@@ -4,3 +4,7 @@ Thumbs.db
 GithubToken.txt
 token.txt
 assets/ImageAssets/
+
+# raw SENET exports (visitor data) — keep private
+assets/Leaderboard/
+*.xlsx
