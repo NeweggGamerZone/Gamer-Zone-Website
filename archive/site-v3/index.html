@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Newegg Gamer Zone — Get in the Zone — Free-to-Play Gaming Lounge, Diamond Bar CA</title>
+<meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League tournaments, workshops.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="geo-bg" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="nav-wrap">
+    <a class="logo" href="index.html"><em>NEWEGG</em> <span>GAMER ZONE</span></a>
+    <input type="checkbox" id="nav-toggle">
+    <label class="nav-burger" for="nav-toggle" aria-label="Menu"><i data-ic="menu"></i></label>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="bulletin.html">Bulletin</a>
+      <a href="edu.html">EDU</a>
+      <a href="partners.html">Partners</a>
+    </nav>
+  </div>
+  <div class="announcement" id="announcement"></div>
+</header>
+<main class="container">
+  <section class="hero-stage">
+    <div class="hero-decor" aria-hidden="true"><div class="glow" style="left:50%;transform:translateX(-50%)"></div><div class="stripe s1"></div><div class="stripe s2"></div></div>
+    <p class="kicker">Newegg Gamer Zone &middot; Diamond Bar, CA &middot; Free admission</p>
+    <div class="hero-stack">
+      <span class="hs-line solid">Get in</span>
+      <img class="hs-bot" src="assets/img/eggbot.png" alt="">
+      <span class="hs-line outline">The Zone</span>
+    </div>
+    <p class="lead">Try the latest tech for free &mdash; high-end gaming PCs, racing simulators, VR, and esports stages. Free snacks too. Always free to play.</p>
+    <div class="btn-row">
+      <a class="btn" data-cfg-href="reservationUrl" href="#">Reserve free play</a>
+      <a class="btn navy" data-cfg-href="verkadaUrl" href="#">Pre-register &middot; skip the line</a>
+      <a class="btn ghost" href="#visit">Plan your visit</a>
+    </div>
+    <p class="scroll-cue">&#9660; This week at GZ</p>
+  </section>
+
+  <section class="reveal" id="week">
+    <h2><i data-ic="cal"></i> This week at GZ</h2>
+    <div id="home-weekly"></div>
+  </section>
+
+  <section class="reveal">
+    <h2><i data-ic="note"></i> Fresh off the Bulletin</h2>
+    <p class="dim">Visitors &mdash; and gamers around the world &mdash; post on the Gamer Zone Bulletin. Add yours.</p>
+    <div class="wall-grid" id="home-wall-highlights" style="margin-top:1.2rem"></div>
+    <p style="margin-top:1.2rem"><a class="btn ghost" href="bulletin.html">See the Bulletin &amp; post</a></p>
+  </section>
+
+  <section class="reveal">
+    <h2><i data-ic="gamepad"></i> What's inside</h2>
+    <div class="grid cols-3">
+      <div class="card tilt"><i data-ic="pc" data-lg></i><h3>High-end gaming PCs</h3><p class="dim">The latest hardware, ready to play. Try before you buy &mdash; or just play.</p></div>
+      <div class="card tilt"><i data-ic="wheel" data-lg></i><h3>Racing simulators</h3><p class="dim">Full sim rigs. Chase the lap record and leave your name on the ladder.</p></div>
+      <div class="card tilt"><i data-ic="vr" data-lg></i><h3>VR &amp; mixed reality</h3><p class="dim">Including the Virtuix Omni One treadmill &mdash; walk, crouch, and jump in VR.</p></div>
+      <div class="card tilt"><i data-ic="trophy" data-lg></i><h3>Esports stage</h3><p class="dim">Tournament setups, XP League events, competitive nights, and prizes.</p></div>
+      <div class="card tilt"><i data-ic="grad" data-lg></i><h3>Workshops &amp; EDU</h3><p class="dim">PC building, AI in game design, and youth esports training. <a href="edu.html">See EDU</a></p></div>
+      <div class="card tilt"><i data-ic="snack" data-lg></i><h3>Free snacks</h3><p class="dim">Daily snacks and refreshments. Yes, also free.</p></div>
+    </div>
+  </section>
+
+  <section id="visit" class="reveal">
+    <h2><i data-ic="pin"></i> Plan your next visit</h2>
+    <div class="grid cols-2">
+      <div class="card tilt">
+        <i data-ic="clock" data-lg></i><h3>Hours</h3>
+        <p data-cfg="hours"></p>
+        <p class="dim" data-cfg="hoursNote"></p>
+        <p style="margin-top:.6rem"><a href="events.html">Check this month's calendar</a></p>
+      </div>
+      <div class="card tilt">
+        <i data-ic="pin" data-lg></i><h3>Location</h3>
+        <p><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a></p>
+        <p class="dim">Inside Newegg HQ. Free parking on site. Tap the address for directions.</p>
+      </div>
+      <div class="card tilt">
+        <i data-ic="ticket" data-lg></i><h3>Reserve free play</h3>
+        <p class="dim">Walk-ins welcome, first-come first-served. Want a guaranteed PC? Book a slot.</p>
+        <p style="margin-top:.7rem"><a class="btn" data-cfg-href="reservationUrl" href="#">Reserve now</a></p>
+      </div>
+      <div class="card tilt">
+        <i data-ic="run" data-lg></i><h3>Pre-register &middot; skip the line</h3>
+        <p class="dim">Create your guest profile before you arrive and breeze through check-in at the front desk.</p>
+        <p style="margin-top:.7rem"><a class="btn navy" data-cfg-href="verkadaUrl" href="#">Pre-register now</a></p>
+      </div>
+    </div>
+    <p class="dim" style="margin-top:1rem">Under 18? You're welcome &mdash; minors must be accompanied by an adult (18+) at all times. ID may be requested on arrival.</p>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="container links-grid">
+    <div><h4>Visit</h4><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a><p data-cfg="hours"></p><p data-cfg="hoursNote"></p></div>
+    <div><h4>Play</h4><a data-cfg-href="reservationUrl" href="#">Reserve free play</a><a data-cfg-href="verkadaUrl" href="#">Pre-register your visit</a><a href="events.html">Events &amp; calendar</a><a data-cfg-href="startggUrl" href="#">Tournaments on Start.GG</a></div>
+    <div><h4>Community</h4><a data-cfg-href="instagramUrl" href="#">Instagram @newegggamerzone</a><a data-cfg-href="discordUrl" href="#">Discord</a><a data-cfg-href="facebookUrl" href="#">Facebook</a><a data-cfg-href="meetupUrl" href="#">Diamond Bar Gaming Meetup</a><a data-cfg-href="eventbriteUrl" href="#">Public events on Eventbrite</a><a href="bulletin.html">Gamer Zone Bulletin</a></div>
+    <div><h4>More</h4><a href="edu.html">Workshops &amp; EDU</a><a href="partners.html">Host an event</a><a data-cfg-href="dealsUrl" href="#">Shop Newegg's best deals</a><a data-cfg-href="surveyUrl" href="#">Feedback survey</a><a data-cfg-href="linktreeUrl" href="#">All our links</a><a data-cfg-href="gamerZoneUrl" href="#">Gamer Zone on Newegg.com</a></div>
+  </div>
+  <div class="footer-brand" aria-hidden="true"><img class="eggbot" src="assets/img/eggbot.png" alt=""><img class="ne-logo" src="assets/img/newegg-logo-glow.png" alt="Newegg"></div>
+  <p class="legal">Minors under 18 must be accompanied by an adult (18+) at all times &middot; ID may be required &middot; Free play subject to availability; hours may change for private events &middot; All trademarks belong to their respective owners &middot; &copy; 2026 Newegg Commerce, Inc.</p>
+  <div class="hazard"></div>
+  <p class="footnote" style="padding-top:1rem">Newegg Gamer Zone &middot; <span class="updated-stamp">Site updated <span data-cfg="updated"></span></span></p>
+</footer>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/events.js"></script>
+<script src="assets/js/wall.js"></script>
+</body>
+</html>

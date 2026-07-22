@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GZ Ops</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="container">
+  <section id="gate" class="hero">
+    <h1>GZ Ops Review</h1>
+    <p class="dim">Staff only.</p>
+    <form class="gz-form" id="gate-form" style="margin-top:1rem">
+      <input type="password" id="gate-pass" placeholder="Password" autocomplete="off" required>
+      <button class="btn" type="submit">Enter</button>
+      <p class="form-note" id="gate-err"></p>
+    </form>
+  </section>
+
+  <section id="admin-panel" style="display:none">
+    <h1>Bulletin Moderation</h1>
+    <p class="dim">Pending submissions from <strong>this device</strong> (kiosk intake). Approve → export → replace <code>data/posts.json</code> in the repo → push.</p>
+
+    <h2 style="margin-top:1.5rem">Pending review</h2>
+    <div id="pending-list"></div>
+
+    <h2 style="margin-top:1.5rem">Add post manually <span class="dim" style="font-size:.85rem">(for Discord / remote submissions)</span></h2>
+    <form class="gz-form" id="manual-form">
+      <textarea name="text" maxlength="280" required placeholder="Post text"></textarea>
+      <input name="name" maxlength="40" placeholder="Name / gamertag">
+      <select name="type">
+        <option value="note">Note</option>
+        <option value="meme">Meme</option>
+        <option value="prize">Prize</option>
+        <option value="lfg">LFG</option>
+        <option value="tech">Tech tip</option>
+      </select>
+      <input name="image" placeholder="Optional image path (assets/img/wall/...)">
+      <label><input type="checkbox" name="remote" style="width:auto" checked> Remote post</label>
+      <button class="btn small" type="submit">Add to approved buffer</button>
+    </form>
+
+    <h2 style="margin-top:1.5rem">Publish</h2>
+    <p class="dim">Approved buffer: <strong id="approved-count">0</strong> post(s) waiting to be published.</p>
+    <div class="btn-row" style="margin-top:.6rem">
+      <button class="btn" id="btn-export">Export posts.json</button>
+      <button class="btn danger" id="btn-clear-approved">Clear approved buffer</button>
+    </div>
+    <p class="form-note" id="export-note" style="margin-top:.6rem"></p>
+  </section>
+</main>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

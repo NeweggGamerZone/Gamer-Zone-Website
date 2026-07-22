@@ -1,0 +1,92 @@
+{
+  "period": "July 2026",
+  "generated": "2026-07-21",
+  "source": "User activity_Tue, Jul 21, 2026, 10_53_13 PDT.xlsx",
+  "scoring": {
+    "pointsPerHour": 10,
+    "pointsPerAvgHour": 10,
+    "pointsPerReferral": 100
+  },
+  "players": [
+    {
+      "username": "Pretzel1",
+      "sessions": 7,
+      "totalHours": 46.2,
+      "avgHours": 6.6,
+      "referrals": 2,
+      "zonePoints": 732
+    },
+    {
+      "username": "scythe1",
+      "sessions": 7,
+      "totalHours": 35.0,
+      "avgHours": 5.0,
+      "referrals": 0,
+      "zonePoints": 400
+    },
+    {
+      "username": "lizziedear",
+      "sessions": 2,
+      "totalHours": 14.8,
+      "avgHours": 7.4,
+      "referrals": 1,
+      "zonePoints": 328
+    },
+    {
+      "username": "Pgone1823",
+      "sessions": 3,
+      "totalHours": 13.5,
+      "avgHours": 4.5,
+      "referrals": 0,
+      "zonePoints": 185
+    },
+    {
+      "username": "bliskyO",
+      "sessions": 6,
+      "totalHours": 13.2,
+      "avgHours": 2.2,
+      "referrals": 0,
+      "zonePoints": 162
+    },
+    {
+      "username": "Callie1",
+      "sessions": 1,
+      "totalHours": 7.8,
+      "avgHours": 7.8,
+      "referrals": 0,
+      "zonePoints": 158
+    },
+    {
+      "username": "kwan",
+      "sessions": 2,
+      "totalHours": 9.8,
+      "avgHours": 4.9,
+      "referrals": 0,
+      "zonePoints": 148
+    },
+    {
+      "username": "AlecS",
+      "sessions": 6,
+      "totalHours": 10.2,
+      "avgHours": 1.7,
+      "referrals": 0,
+      "zonePoints": 122
+    },
+    {
+      "username": "Egg",
+      "sessions": 3,
+      "totalHours": 9.0,
+      "avgHours": 3.0,
+      "referrals": 0,
+      "zonePoints": 120
+    },
+    {
+      "username": "seanshoe",
+      "sessions": 4,
+      "totalHours": 8.8,
+      "avgHours": 2.2,
+      "referrals": 0,
+      "zonePoints": 118
+    }
+  ]
+}

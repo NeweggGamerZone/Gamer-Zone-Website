@@ -1,0 +1,6 @@
+.DS_Store
+Thumbs.db
+*.log
+GithubToken.txt
+token.txt
+assets/ImageAssets/

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex, nofollow">
+<title>GZ Referrals</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="container">
+  <section id="gate" class="hero">
+    <p class="kicker">Staff only</p>
+    <h1>Referrals <span class="accent">Admin</span></h1>
+    <form class="gz-form" id="gate-form" style="margin-top:1rem">
+      <input type="password" id="gate-pass" placeholder="Password" autocomplete="off" required>
+      <button class="btn" type="submit">Enter</button>
+      <p class="form-note" id="gate-err"></p>
+    </form>
+  </section>
+
+  <section id="panel" style="display:none">
+    <h1>Referrals <span class="accent">Admin</span></h1>
+    <p class="dim">Each referral = <strong>100 Zone Points</strong>. Add a username and their referral count, then export <code>referrals.json</code> and drop it in <code>/data</code> (or hand it to Cowork). Re-run the leaderboard build to apply.</p>
+
+    <div class="hud" style="margin-top:1rem;max-width:560px">
+      <div class="adm-row" style="font-family:var(--head);font-size:.72rem;text-transform:uppercase;color:var(--ink-dim)">
+        <span>Username</span><span>Referrals</span><span></span>
+      </div>
+      <div id="rows"></div>
+      <div class="adm-row" style="margin-top:.6rem">
+        <input id="new-user" placeholder="Username (matches check-in login)">
+        <input id="new-count" type="number" min="0" value="1">
+        <button class="btn small" id="add">Add</button>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:1.2rem">
+      <a class="btn" id="export">Export referrals.json</a>
+      <button class="btn ghost" id="load-current">Reload saved</button>
+    </div>
+    <p class="form-note" id="note" style="margin-top:.6rem"></p>
+  </section>
+</main>
+<script src="assets/js/main.js"></script>
+<script>
+const PASS_HASH = '4cdd5500c84c2eeee81db64af31e95a3bb72b33569a719c3664f0afdbea21f1c';
+const LS = 'gz_referrals';
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+let data = {};
+function render(){
+  const el=document.getElementById('rows');
+  el.innerHTML = Object.entries(data).map(([u,c])=>`<div class="adm-row">
+    <input value="${u.replace(/"/g,'&quot;')}" data-u="${u.replace(/"/g,'&quot;')}" class="ren">
+    <input type="number" min="0" value="${c}" data-c="${u.replace(/"/g,'&quot;')}">
+    <button class="btn small danger" data-del="${u.replace(/"/g,'&quot;')}">×</button>
+  </div>`).join('') || '<p class="dim">No referrals yet.</p>';
+}
+function save(){localStorage.setItem(LS,JSON.stringify(data));}
+async function loadCurrent(){
+  try{const j=await (await fetch('data/referrals.json')).json(); data={}; Object.entries(j.referrals||{}).forEach(([k,v])=>data[k]=+v);}
+  catch{data={};}
+  const ls=localStorage.getItem(LS); if(ls){try{data=JSON.parse(ls);}catch{}}
+  render();
+}
+document.getElementById('gate-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(await sha256(document.getElementById('gate-pass').value)===PASS_HASH){
+    document.getElementById('gate').style.display='none';
+    document.getElementById('panel').style.display='block';
+    loadCurrent();
+  } else document.getElementById('gate-err').textContent='Nope.';
+});
+document.addEventListener('click',e=>{
+  const del=e.target.closest('[data-del]'); if(del){delete data[del.dataset.del];save();render();}
+});
+document.addEventListener('input',e=>{
+  if(e.target.dataset.c!==undefined){data[e.target.dataset.c]=Math.max(0,+e.target.value||0);save();}
+  if(e.target.classList.contains('ren')){const old=e.target.dataset.u,nw=e.target.value.trim();if(nw&&nw!==old){data[nw]=data[old];delete data[old];e.target.dataset.u=nw;save();}}
+});
+document.getElementById('add').addEventListener('click',()=>{
+  const u=document.getElementById('new-user').value.trim(); const c=Math.max(0,+document.getElementById('new-count').value||0);
+  if(!u)return; data[u]=c; save(); render();
+  document.getElementById('new-user').value=''; document.getElementById('new-count').value=1;
+});
+document.getElementById('load-current').addEventListener('click',loadCurrent);
+document.getElementById('export').addEventListener('click',e=>{
+  const out={note:"Friends-referred counts, keyed by username (case-insensitive). 100 Zone Points each.",referrals:data};
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  e.target.href=URL.createObjectURL(blob); e.target.download='referrals.json';
+  document.getElementById('note').textContent='Downloaded referrals.json — replace data/referrals.json and re-run scripts/build_leaderboard.py (or ask Cowork).';
+});
+</script>
+</body>
+</html>

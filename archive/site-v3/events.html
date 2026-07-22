@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events & Calendar — Newegg Gamer Zone</title>
+<meta name="description" content="Weekly events, XP League Fortnite trainings and tournaments, theme days, and the monthly calendar at the Newegg Gamer Zone.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="geo-bg" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="nav-wrap">
+    <a class="logo" href="index.html"><em>NEWEGG</em> <span>GAMER ZONE</span></a>
+    <input type="checkbox" id="nav-toggle">
+    <label class="nav-burger" for="nav-toggle" aria-label="Menu"><i data-ic="menu"></i></label>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="bulletin.html">Bulletin</a>
+      <a href="edu.html">EDU</a>
+      <a href="partners.html">Partners</a>
+    </nav>
+  </div>
+  <div class="announcement" id="announcement"></div>
+</header>
+<main class="container">
+  <section class="hero" style="padding-bottom:.5rem">
+    <div class="hero-decor" aria-hidden="true"><div class="stripe s1"></div></div>
+    <p class="kicker">What's happening</p>
+    <h1>Events &amp; <span class="accent">calendar</span></h1>
+    <p class="lead">Tap any flyer to zoom. GZ occasionally closes for private events &mdash; always check here before a visit. Brackets live on <a data-cfg-href="startggUrl" href="#">Start.GG</a>; public RSVPs on <a data-cfg-href="eventbriteUrl" href="#">Eventbrite</a>.</p>
+  </section>
+
+  <section class="reveal">
+    <h2><i data-ic="gamepad"></i> Weekly lineup</h2>
+    <div id="weekly-current"></div>
+  </section>
+
+  <div class="tape" aria-hidden="true"><div class="tape-track">
+    <span><i data-ic="zero"></i> Always free to play</span><span><i data-ic="run"></i> Walk-ins welcome</span><span><i data-ic="users"></i> Bring your squad</span><span><i data-ic="trophy"></i> XP League Fridays</span><span><i data-ic="grad"></i> Training Wednesdays</span>
+    <span><i data-ic="zero"></i> Always free to play</span><span><i data-ic="run"></i> Walk-ins welcome</span><span><i data-ic="users"></i> Bring your squad</span><span><i data-ic="trophy"></i> XP League Fridays</span><span><i data-ic="grad"></i> Training Wednesdays</span>
+  </div></div>
+
+  <section class="reveal">
+    <h2><i data-ic="cal"></i> This month</h2>
+    <div id="monthly-current"></div>
+  </section>
+
+  <section class="reveal">
+    <h2><i data-ic="medal"></i> Event details</h2>
+    <div class="grid cols-2" id="events-upcoming"></div>
+  </section>
+
+  <section class="reveal">
+    <h2><i data-ic="ticket"></i> Archive</h2>
+    <p class="dim">Every past flyer and calendar, preserved automatically. Proof the Zone never sleeps.</p>
+    <div id="calendar-archive" style="margin-top:1rem"></div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="container links-grid">
+    <div><h4>Visit</h4><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a><p data-cfg="hours"></p><p data-cfg="hoursNote"></p></div>
+    <div><h4>Play</h4><a data-cfg-href="reservationUrl" href="#">Reserve free play</a><a data-cfg-href="verkadaUrl" href="#">Pre-register your visit</a><a href="events.html">Events &amp; calendar</a><a data-cfg-href="startggUrl" href="#">Tournaments on Start.GG</a></div>
+    <div><h4>Community</h4><a data-cfg-href="instagramUrl" href="#">Instagram @newegggamerzone</a><a data-cfg-href="discordUrl" href="#">Discord</a><a data-cfg-href="facebookUrl" href="#">Facebook</a><a data-cfg-href="meetupUrl" href="#">Diamond Bar Gaming Meetup</a><a data-cfg-href="eventbriteUrl" href="#">Public events on Eventbrite</a><a href="bulletin.html">Gamer Zone Bulletin</a></div>
+    <div><h4>More</h4><a href="edu.html">Workshops &amp; EDU</a><a href="partners.html">Host an event</a><a data-cfg-href="dealsUrl" href="#">Shop Newegg's best deals</a><a data-cfg-href="surveyUrl" href="#">Feedback survey</a><a data-cfg-href="linktreeUrl" href="#">All our links</a><a data-cfg-href="gamerZoneUrl" href="#">Gamer Zone on Newegg.com</a></div>
+  </div>
+  <div class="footer-brand" aria-hidden="true"><img class="eggbot" src="assets/img/eggbot.png" alt=""><img class="ne-logo" src="assets/img/newegg-logo-glow.png" alt="Newegg"></div>
+  <p class="legal">Minors under 18 must be accompanied by an adult (18+) at all times &middot; ID may be required &middot; Free play subject to availability; hours may change for private events &middot; All trademarks belong to their respective owners &middot; &copy; 2026 Newegg Commerce, Inc.</p>
+  <div class="hazard"></div>
+  <p class="footnote" style="padding-top:1rem">Newegg Gamer Zone &middot; <span class="updated-stamp">Site updated <span data-cfg="updated"></span></span></p>
+</footer>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/events.js"></script>
+</body>
+</html>
