@@ -67,12 +67,12 @@ h1 .accent, h2 .accent { color: var(--ne-orange); }
 .hero-decor .stripe.s2 { top: 26%; right: 8%; width: 24%; opacity: .16; }
 .hero-decor .glow { position: absolute; width: 480px; height: 480px; right: -140px; top: -120px; background: radial-gradient(circle, rgba(10,77,166,.5), transparent 65%); will-change: transform; }
 .geo-bg { position: fixed; inset: 0; z-index: -2; pointer-events: none; background: #050609; overflow: hidden; }
-.geo-bg::before { content: ""; position: absolute; left: 0; right: 0; top: -60%; bottom: -60%;
-  background: url('../img/bg-geo.jpg') repeat; background-size: 540px auto; opacity: .10;
-  animation: tilescroll 34s linear infinite; will-change: transform; }
+.geo-bg::before { content: ""; position: absolute; left: 0; right: 0; top: -560px; bottom: -560px;
+  background: url('../img/bg-geo.jpg') repeat; background-size: 540px auto; opacity: .32;
+  animation: tilescroll 50s linear infinite; will-change: transform; }
 .geo-bg::after { content: ""; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 22%, rgba(5,6,9,.35), rgba(5,6,9,.9) 78%); }
-@keyframes tilescroll { from { transform: translateY(0); } to { transform: translateY(-540px); } }
+  background: radial-gradient(circle at 50% 24%, rgba(5,6,9,.30), rgba(5,6,9,.80) 82%); }
+@keyframes tilescroll { from { transform: translateY(-540px); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .geo-bg::before { animation: none; } }
 
 .btn { display: inline-block; background: var(--ne-orange); color: #000; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: .72rem 1.35rem; border: none; cursor: pointer; font-size: .92rem; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
@@ -281,3 +281,44 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .cal-detail .cd-body{display:flex;gap:1.1rem;margin-top:.9rem;flex-wrap:wrap}
 .cal-detail .cd-body img{width:160px;border:1px solid var(--line);clip-path:var(--clip)}
 .cal-detail .cd-body>div{flex:1;min-width:180px}
+
+/* ===== v6: flat square corners (no chopped/rounded) ===== */
+.card,.hud,.btn,.btn.ghost,.tag,.chip,.cal,.cal-detail,.calendar-empty,.flyer-card,
+.session-pill,.pending-item,nav.main-nav a,.flyer img,.calendar-img,.cal-cell,
+.track-badge,.event-card,.lightbox img { clip-path: none !important; border-radius: 0 !important; }
+.hud::after, .flyer-card { } /* keep hazard accents, just square */
+
+/* ===== v6: Ambassador program ===== */
+.amb-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.amb-type{background:var(--bg-2);border:1px solid var(--line);border-top:4px solid var(--ne-orange);padding:1.2rem}
+.amb-type h3{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:1rem;margin:.4rem 0 .3rem}
+.quota{background:var(--bg-2);border:1px solid var(--line);border-left:4px solid var(--ne-navy-glow);padding:1.1rem 1.3rem;margin-top:.6rem}
+.quota b{color:var(--ne-orange)}
+/* tenure ladder */
+.ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:1rem;position:relative}
+@media(max-width:820px){.ladder{grid-template-columns:1fr}}
+.rung{background:var(--bg-2);border:1px solid var(--line);padding:1.1rem;position:relative}
+.rung+.rung{border-left:none}
+@media(max-width:820px){.rung+.rung{border-left:1px solid var(--line);border-top:none}}
+.rung .when{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.72rem;color:var(--ne-orange);letter-spacing:.05em}
+.rung .lvl{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:1.05rem;margin:.15rem 0 .5rem}
+.rung ul{margin:0 0 0 1rem;padding:0}
+.rung li{font-size:.85rem;color:var(--ink-dim);margin-bottom:.3rem}
+.rung.locked{opacity:.9}
+.rung .badge{position:absolute;top:.7rem;right:.7rem;font-size:.6rem;font-family:var(--head);font-weight:800;text-transform:uppercase;padding:.12rem .45rem;background:var(--bg-3);color:var(--ink-dim);letter-spacing:.04em}
+.rung.gold{border-top:4px solid var(--ne-orange)}
+.rung-fill{height:6px;background:repeating-linear-gradient(-55deg,var(--ne-orange) 0 12px,transparent 12px 24px);margin:0 0 0;opacity:.8}
+.cond{font-size:.82rem;color:var(--ink-dim);margin-top:.8rem}
+.cond b{color:var(--ne-orange)}
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(3,4,7,.82);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg-2);border:1px solid var(--line);border-top:4px solid var(--ne-orange);max-width:540px;width:100%;max-height:90vh;overflow:auto;padding:1.6rem}
+.modal h3{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:1.2rem;margin-bottom:.3rem}
+.modal .close{float:right;background:none;border:none;color:var(--ink-dim);font-size:1.5rem;cursor:pointer;line-height:1}
+.modal label{display:block;font-family:var(--head);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin:.8rem 0 .25rem}
+.modal input,.modal select,.modal textarea{width:100%;background:var(--bg-3);border:1px solid var(--line);color:var(--ink);padding:.6rem .7rem;font-family:var(--sans);font-size:.95rem}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:2px solid var(--ne-orange)}
+.modal textarea{min-height:80px;resize:vertical}
+.modal .req{color:var(--ne-orange)}
+.modal .form-note{font-size:.76rem;color:var(--ink-dim);margin-top:.9rem}
