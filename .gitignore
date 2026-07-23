@@ -8,3 +8,4 @@ assets/ImageAssets/
 # raw SENET exports (visitor data) — keep private
 assets/Leaderboard/
 *.xlsx
+.github/
