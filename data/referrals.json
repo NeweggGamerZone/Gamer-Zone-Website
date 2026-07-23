@@ -1,7 +1,0 @@
-{
-  "note": "Friends-referred counts, keyed by username (case-insensitive). Managed via the hidden referrals admin page. 100 Zone Points each.",
-  "referrals": {
-    "Pretzel1": 2,
-    "lizziedear": 1
-  }
-}
