@@ -30,3 +30,17 @@ A scheduled Cowork task can grab the link automatically using the Claude-in-Chro
 Walk-ins are always welcome; pre-registration only skips the line.
 
 > Ready to enable option B on a schedule? Say the word and I'll set up the recurring task (after you've logged into Verkada in the Chrome profile).
+
+## Recurring guest events — the low-maintenance setup (researched Jul 2026)
+
+You do **not** create an event every day. Verkada Guest supports **recurring guest events** and **RSVP links**, and it emails registrants the day-of sign-in link + QR automatically. So the simplest fully-automated setup is:
+
+- **Two recurring weekly events, set once:**
+  1. **Free Play — 18+** (guest type: 18+ → collects name, ID as configured)
+  2. **Free Play — Under 18** (guest type: Under 18 → collects guardian + ID as configured)
+  Each set to **repeat weekly on Tue, Wed, Thu, Fri, Sat**. That's it — two events cover every open day, indefinitely.
+- Verkada's per-guest-type **custom sign-in fields** handle the different requirements (18+ vs under-18 with guardian). One recurring event per guest type keeps profiles clean.
+- **One registration per visitor** — each guest registers themselves (the site says so on the calendar). Groups: each person registers individually.
+- Because Verkada sends the **day-of sign-in email automatically** to anyone who pre-registered, we likely **don't need our own automated email**. Our site just links to the RSVP/registration link for each guest type.
+
+**Site wiring:** replace the single `verkadaUrl` with two links (18+ / Under-18 RSVP links) once you create the recurring events, and the Visit/calendar CTAs can offer both. Say the word and I'll add `verkadaUrl18` / `verkadaUrlMinor` to config and split the button.

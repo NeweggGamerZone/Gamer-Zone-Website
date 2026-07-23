@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     const f = e.target;
     const g = n => (f.elements[n].value || '').trim();
-    const subject = `Gamer Zone Ambassador Application — ${g('name') || 'New applicant'}`;
+    const subject = "Ambassador Application Program";
     const body = [
       'NEWEGG GAMER ZONE — AMBASSADOR APPLICATION',
       '',
