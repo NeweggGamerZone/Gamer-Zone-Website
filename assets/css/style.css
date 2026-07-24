@@ -335,3 +335,26 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .mile .unlock{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:1.02rem;margin:.3rem 0 .15rem}
 .mile p{color:var(--ink-dim);font-size:.87rem;margin:0;max-width:640px}
 .mile.last .node{background:var(--ne-navy-glow);color:#fff}
+
+/* ===== v9: home leaderboard + refined dark polish ===== */
+.lbx{display:flex;flex-direction:column;gap:8px;max-width:620px}
+.lbx-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:.7rem;background:var(--bg-2);border:1px solid var(--line);padding:.7rem .9rem;transition:border-color .18s,transform .18s}
+.lbx-row:hover{border-color:var(--ne-orange);transform:translateX(3px)}
+.lbx-row.top{border-color:var(--ne-orange);background:linear-gradient(90deg,rgba(250,157,40,.10),transparent 60%)}
+.lbx-rank{font-family:var(--head);font-weight:800;font-size:1.2rem;color:var(--ne-orange);text-align:center}
+.lbx-user{font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.lbx-meta{grid-column:2;font-size:.74rem;color:var(--ink-dim);margin-top:-2px}
+.lbx-pts{font-family:var(--head);font-weight:800;color:var(--ne-orange);font-size:1.1rem}
+.lbx-pts small{font-size:.6rem;color:var(--ink-dim);font-weight:700;margin-left:.2rem}
+.lbx-row .lbx-user,.lbx-row .lbx-pts{grid-row:1}
+
+/* --- refined dark polish (learn.newegg vibe: soft shadows, calmer surfaces) --- */
+.card{transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease}
+.card.tilt:hover{box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(250,157,40,.25)}
+.site-header{box-shadow:0 1px 0 rgba(255,255,255,.03)}
+.hero-decor .glow{opacity:.8}
+h2{align-items:center}
+.btn{transition:background .15s ease, transform .1s ease}
+.btn:active{transform:translateY(1px)}
+a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
+.dim{line-height:1.65}

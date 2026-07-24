@@ -68,7 +68,7 @@ def main():
             "zonePoints": pts,
         })
     players.sort(key=lambda p: p["zonePoints"], reverse=True)
-    top = players[:10]
+    top = players[:5]
 
     period = date.today().strftime("%B %Y")
     out = {

@@ -8,7 +8,6 @@ assets/ImageAssets/
 # raw SENET exports (visitor data) — keep private
 assets/Leaderboard/
 *.xlsx
-.github/
 
 # keep admin + raw referral data out of the public repo
 gz-referrals.html
