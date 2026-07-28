@@ -27,7 +27,10 @@ const GZ_ICONS = {
 const GZ = {
   cfg: null,
   async config() {
-    if (!GZ.cfg) { const r = await fetch('data/config.json'); GZ.cfg = await r.json(); }
+    if (!GZ.cfg) {
+      try { const r = await fetch('data/config.json'); GZ.cfg = r.ok ? await r.json() : {}; }
+      catch { GZ.cfg = {}; } // e.g. opened via file:// — don't let this throw and block the rest of DOMContentLoaded
+    }
     return GZ.cfg;
   },
   todayISO() { return new Date().toISOString().slice(0, 10); },
@@ -84,21 +87,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       decor.querySelectorAll('.stripe.s2').forEach(el => el.style.transform = `translateY(${y * .45}px)`);
       decor.querySelectorAll('.glow').forEach(el => el.style.transform = `translateY(${y * .15}px)`);
     }, { passive: true });
-  }
-
-  if (matchMedia('(pointer:fine)').matches) {
-    document.body.addEventListener('mousemove', e => {
-      const c = e.target.closest('.card.tilt');
-      if (!c) return;
-      const r = c.getBoundingClientRect();
-      const rx = ((e.clientY - r.top) / r.height - .5) * -7;
-      const ry = ((e.clientX - r.left) / r.width - .5) * 9;
-      c.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(6px)`;
-    });
-    document.body.addEventListener('mouseout', e => {
-      const c = e.target.closest('.card.tilt');
-      if (c) c.style.transform = '';
-    });
   }
 
   const lb = document.createElement('div');

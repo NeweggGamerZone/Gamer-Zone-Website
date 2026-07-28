@@ -14,7 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     const f = e.target;
     const g = n => (f.elements[n].value || '').trim();
-    const subject = "Ambassador Application Program";
+    const recurMonthly = g('recurMonthly');
+    const subject = recurMonthly === 'Yes'
+      ? "Ambassador Application Program — Recurring Monthly Event"
+      : "Ambassador Application Program";
     const body = [
       'NEWEGG GAMER ZONE — AMBASSADOR APPLICATION',
       '',
@@ -24,8 +27,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       `Ambassador type: ${g('type')}`,
       `Organization / team: ${g('org')}`,
       '',
-      `Events you can host per year: ${g('events')}`,
+      `Events you can host over 6 months: ${g('events')}`,
       `Expected attendees per event: ${g('attendees')}`,
+      `Recurs monthly: ${recurMonthly}`,
       `Games / format: ${g('games')}`,
       '',
       'About / why host at the Gamer Zone:',

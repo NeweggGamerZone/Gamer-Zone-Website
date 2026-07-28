@@ -4,12 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Events & Calendar — Newegg Gamer Zone</title>
-<meta name="description" content="Weekly events, XP League Fortnite trainings and tournaments, theme days, and the monthly calendar at the Newegg Gamer Zone.">
+<title>Event Update — Newegg Gamer Zone</title>
+<meta name="description" content="The Newegg Gamer Zone event update board — upcoming dates at a glance, with major events flagged.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="stylesheet" href="assets/css/style.css">
+<script>
+  /* ?board=1 renders just the calendar block full-bleed — used to generate
+     clean 1200x1200 / 1920x1080 screenshots of the schedule alone. */
+  if (/[?&]board=1/.test(location.search)) document.documentElement.classList.add('board-mode');
+</script>
 </head>
 <body>
 <div class="geo-bg" aria-hidden="true"></div>
@@ -31,32 +36,18 @@
 <main class="container">
   <section class="hero" style="padding-bottom:.5rem">
     <div class="hero-decor" aria-hidden="true"><div class="stripe s1"></div></div>
-    <p class="kicker">Plan your visit</p>
-    <h1>Events &amp; <span class="accent">calendar</span></h1>
-    <p class="lead">Tap any flyer to zoom. GZ occasionally closes for private events &mdash; always check here before a visit. Brackets live on <a data-cfg-href="startggUrl" href="#">Start.GG</a>; public RSVPs on <a data-cfg-href="eventbriteUrl" href="#">Eventbrite</a>.</p>
-  </section>
-
-  <section class="reveal" id="calendar">
-    <h2><i data-ic="cal"></i> Plan your visit</h2>
-    <p class="dim">Free to play, open Tuesday&ndash;Saturday 10am&ndash;7pm. Pick a date to see what's on &mdash; then pre-register to skip the line.</p>
-    <div class="cal-wrap" style="margin-top:1rem">
-      <div class="cal">
-        <div class="cal-top"><button id="cal-prev" aria-label="Previous month">&lsaquo;</button><span class="cal-month" id="cal-month"></span><button id="cal-next" aria-label="Next month">&rsaquo;</button></div>
-        <div class="cal-grid" id="cal-grid"></div>
-        <div class="cal-legend"><span><i></i> Event</span><span><i class="free"></i> Free play</span><span><i class="closed"></i> Closed</span></div>
-      </div>
-      <div class="cal-detail" id="cal-detail"></div>
-    </div>
+    <p class="kicker">Event update</p>
+    <h1>What's <span class="accent">next</span> at the Zone</h1>
+    <p class="lead">Every upcoming date, at a glance. <i data-ic="medal" class="ic" style="color:var(--ne-orange)"></i> marks a major event &mdash; don't miss those.</p>
   </section>
 
   <section class="reveal eu-section">
-    <h2><i data-ic="medal"></i> Schedule breakdown</h2>
     <div class="eu-board">
       <div class="eu-top">
         <div class="eu-eyebrow">
           <i data-ic="cal" data-lg></i>
           <div>
-            <h3 class="eu-eyebrow-title">Gamer Zone <span class="accent">Event Update</span></h3>
+            <h2 class="eu-eyebrow-title">Gamer Zone <span class="accent">Event Update</span></h2>
             <p>Diamond Bar, CA &middot; Free to play</p>
           </div>
         </div>
@@ -66,31 +57,11 @@
       <div class="eu-legend"><i data-ic="medal"></i> Major event</div>
     </div>
   </section>
-
-  <section class="reveal">
-    <h2><i data-ic="gamepad"></i> Weekly lineup</h2>
-    <div id="weekly-current"></div>
-  </section>
-
-  <section class="reveal">
-    <h2><i data-ic="cal"></i> This month</h2>
-    <div id="monthly-current"></div>
-  </section>
-
-  <section class="reveal">
-    <h2><i data-ic="medal"></i> Event details</h2>
-    <div class="grid cols-2" id="events-upcoming"></div>
-  </section>
-
-  <section class="reveal">
-    <h2><i data-ic="ticket"></i> Archive</h2>
-    <p class="dim">Every past flyer and calendar, preserved automatically. Proof the Zone never sleeps.</p>
-    <div id="calendar-archive" style="margin-top:1rem"></div>
-  </section>
 </main>
 
-<!-- Fallback dataset for the schedule breakdown board: mirrors data/events.json.
-     Keep in sync when events.json changes. -->
+<!-- Fallback dataset: mirrors data/events.json. Used when fetch() can't run
+     (e.g. file opened directly instead of via a server) so the board always
+     renders content. Keep this in sync when events.json changes. -->
 <script type="application/json" id="eu-embedded-events">
 {
   "events": [
@@ -115,8 +86,6 @@
   <div class="hazard"></div>
 </footer>
 <script src="assets/js/main.js"></script>
-<script src="assets/js/events.js"></script>
-<script src="assets/js/calendar.js"></script>
 <script src="assets/js/event-update.js"></script>
 </body>
 </html>

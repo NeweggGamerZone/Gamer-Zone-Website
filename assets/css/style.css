@@ -16,6 +16,7 @@
   --marker: 'Permanent Marker', 'Comic Sans MS', cursive;
   --head: 'Montserrat', 'Segoe UI', sans-serif;
   --sans: 'Inter', 'Open Sans', 'Segoe UI', system-ui, sans-serif;
+  --eu-body: 'Open Sans', 'Inter', 'Segoe UI', system-ui, sans-serif;
   --safe-x: clamp(1rem, 4vw, 2.2rem);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,28 +67,46 @@ h1 .accent, h2 .accent { color: var(--ne-orange); }
 .hero-decor .stripe { position: absolute; height: 12px; width: 42%; background: repeating-linear-gradient(-55deg, var(--ne-orange) 0 16px, transparent 16px 32px); opacity: .28; will-change: transform; }
 .hero-decor .stripe.s1 { top: 12%; right: -4%; }
 .hero-decor .stripe.s2 { top: 26%; right: 8%; width: 24%; opacity: .16; }
-.hero-decor .glow { position: absolute; width: 480px; height: 480px; right: -140px; top: -120px; background: radial-gradient(circle, rgba(10,77,166,.5), transparent 65%); will-change: transform; }
 .geo-bg { display: none; position: fixed; inset: 0; z-index: -2; pointer-events: none; background: #050609; overflow: hidden; }
 body.has-tiles .geo-bg { display: block; }
 .geo-bg::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 200%;
-  background: url('../img/bg-tile.jpg') repeat-y; background-size: 100% 920px; opacity: .20;
+  background: url('../img/bg-tile.jpg') repeat; background-size: 460px 920px; opacity: .20;
   animation: tilescroll 44s linear infinite; will-change: transform; }
 .geo-bg::after { content: ""; position: absolute; inset: 0;
   background: radial-gradient(circle at 50% 22%, rgba(5,6,9,.55), rgba(5,6,9,.9) 80%); }
 @keyframes tilescroll { from { transform: translateY(0); } to { transform: translateY(-920px); } }
 @media (prefers-reduced-motion: reduce) { .geo-bg::before { animation: none; } }
 
-.btn { display: inline-block; background: var(--ne-orange); color: #000; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: .72rem 1.35rem; border: none; cursor: pointer; font-size: .92rem; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+.btn { position: relative; overflow: hidden; display: inline-block; background: var(--ne-orange); color: #000; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: .72rem 1.35rem; border: none; cursor: pointer; font-size: .92rem; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
 .btn:hover { background: #ffb54d; text-decoration: none; }
 .btn.ghost { background: transparent; color: var(--ne-orange); box-shadow: inset 0 0 0 2px var(--ne-orange); }
 .btn.navy { background: var(--ne-navy-glow); color: #fff; }
 .btn-row { display: flex; gap: .8rem; flex-wrap: wrap; }
 
+/* periodic "click me" shine — a diagonal highlight sweeps across every button
+   on a 15s cycle (mostly idle, brief sweep) as a reminder that it's clickable. */
+.btn::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.65) 50%, transparent 60%);
+  transform: translateX(-130%) skewX(-15deg);
+  animation: btn-shine 15s ease-in-out infinite;
+}
+@keyframes btn-shine {
+  0% { transform: translateX(-130%) skewX(-15deg); }
+  8% { transform: translateX(130%) skewX(-15deg); }
+  100% { transform: translateX(130%) skewX(-15deg); }
+}
+@media (prefers-reduced-motion: reduce) { .btn::after { animation: none; display: none; } }
+
+/* disabled/closed buttons: no shine, no hover, not clickable */
+.btn.is-disabled { background: var(--bg-3); color: var(--ink-dim); box-shadow: none; cursor: not-allowed; pointer-events: none; }
+.btn.is-disabled::after { display: none; }
+.btn.is-disabled:hover { background: var(--bg-3); }
+
 .grid { display: grid; gap: 1rem; }
 .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
-.card { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: 1.3rem; transform-style: preserve-3d; transition: transform .18s ease, border-color .18s; }
-.tilt:hover { border-color: var(--ne-orange); }
+.card { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: 1.3rem; }
 .card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; }
 .event-card { border-left: 4px solid var(--ne-orange); }
 .event-card .meta { font-size: .85rem; color: var(--ink-dim); }
@@ -96,24 +115,7 @@ body.has-tiles .geo-bg { display: block; }
 
 .reveal { opacity: 0; transform: translateY(34px) perspective(900px) rotateX(6deg); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
 .reveal.in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } .tape-track { animation: none; } }
-
-/* ---- rotating banner tapes: gamer HUD style ---- */
-.tape { position: relative; margin: 3.4rem calc(-1 * var(--safe-x)); padding: .6rem 0; overflow: hidden;
-  background: linear-gradient(90deg, #02132b, var(--ne-navy) 30%, #02132b 70%, var(--ne-navy));
-  transform: rotate(-1.6deg) scale(1.03); border-block: 2px solid var(--ne-navy-glow);
-  box-shadow: 0 0 22px rgba(10,77,166,.5), inset 0 0 30px rgba(0,0,0,.6); }
-.tape::before, .tape::after { content: ""; position: absolute; left: 0; right: 0; height: 5px;
-  background: repeating-linear-gradient(-55deg, var(--ne-orange) 0 10px, transparent 10px 20px); opacity: .8; }
-.tape::before { top: 0; } .tape::after { bottom: 0; }
-.tape-track { display: flex; gap: 2.6rem; width: max-content; animation: tape 26s linear infinite; color: var(--ne-orange); font-family: var(--head); font-weight: 800; text-transform: uppercase; font-size: .84rem; letter-spacing: .14em; align-items: center; padding: .3rem 0;
-  text-shadow: 0 0 12px rgba(250,157,40,.55); }
-.tape-track span { display: flex; align-items: center; gap: .5rem; white-space: nowrap; }
-.tape-track span::after { content: "//"; margin-left: 2.1rem; color: var(--ne-navy-glow); text-shadow: none; }
-.tape.rev { transform: rotate(1.6deg) scale(1.03); }
-.tape.rev .tape-track { animation-direction: reverse; }
-.tape:hover .tape-track { animation-play-state: paused; }
-@keyframes tape { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 
 .flyer-rail { display: grid; grid-auto-flow: column; grid-auto-columns: min(340px, 82vw); gap: 1.1rem; overflow-x: auto; padding: .6rem .2rem 1.1rem; scroll-snap-type: x mandatory; perspective: 1100px; }
 .flyer-rail::-webkit-scrollbar { height: 8px; }
@@ -151,7 +153,6 @@ details.archive-month .grid { margin-top: 1rem; }
 .sticky.c-blue   { background: #7fb7ff; transform: rotate(-.8deg); }
 .sticky.c-green  { background: #9bf6a3; transform: rotate(2deg); }
 .sticky.c-orange { background: #ffb45e; transform: rotate(-2.2deg); }
-.sticky:hover { transform: rotate(0) scale(1.05); transition: transform .15s; z-index: 2; }
 .filter-row { display: flex; gap: .5rem; flex-wrap: wrap; margin: 1rem 0 1.5rem; }
 .chip { background: var(--bg-3); border: 1px solid var(--line); color: var(--ink-dim); padding: .35rem .95rem; cursor: pointer; font-family: var(--head); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); }
 .chip.active { background: var(--ne-orange); color: #000; border-color: var(--ne-orange); }
@@ -195,7 +196,6 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
   #nav-toggle:checked ~ nav.main-nav { display: flex; }
   .nav-wrap { flex-wrap: wrap; }
   .hero { padding-top: 2rem; }
-  .tape { margin: 2.4rem calc(-1 * var(--safe-x)); }
   .flyer-rail { grid-auto-columns: 84vw; }
 }
 
@@ -339,7 +339,6 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 /* ===== v9: home leaderboard + refined dark polish ===== */
 .lbx{display:flex;flex-direction:column;gap:8px;max-width:620px}
 .lbx-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:.7rem;background:var(--bg-2);border:1px solid var(--line);padding:.7rem .9rem;transition:border-color .18s,transform .18s}
-.lbx-row:hover{border-color:var(--ne-orange);transform:translateX(3px)}
 .lbx-row.top{border-color:var(--ne-orange);background:linear-gradient(90deg,rgba(250,157,40,.10),transparent 60%)}
 .lbx-rank{font-family:var(--head);font-weight:800;font-size:1.2rem;color:var(--ne-orange);text-align:center}
 .lbx-user{font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em}
@@ -349,12 +348,94 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .lbx-row .lbx-user,.lbx-row .lbx-pts{grid-row:1}
 
 /* --- refined dark polish (learn.newegg vibe: soft shadows, calmer surfaces) --- */
-.card{transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease}
-.card.tilt:hover{box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(250,157,40,.25)}
 .site-header{box-shadow:0 1px 0 rgba(255,255,255,.03)}
-.hero-decor .glow{opacity:.8}
 h2{align-items:center}
 .btn{transition:background .15s ease, transform .1s ease}
 .btn:active{transform:translateY(1px)}
 a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .dim{line-height:1.65}
+
+/* ===== v10: Event Update — blurred-bg schedule board ===== */
+/* Type scale: everything below derives from --eu-date-size so the ratios always
+   hold — event title = 70% of date (30% smaller), subtagline = 50% of title —
+   with a hard 14px floor on every text size on this board, per spec. */
+.eu-board{
+  --eu-date-size: clamp(1.9rem, 6.4vw, 4.6rem);
+  --eu-name-size: max(14px, calc(var(--eu-date-size) * 0.70));
+  --eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.50));
+  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(2.2rem,6vw,4.5rem) var(--safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
+.eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../img/event-update-bg.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
+.eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.6),rgba(4,5,7,.82) 55%,rgba(4,5,7,.94));}
+.eu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:clamp(1.6rem,4.5vw,3rem);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
+.eu-top .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
+.eu-eyebrow .ic{width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);color:var(--ne-orange);flex:none}
+/* masthead: the instantly-recognizable ID of this board */
+.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(2rem,7.5vw,4.6rem);letter-spacing:.01em;line-height:.98;margin:0;display:block;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-eyebrow-title::after{content:none}
+.eu-eyebrow-title .accent{color:var(--ne-orange)}
+.eu-eyebrow p{font-family:var(--eu-body);font-size:max(14px,.9rem);color:var(--ink-dim);margin-top:.3rem}
+.eu-brand{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ne-orange);font-size:max(14px,.95rem);text-align:right;white-space:nowrap;flex:none}
+.eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
+
+.eu-list{display:flex;flex-direction:column}
+.eu-row{display:flex;align-items:baseline;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
+.eu-list .eu-row:last-child{border-bottom:1px solid rgba(242,244,248,.22)}
+.eu-date-wrap{display:flex;align-items:center;gap:.6rem;min-width:0}
+.eu-date{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:var(--eu-date-size);line-height:1;color:#F4EFC8;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.eu-major .eu-date{color:var(--ne-orange)}
+.eu-major-mark{flex:none;width:clamp(20px,3.4vw,34px);height:clamp(20px,3.4vw,34px);color:var(--ne-orange);filter:drop-shadow(0 0 8px rgba(250,157,40,.75));animation:eu-pulse 2.2s ease-in-out infinite}
+@keyframes eu-pulse{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+.eu-info{text-align:right;min-width:0}
+/* event title: only 30% smaller than the date (was much smaller before) */
+.eu-name{font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1.15;color:var(--ink)}
+/* subtagline: exactly 50% of the event title, floored at 14px */
+.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
+.eu-major .eu-name{color:var(--ne-orange)}
+
+.eu-legend{display:flex;align-items:center;gap:.5rem;margin-top:clamp(1.4rem,4vw,2.4rem);font-family:var(--eu-body);font-size:max(14px,.8rem);color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em}
+.eu-legend .ic{width:16px;height:16px;color:var(--ne-orange)}
+
+/* ---- native responsive breakpoints (normal in-page browsing) ----
+   Keyed to real viewport width, same convention as the rest of the site
+   (see the 760/820px breakpoints elsewhere), not viewport aspect-ratio —
+   a component that isn't full-bleed shouldn't reflow off window *height*. */
+@media (max-width: 900px){
+  .eu-top{flex-direction:column;align-items:flex-start;gap:.5rem}
+  .eu-brand{text-align:left}
+}
+@media (max-width: 640px){
+  .eu-board{--eu-date-size: clamp(2.1rem, 11vw, 3rem);padding:clamp(1.6rem,7vw,2.6rem) var(--safe-x)}
+  .eu-eyebrow-title{font-size:clamp(1.5rem,9vw,2.2rem)}
+  .eu-eyebrow .ic{width:28px;height:28px}
+  .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem;padding:clamp(.9rem,4vw,1.3rem) 0}
+  .eu-info{text-align:left}
+  .eu-date-wrap{gap:.4rem}
+}
+@media (max-width: 400px){
+  .eu-board{--eu-date-size: clamp(1.9rem, 13vw, 2.6rem)}
+  .eu-eyebrow-title{font-size:clamp(1.3rem,10vw,1.8rem)}
+}
+
+/* ---- board-only render mode: isolates just the calendar block, full-bleed to the
+   viewport, for clean 1200x1200 / 1920x1080 screenshot capture. The aspect-ratio
+   tuning below only applies here, where the board *is* the viewport exactly —
+   it's intentionally not used for normal responsive browsing above. */
+html.board-mode{overflow:hidden}
+html.board-mode .site-header,
+html.board-mode .site-footer,
+html.board-mode .hero{display:none}
+html.board-mode main.container{max-width:none;margin:0;padding:0}
+html.board-mode section.eu-section{margin:0}
+html.board-mode .eu-board{margin:0;width:100vw;height:100vh;min-height:100vh;padding:clamp(1.6rem,5vw,4.5rem)}
+html.board-mode .reveal{opacity:1;transform:none}
+@media (max-aspect-ratio: 6/5){
+  html.board-mode .eu-board{--eu-date-size: clamp(2.4rem, 10vw, 4.2rem)}
+  html.board-mode .eu-top{flex-direction:column;align-items:flex-start;gap:.6rem}
+  html.board-mode .eu-brand{text-align:left}
+  html.board-mode .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem;padding:clamp(1rem,3vw,1.6rem) 0}
+  html.board-mode .eu-info{text-align:left}
+}
+@media (min-aspect-ratio: 3/2){
+  html.board-mode .eu-board{--eu-date-size: clamp(2.6rem, 5.2vw, 5.4rem)}
+  html.board-mode .eu-eyebrow-title{font-size:clamp(2.2rem,5.6vw,4.8rem)}
+}

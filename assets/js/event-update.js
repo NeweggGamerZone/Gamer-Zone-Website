@@ -1,0 +1,53 @@
+/* Event Update board — MAAP-poster-style schedule.
+   Big Montserrat date on the left, Montserrat event title on the right (time-only
+   subtagline in Open Sans below it), a pulsing star mark flags type:"major" events.
+   Data-driven from data/events.json, so it stays in sync with the rest of the site. */
+(async function () {
+  const list = document.getElementById('eu-list');
+  if (!list) return;
+
+  function embedded() {
+    const el = document.getElementById('eu-embedded-events');
+    try { return el ? JSON.parse(el.textContent) : { events: [] }; } catch { return { events: [] }; }
+  }
+
+  // Try the live JSON first (keeps this in sync with the rest of the site).
+  // Falls back to the dataset embedded in the page itself — so the board
+  // still renders correctly when opened directly (file://) or previewed
+  // somewhere that can't fetch() a relative path.
+  let data = null;
+  try {
+    const r = await fetch('data/events.json');
+    if (r.ok) data = await r.json();
+  } catch {}
+  if (!data || !Array.isArray(data.events) || !data.events.length) data = embedded();
+
+  const today = GZ.todayISO();
+  const events = (data.events || [])
+    .filter(e => e.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const monthDate = iso => {
+    const d = new Date(iso + 'T12:00:00');
+    return { mon: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(), day: d.getDate() };
+  };
+
+  function row(ev) {
+    const { mon, day } = monthDate(ev.date);
+    const isMajor = ev.type === 'major' || ev.featured;
+    return `<div class="eu-row${isMajor ? ' eu-major' : ''}">
+      <div class="eu-date-wrap">
+        <span class="eu-date">${mon} ${day}</span>
+        ${isMajor ? GZ.icon('medal', 'ic eu-major-mark') : ''}
+      </div>
+      <div class="eu-info">
+        <div class="eu-name">${GZ.esc(ev.title)}</div>
+        <div class="eu-meta">${ev.time ? GZ.esc(ev.time) : ''}</div>
+      </div>
+    </div>`;
+  }
+
+  list.innerHTML = events.length
+    ? events.map(row).join('')
+    : '<div class="calendar-empty">New dates dropping soon &mdash; check back shortly.</div>';
+})();
