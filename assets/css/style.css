@@ -137,6 +137,9 @@ body.has-tiles .geo-bg { display: block; }
 details.archive-month { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: .9rem 1.1rem; margin-bottom: .7rem; }
 details.archive-month summary { cursor: pointer; font-family: var(--head); font-weight: 700; text-transform: uppercase; font-size: .9rem; letter-spacing: .04em; }
 details.archive-month .grid { margin-top: 1rem; }
+.photo-placeholder { aspect-ratio: 4/3; border: 2px dashed var(--line); background: var(--bg-2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; color: var(--ink-dim); text-align: center; }
+.photo-placeholder .ic { opacity: .6; }
+.photo-placeholder p { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--head); font-weight: 700; }
 .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.92); display: none; align-items: center; justify-content: center; z-index: 100; cursor: zoom-out; padding: 1rem; }
 .lightbox.open { display: flex; }
 .lightbox img { max-height: 92vh; object-fit: contain; }
@@ -360,7 +363,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    hold — event title = 70% of date (30% smaller), subtagline = 50% of title —
    with a hard 14px floor on every text size on this board, per spec. */
 .eu-board{
-  --eu-date-size: clamp(1.9rem, 6.4vw, 4.6rem);
+  --eu-date-size: clamp(1.5rem, 4.6vw, 3.2rem);
   --eu-name-size: max(14px, calc(var(--eu-date-size) * 0.70));
   --eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.50));
   position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(2.2rem,6vw,4.5rem) var(--safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
@@ -429,13 +432,13 @@ html.board-mode section.eu-section{margin:0}
 html.board-mode .eu-board{margin:0;width:100vw;height:100vh;min-height:100vh;padding:clamp(1.6rem,5vw,4.5rem)}
 html.board-mode .reveal{opacity:1;transform:none}
 @media (max-aspect-ratio: 6/5){
-  html.board-mode .eu-board{--eu-date-size: clamp(2.4rem, 10vw, 4.2rem)}
+  html.board-mode .eu-board{--eu-date-size: clamp(1.7rem, 7vw, 2.9rem)}
   html.board-mode .eu-top{flex-direction:column;align-items:flex-start;gap:.6rem}
   html.board-mode .eu-brand{text-align:left}
-  html.board-mode .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem;padding:clamp(1rem,3vw,1.6rem) 0}
+  html.board-mode .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem;padding:clamp(.7rem,2.2vw,1.1rem) 0}
   html.board-mode .eu-info{text-align:left}
 }
 @media (min-aspect-ratio: 3/2){
-  html.board-mode .eu-board{--eu-date-size: clamp(2.6rem, 5.2vw, 5.4rem)}
+  html.board-mode .eu-board{--eu-date-size: clamp(1.8rem, 3.6vw, 3.7rem)}
   html.board-mode .eu-eyebrow-title{font-size:clamp(2.2rem,5.6vw,4.8rem)}
 }

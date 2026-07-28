@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const bg = document.getElementById('amb-modal');
   if (!bg) return;
   const cfg = await GZ.config();
-  const to = cfg.ambassadorEmail || cfg.contactEmail || '';
+  const to = cfg.ambassadorEmail || cfg.contactEmail || 'gamerzone@newegg.com';
   const open = () => bg.classList.add('open');
   const close = () => bg.classList.remove('open');
   document.querySelectorAll('[data-amb-open]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(); }));

@@ -10,8 +10,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="stylesheet" href="assets/css/style.css">
+<style>
+  /* Page-scoped: keep orange only on buttons + icons; everything else (kickers,
+     accent text, badges, links) uses the Newegg blue on this page. */
+  body.edu-page .kicker,
+  body.edu-page h1 .accent,
+  body.edu-page h2 .accent,
+  body.edu-page .track-badge,
+  body.edu-page .site-footer h4 { color: var(--ne-navy-glow); }
+  body.edu-page main a:not(.btn),
+  body.edu-page .site-footer a:not(.btn) { color: var(--ne-navy-glow); }
+</style>
 </head>
-<body>
+<body class="edu-page">
 <div class="geo-bg" aria-hidden="true"></div>
 <header class="site-header">
   <div class="nav-wrap">
@@ -23,7 +34,6 @@
       <a href="events.html">Events</a>
       <a href="edu.html">EDU</a>
       <a href="ambassador.html">Ambassador</a>
-      <a href="event-update.html">Event Update</a>
     </nav>
   </div>
   <div class="announcement" id="announcement"></div>
@@ -35,7 +45,7 @@
     <h1>Learn it. Build it.<br><span class="accent">Play it.</span></h1>
     <p class="lead">Empowering the next generation of creators, programmers, and gamers — hands-on workshops in AI, game design, and PC building, plus pro esports training with XP League. Choose your track and start building something real.</p>
     <div class="btn-row">
-      <a class="btn" href="mailto:gamerzone@newegg.com?subject=Gamer%20Zone%20Workshop%20Registration">Register for workshops</a>
+      <span class="btn is-disabled" aria-disabled="true">Register for workshops</span>
       <a class="btn ghost" href="#esports">Esports training</a>
     </div>
   </section>
@@ -53,7 +63,7 @@
         <p style="margin-top:.9rem"><span class="btn is-disabled" aria-disabled="true">Closed</span></p>
       </div>
       <div class="card hud">
-        <span class="track-badge">Hardware Explorer</span>
+        <span class="track-badge">Tech Builder</span>
         <h3>PC Building 101</h3>
         <p class="dim">Choose parts, assemble, and set up your own PC with GZ staff. High schoolers · 6 sessions.</p>
         <div style="margin-top:.6rem">
@@ -62,7 +72,7 @@
         <p style="margin-top:.9rem"><span class="btn is-disabled" aria-disabled="true">Closed</span></p>
       </div>
     </div>
-    <p class="dim" style="margin-top:.8rem">Previous tracks (AI Beginner and more) live in the <a href="https://youthai.newegg.org/register-lv1">workshop archive</a>. New cohorts announced on this page, <a data-cfg-href="instagramUrl" href="#">Instagram</a>, and <a data-cfg-href="discordUrl" href="#">Discord</a>.</p>
+    <p class="dim" style="margin-top:.8rem">New cohorts announced on this page, <a data-cfg-href="instagramUrl" href="#">Instagram</a>, and <a data-cfg-href="discordUrl" href="#">Discord</a>.</p>
   </section>
 
   <section id="esports" class="reveal">
@@ -89,7 +99,7 @@
     <h2><i data-ic="users"></i> Schools &amp; groups</h2>
     <p class="dim">Bringing a class, team, or youth org? Field trips and private workshop sessions are available — see <a href="index.html">Partners</a> or apply through the <a data-cfg-href="reservationUrl" href="#">event application</a>. Under-18 visitors need an accompanying guardian for regular free play.</p>
     <div class="btn-row" style="margin-top:1rem">
-      <a class="btn" href="mailto:gamerzone@newegg.com?subject=Gamer%20Zone%20Workshop%20Registration">Register for workshops</a>
+      <span class="btn is-disabled" aria-disabled="true">Register for workshops</span>
     </div>
   </section>
 </main>

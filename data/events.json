@@ -83,6 +83,30 @@
       "flyer": "assets/calendar/weekly/2026-07-31-xp-tournament-party.png",
       "accent": "#FFC400",
       "flyerWeb": "assets/img/flyers/2026-07-31-xp-tournament-party.jpg"
+    },
+    {
+      "id": "xp-fortnite-training-2026-08-05",
+      "title": "XP League: Fortnite Training",
+      "subtitle": "Train with the pros from XP League",
+      "date": "2026-08-05",
+      "time": "4:00 PM – 6:00 PM",
+      "type": "edu",
+      "blurb": "XP League coaches teach keybinds, builds, and pro strategies. All skill levels welcome.",
+      "featured": false,
+      "reservation": false,
+      "accent": "#7ED321"
+    },
+    {
+      "id": "xp-fortnite-tournament-2026-08-07",
+      "title": "XP League Fortnite Tournament",
+      "subtitle": "Friday showdown",
+      "date": "2026-08-07",
+      "time": "4:00 PM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "Biweekly Fortnite tournament with XP League. Chase the Victory Royale.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
     }
   ]
 }
