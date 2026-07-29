@@ -50,6 +50,22 @@ function injectIcons(root = document) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Load veil: makes the loading moment explicit instead of a blank flash,
+  // and on a visitor's very first-ever page load, holds a beat longer and
+  // eases open slowly (like a VR headset powering on) rather than a snap-cut.
+  (function revealVeil() {
+    const veil = document.getElementById('gz-veil');
+    if (!veil) return;
+    let firstVisit = false;
+    try {
+      firstVisit = !localStorage.getItem('gz-visited');
+      localStorage.setItem('gz-visited', '1');
+    } catch { /* storage unavailable (privacy mode, file://) — just use the quick fade */ }
+    if (firstVisit) document.body.classList.add('veil-first');
+    setTimeout(() => veil.classList.add('veil-hidden'), firstVisit ? 900 : 250);
+    veil.addEventListener('transitionend', () => veil.remove(), { once: true });
+  })();
+
   injectIcons();
 
   const cfg = await GZ.config();

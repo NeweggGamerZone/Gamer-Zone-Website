@@ -38,9 +38,22 @@
   if (!data || !Array.isArray(data.events) || !data.events.length) data = embedded();
 
   const today = GZ.todayISO();
+  // Show only the current week's remaining lineup (Mon–Sun containing today),
+  // capped at 5 days — not the entire running schedule.
+  const mondayOf = dateISO => {
+    const d = new Date(dateISO + 'T12:00:00');
+    const day = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - day);
+    return d.toISOString().slice(0, 10);
+  };
+  const weekStart = mondayOf(today);
+  const weekEndD = new Date(weekStart + 'T12:00:00'); weekEndD.setDate(weekEndD.getDate() + 6);
+  const weekEnd = weekEndD.toISOString().slice(0, 10);
+
   const events = (data.events || [])
-    .filter(e => e.date >= today && e.type !== 'closed')
-    .sort((a, b) => a.date.localeCompare(b.date));
+    .filter(e => e.date >= today && e.date <= weekEnd && e.type !== 'closed')
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 5);
 
   const monthDate = iso => {
     const d = new Date(iso + 'T12:00:00');

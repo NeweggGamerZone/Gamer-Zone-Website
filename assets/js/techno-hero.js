@@ -55,7 +55,9 @@
   function fadeFor(z) {
     const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
     const farFade = Math.min(1, (Z_FAR - z) / 820); // fade in very slowly as it spawns near the vanishing point
-    return Math.max(0, Math.min(1, nearFade * (0.3 + 0.7 * farFade)));
+    // No opacity floor here — a freshly spawned ring must ease up from 0,
+    // not pop straight to a minimum brightness the instant it respawns.
+    return Math.max(0, Math.min(1, nearFade * farFade));
   }
 
   function strokeRail(wall, u, v, rot, globalFade, hue) {
