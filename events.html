@@ -39,13 +39,15 @@
   <section class="reveal" id="calendar">
     <h2><i data-ic="cal"></i> Plan your visit</h2>
     <p class="dim">Free to play, open Tuesday&ndash;Saturday 10am&ndash;7pm. Pick a date to see what's on &mdash; then pre-register to skip the line.</p>
-    <div class="cal-wrap" style="margin-top:1rem">
-      <div class="cal">
-        <div class="cal-top"><button id="cal-prev" aria-label="Previous month">&lsaquo;</button><span class="cal-month" id="cal-month"></span><button id="cal-next" aria-label="Next month">&rsaquo;</button></div>
-        <div class="cal-grid" id="cal-grid"></div>
-        <div class="cal-legend"><span><i></i> Event</span><span><i class="free"></i> Free play</span><span><i class="closed"></i> Closed</span></div>
+    <div class="cal-board">
+      <div class="cal-wrap">
+        <div class="cal">
+          <div class="cal-top"><button id="cal-prev" aria-label="Previous month">&lsaquo;</button><span class="cal-month" id="cal-month"></span><button id="cal-next" aria-label="Next month">&rsaquo;</button></div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-legend"><span><i class="lg-closed"></i> Closed</span><span><i class="lg-free"></i> Free Play</span><span><i class="lg-theme"></i> Theme Day</span><span><i class="lg-edu"></i> EDU / Esports</span><span><i class="lg-amb"></i> Ambassador</span><span><i class="lg-major"></i> Major / Tournament</span></div>
+        </div>
+        <div class="cal-detail" id="cal-detail"></div>
       </div>
-      <div class="cal-detail" id="cal-detail"></div>
     </div>
   </section>
 
@@ -56,13 +58,12 @@
         <div class="eu-eyebrow">
           <i data-ic="cal" data-lg></i>
           <div>
-            <h3 class="eu-eyebrow-title">Gamer Zone <span class="accent">Event Update</span></h3>
+            <h3 class="eu-eyebrow-title">Gamer Zone <span class="accent">Weekly Lineup</span></h3>
             <p>Diamond Bar, CA &middot; Free to play</p>
           </div>
         </div>
       </div>
       <div class="eu-list" id="eu-list"></div>
-      <div class="eu-legend"><i data-ic="medal"></i> Major event</div>
     </div>
   </section>
 

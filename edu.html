@@ -11,15 +11,9 @@
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="stylesheet" href="assets/css/style.css">
 <style>
-  /* Page-scoped: keep orange only on buttons + icons; everything else (kickers,
-     accent text, badges, links) uses the Newegg blue on this page. */
-  body.edu-page .kicker,
-  body.edu-page h1 .accent,
-  body.edu-page h2 .accent,
-  body.edu-page .track-badge,
-  body.edu-page .site-footer h4 { color: var(--ne-navy-glow); }
-  body.edu-page main a:not(.btn),
-  body.edu-page .site-footer a:not(.btn) { color: var(--ne-navy-glow); }
+  /* Kicker/accent text and track badges are blue site-wide by default now,
+     so no page-scoped override is needed here anymore. */
+  body.edu-page .track-badge { color: var(--ne-blue-text); }
 </style>
 </head>
 <body class="edu-page">
@@ -98,7 +92,7 @@
 
   <section class="reveal">
     <h2><i data-ic="users"></i> Schools &amp; groups</h2>
-    <p class="dim">Bringing a class, team, or youth org? Field trips and private workshop sessions are available — see <a href="index.html">Partners</a> or apply through the <a data-cfg-href="reservationUrl" href="#">event application</a>. Under-18 visitors need an accompanying guardian for regular free play.</p>
+    <p class="dim">Bringing a class, team, or youth organization? Reach out to us at <a href="mailto:gamerzone@newegg.com">gamerzone@newegg.com</a>. Under-18 visitors need an accompanying guardian for regular free play.</p>
     <div class="btn-row" style="margin-top:1rem">
       <span class="btn is-disabled" aria-disabled="true">Register for workshops</span>
     </div>

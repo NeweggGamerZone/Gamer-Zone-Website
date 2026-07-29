@@ -38,7 +38,7 @@
     return `<div class="eu-row${isMajor ? ' eu-major' : ''}">
       <div class="eu-date-wrap">
         <span class="eu-date">${mon} ${day}</span>
-        ${isMajor ? GZ.icon('medal', 'ic eu-major-mark') : ''}
+        ${isMajor ? '<span class="eu-major-mark" aria-hidden="true">&#9733;</span>' : ''}
       </div>
       <div class="eu-info">
         <div class="eu-name">${GZ.esc(ev.title)}</div>

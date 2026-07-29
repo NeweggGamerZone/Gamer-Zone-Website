@@ -18,6 +18,9 @@
   (data.events || []).forEach(e => { byDate[e.date] = e; });
 
   const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor Event', edu: 'Training / EDU', community: 'Community', major: 'Major Event' };
+  // Color-code buckets: Closed=red, Free Play=blue, Theme Day=light blue,
+  // EDU/Esports=green, Ambassador (vendor/community-hosted)=pink, Major/Tournament=orange.
+  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major' };
   const t0 = new Date(today + 'T12:00:00');
   let view = new Date(t0.getFullYear(), t0.getMonth(), 1);
 
@@ -36,12 +39,11 @@
       const dt = iso(y, m, d), wd = new Date(y, m, d).getDay();
       const closed = (wd === 0 || wd === 1), e = byDate[dt];
       const cls = ['cal-cell'];
-      if (closed) cls.push('closed');
-      if (e) cls.push('has');
+      if (closed) cls.push('closed', 'cal-closed');
+      else if (e) cls.push(TYPE_COLOR[e.type] || 'cal-edu');
+      else cls.push('cal-free');
       if (dt === today) cls.push('today');
-      const mark = e ? `<span class="dot" style="background:${GZ.esc(e.accent || '#FA9D28')}"></span>`
-        : (closed ? '' : '<span class="dl">Free</span>');
-      html += `<div class="${cls.join(' ')}" data-d="${dt}"><span class="dn">${d}</span>${mark}</div>`;
+      html += `<div class="${cls.join(' ')}" data-d="${dt}"><span class="dn">${d}</span></div>`;
     }
     grid.innerHTML = html;
   }
@@ -55,7 +57,8 @@
       : '';
     if (e) {
       const src = e.flyerWeb || e.flyer;
-      detail.innerHTML = `<span class="tag orange">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
+      const typeCls = TYPE_COLOR[e.type] || 'cal-edu';
+      detail.innerHTML = `<span class="tag ${typeCls}">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
         <h3>${GZ.esc(e.title)}</h3>
         <p class="dim">${pretty(dt)} · ${GZ.esc(e.time || '')}</p>
         <div class="cd-body">
@@ -64,9 +67,9 @@
           ${preregBlock}</div>
         </div>`;
     } else if (closed) {
-      detail.innerHTML = `<h3>${pretty(dt)}</h3><p class="dim">Closed. The Gamer Zone is open Tuesday through Saturday, 10am–7pm. See you then!</p>`;
+      detail.innerHTML = `<span class="tag cal-closed">Closed</span><h3>${pretty(dt)}</h3><p class="dim">Closed. The Gamer Zone is open Tuesday through Saturday, 10am–7pm. See you then!</p>`;
     } else {
-      detail.innerHTML = `<span class="tag">Free Play</span><h3>${pretty(dt)}</h3>
+      detail.innerHTML = `<span class="tag cal-free">Free Play</span><h3>${pretty(dt)}</h3>
         <p class="dim">Open 10am–7pm. Try the latest tech for free — walk in, or pre-register to skip the line at check-in.</p>
         ${preregBlock}`;
     }
