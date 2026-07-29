@@ -5,9 +5,9 @@
   let data;
   try { data = await (await fetch('data/leaderboard.json')).json(); }
   catch { el.innerHTML = '<p class="dim">Leaderboard updating…</p>'; return; }
-  const medal = i => ['1','2','3','4','5'][i] || (i+1);
+  const TROPHY = ['🥇','🥈','🥉','🎮','🎮'];
   const rows = (data.players||[]).slice(0,5).map((p,i)=>`<div class="lbx-row${i===0?' top':''}">
-    <span class="lbx-rank">${i+1}</span>
+    <span class="lbx-rank" aria-label="Rank ${i+1}">${TROPHY[i] || (i+1)}</span>
     <span class="lbx-user">${GZ.esc(p.username)}</span>
     <span class="lbx-meta">${p.sessions} sessions · ${p.totalHours}h</span>
     <span class="lbx-pts">${p.zonePoints.toLocaleString()}<small>pts</small></span>

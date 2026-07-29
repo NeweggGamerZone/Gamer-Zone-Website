@@ -3,9 +3,9 @@
 :root {
   --ne-orange: #FA9D28;
   --ne-orange-deep: #E07C00;
-  --ne-navy: #002D6A;
-  --ne-navy-glow: #0A4DA6;
-  --ne-blue-text: #7DB2FF; /* lighter blue for body/accent text on dark bg — WCAG AAA vs bg */
+  --ne-navy: #031B47; /* matched to Newegg's actual site navy */
+  --ne-navy-glow: #146ADB; /* matched to Newegg's actual site accent blue */
+  --ne-blue-text: #8AB4ED; /* lightened tint of Newegg's accent blue — WCAG AAA vs dark bg */
   --bg: #060708;
   --bg-2: #0E1013;
   --bg-3: #16181D;
@@ -64,12 +64,13 @@ h1 .accent, h2 .accent { color: var(--ne-blue-text); }
 
 .hero { position: relative; padding: 4rem 0 2.5rem; }
 .hero p.lead { font-size: 1.12rem; color: var(--ink-dim); max-width: 640px; margin: .9rem 0 1.4rem; }
-.hero-decor { display: none; }
+.hero-decor { position: absolute; inset: 0; pointer-events: none; z-index: -1; }
+body.home-page .hero-decor { display: none; } /* homepage gets the full techno-city hero instead */
 .hero-decor .stripe { position: absolute; height: 12px; width: 42%; background: repeating-linear-gradient(-55deg, var(--ne-orange) 0 16px, transparent 16px 32px); opacity: .28; will-change: transform; }
 .hero-decor .stripe.s1 { top: 12%; right: -4%; }
 .hero-decor .stripe.s2 { top: 26%; right: 8%; width: 24%; opacity: .16; }
-.geo-bg { display: none; position: fixed; inset: 0; z-index: -2; pointer-events: none; background: #050609; overflow: hidden; }
-body.has-tiles .geo-bg { display: block; }
+.geo-bg { display: block; position: fixed; inset: 0; z-index: -2; pointer-events: none; background: #050609; overflow: hidden; }
+body.home-page .geo-bg { display: none; } /* homepage runs its own animated techno-city background instead */
 .geo-bg::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 200%;
   background: url('../img/bg-tile.jpg') repeat; background-size: 460px 920px; opacity: .20;
   animation: tilescroll 44s linear infinite; will-change: transform; }
@@ -118,9 +119,13 @@ body.has-tiles .geo-bg { display: block; }
 .game-list { column-width: 210px; column-gap: 2.4rem; }
 .game-list li { break-inside: avoid; list-style: none; font-family: var(--head); font-weight: 700; font-size: .92rem; letter-spacing: .015em; text-transform: uppercase; padding: .5rem 0; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; gap: .55rem; }
 .game-list li::before { content: '\25C6'; color: var(--ne-orange); font-size: .6rem; flex: 0 0 auto; }
+.game-list li:has(.gl-emoji)::before { content: none; }
+.gl-emoji { flex: 0 0 auto; font-size: .95rem; filter: grayscale(0) saturate(1); }
 .game-list li:last-child { border-bottom: none; }
 @media (max-width: 760px) { .game-list-panel { padding: 1.5rem 1.3rem; } }
 @media (max-width: 460px) { .game-list { column-width: 100%; } }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: .5rem; }
 
 .reveal { opacity: 0; transform: translateY(34px) perspective(900px) rotateX(6deg); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
 .reveal.in { opacity: 1; transform: none; }
@@ -224,6 +229,31 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .hero-stage .hero-decor .stripe.s2 { top: auto; bottom: 10%; left: -4%; right: auto; }
 .scroll-cue { margin-top: 2.2rem; color: var(--ink-dim); font-size: .74rem; font-family: var(--head); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; animation: cue 2s ease-in-out infinite; }
 @keyframes cue { 0%,100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(7px); opacity: 1; } }
+
+/* ---- homepage-only: "standing on a motherboard, looking at a techno city
+   inside the PC" hero. Canvas digital-rain skyline + a perspective circuit
+   floor, all coded (no external images/image-gen). ---- */
+.tech-hero { isolation: isolate; background: radial-gradient(circle at 50% 18%, #0a1424 0%, #05070a 68%); }
+.tech-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
+.tech-grid {
+  position: absolute; left: -25%; right: -25%; bottom: 0; height: 58%; z-index: -2;
+  background-image: linear-gradient(rgba(20,106,219,.4) 1px, transparent 1px),
+                     linear-gradient(90deg, rgba(20,106,219,.4) 1px, transparent 1px);
+  background-size: 54px 54px;
+  transform: perspective(340px) rotateX(64deg);
+  transform-origin: bottom;
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.95), transparent 92%);
+          mask-image: linear-gradient(to top, rgba(0,0,0,.95), transparent 92%);
+  animation: tech-grid-scroll 5s linear infinite;
+}
+@keyframes tech-grid-scroll { from { background-position-y: 0; } to { background-position-y: 54px; } }
+.tech-scan { position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(rgba(4,5,7,0) 0%, rgba(4,5,7,.5) 76%, rgba(4,5,7,.92) 100%); }
+@media (prefers-reduced-motion: reduce) { .tech-grid { animation: none; } }
+
+.hero-in { opacity: 0; transform: translateY(22px); animation: hero-rise .85s cubic-bezier(.2,.7,.3,1) forwards; animation-delay: var(--d, 0s); }
+@keyframes hero-rise { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-in { animation: none; opacity: 1; transform: none; } }
 
 /* ---- bulletin photo posts (polaroid) ---- */
 .sticky.has-photo { padding-bottom: 1rem; }
@@ -376,7 +406,7 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .lbx{display:flex;flex-direction:column;gap:8px;max-width:620px}
 .lbx-row{display:grid;grid-template-columns:34px 1fr auto;grid-template-rows:auto auto;grid-template-areas:"rank user pts" "rank meta pts";align-items:center;column-gap:.7rem;background:var(--bg-2);border:1px solid var(--line);padding:.7rem .9rem;transition:border-color .18s,transform .18s}
 .lbx-row.top{border-color:var(--ne-blue-text);background:linear-gradient(90deg,rgba(125,178,255,.12),transparent 60%)}
-.lbx-rank{grid-area:rank;font-family:var(--head);font-weight:800;font-size:1.2rem;color:var(--ne-blue-text);text-align:center}
+.lbx-rank{grid-area:rank;font-size:1.5rem;line-height:1;text-align:center}
 .lbx-user{grid-area:user;font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em;align-self:end}
 .lbx-meta{grid-area:meta;font-size:.74rem;color:var(--ink-dim);align-self:start}
 .lbx-pts{grid-area:pts;font-family:var(--head);font-weight:800;color:var(--ne-blue-text);font-size:1.1rem;text-align:right;align-self:center}

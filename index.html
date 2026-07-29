@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="has-tiles">
+<body class="home-page">
 <div class="geo-bg" aria-hidden="true"></div>
 <header class="site-header">
   <div class="nav-wrap">
@@ -29,18 +29,20 @@
   <div class="announcement" id="announcement"></div>
 </header>
 <main class="container">
-  <section class="hero-stage">
-    <div class="hero-decor" aria-hidden="true"><div class="stripe s1"></div><div class="stripe s2"></div></div>
-    <p class="kicker">Newegg Gamer Zone &middot; Diamond Bar, CA &middot; Free admission</p>
+  <section class="hero-stage tech-hero">
+    <canvas id="techno-canvas" class="tech-canvas" aria-hidden="true"></canvas>
+    <div class="tech-grid" aria-hidden="true"></div>
+    <div class="tech-scan" aria-hidden="true"></div>
+    <p class="kicker hero-in" style="--d:0s">Newegg Gamer Zone &middot; Diamond Bar, CA &middot; Free admission</p>
     <div class="hero-stack">
-      <span class="hs-line solid">Get in</span>
-      <span class="hs-line outline">The Zone</span>
+      <span class="hs-line solid hero-in" style="--d:.15s">Get in</span>
+      <span class="hs-line outline hero-in" style="--d:.32s">The Zone</span>
     </div>
-    <p class="lead">Try the latest tech for free &mdash; high-end gaming PCs, racing simulators, VR, and esports stages. Free snacks too. Always free to play.</p>
-    <div class="btn-row">
+    <p class="lead hero-in" style="--d:.5s">Try the latest tech for free &mdash; high-end gaming PCs, racing simulators, VR, and esports stages. Free snacks too. Always free to play.</p>
+    <div class="btn-row hero-in" style="--d:.68s">
       <a class="btn" href="events.html#calendar">Plan your visit</a>
     </div>
-    <p class="scroll-cue">&#9660; Weekly lineup</p>
+    <p class="scroll-cue hero-in" style="--d:.85s">&#9660; Weekly lineup</p>
   </section>
 
   <section class="reveal eu-section" id="week">
@@ -149,6 +151,7 @@
   <div class="hazard"></div>
 </footer>
 <script src="assets/js/main.js"></script>
+<script src="assets/js/techno-hero.js"></script>
 <script src="assets/js/events.js"></script>
 <script src="assets/js/event-update.js"></script>
 <script src="assets/js/leaderboard.js"></script>
