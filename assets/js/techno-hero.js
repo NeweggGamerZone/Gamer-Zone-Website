@@ -64,8 +64,8 @@
     const b = project(w1.x, w1.y, Z_NEAR, rot);
     const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
     grad.addColorStop(0, 'rgba(61,139,255,0)');
-    grad.addColorStop(0.35, `rgba(61,139,255,${0.32 * globalFade})`);
-    grad.addColorStop(1, `rgba(120,180,255,${0.62 * globalFade})`);
+    grad.addColorStop(0.35, `rgba(61,139,255,${0.24 * globalFade})`);
+    grad.addColorStop(1, `rgba(120,180,255,${0.48 * globalFade})`);
     ctx.strokeStyle = grad;
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
@@ -75,7 +75,7 @@
     const f = fadeFor(z) * globalFade;
     if (f <= 0.01) return;
     const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, z, rot));
-    ctx.strokeStyle = `rgba(138,180,237,${0.5 * f})`;
+    ctx.strokeStyle = `rgba(138,180,237,${0.4 * f})`;
     ctx.lineWidth = 1.3;
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
@@ -99,14 +99,14 @@
       p.z += (Z_FAR - Z_NEAR) * 0.16 * dt * 3.2;
       p.hue = (p.hue + dt * 40) % 360;
       if (p.z >= Z_FAR - 40) { pulses.splice(i, 1); continue; }
-      const nearIn = Math.min(1, (p.z - Z_NEAR) / 120);
+      const nearIn = Math.min(1, (p.z - Z_NEAR) / 300);
       const farOut = Math.min(1, (Z_FAR - 40 - p.z) / 180);
       const f = nearIn * farOut * globalFade;
       if (f <= 0.01) continue;
       const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, p.z, rot));
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.55 * f})`;
+      ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.45 * f})`;
       ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, .9)`;
       ctx.shadowBlur = 14;
       ctx.lineWidth = 2;
@@ -149,7 +149,7 @@
   }
 
   function drawComponent(c, rot, elapsed, globalFade) {
-    const f = fadeFor(c.z) * globalFade * Math.min(1, c.spawnT / 0.6);
+    const f = fadeFor(c.z) * globalFade * Math.min(1, c.spawnT / 1.4);
     if (f <= 0.02) return;
     const wp = wallPoint(c.wall, c.u, c.v);
     const p = project(wp.x, wp.y, c.z, rot);
@@ -161,9 +161,9 @@
     ctx.globalCompositeOperation = 'lighter';
     ctx.shadowColor = 'rgba(120,180,255,.9)';
     ctx.shadowBlur = Math.max(4, scale * 0.35);
-    const line = 'rgba(160,200,255,.95)';
-    const fillCool = 'rgba(20,106,219,.28)';
-    const glow = 'rgba(250,157,40,.95)';
+    const line = 'rgba(160,200,255,.82)';
+    const fillCool = 'rgba(20,106,219,.22)';
+    const glow = 'rgba(250,157,40,.85)';
     ctx.lineWidth = Math.max(1, scale * 0.05);
 
     if (c.kind === 'chip') {
