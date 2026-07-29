@@ -4,8 +4,8 @@
   --ne-orange: #FA9D28;
   --ne-orange-deep: #E07C00;
   --ne-navy: #031B47; /* matched to Newegg's actual site navy */
-  --ne-navy-glow: #146ADB; /* matched to Newegg's actual site accent blue */
-  --ne-blue-text: #8AB4ED; /* lightened tint of Newegg's accent blue — WCAG AAA vs dark bg */
+  --ne-navy-glow: #0F5FD1; /* deeper, more saturated accent blue */
+  --ne-blue-text: #3D8BFF; /* brighter/more vivid electric blue — WCAG AA vs dark bg */
   --bg: #060708;
   --bg-2: #0E1013;
   --bg-3: #16181D;
@@ -230,26 +230,13 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .scroll-cue { margin-top: 2.2rem; color: var(--ink-dim); font-size: .74rem; font-family: var(--head); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; animation: cue 2s ease-in-out infinite; }
 @keyframes cue { 0%,100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(7px); opacity: 1; } }
 
-/* ---- homepage-only: "standing on a motherboard, looking at a techno city
-   inside the PC" hero. Canvas digital-rain skyline + a perspective circuit
-   floor, all coded (no external images/image-gen). ---- */
-.tech-hero { isolation: isolate; background: radial-gradient(circle at 50% 18%, #0a1424 0%, #05070a 68%); }
+/* ---- homepage-only: flying through a grid tunnel inside the PC, past
+   glowing component silhouettes (chip, RAM, capacitors, fan, heatsink).
+   Pure canvas perspective-projection math (no external images/image-gen). ---- */
+.tech-hero { isolation: isolate; background: radial-gradient(circle at 50% 45%, #0a1424 0%, #05070a 72%); }
 .tech-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
-.tech-grid {
-  position: absolute; left: -25%; right: -25%; bottom: 0; height: 58%; z-index: -2;
-  background-image: linear-gradient(rgba(20,106,219,.4) 1px, transparent 1px),
-                     linear-gradient(90deg, rgba(20,106,219,.4) 1px, transparent 1px);
-  background-size: 54px 54px;
-  transform: perspective(340px) rotateX(64deg);
-  transform-origin: bottom;
-  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.95), transparent 92%);
-          mask-image: linear-gradient(to top, rgba(0,0,0,.95), transparent 92%);
-  animation: tech-grid-scroll 5s linear infinite;
-}
-@keyframes tech-grid-scroll { from { background-position-y: 0; } to { background-position-y: 54px; } }
 .tech-scan { position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(rgba(4,5,7,0) 0%, rgba(4,5,7,.5) 76%, rgba(4,5,7,.92) 100%); }
-@media (prefers-reduced-motion: reduce) { .tech-grid { animation: none; } }
+  background: radial-gradient(circle at 50% 46%, rgba(4,5,7,0) 0%, rgba(4,5,7,.35) 70%, rgba(4,5,7,.88) 100%); }
 
 .hero-in { opacity: 0; transform: translateY(22px); animation: hero-rise .85s cubic-bezier(.2,.7,.3,1) forwards; animation-delay: var(--d, 0s); }
 @keyframes hero-rise { to { opacity: 1; transform: none; } }
