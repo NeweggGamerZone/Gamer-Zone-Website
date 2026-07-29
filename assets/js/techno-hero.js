@@ -1,9 +1,12 @@
-/* Homepage-only hero: flying endlessly through a 4-sided grid tunnel inside
-   the PC — floor, ceiling, and both walls converge to a shared vanishing
-   point, with glowing rings sliding toward the viewer and stylized PC
-   component silhouettes (chip, RAM, capacitors, fan, heatsink fins) receding
-   past on the walls. Pure canvas perspective-projection math (screenX = cx +
-   worldX*f/z), no external images, no image-gen API, no literal rain. */
+/* Homepage-only fixed background: a full-page grid tunnel through the inside
+   of a PC. Floor/ceiling/walls converge to a shared vanishing point and
+   slowly roll; structural rings fly toward the viewer; RGB pulse rings sweep
+   the opposite way toward the vanishing point and fade there; PC-component
+   silhouettes (chip, RAM, capacitors, fan, heatsink) spawn at random walls
+   and times with a glow/bloom look. Pure canvas perspective-projection math
+   (screenX = cx + rotated(worldX)*f/z) — no external images, no image-gen
+   API, no literal rain/skyline. Fixed position, so it stays put behind the
+   whole page while you scroll. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -11,182 +14,248 @@
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let W, H, DPR, cx, cy;
-  const F = 300;        // focal length
+  const F = 300;
   const Z_NEAR = 60, Z_FAR = 1500;
-  let A, B;              // tunnel half-width / half-height in world units
+  let A, B;
   let rings = [];
   let comps = [];
-
-  function project(x, y, z) {
-    const s = F / z;
-    return { x: cx + x * s, y: cy + y * s, s };
-  }
+  let pulses = [];
+  const ROT_SPEED = 0.045; // slow roll, radians/sec
 
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     W = canvas.clientWidth; H = canvas.clientHeight;
     canvas.width = W * DPR; canvas.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    cx = W / 2; cy = H * 0.46;
-    A = W * 0.95; B = H * 0.95;
+    cx = W / 2; cy = H / 2;
+    A = Math.max(W, H) * 0.72; B = A;
     buildRings();
-    buildComponents();
   }
 
   function buildRings() {
     rings = [];
     const count = 9;
-    for (let i = 0; i < count; i++) {
-      rings.push({ z: Z_NEAR + (i / count) * (Z_FAR - Z_NEAR) });
-    }
+    for (let i = 0; i < count; i++) rings.push({ z: Z_NEAR + (i / count) * (Z_FAR - Z_NEAR) });
   }
 
-  // Components live on one of the 4 walls at a fixed local (u,v) in [-1,1],
-  // and are assigned a ring index so they travel in lockstep with a ring.
-  function buildComponents() {
-    const defs = [
-      { wall: 'floor', u: -0.5, kind: 'ram' },
-      { wall: 'floor', u: 0.35, kind: 'heatsink' },
-      { wall: 'ceiling', u: -0.3, kind: 'capacitor' },
-      { wall: 'ceiling', u: 0.5, kind: 'capacitor' },
-      { wall: 'left', v: 0.1, kind: 'chip' },
-      { wall: 'right', v: -0.15, kind: 'fan' },
-      { wall: 'right', v: 0.45, kind: 'heatsink' },
-      { wall: 'left', v: -0.4, kind: 'ram' },
-    ];
-    comps = defs.map((d, i) => ({ ...d, ringIndex: i % rings.length, spin: Math.random() * Math.PI * 2 }));
+  function project(x, y, z, rot) {
+    const c = Math.cos(rot), s = Math.sin(rot);
+    const rx = x * c - y * s, ry = x * s + y * c;
+    const sc = F / z;
+    return { x: cx + rx * sc, y: cy + ry * sc, s: sc };
   }
 
-  function wallPoint(wall, u, v, z) {
-    // u,v in [-1,1] local coords on that wall's plane
-    if (wall === 'floor') return { x: u * A, y: B, z };
-    if (wall === 'ceiling') return { x: u * A, y: -B, z };
-    if (wall === 'left') return { x: -A, y: v * B, z };
-    return { x: A, y: v * B, z }; // right
+  function wallPoint(wall, u, v) {
+    if (wall === 'floor') return { x: u * A, y: B };
+    if (wall === 'ceiling') return { x: u * A, y: -B };
+    if (wall === 'left') return { x: -A, y: v * B };
+    return { x: A, y: v * B };
   }
 
   function fadeFor(z) {
-    // fog: dim when far away, fade out again just before it flies past the camera
-    const nearFade = Math.min(1, (z - Z_NEAR) / 90);
+    const nearFade = Math.min(1, (z - Z_NEAR) / 140); // fade out hard as it nears the outer edge
     const farFade = Math.min(1, (Z_FAR - z) / 260);
-    return Math.max(0, Math.min(1, nearFade * (0.35 + 0.65 * farFade)));
+    return Math.max(0, Math.min(1, nearFade * (0.3 + 0.7 * farFade)));
   }
 
-  function strokeRail(wall, u, v) {
-    const p1 = wallPoint(wall, u, v, Z_FAR);
-    const p2 = wallPoint(wall, u, v, Z_NEAR);
-    const a = project(p1.x, p1.y, p1.z);
-    const b = project(p2.x, p2.y, p2.z);
+  function strokeRail(wall, u, v, rot, globalFade) {
+    const w1 = wallPoint(wall, u, v);
+    const a = project(w1.x, w1.y, Z_FAR, rot);
+    const b = project(w1.x, w1.y, Z_NEAR, rot);
     const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
     grad.addColorStop(0, 'rgba(61,139,255,0)');
-    grad.addColorStop(0.35, 'rgba(61,139,255,.35)');
-    grad.addColorStop(1, 'rgba(120,180,255,.7)');
+    grad.addColorStop(0.35, `rgba(61,139,255,${0.32 * globalFade})`);
+    grad.addColorStop(1, `rgba(120,180,255,${0.62 * globalFade})`);
     ctx.strokeStyle = grad;
+    ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   }
 
-  function drawRing(z) {
-    const f = fadeFor(z);
+  function drawRing(z, rot, globalFade) {
+    const f = fadeFor(z) * globalFade;
     if (f <= 0.01) return;
-    const corners = [
-      project(-A, -B, z), project(A, -B, z), project(A, B, z), project(-A, B, z),
-    ];
-    ctx.strokeStyle = `rgba(138,180,237,${0.55 * f})`;
-    ctx.lineWidth = 1.4;
+    const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, z, rot));
+    ctx.strokeStyle = `rgba(138,180,237,${0.5 * f})`;
+    ctx.lineWidth = 1.3;
     ctx.beginPath();
-    ctx.moveTo(corners[0].x, corners[0].y);
-    for (let i = 1; i < 4; i++) ctx.lineTo(corners[i].x, corners[i].y);
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < 4; i++) ctx.lineTo(pts[i].x, pts[i].y);
     ctx.closePath();
     ctx.stroke();
   }
 
-  function drawComponent(c, t) {
-    const ring = rings[c.ringIndex];
-    const z = ring.z;
-    const f = fadeFor(z);
+  // RGB pulse rings: spawn at the near edge, sweep inward toward the
+  // vanishing point (opposite of the main rings), hue-cycling, fading in as
+  // they spawn and fading out as they approach the center.
+  let pulseTimer = 0;
+  function spawnPulse() {
+    pulses.push({ z: Z_NEAR + 20, hue: Math.random() * 360 });
+  }
+  function updatePulses(dt, rot, globalFade) {
+    pulseTimer -= dt;
+    if (pulseTimer <= 0) { spawnPulse(); pulseTimer = 2.6 + Math.random() * 2.2; }
+    for (let i = pulses.length - 1; i >= 0; i--) {
+      const p = pulses[i];
+      p.z += (Z_FAR - Z_NEAR) * 0.16 * dt * 3.2;
+      p.hue = (p.hue + dt * 40) % 360;
+      if (p.z >= Z_FAR - 40) { pulses.splice(i, 1); continue; }
+      const nearIn = Math.min(1, (p.z - Z_NEAR) / 120);
+      const farOut = Math.min(1, (Z_FAR - 40 - p.z) / 180);
+      const f = nearIn * farOut * globalFade;
+      if (f <= 0.01) continue;
+      const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, p.z, rot));
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.55 * f})`;
+      ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, .9)`;
+      ctx.shadowBlur = 14;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let k = 1; k < 4; k++) ctx.lineTo(pts[k].x, pts[k].y);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // PC components: randomized spawn (wall, position, kind, timing) rather
+  // than a fixed set, so they feel organic instead of static set-dressing.
+  const KINDS = ['chip', 'ram', 'capacitor', 'fan', 'heatsink'];
+  const WALLS = ['floor', 'ceiling', 'left', 'right'];
+  let spawnTimer = 0;
+  const MAX_COMPONENTS = 5;
+  function maybeSpawn(dt) {
+    spawnTimer -= dt;
+    if (spawnTimer > 0 || comps.length >= MAX_COMPONENTS) return;
+    spawnTimer = 1.1 + Math.random() * 1.6;
+    comps.push({
+      wall: WALLS[(Math.random() * WALLS.length) | 0],
+      u: Math.random() * 1.5 - 0.75,
+      v: Math.random() * 1.5 - 0.75,
+      kind: KINDS[(Math.random() * KINDS.length) | 0],
+      z: Z_FAR - Math.random() * 200,
+      spin: Math.random() * Math.PI * 2,
+      spawnT: 0,
+    });
+  }
+  function updateComponents(dt) {
+    for (let i = comps.length - 1; i >= 0; i--) {
+      const c = comps[i];
+      c.z -= SPEED * dt;
+      c.spawnT += dt;
+      if (c.z < Z_NEAR - 40) comps.splice(i, 1);
+    }
+  }
+
+  function drawComponent(c, rot, elapsed, globalFade) {
+    const f = fadeFor(c.z) * globalFade * Math.min(1, c.spawnT / 0.6);
     if (f <= 0.02) return;
-    const u = c.u ?? 0, v = c.v ?? 0;
-    const wp = wallPoint(c.wall, u, v, z);
-    const p = project(wp.x, wp.y, wp.z);
-    const scale = p.s * 26; // icon size scales with perspective depth
-    if (scale < 1.2) return;
+    const wp = wallPoint(c.wall, c.u, c.v);
+    const p = project(wp.x, wp.y, c.z, rot);
+    const scale = p.s * 30;
+    if (scale < 1.4) return;
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.globalAlpha = f;
-    const glow = 'rgba(250,157,40,.9)';
-    const line = 'rgba(138,180,237,.85)';
-    ctx.lineWidth = Math.max(1, scale * 0.06);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.shadowColor = 'rgba(120,180,255,.9)';
+    ctx.shadowBlur = Math.max(4, scale * 0.35);
+    const line = 'rgba(160,200,255,.95)';
+    const fillCool = 'rgba(20,106,219,.28)';
+    const glow = 'rgba(250,157,40,.95)';
+    ctx.lineWidth = Math.max(1, scale * 0.05);
 
     if (c.kind === 'chip') {
-      ctx.strokeStyle = line;
-      ctx.strokeRect(-scale, -scale, scale * 2, scale * 2);
-      ctx.fillStyle = 'rgba(20,106,219,.35)';
+      ctx.strokeStyle = line; ctx.fillStyle = fillCool;
       ctx.fillRect(-scale, -scale, scale * 2, scale * 2);
-      ctx.strokeStyle = glow;
-      const pins = 4;
+      ctx.strokeRect(-scale, -scale, scale * 2, scale * 2);
+      ctx.strokeStyle = glow; ctx.shadowColor = glow;
+      const pins = 5;
       for (let i = 0; i < pins; i++) {
         const off = -scale + (i + 0.5) * (scale * 2 / pins);
-        ctx.beginPath(); ctx.moveTo(off, -scale); ctx.lineTo(off, -scale * 1.4); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(off, scale); ctx.lineTo(off, scale * 1.4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(off, -scale); ctx.lineTo(off, -scale * 1.5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(off, scale); ctx.lineTo(off, scale * 1.5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-scale, off - scale); ctx.lineTo(-scale * 1.5, off - scale); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(scale, off - scale); ctx.lineTo(scale * 1.5, off - scale); ctx.stroke();
       }
+      ctx.strokeStyle = line; ctx.shadowBlur = scale * 0.2;
+      ctx.strokeRect(-scale * 0.45, -scale * 0.45, scale * 0.9, scale * 0.9);
     } else if (c.kind === 'ram') {
-      ctx.strokeStyle = line;
-      ctx.strokeRect(-scale * 1.6, -scale * 0.5, scale * 3.2, scale);
-      ctx.fillStyle = 'rgba(20,106,219,.3)';
-      ctx.fillRect(-scale * 1.6, -scale * 0.5, scale * 3.2, scale);
-      for (let i = 0; i < 5; i++) {
-        ctx.fillStyle = i % 2 === 0 ? glow : 'rgba(250,157,40,.35)';
-        ctx.fillRect(-scale * 1.4 + i * scale * 0.62, -scale * 0.3, scale * 0.3, scale * 0.6);
+      ctx.strokeStyle = line; ctx.fillStyle = fillCool;
+      ctx.fillRect(-scale * 1.7, -scale * 0.55, scale * 3.4, scale * 1.1);
+      ctx.strokeRect(-scale * 1.7, -scale * 0.55, scale * 3.4, scale * 1.1);
+      for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = i % 2 === 0 ? glow : 'rgba(250,157,40,.4)';
+        ctx.fillRect(-scale * 1.5 + i * scale * 0.56, -scale * 0.3, scale * 0.26, scale * 0.6);
       }
     } else if (c.kind === 'capacitor') {
+      ctx.strokeStyle = line; ctx.fillStyle = fillCool;
+      ctx.beginPath(); ctx.arc(0, 0, scale, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = glow; ctx.shadowColor = glow;
+      ctx.beginPath(); ctx.moveTo(-scale * 0.75, 0); ctx.lineTo(scale * 0.75, 0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -scale * 0.75); ctx.lineTo(0, scale * 0.75); ctx.stroke();
       ctx.strokeStyle = line;
-      ctx.beginPath(); ctx.arc(0, 0, scale * 0.9, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-scale * 0.9, 0); ctx.lineTo(scale * 0.9, 0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, -scale * 0.9); ctx.lineTo(0, scale * 0.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, scale * 1.25, 0, Math.PI * 2); ctx.stroke();
     } else if (c.kind === 'fan') {
-      const spin = c.spin + t * 1.6;
+      const spin = c.spin + elapsed * 2.1;
       ctx.strokeStyle = line;
-      ctx.beginPath(); ctx.arc(0, 0, scale * 1.1, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = glow;
-      const blades = 5;
+      ctx.beginPath(); ctx.arc(0, 0, scale * 1.15, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = fillCool;
+      ctx.beginPath(); ctx.arc(0, 0, scale * 1.15, 0, Math.PI * 2); ctx.fill();
+      const blades = 6;
       for (let i = 0; i < blades; i++) {
         const ang = spin + (i / blades) * Math.PI * 2;
-        ctx.beginPath(); ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(ang) * scale * 1.05, Math.sin(ang) * scale * 1.05);
+        const midAng = ang + 0.35;
+        ctx.strokeStyle = i % 2 === 0 ? glow : line;
+        ctx.shadowColor = ctx.strokeStyle;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(Math.cos(midAng) * scale * 0.7, Math.sin(midAng) * scale * 0.7,
+          Math.cos(ang) * scale * 1.05, Math.sin(ang) * scale * 1.05);
         ctx.stroke();
       }
-      ctx.beginPath(); ctx.arc(0, 0, scale * 0.18, 0, Math.PI * 2); ctx.fillStyle = glow; ctx.fill();
+      ctx.fillStyle = glow; ctx.shadowColor = glow;
+      ctx.beginPath(); ctx.arc(0, 0, scale * 0.2, 0, Math.PI * 2); ctx.fill();
     } else if (c.kind === 'heatsink') {
       ctx.strokeStyle = line;
-      const fins = 6;
+      const fins = 7;
       for (let i = 0; i < fins; i++) {
-        const off = -scale * 1.3 + i * (scale * 2.6 / fins);
-        ctx.beginPath(); ctx.moveTo(off, -scale); ctx.lineTo(off, scale); ctx.stroke();
+        const off = -scale * 1.4 + i * (scale * 2.8 / fins);
+        ctx.beginPath(); ctx.moveTo(off, -scale * 1.1); ctx.lineTo(off, scale * 1.1); ctx.stroke();
       }
+      ctx.strokeStyle = glow; ctx.shadowColor = glow;
+      ctx.beginPath(); ctx.moveTo(-scale * 1.4, -scale * 1.1); ctx.lineTo(scale * 1.4, -scale * 1.1); ctx.stroke();
     }
     ctx.restore();
   }
 
   let raf, last = 0, elapsed = 0;
-  const SPEED = 230; // world units per second, tunnel travel speed
+  const SPEED = 230;
 
   function frame(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts; elapsed += dt;
+    const rot = elapsed * ROT_SPEED;
+    const globalFade = Math.min(1, elapsed / 3.2); // slow overall fade-in on load
+
     ctx.clearRect(0, 0, W, H);
 
-    // persistent rail skeleton — 5 rails per wall, converging to the vanishing point
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0); strokeRail('ceiling', u, 0); }
-    for (const v of stops) { strokeRail('left', 0, v); strokeRail('right', 0, v); }
+    for (const u of stops) { strokeRail('floor', u, 0, rot, globalFade); strokeRail('ceiling', u, 0, rot, globalFade); }
+    for (const v of stops) { strokeRail('left', 0, v, rot, globalFade); strokeRail('right', 0, v, rot, globalFade); }
 
-    // rings + components travel toward the viewer, looping infinitely
     for (const r of rings) {
       r.z -= SPEED * dt;
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
-      drawRing(r.z);
+      drawRing(r.z, rot, globalFade);
     }
-    for (const c of comps) drawComponent(c, elapsed);
+
+    updatePulses(dt, rot, globalFade);
+
+    maybeSpawn(dt);
+    updateComponents(dt);
+    for (const c of comps) drawComponent(c, rot, elapsed, globalFade);
 
     raf = requestAnimationFrame(frame);
   }
@@ -194,10 +263,9 @@
   function drawStatic() {
     ctx.clearRect(0, 0, W, H);
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0); strokeRail('ceiling', u, 0); }
-    for (const v of stops) { strokeRail('left', 0, v); strokeRail('right', 0, v); }
-    for (const r of rings) drawRing(r.z);
-    for (const c of comps) drawComponent(c, 0);
+    for (const u of stops) { strokeRail('floor', u, 0, 0, 1); strokeRail('ceiling', u, 0, 0, 1); }
+    for (const v of stops) { strokeRail('left', 0, v, 0, 1); strokeRail('right', 0, v, 0, 1); }
+    for (const r of rings) drawRing(r.z, 0, 1);
   }
 
   window.addEventListener('resize', size);
