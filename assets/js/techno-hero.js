@@ -1,12 +1,11 @@
 /* Homepage-only fixed background: a full-page grid tunnel through the inside
-   of a PC. Floor/ceiling/walls converge to a shared vanishing point and
-   slowly roll; structural rings fly toward the viewer; RGB pulse rings sweep
-   the opposite way toward the vanishing point and fade there; PC-component
-   silhouettes (chip, RAM, capacitors, fan, heatsink) spawn at random walls
-   and times with a glow/bloom look. Pure canvas perspective-projection math
-   (screenX = cx + rotated(worldX)*f/z) — no external images, no image-gen
-   API, no literal rain/skyline. Fixed position, so it stays put behind the
-   whole page while you scroll. */
+   of a PC — and a small interactive bit riding along it. An egg-bot character
+   sits on whichever of the tunnel's 4 sides (floor/right/ceiling/left) is
+   currently "down," rotating smoothly between them on Left/Right (or A/D),
+   and jumping (Space/Up) over the red hazard lines that travel out of the
+   vanishing point toward the viewer. Scrolling away from the hero fades the
+   character out and pauses scoring — the grid keeps drifting either way.
+   Pure canvas perspective-projection math, no images, no PC-part clutter. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -18,9 +17,9 @@
   const Z_NEAR = 60, Z_FAR = 1500;
   let A, B;
   let rings = [];
-  let comps = [];
   let pulses = [];
-  const ROT_SPEED = 0.045; // slow roll, radians/sec
+  let hazards = [];
+  const ROT_SPEED = 0.045; // slow ambient roll, radians/sec — the grid always drifts
 
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -51,6 +50,8 @@
     if (wall === 'left') return { x: -A, y: v * B };
     return { x: A, y: v * B };
   }
+  // wall index (0=floor,1=right,2=ceiling,3=left) <-> the named walls above.
+  const WALL_NAMES = ['floor', 'right', 'ceiling', 'left'];
 
   function fadeFor(z) {
     const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
@@ -66,10 +67,10 @@
     const b = project(w1.x, w1.y, Z_NEAR, rot);
     const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
     grad.addColorStop(0, `hsla(${hue}, 70%, 55%, 0)`);
-    grad.addColorStop(0.35, `hsla(${hue}, 70%, 55%, ${0.16 * globalFade})`);
-    grad.addColorStop(1, `hsla(${hue + 30}, 80%, 62%, ${0.34 * globalFade})`);
+    grad.addColorStop(0.35, `hsla(${hue}, 70%, 55%, ${0.3 * globalFade})`);
+    grad.addColorStop(1, `hsla(${hue + 30}, 85%, 65%, ${0.58 * globalFade})`);
     ctx.strokeStyle = grad;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.1;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   }
 
@@ -86,29 +87,27 @@
     ctx.stroke();
   }
 
-  // RGB pulse rings: spawn at the near edge, sweep inward toward the
-  // vanishing point (opposite of the main rings), hue-cycling, fading in as
-  // they spawn and fading out as they approach the center.
+  // RGB pulse rings: spawn near the vanishing point and sweep OUWARD toward
+  // the viewer (same direction as everything else in the tunnel), hue-cycling,
+  // using the same symmetric fadeFor() as the structural rings.
   let pulseTimer = 0;
   function spawnPulse() {
-    pulses.push({ z: Z_NEAR + 20, hue: Math.random() * 360 });
+    pulses.push({ z: Z_FAR - 20, hue: Math.random() * 360 });
   }
   function updatePulses(dt, rot, globalFade) {
     pulseTimer -= dt;
     if (pulseTimer <= 0) { spawnPulse(); pulseTimer = 2.6 + Math.random() * 2.2; }
     for (let i = pulses.length - 1; i >= 0; i--) {
       const p = pulses[i];
-      p.z += (Z_FAR - Z_NEAR) * 0.16 * dt * 3.2;
+      p.z -= (Z_FAR - Z_NEAR) * 0.16 * dt * 3.2;
       p.hue = (p.hue + dt * 40) % 360;
-      if (p.z >= Z_FAR - 40) { pulses.splice(i, 1); continue; }
-      const nearIn = Math.min(1, (p.z - Z_NEAR) / 300);
-      const farOut = Math.min(1, (Z_FAR - 40 - p.z) / 180);
-      const f = nearIn * farOut * globalFade;
+      if (p.z <= Z_NEAR) { pulses.splice(i, 1); continue; }
+      const f = fadeFor(p.z) * globalFade;
       if (f <= 0.01) continue;
       const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, p.z, rot));
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.45 * f})`;
+      ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.5 * f})`;
       ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, .9)`;
       ctx.shadowBlur = 14;
       ctx.lineWidth = 2;
@@ -121,181 +120,181 @@
     }
   }
 
-  // PC components: randomized spawn (wall, position, kind, timing) rather
-  // than a fixed set, so they feel organic instead of static set-dressing.
-  const KINDS = ['chip', 'ram', 'capacitor', 'fan', 'heatsink'];
-  const WALLS = ['floor', 'ceiling', 'left', 'right'];
-  let spawnTimer = 0;
-  const MAX_COMPONENTS = 5;
-  function maybeSpawn(dt) {
+  // ---------------- interactive egg-bot ----------------
+  let currentWall = 0; // 0 floor, 1 right, 2 ceiling, 3 left
+  let wallRot = 0, wallRotTarget = 0;
+  let heroY = 0, heroVy = 0, jumping = false;
+  let distance = 0, speed = 60, hitFlash = 0;
+  let highScore = 0;
+  try { highScore = parseFloat(localStorage.getItem('gz-hero-highscore') || '0') || 0; } catch {}
+  let visible = true;      // is the hero section still roughly on screen?
+  let charAlpha = 1;       // smoothed toward `visible`
+  let spawnTimer = 1.4;
+
+  const hud = buildHud();
+  function buildHud() {
+    if (!document.body.classList.contains('home-page')) return null;
+    const wrap = document.createElement('div');
+    wrap.id = 'gz-hero-hud';
+    wrap.innerHTML = '<span class="gz-hero-score">High Score <b>0</b>m</span>';
+    document.body.appendChild(wrap);
+    const style = document.createElement('style');
+    style.textContent = `
+      #gz-hero-hud{position:fixed;top:76px;left:clamp(1rem,4vw,2.2rem);z-index:40;
+        font-family:'Montserrat','Segoe UI',sans-serif;font-weight:800;letter-spacing:.04em;
+        font-size:.78rem;text-transform:uppercase;color:#cfe0ff;text-shadow:0 0 10px rgba(61,139,255,.55);
+        pointer-events:none;transition:opacity .5s ease;opacity:1}
+      #gz-hero-hud b{color:#FA9D28;text-shadow:0 0 10px rgba(250,157,40,.6)}
+      #gz-hero-hud.hidden{opacity:0}
+      @media(max-width:640px){#gz-hero-hud{top:64px;font-size:.68rem}}
+    `;
+    document.head.appendChild(style);
+    return wrap;
+  }
+
+  function rotateToWall(delta) {
+    currentWall = (currentWall + delta + 4) % 4;
+    wallRotTarget = -currentWall * (Math.PI / 2);
+    while (wallRotTarget - wallRot > Math.PI) wallRotTarget -= Math.PI * 2;
+    while (wallRotTarget - wallRot < -Math.PI) wallRotTarget += Math.PI * 2;
+  }
+  function jump() {
+    if (!jumping) { jumping = true; heroVy = -420; }
+  }
+  window.addEventListener('keydown', e => {
+    if (!visible || e.repeat) return;
+    const tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); rotateToWall(-1); }
+    else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); rotateToWall(1); }
+    else if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); jump(); }
+  });
+
+  // The hero "stands" on the current wall at a screen-anchored depth so it
+  // always sits in frame no matter the window size (see desiredOffset trick).
+  function heroScreenAnchor(rot) {
+    const desiredOffset = H * 0.42;
+    const z = Math.max(Z_NEAR + 30, (F * B) / desiredOffset);
+    const wp = wallPoint(WALL_NAMES[0], 0, 0); // local floor-center point; wall identity is baked into rot
+    return { z, p: project(wp.x, wp.y, z, rot) };
+  }
+
+  function spawnHazard() {
+    hazards.push({ wall: Math.floor(Math.random() * 4), z: Z_FAR, passed: false });
+  }
+
+  function updateHazards(dt, rot, heroZ) {
     spawnTimer -= dt;
-    if (spawnTimer > 0 || comps.length >= MAX_COMPONENTS) return;
-    spawnTimer = 1.1 + Math.random() * 1.6;
-    comps.push({
-      wall: WALLS[(Math.random() * WALLS.length) | 0],
-      u: Math.random() * 1.5 - 0.75,
-      v: Math.random() * 1.5 - 0.75,
-      kind: KINDS[(Math.random() * KINDS.length) | 0],
-      z: Z_FAR - Math.random() * 200,
-      spin: Math.random() * Math.PI * 2,
-      spawnT: 0,
-    });
-  }
-  function updateComponents(dt) {
-    for (let i = comps.length - 1; i >= 0; i--) {
-      const c = comps[i];
-      c.z -= SPEED * dt;
-      c.spawnT += dt;
-      if (c.z < Z_NEAR - 40) comps.splice(i, 1);
+    if (spawnTimer <= 0) {
+      spawnTimer = Math.max(1.1, 2.6 - distance * 0.002) + Math.random() * 0.8;
+      spawnHazard();
+    }
+    const depthSpeed = 230 * 2.1;
+    for (let i = hazards.length - 1; i >= 0; i--) {
+      const hz = hazards[i];
+      hz.z -= depthSpeed * dt;
+      if (visible && !hz.passed && hz.z <= heroZ) {
+        hz.passed = true;
+        if (hz.wall === currentWall && !jumping) {
+          if (distance > highScore) {
+            highScore = distance;
+            try { localStorage.setItem('gz-hero-highscore', String(Math.floor(highScore))); } catch {}
+          }
+          distance = 0;
+          hitFlash = 1;
+        }
+      }
+      if (hz.z < Z_NEAR - 40) hazards.splice(i, 1);
     }
   }
 
-  function drawComponent(c, rot, elapsed, globalFade) {
-    const f = fadeFor(c.z) * globalFade * Math.min(1, c.spawnT / 1.4);
+  function drawHazard(hz, rot, globalFade) {
+    const f = fadeFor(hz.z) * globalFade;
     if (f <= 0.02) return;
-    const wp = wallPoint(c.wall, c.u, c.v);
-    const p = project(wp.x, wp.y, c.z, rot);
-    const scale = p.s * 42;
-    if (scale < 1.4) return;
+    const wall = WALL_NAMES[hz.wall];
+    const isFloorLike = wall === 'floor' || wall === 'ceiling';
+    const p1 = wallPoint(wall, isFloorLike ? -1 : 0, isFloorLike ? 0 : -1);
+    const p2 = wallPoint(wall, isFloorLike ? 1 : 0, isFloorLike ? 0 : 1);
+    const a = project(p1.x, p1.y, hz.z, rot), b = project(p2.x, p2.y, hz.z, rot);
+    const isActive = hz.wall === currentWall;
     ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.globalAlpha = f * 0.62;
+    ctx.globalAlpha = f;
     ctx.globalCompositeOperation = 'lighter';
-    ctx.shadowColor = 'rgba(120,180,255,.75)';
-    ctx.shadowBlur = Math.max(4, scale * 0.35);
-    const line = 'rgba(160,200,255,.62)';
-    const fillCool = 'rgba(20,106,219,.16)';
-    const glow = 'rgba(250,157,40,.65)';
-    ctx.lineWidth = Math.max(1, scale * 0.05);
-
-    if (c.kind === 'chip') {
-      ctx.strokeStyle = line; ctx.fillStyle = fillCool;
-      ctx.fillRect(-scale, -scale, scale * 2, scale * 2);
-      ctx.strokeRect(-scale, -scale, scale * 2, scale * 2);
-      ctx.strokeStyle = glow; ctx.shadowColor = glow;
-      const pins = 5;
-      for (let i = 0; i < pins; i++) {
-        const off = -scale + (i + 0.5) * (scale * 2 / pins);
-        ctx.beginPath(); ctx.moveTo(off, -scale); ctx.lineTo(off, -scale * 1.5); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(off, scale); ctx.lineTo(off, scale * 1.5); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(-scale, off - scale); ctx.lineTo(-scale * 1.5, off - scale); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(scale, off - scale); ctx.lineTo(scale * 1.5, off - scale); ctx.stroke();
-      }
-      ctx.strokeStyle = line; ctx.shadowBlur = scale * 0.2;
-      ctx.strokeRect(-scale * 0.45, -scale * 0.45, scale * 0.9, scale * 0.9);
-    } else if (c.kind === 'ram') {
-      ctx.strokeStyle = line; ctx.fillStyle = fillCool;
-      ctx.fillRect(-scale * 1.7, -scale * 0.55, scale * 3.4, scale * 1.1);
-      ctx.strokeRect(-scale * 1.7, -scale * 0.55, scale * 3.4, scale * 1.1);
-      for (let i = 0; i < 6; i++) {
-        ctx.fillStyle = i % 2 === 0 ? glow : 'rgba(250,157,40,.4)';
-        ctx.fillRect(-scale * 1.5 + i * scale * 0.56, -scale * 0.3, scale * 0.26, scale * 0.6);
-      }
-    } else if (c.kind === 'capacitor') {
-      ctx.strokeStyle = line; ctx.fillStyle = fillCool;
-      ctx.beginPath(); ctx.arc(0, 0, scale, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = glow; ctx.shadowColor = glow;
-      ctx.beginPath(); ctx.moveTo(-scale * 0.75, 0); ctx.lineTo(scale * 0.75, 0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, -scale * 0.75); ctx.lineTo(0, scale * 0.75); ctx.stroke();
-      ctx.strokeStyle = line;
-      ctx.beginPath(); ctx.arc(0, 0, scale * 1.25, 0, Math.PI * 2); ctx.stroke();
-    } else if (c.kind === 'fan') {
-      const spin = c.spin + elapsed * 2.1;
-      ctx.strokeStyle = line;
-      ctx.beginPath(); ctx.arc(0, 0, scale * 1.15, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = fillCool;
-      ctx.beginPath(); ctx.arc(0, 0, scale * 1.15, 0, Math.PI * 2); ctx.fill();
-      const blades = 6;
-      for (let i = 0; i < blades; i++) {
-        const ang = spin + (i / blades) * Math.PI * 2;
-        const midAng = ang + 0.35;
-        ctx.strokeStyle = i % 2 === 0 ? glow : line;
-        ctx.shadowColor = ctx.strokeStyle;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(Math.cos(midAng) * scale * 0.7, Math.sin(midAng) * scale * 0.7,
-          Math.cos(ang) * scale * 1.05, Math.sin(ang) * scale * 1.05);
-        ctx.stroke();
-      }
-      ctx.fillStyle = glow; ctx.shadowColor = glow;
-      ctx.beginPath(); ctx.arc(0, 0, scale * 0.2, 0, Math.PI * 2); ctx.fill();
-    } else if (c.kind === 'heatsink') {
-      ctx.strokeStyle = line;
-      const fins = 7;
-      for (let i = 0; i < fins; i++) {
-        const off = -scale * 1.4 + i * (scale * 2.8 / fins);
-        ctx.beginPath(); ctx.moveTo(off, -scale * 1.1); ctx.lineTo(off, scale * 1.1); ctx.stroke();
-      }
-      ctx.strokeStyle = glow; ctx.shadowColor = glow;
-      ctx.beginPath(); ctx.moveTo(-scale * 1.4, -scale * 1.1); ctx.lineTo(scale * 1.4, -scale * 1.1); ctx.stroke();
-    }
+    ctx.shadowColor = 'rgba(255,46,120,.9)';
+    ctx.shadowBlur = isActive ? 16 : 6;
+    ctx.strokeStyle = isActive ? 'rgba(255,70,140,1)' : 'rgba(255,46,120,.4)';
+    ctx.lineWidth = isActive ? 2.6 : 1.4;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
     ctx.restore();
   }
 
-  // Pixel "hero" sprite: a small blocky 8-bit-style character that idles and
-  // paces back and forth along the floor grid line, in the same projected
-  // world space as everything else (no images — plain fillRect blocks,
-  // projected + scaled like the PC components).
-  const HERO_RANGE = 0.5; // how far it walks along the floor's u-axis
-  function drawHero(rot, elapsed, globalFade) {
-    const walkPhase = elapsed * 0.32;
-    const u = Math.sin(walkPhase) * HERO_RANGE;
-    const movingRight = Math.cos(walkPhase) >= 0;
-    // Solve for the depth (z) that puts the floor point at a fixed, comfortable
-    // spot on screen (rather than a fixed world z, which — at these near
-    // depths — projects the floor's outer edge far below the viewport on
-    // shorter windows). This keeps the sprite inside frame at any size.
-    const desiredOffset = H * 0.42;
-    const heroZ = Math.max(Z_NEAR + 30, (F * B) / desiredOffset);
-    const wp = wallPoint('floor', u, 0);
-    const p = project(wp.x, wp.y, heroZ, rot);
-    const f = fadeFor(heroZ) * globalFade;
-    if (f <= 0.03) return;
-    const px = Math.max(1, p.s * 70); // one "pixel" block, in screen px
-    if (px < 1.2) return;
-
-    const walking = Math.abs(Math.cos(walkPhase)) > 0.03; // pauses briefly at each turn = idle
-    const stride = walking ? Math.floor(elapsed * 6.5) % 2 : 0;
-    const bob = walking ? 0 : Math.sin(elapsed * 2.2) * 0.4; // idle breathing bob
+  // Egg-bot: cream body, orange trim, dark visor — same blocky pixel
+  // fidelity as the rest of the tunnel's glowing linework, echoing Newegg's
+  // own egg-shaped mascot.
+  function drawHero(anchor, elapsed, globalFade) {
+    const f = fadeFor(anchor.z) * globalFade * charAlpha;
+    if (f <= 0.02) return;
+    const px = Math.max(1, anchor.p.s * 60);
+    if (px < 1) return;
+    const bob = jumping ? 0 : Math.sin(elapsed * 2.4) * 0.3;
 
     ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.scale(movingRight ? 1 : -1, 1);
-    ctx.globalAlpha = f;
+    ctx.translate(anchor.p.x, anchor.p.y + heroY);
     ctx.globalCompositeOperation = 'lighter';
-    ctx.shadowColor = 'rgba(255,170,60,.9)';
-    ctx.shadowBlur = Math.max(2, px * 0.3);
-    ctx.fillStyle = 'rgba(255,200,110,1)';
+    ctx.globalAlpha = f;
 
-    const ROWS = 9; // 0=head top ... 8=feet (anchor row, sits at the floor point)
-    const blocks = [];
-    for (let r = 0; r <= 1; r++) for (let c = 2; c <= 4; c++) blocks.push([c, r]);        // head
-    for (let r = 2; r <= 4; r++) for (let c = 1; c <= 5; c++) blocks.push([c, r]);        // torso
-    const armSwing = stride === 0 ? 0 : 1;
-    blocks.push([0, 2 + armSwing]);                                                       // back arm
-    blocks.push([6, 3 - armSwing]);                                                       // front arm
-    if (stride === 0) {
-      for (let r = 5; r <= 6; r++) blocks.push([2, r]);
-      for (let r = 5; r <= 8; r++) blocks.push([4, r]);
-    } else {
-      for (let r = 5; r <= 8; r++) blocks.push([2, r]);
-      for (let r = 5; r <= 6; r++) blocks.push([4, r]);
+    const ROWS = 8; // row 7 = feet/anchor row
+    const cream = 'rgba(240,244,255,.95)';
+    const orange = 'rgba(250,157,40,.95)';
+    const visor = 'rgba(8,20,46,.96)';
+    const eye = 'rgba(210,235,255,.95)';
+
+    function block(c, r, w, h, color, glow) {
+      ctx.fillStyle = color;
+      ctx.shadowColor = glow || color;
+      ctx.shadowBlur = px * 0.35;
+      ctx.fillRect((c - 3.5) * px, (r - (ROWS - 1) + bob) * px, w * px * 0.94, h * px * 0.94);
     }
-    blocks.forEach(([c, r]) => {
-      ctx.fillRect((c - 3) * px, (r - (ROWS - 1) + bob) * px, px * 0.92, px * 0.92);
-    });
+
+    // egg body (narrow top, wide middle, tapered bottom)
+    block(2.5, 0, 2, 1, cream, 'rgba(180,200,255,.5)');
+    block(1.5, 1, 4, 1, cream);
+    block(1, 2, 5, 2, cream);
+    block(1.5, 4, 4, 1, cream);
+    block(2, 5, 3, 1, orange); // orange belly trim
+    // visor / face
+    block(1.6, 2.2, 3.8, 1.4, visor, 'rgba(61,139,255,.6)');
+    block(2, 2.6, 0.6, 0.6, eye);
+    block(3.4, 2.6, 0.6, 0.6, eye);
+    // feet
+    const stride = jumping ? 0 : Math.floor(elapsed * 3) % 2;
+    block(1.4 + stride * 0.3, 6, 1, 1, orange);
+    block(3.6 - stride * 0.3, 6, 1, 1, orange);
+
     ctx.restore();
   }
 
   let raf, last = 0, elapsed = 0;
   const SPEED = 230;
 
+  // Scroll pause: fade the character out and stop scoring once the hero
+  // section is mostly scrolled past — the grid itself never stops moving.
+  function updateVisibility() {
+    visible = window.scrollY < window.innerHeight * 0.55;
+    if (hud) hud.classList.toggle('hidden', !visible);
+  }
+  window.addEventListener('scroll', updateVisibility, { passive: true });
+
   function frame(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts; elapsed += dt;
-    const rot = elapsed * ROT_SPEED;
+    const ambientRot = elapsed * ROT_SPEED;
     const globalFade = Math.min(1, elapsed / 3.2); // slow overall fade-in on load
-    const hue = (200 + elapsed * 6) % 360; // slow RGB drift across the grid lines
+    const hue = (200 + elapsed * 6) % 360;
+
+    wallRot += (wallRotTarget - wallRot) * Math.min(1, dt * 9);
+    const rot = ambientRot + wallRot;
+    charAlpha += ((visible ? 1 : 0) - charAlpha) * Math.min(1, dt * 4);
 
     ctx.clearRect(0, 0, W, H);
 
@@ -311,11 +310,35 @@
 
     updatePulses(dt, rot, globalFade);
 
-    maybeSpawn(dt);
-    updateComponents(dt);
-    for (const c of comps) drawComponent(c, rot, elapsed, globalFade);
+    const anchor = heroScreenAnchor(rot);
 
-    drawHero(rot, elapsed, globalFade);
+    if (visible) {
+      distance += speed * dt * 0.01 * (1 + Math.min(2, distance * 0.002));
+      hitFlash = Math.max(0, hitFlash - dt * 2.2);
+      if (jumping) {
+        heroVy += 1400 * dt;
+        heroY += heroVy * dt;
+        if (heroY >= 0) { heroY = 0; heroVy = 0; jumping = false; }
+      }
+      if (hud) {
+        const shown = Math.max(highScore, distance);
+        hud.querySelector('b').textContent = Math.floor(shown);
+      }
+    }
+    updateHazards(dt, rot, anchor.z);
+
+    const sortedHz = hazards.slice().sort((a, b) => b.z - a.z);
+    for (const hz of sortedHz) drawHazard(hz, rot, globalFade);
+
+    drawHero(anchor, elapsed, globalFade);
+
+    if (hitFlash > 0.01) {
+      ctx.save();
+      ctx.globalAlpha = hitFlash * 0.22;
+      ctx.fillStyle = '#ff2e78';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
 
     raf = requestAnimationFrame(frame);
   }
@@ -326,10 +349,12 @@
     for (const u of stops) { strokeRail('floor', u, 0, 0, 1, 200); strokeRail('ceiling', u, 0, 0, 1, 200); }
     for (const v of stops) { strokeRail('left', 0, v, 0, 1, 200); strokeRail('right', 0, v, 0, 1, 200); }
     for (const r of rings) drawRing(r.z, 0, 1);
-    drawHero(0, 0, 1);
+    const anchor = heroScreenAnchor(0);
+    drawHero(anchor, 0, 1);
   }
 
   window.addEventListener('resize', size);
+  updateVisibility();
   size();
 
   if (reduceMotion) {
