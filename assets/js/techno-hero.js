@@ -230,6 +230,61 @@
     ctx.restore();
   }
 
+  // Pixel "hero" sprite: a small blocky 8-bit-style character that idles and
+  // paces back and forth along the floor grid line, in the same projected
+  // world space as everything else (no images — plain fillRect blocks,
+  // projected + scaled like the PC components).
+  const HERO_RANGE = 0.5; // how far it walks along the floor's u-axis
+  function drawHero(rot, elapsed, globalFade) {
+    const walkPhase = elapsed * 0.32;
+    const u = Math.sin(walkPhase) * HERO_RANGE;
+    const movingRight = Math.cos(walkPhase) >= 0;
+    // Solve for the depth (z) that puts the floor point at a fixed, comfortable
+    // spot on screen (rather than a fixed world z, which — at these near
+    // depths — projects the floor's outer edge far below the viewport on
+    // shorter windows). This keeps the sprite inside frame at any size.
+    const desiredOffset = H * 0.42;
+    const heroZ = Math.max(Z_NEAR + 30, (F * B) / desiredOffset);
+    const wp = wallPoint('floor', u, 0);
+    const p = project(wp.x, wp.y, heroZ, rot);
+    const f = fadeFor(heroZ) * globalFade;
+    if (f <= 0.03) return;
+    const px = Math.max(1, p.s * 70); // one "pixel" block, in screen px
+    if (px < 1.2) return;
+
+    const walking = Math.abs(Math.cos(walkPhase)) > 0.03; // pauses briefly at each turn = idle
+    const stride = walking ? Math.floor(elapsed * 6.5) % 2 : 0;
+    const bob = walking ? 0 : Math.sin(elapsed * 2.2) * 0.4; // idle breathing bob
+
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.scale(movingRight ? 1 : -1, 1);
+    ctx.globalAlpha = f;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.shadowColor = 'rgba(255,170,60,.9)';
+    ctx.shadowBlur = Math.max(2, px * 0.3);
+    ctx.fillStyle = 'rgba(255,200,110,1)';
+
+    const ROWS = 9; // 0=head top ... 8=feet (anchor row, sits at the floor point)
+    const blocks = [];
+    for (let r = 0; r <= 1; r++) for (let c = 2; c <= 4; c++) blocks.push([c, r]);        // head
+    for (let r = 2; r <= 4; r++) for (let c = 1; c <= 5; c++) blocks.push([c, r]);        // torso
+    const armSwing = stride === 0 ? 0 : 1;
+    blocks.push([0, 2 + armSwing]);                                                       // back arm
+    blocks.push([6, 3 - armSwing]);                                                       // front arm
+    if (stride === 0) {
+      for (let r = 5; r <= 6; r++) blocks.push([2, r]);
+      for (let r = 5; r <= 8; r++) blocks.push([4, r]);
+    } else {
+      for (let r = 5; r <= 8; r++) blocks.push([2, r]);
+      for (let r = 5; r <= 6; r++) blocks.push([4, r]);
+    }
+    blocks.forEach(([c, r]) => {
+      ctx.fillRect((c - 3) * px, (r - (ROWS - 1) + bob) * px, px * 0.92, px * 0.92);
+    });
+    ctx.restore();
+  }
+
   let raf, last = 0, elapsed = 0;
   const SPEED = 230;
 
@@ -258,6 +313,8 @@
     updateComponents(dt);
     for (const c of comps) drawComponent(c, rot, elapsed, globalFade);
 
+    drawHero(rot, elapsed, globalFade);
+
     raf = requestAnimationFrame(frame);
   }
 
@@ -267,6 +324,7 @@
     for (const u of stops) { strokeRail('floor', u, 0, 0, 1, 200); strokeRail('ceiling', u, 0, 0, 1, 200); }
     for (const v of stops) { strokeRail('left', 0, v, 0, 1, 200); strokeRail('right', 0, v, 0, 1, 200); }
     for (const r of rings) drawRing(r.z, 0, 1);
+    drawHero(0, 0, 1);
   }
 
   window.addEventListener('resize', size);
