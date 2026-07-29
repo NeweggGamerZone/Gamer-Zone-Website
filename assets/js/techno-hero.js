@@ -53,8 +53,8 @@
   }
 
   function fadeFor(z) {
-    const nearFade = Math.min(1, (z - Z_NEAR) / 140); // fade out hard as it nears the outer edge
-    const farFade = Math.min(1, (Z_FAR - z) / 260);
+    const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
+    const farFade = Math.min(1, (Z_FAR - z) / 480); // fade in slowly as it spawns near the vanishing point
     return Math.max(0, Math.min(1, nearFade * (0.3 + 0.7 * farFade)));
   }
 
