@@ -7,7 +7,7 @@
 <title>Newegg Gamer Zone — Get in the Zone — Free-to-Play Gaming Lounge, Diamond Bar CA</title>
 <meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, Zone Points leaderboard.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -21,6 +21,7 @@
         <nav class="main-nav">
       <a href="index.html">Home</a>
       <a href="events.html">Events</a>
+      <a href="games.html">Games</a>
       <a href="edu.html">EDU</a>
       <a href="ambassador.html">Ambassador</a>
     </nav>
@@ -39,12 +40,24 @@
     <div class="btn-row">
       <a class="btn" href="events.html#calendar">Plan your visit</a>
     </div>
-    <p class="scroll-cue">&#9660; This week at GZ</p>
+    <p class="scroll-cue">&#9660; Weekly lineup</p>
   </section>
 
-  <section class="reveal" id="week">
-    <h2><i data-ic="cal"></i> This week at GZ</h2>
-    <div id="home-weekly"></div>
+  <section class="reveal eu-section" id="week">
+    <h2><i data-ic="gamepad"></i> Weekly lineup</h2>
+    <div class="eu-board">
+      <div class="eu-top">
+        <div class="eu-eyebrow">
+          <i data-ic="cal" data-lg></i>
+          <div>
+            <h3 class="eu-eyebrow-title">Gamer Zone <span class="accent">Event Update</span></h3>
+            <p>Diamond Bar, CA &middot; Free to play</p>
+          </div>
+        </div>
+      </div>
+      <div class="eu-list" id="eu-list"></div>
+      <div class="eu-legend"><i data-ic="medal"></i> Major event</div>
+    </div>
   </section>
 
   <section class="reveal">
@@ -95,7 +108,7 @@
   <section class="reveal">
     <h2><i data-ic="medal"></i> Become a Gamer Zone Ambassador</h2>
     <div class="card">
-      <p>Enthusiasts, esports members, and event hosts: bring your community to the Zone. Host recurring events with us &mdash; and unlock deeper perks (gift card &amp; product prizing, catered meals, co-branded promotion) the more events you host.</p>
+      <p>Community leaders, esports teams, and event organizers: bring your community to the Zone. Host recurring events with us &mdash; and unlock deeper perks (gift card &amp; product prizing, catered meals, co-branded promotion) the more events you host.</p>
       <p style="margin-top:.9rem"><a class="btn" href="ambassador.html">Explore the Ambassador Program</a></p>
     </div>
   </section>
@@ -109,13 +122,22 @@
   </section>
 </main>
 
-<div class="partner-band" role="complementary">
-  <div class="pb-inner">
-    <div class="pb-msg">Vendors &amp; brands: <span>activate a community</span>, not a room.
-      <span class="pb-sub">Host a showcase, tournament, product launch, or workshop at the Gamer Zone.</span></div>
-    <a class="btn" data-cfg-href="reservationUrl" href="#">Host an event</a>
-  </div>
-</div>
+<!-- Fallback dataset for the weekly lineup board: mirrors data/events.json.
+     Keep in sync when events.json changes. -->
+<script type="application/json" id="eu-embedded-events">
+{
+  "events": [
+    { "id": "xp-fortnite-training-2026-07-22", "title": "XP League: Fortnite Training", "date": "2026-07-22", "time": "4:00 PM – 6:00 PM", "type": "edu", "featured": false },
+    { "id": "fps-day-2026-07-23", "title": "FPS Day", "date": "2026-07-23", "time": "11:00 AM – 5:00 PM", "type": "theme-night", "featured": true },
+    { "id": "xp-fortnite-tournament-2026-07-24", "title": "XP League Fortnite Tournament", "date": "2026-07-24", "time": "4:00 PM – 7:00 PM", "type": "tournament", "featured": true },
+    { "id": "xp-fortnite-training-2026-07-29", "title": "XP League: Fortnite Training", "date": "2026-07-29", "time": "4:00 PM – 6:00 PM", "type": "edu", "featured": false },
+    { "id": "riot-thursday-2026-07-30", "title": "Riot Thursday", "date": "2026-07-30", "time": "11:00 AM – 5:00 PM", "type": "theme-night", "featured": false },
+    { "id": "xp-fortnite-tournament-2026-07-31", "title": "XP League Fortnite Tournament", "date": "2026-07-31", "time": "11:00 AM – 7:00 PM", "type": "major", "featured": true },
+    { "id": "xp-fortnite-training-2026-08-05", "title": "XP League: Fortnite Training", "date": "2026-08-05", "time": "4:00 PM – 6:00 PM", "type": "edu", "featured": false },
+    { "id": "xp-fortnite-tournament-2026-08-07", "title": "XP League Fortnite Tournament", "date": "2026-08-07", "time": "4:00 PM – 7:00 PM", "type": "tournament", "featured": true }
+  ]
+}
+</script>
 <footer class="site-footer">
   <div class="container links-grid">
     <div><h4>Visit</h4><a data-cfg-href="mapsUrl" href="#">Our Newegg Gamer Zone Google Page.</a><p data-cfg="hours"></p><p data-cfg="phone"></p></div>
@@ -129,6 +151,7 @@
 </footer>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/events.js"></script>
+<script src="assets/js/event-update.js"></script>
 <script src="assets/js/leaderboard.js"></script>
 </body>
 </html>

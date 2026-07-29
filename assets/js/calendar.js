@@ -49,6 +49,10 @@
   function show(dt) {
     const e = byDate[dt], wd = new Date(dt + 'T12:00:00').getDay();
     const closed = (wd === 0 || wd === 1);
+    const isToday = dt === today;
+    const preregBlock = isToday
+      ? `<p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}">Pre-register your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Verkada registration is required — one per visitor.</p>`
+      : '';
     if (e) {
       const src = e.flyerWeb || e.flyer;
       detail.innerHTML = `<span class="tag orange">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
@@ -57,14 +61,14 @@
         <div class="cd-body">
           ${src ? `<img src="${GZ.esc(src)}" alt="${GZ.esc(e.title)} flyer">` : ''}
           <div><p>${GZ.esc(e.blurb || '')}</p>
-          <p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}">Pre-register your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Verkada registration is required — one per visitor.</p></div>
+          ${preregBlock}</div>
         </div>`;
     } else if (closed) {
       detail.innerHTML = `<h3>${pretty(dt)}</h3><p class="dim">Closed. The Gamer Zone is open Tuesday through Saturday, 10am–7pm. See you then!</p>`;
     } else {
       detail.innerHTML = `<span class="tag">Free Play</span><h3>${pretty(dt)}</h3>
         <p class="dim">Open 10am–7pm. Try the latest tech for free — walk in, or pre-register to skip the line at check-in.</p>
-        <p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}">Pre-register your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Verkada registration is required — one per visitor.</p>`;
+        ${preregBlock}`;
     }
     grid.querySelectorAll('.cal-cell.sel').forEach(c => c.classList.remove('sel'));
     const cell = grid.querySelector(`[data-d="${dt}"]`);
