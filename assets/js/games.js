@@ -1,65 +1,59 @@
-/* Gamer Zone game library — genre-grouped by default, with filter chips for
-   A-Z (flat, alphabetical) or a single genre. Flat data-driven so filtering
-   is just re-rendering, no duplicated markup. */
+/* Gamer Zone game library — grouped by platform (Steam, Epic Games, VR,
+   Arcade, Racing Simulator), with filter chips and an A-Z view. Flat
+   data-driven so filtering is just re-rendering, no duplicated markup. */
 (function () {
   const list = document.getElementById('games-list');
   if (!list) return;
   const chipsWrap = document.getElementById('games-filters');
 
-  const GENRES = [
-    { key: 'battle-royale', label: 'Battle Royale', emoji: '🪂' },
-    { key: 'shooter', label: 'Shooter', emoji: '🔫' },
-    { key: 'moba-strategy', label: 'MOBA & Strategy', emoji: '⚔️' },
-    { key: 'fighting', label: 'Fighting', emoji: '🥊' },
-    { key: 'party-coop', label: 'Party & Co-op', emoji: '🎉' },
-    { key: 'survival-horror', label: 'Survival & Horror', emoji: '💀' },
-    { key: 'simulation-sandbox', label: 'Simulation & Sandbox', emoji: '🏗️' },
-    { key: 'rpg-adventure', label: 'RPG & Adventure', emoji: '🗡️' },
-    { key: 'rhythm-puzzle', label: 'Rhythm & Puzzle', emoji: '🎵' },
-    { key: 'racing', label: 'Racing', emoji: '🏁' },
-    { key: 'vr', label: 'VR Experiences', emoji: '🥽' },
+  const PLATFORMS = [
+    { key: 'steam', label: 'Steam', emoji: '🖥️' },
+    { key: 'epic', label: 'Epic Games', emoji: '🎮' },
+    { key: 'vr', label: 'VR', emoji: '🥽' },
+    { key: 'arcade', label: 'Arcade', emoji: '🕹️' },
+    { key: 'racing-sim', label: 'Racing Simulator', emoji: '🏁' },
   ];
-  const GENRE_BY_KEY = Object.fromEntries(GENRES.map(g => [g.key, g]));
+  const PLATFORM_BY_KEY = Object.fromEntries(PLATFORMS.map(p => [p.key, p]));
 
   const GAMES = [
-    ['Fortnite','battle-royale'],['PUBG','battle-royale'],['Fall Guys','battle-royale'],
-    ['Super Animal Royale','battle-royale'],['Naraka: Bladepoint','battle-royale'],
-    ['Counterstrike 2','shooter'],['Apex Legends','shooter'],['Valorant','shooter'],
-    ['Team Fortress 2','shooter'],["Tom Clancy's Rainbow Six Siege",'shooter'],
-    ['The Finals','shooter'],['Overwatch','shooter'],['Helldivers 2','shooter'],
-    ['Left 4 Dead 2','shooter'],['Deep Rock Galactic','shooter'],['Marvel Rivals','shooter'],
-    ['League of Legends','moba-strategy'],['Dota 2','moba-strategy'],
-    ['Teamfight Tactics','moba-strategy'],['Legends of Runeterra','moba-strategy'],
-    ['StarCraft','moba-strategy'],['StarCraft II','moba-strategy'],
-    ['Tekken 7','fighting'],['Tekken 8','fighting'],['Street Fighter 6','fighting'],
-    ['Street Fighter Collection 30th Anniversary','fighting'],['Soul Caliber VI','fighting'],
-    ['MARVEL vs. CAPCOM Fighting Collection: Arcade Classics','fighting'],
-    ['MARVEL Cosmic Invasion','fighting'],['2XKO','fighting'],['Brawlhalla','fighting'],
-    ['Among Us','party-coop'],['Stumble Guys','party-coop'],
-    ['Overcooked All You Can Eat','party-coop'],['Party Animals','party-coop'],
-    ['Golf With Your Friends','party-coop'],['Ultimate Chicken Horse','party-coop'],
-    ['Castle Crashers','party-coop'],['Drawful 2','party-coop'],
-    ['Jackbox Party Pack 4','party-coop'],['Jackbox Party Pack 6','party-coop'],
-    ['Jackbox Party Pack 7','party-coop'],
-    ['Dead By Daylight','survival-horror'],['Repo','survival-horror'],['PEAK','survival-horror'],
-    ['PC Building Simulator 2','simulation-sandbox'],['PowerWash Simulator 2','simulation-sandbox'],
-    ['Stardew Valley','simulation-sandbox'],['Minecraft','simulation-sandbox'],
-    ['Roblox','simulation-sandbox'],['Maple Story','simulation-sandbox'],
-    ['Guild Wars 2','simulation-sandbox'],['RV There Yet?','simulation-sandbox'],
-    ['Where Winds Meet','simulation-sandbox'],['Mecca Chameleon','simulation-sandbox'],
-    ['Bloons TD 6','simulation-sandbox'],
-    ['Hogwarts Legacy','rpg-adventure'],['Cyberpunk 2077','rpg-adventure'],
-    ['Hades 2','rpg-adventure'],['Claire Obscure: Expedition 33','rpg-adventure'],
-    ['Metal Gear Solid: Snake Eater','rpg-adventure'],
-    ['Beat Saber','rhythm-puzzle'],['Taiko no Tatsujin: Rhythm Festival The Setlist Edition','rhythm-puzzle'],
-    ['Geometry Dash','rhythm-puzzle'],
-    ['Forza Horizon 6','racing'],['Asseto Corsa','racing'],['Trackmania','racing'],
+    ['Fortnite','epic'],['PUBG','steam'],['Fall Guys','epic'],
+    ['Super Animal Royale','steam'],['Naraka: Bladepoint','steam'],
+    ['Counterstrike 2','steam'],['Apex Legends','steam'],['Valorant','steam'],
+    ['Team Fortress 2','steam'],["Tom Clancy's Rainbow Six Siege",'steam'],
+    ['The Finals','steam'],['Overwatch','steam'],['Helldivers 2','steam'],
+    ['Left 4 Dead 2','steam'],['Deep Rock Galactic','steam'],['Marvel Rivals','steam'],
+    ['League of Legends','steam'],['Dota 2','steam'],
+    ['Teamfight Tactics','steam'],['Legends of Runeterra','steam'],
+    ['StarCraft','steam'],['StarCraft II','steam'],
+    ['Tekken 7','arcade'],['Tekken 8','arcade'],['Street Fighter 6','arcade'],
+    ['Street Fighter Collection 30th Anniversary','arcade'],['Soul Caliber VI','arcade'],
+    ['MARVEL vs. CAPCOM Fighting Collection: Arcade Classics','arcade'],
+    ['MARVEL Cosmic Invasion','arcade'],['2XKO','arcade'],['Brawlhalla','arcade'],
+    ['Among Us','arcade'],['Stumble Guys','arcade'],
+    ['Overcooked All You Can Eat','arcade'],['Party Animals','arcade'],
+    ['Golf With Your Friends','arcade'],['Ultimate Chicken Horse','arcade'],
+    ['Castle Crashers','arcade'],['Drawful 2','arcade'],
+    ['Jackbox Party Pack 4','arcade'],['Jackbox Party Pack 6','arcade'],
+    ['Jackbox Party Pack 7','arcade'],
+    ['Dead By Daylight','steam'],['Repo','steam'],['PEAK','steam'],
+    ['PC Building Simulator 2','steam'],['PowerWash Simulator 2','steam'],
+    ['Stardew Valley','steam'],['Minecraft','steam'],
+    ['Roblox','steam'],['Maple Story','steam'],
+    ['Guild Wars 2','steam'],['RV There Yet?','steam'],
+    ['Where Winds Meet','steam'],['Mecca Chameleon','steam'],
+    ['Bloons TD 6','steam'],
+    ['Hogwarts Legacy','steam'],['Cyberpunk 2077','steam'],
+    ['Hades 2','steam'],['Claire Obscure: Expedition 33','steam'],
+    ['Metal Gear Solid: Snake Eater','steam'],
+    ['Beat Saber','vr'],['Taiko no Tatsujin: Rhythm Festival The Setlist Edition','arcade'],
+    ['Geometry Dash','arcade'],
+    ['Forza Horizon 6','racing-sim'],['Asseto Corsa','racing-sim'],['Trackmania','racing-sim'],
     ['Arizona Sunshine® VR 2','vr'],['The Thrill of the Fight 2','vr'],
     ['Batman: Arkham Shadow','vr'],['Fruit Ninja','vr'],
     ['Teenage Mutant Ninja Turtles Empire City','vr'],['Population One','vr'],
     ['Kill It With Fire VR','vr'],['Among Us 3D: VR','vr'],
     ['Elder Scrolls V: Skyrim VR','vr'],['VRChat','vr'],['Doctor Who: The Edge of Time','vr'],
-  ].map(([name, genre]) => ({ name, genre }));
+  ].map(([name, platform]) => ({ name, platform }));
 
   function panel(title, emoji, games) {
     const items = games.map(g => `<li><span class="gl-emoji" aria-hidden="true">${emoji}</span>${GZ.esc(g.name)}</li>`).join('');
@@ -69,10 +63,10 @@
     </section>`;
   }
 
-  function renderByGenre() {
-    list.innerHTML = GENRES.map(g => {
-      const games = GAMES.filter(x => x.genre === g.key);
-      return games.length ? panel(g.label, g.emoji, games) : '';
+  function renderByPlatform() {
+    list.innerHTML = PLATFORMS.map(p => {
+      const games = GAMES.filter(x => x.platform === p.key);
+      return games.length ? panel(p.label, p.emoji, games) : '';
     }).join('');
   }
 
@@ -81,10 +75,10 @@
     list.innerHTML = panel('A–Z', '🔤', sorted);
   }
 
-  function renderGenre(key) {
-    const g = GENRE_BY_KEY[key];
-    const games = GAMES.filter(x => x.genre === key);
-    list.innerHTML = panel(g.label, g.emoji, games);
+  function renderPlatform(key) {
+    const p = PLATFORM_BY_KEY[key];
+    const games = GAMES.filter(x => x.platform === key);
+    list.innerHTML = panel(p.label, p.emoji, games);
   }
 
   function setActive(btn) {
@@ -97,10 +91,10 @@
     if (!btn) return;
     setActive(btn);
     const mode = btn.dataset.mode;
-    if (mode === 'genre') renderByGenre();
+    if (mode === 'platform') renderByPlatform();
     else if (mode === 'az') renderAZ();
-    else renderGenre(btn.dataset.genre);
+    else renderPlatform(btn.dataset.platform);
   });
 
-  renderByGenre();
+  renderByPlatform();
 })();
