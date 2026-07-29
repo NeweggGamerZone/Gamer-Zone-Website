@@ -54,18 +54,18 @@
 
   function fadeFor(z) {
     const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
-    const farFade = Math.min(1, (Z_FAR - z) / 480); // fade in slowly as it spawns near the vanishing point
+    const farFade = Math.min(1, (Z_FAR - z) / 820); // fade in very slowly as it spawns near the vanishing point
     return Math.max(0, Math.min(1, nearFade * (0.3 + 0.7 * farFade)));
   }
 
-  function strokeRail(wall, u, v, rot, globalFade) {
+  function strokeRail(wall, u, v, rot, globalFade, hue) {
     const w1 = wallPoint(wall, u, v);
     const a = project(w1.x, w1.y, Z_FAR, rot);
     const b = project(w1.x, w1.y, Z_NEAR, rot);
     const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-    grad.addColorStop(0, 'rgba(61,139,255,0)');
-    grad.addColorStop(0.35, `rgba(61,139,255,${0.24 * globalFade})`);
-    grad.addColorStop(1, `rgba(120,180,255,${0.48 * globalFade})`);
+    grad.addColorStop(0, `hsla(${hue}, 70%, 55%, 0)`);
+    grad.addColorStop(0.35, `hsla(${hue}, 70%, 55%, ${0.16 * globalFade})`);
+    grad.addColorStop(1, `hsla(${hue + 30}, 80%, 62%, ${0.34 * globalFade})`);
     ctx.strokeStyle = grad;
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
@@ -75,7 +75,7 @@
     const f = fadeFor(z) * globalFade;
     if (f <= 0.01) return;
     const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, z, rot));
-    ctx.strokeStyle = `rgba(138,180,237,${0.4 * f})`;
+    ctx.strokeStyle = `rgba(138,180,237,${0.32 * f})`;
     ctx.lineWidth = 1.3;
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
@@ -153,17 +153,17 @@
     if (f <= 0.02) return;
     const wp = wallPoint(c.wall, c.u, c.v);
     const p = project(wp.x, wp.y, c.z, rot);
-    const scale = p.s * 30;
+    const scale = p.s * 42;
     if (scale < 1.4) return;
     ctx.save();
     ctx.translate(p.x, p.y);
-    ctx.globalAlpha = f;
+    ctx.globalAlpha = f * 0.62;
     ctx.globalCompositeOperation = 'lighter';
-    ctx.shadowColor = 'rgba(120,180,255,.9)';
+    ctx.shadowColor = 'rgba(120,180,255,.75)';
     ctx.shadowBlur = Math.max(4, scale * 0.35);
-    const line = 'rgba(160,200,255,.82)';
-    const fillCool = 'rgba(20,106,219,.22)';
-    const glow = 'rgba(250,157,40,.85)';
+    const line = 'rgba(160,200,255,.62)';
+    const fillCool = 'rgba(20,106,219,.16)';
+    const glow = 'rgba(250,157,40,.65)';
     ctx.lineWidth = Math.max(1, scale * 0.05);
 
     if (c.kind === 'chip') {
@@ -238,12 +238,13 @@
     last = ts; elapsed += dt;
     const rot = elapsed * ROT_SPEED;
     const globalFade = Math.min(1, elapsed / 3.2); // slow overall fade-in on load
+    const hue = (200 + elapsed * 6) % 360; // slow RGB drift across the grid lines
 
     ctx.clearRect(0, 0, W, H);
 
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0, rot, globalFade); strokeRail('ceiling', u, 0, rot, globalFade); }
-    for (const v of stops) { strokeRail('left', 0, v, rot, globalFade); strokeRail('right', 0, v, rot, globalFade); }
+    for (const u of stops) { strokeRail('floor', u, 0, rot, globalFade, hue); strokeRail('ceiling', u, 0, rot, globalFade, hue); }
+    for (const v of stops) { strokeRail('left', 0, v, rot, globalFade, hue); strokeRail('right', 0, v, rot, globalFade, hue); }
 
     for (const r of rings) {
       r.z -= SPEED * dt;
@@ -263,8 +264,8 @@
   function drawStatic() {
     ctx.clearRect(0, 0, W, H);
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0, 0, 1); strokeRail('ceiling', u, 0, 0, 1); }
-    for (const v of stops) { strokeRail('left', 0, v, 0, 1); strokeRail('right', 0, v, 0, 1); }
+    for (const u of stops) { strokeRail('floor', u, 0, 0, 1, 200); strokeRail('ceiling', u, 0, 0, 1, 200); }
+    for (const v of stops) { strokeRail('left', 0, v, 0, 1, 200); strokeRail('right', 0, v, 0, 1, 200); }
     for (const r of rings) drawRing(r.z, 0, 1);
   }
 

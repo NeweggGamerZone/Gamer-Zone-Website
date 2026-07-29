@@ -295,7 +295,7 @@ body.home-page { background: transparent; }
   --cal-edu:#3FBF6B; --cal-amb:#E85DA0; --cal-major:var(--ne-orange);
 }
 .cal-board{position:relative;padding:clamp(1.4rem,3.6vw,2.2rem);overflow:hidden}
-.cal-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../img/event-update-bg.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.5) saturate(1.05);transform:scale(1.06)}
+.cal-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/dailyplay-bg.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.5) saturate(1.05);transform:scale(1.06)}
 .cal-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.62),rgba(4,5,7,.84) 55%,rgba(4,5,7,.95));}
 .cal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start}
 @media(max-width:820px){.cal-wrap{grid-template-columns:1fr}}
@@ -329,11 +329,14 @@ body.home-page { background: transparent; }
 .cal-legend i.lg-edu{background:var(--cal-edu)}
 .cal-legend i.lg-amb{background:var(--cal-amb)}
 .cal-legend i.lg-major{background:var(--cal-major)}
-.cal-detail{background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.3rem;min-height:220px}
-.cal-detail h3{font-family:var(--head);text-transform:uppercase;letter-spacing:.02em;margin:.35rem 0}
-.cal-detail .cd-body{display:flex;gap:1.1rem;margin-top:.9rem;flex-wrap:wrap}
-.cal-detail .cd-body img{width:160px;border:1px solid var(--line)}
-.cal-detail .cd-body>div{flex:1;min-width:180px}
+.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.3rem;min-height:220px;overflow:hidden;isolation:isolate}
+.cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
+.cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.6),rgba(4,5,7,.82) 55%,rgba(4,5,7,.94))}
+.cal-detail h3{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75)}
+.cal-detail .cd-sub{font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--ne-blue-text);margin:0 0 .6rem;text-shadow:0 1px 10px rgba(0,0,0,.7)}
+.cal-detail>p.dim{font-family:var(--eu-body);color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.cal-detail .cd-body{margin-top:.9rem}
+.cal-detail .cd-body p{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cal-detail .tag.cal-closed{background:var(--cal-closed);color:#fff}
 .cal-detail .tag.cal-free{background:var(--cal-free);color:#fff}
 .cal-detail .tag.cal-theme{background:var(--cal-theme);color:#000}
@@ -421,7 +424,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
   --eu-name-size: max(14px, calc(var(--eu-date-size) * 0.70));
   --eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.50));
   position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(2.2rem,6vw,4.5rem) var(--safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
-.eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../img/event-update-bg.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
+.eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.6),rgba(4,5,7,.82) 55%,rgba(4,5,7,.94));}
 .eu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:clamp(1.6rem,4.5vw,3rem);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
 .eu-top .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}

@@ -6,6 +6,21 @@
   const list = document.getElementById('eu-list');
   if (!list) return;
 
+  // Weekly lineup board background: rotate through the week1-4 BG assets
+  // based on which week of the current month it is (Mon-Sun buckets, 1-indexed
+  // from the 1st of the month). A 5th week falls back to the week-1 graphic.
+  (function setWeeklyBoardBg() {
+    const boards = document.querySelectorAll('.eu-board');
+    if (!boards.length) return;
+    const today = new Date();
+    let weekOfMonth = Math.ceil(today.getDate() / 7) || 1;
+    if (weekOfMonth > 4) weekOfMonth = 1; // 5th week: loop back to the week-1 graphic
+    // Path is resolved relative to style.css (assets/css/), not this page,
+    // since the value is substituted into a CSS custom property.
+    const url = `../calendar/BGAssets/event-update-bg-week${weekOfMonth}.jpg`;
+    boards.forEach(b => b.style.setProperty('--eu-bg', `url('${url}')`));
+  })();
+
   function embedded() {
     const el = document.getElementById('eu-embedded-events');
     try { return el ? JSON.parse(el.textContent) : { events: [] }; } catch { return { events: [] }; }
@@ -24,7 +39,7 @@
 
   const today = GZ.todayISO();
   const events = (data.events || [])
-    .filter(e => e.date >= today)
+    .filter(e => e.date >= today && e.type !== 'closed')
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const monthDate = iso => {

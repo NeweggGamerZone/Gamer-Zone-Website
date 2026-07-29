@@ -59,7 +59,7 @@ async function renderAll() {
     loadJSON('data/calendar-manifest.json'),
     loadJSON('data/events.json')
   ]);
-  const events = (data && data.events || []).slice().sort((a, b) => a.date.localeCompare(b.date));
+  const events = (data && data.events || []).filter(e => e.type !== 'closed').slice().sort((a, b) => a.date.localeCompare(b.date));
   const today = GZ.todayISO();
   const curMonth = today.slice(0, 7);
   const weekStart = mondayOf(today);
