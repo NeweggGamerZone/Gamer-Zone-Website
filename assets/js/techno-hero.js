@@ -1,25 +1,26 @@
 /* Homepage-only fixed background: a full-page grid tunnel through the inside
    of a PC — and a small interactive bit riding along it. A single-color,
-   smooth vector egg-bot (pre-rendered once to an offscreen canvas, then just
-   stamped each frame — much cheaper than redrawing dozens of shadowed shapes,
-   and far smoother than a blocky pixel sprite) rides the slow ambient spin of
-   the grid, sized to match the grid square it's standing on, always centered
-   on whichever of the tunnel's 4 sides (floor/right/ceiling/left) it
-   currently occupies. It turns so its head always faces the center of the
-   screen and its feet always point outward — including compensating for the
-   grid's own continuous slow roll, so it always reads as "standing on" that
-   square. Left/Right (or A/D) glide it over to a different side — the grid
-   itself never rotates in response, only the character moves. Space jumps
-   over the spiked orange hazard lines traveling out of the vanishing point
-   toward the viewer, riding along an actual background ring line so they
-   read as part of the grid (single-wall, opposite-wall, adjacent-wall, or
-   full-ring patterns); cyan/rainbow RGB pulses (same ring-attached approach)
-   instead grant a brief speed boost tinted the pulse's own color when
-   caught. Score ticks up dino-runner style: slow at first, gradually
-   accelerating after 100m.
-   Scrolling away from the hero fades the character out and pauses scoring —
-   the grid keeps drifting either way. Pure canvas perspective-projection
-   math, no images, no PC-part clutter. */
+   smooth vector running-man figure (pre-rendered head+torso to an offscreen
+   canvas, then just stamped each frame with live-animated swinging arms and
+   legs — much cheaper than redrawing dozens of shadowed shapes) rides the
+   slow ambient spin of the grid, sized to match the grid square it's
+   standing on but capped so it always stays fully on screen, always
+   centered on whichever of the tunnel's 4 sides (floor/right/ceiling/left)
+   it currently occupies. It turns so its head always faces the center of
+   the screen and its feet always point outward — including compensating for
+   the grid's own continuous slow roll, so it always reads as "standing on"
+   that square. Left/Right (or A/D) glide it over to a different side — the
+   grid itself never rotates in response, only the character moves. W jumps
+   (not Space/Up, which the browser treats as page-scroll keys) over the
+   spiked orange hazard lines traveling out of the vanishing point toward the
+   viewer, riding along an actual background ring line so they read as part
+   of the grid (single-wall, opposite-wall, adjacent-wall, or full-ring
+   patterns); cyan/rainbow RGB pulses (same ring-attached approach) instead
+   grant a brief speed boost tinted the pulse's own color when caught. Score
+   ticks up dino-runner style: slow at first, gradually accelerating after
+   100m. Scrolling away from the hero fades the character out and pauses
+   scoring — the grid keeps drifting either way. Pure canvas
+   perspective-projection math, no images, no PC-part clutter. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -207,7 +208,7 @@
     }
   }
 
-  // ---------------- interactive egg-bot ----------------
+  // ---------------- interactive runner ----------------
   let currentWall = 0; // 0 floor, 1 right, 2 ceiling, 3 left — which side is "selected"
   let heroLocal = { x: 0, y: 0 }; // smoothed world-space position, eases toward the selected wall's center — real value set on first size()
   let heroAngleVec = { x: 1, y: 0 }; // smoothed *relative* facing direction (as a vector, to avoid angle-wrap jumps) — ambient spin is added on top each frame
@@ -226,7 +227,7 @@
     wrap.id = 'gz-hero-hud';
     wrap.innerHTML = '<span class="gz-hero-high">High Score <b id="gz-hero-high-val">0</b>m</span>' +
       '<span class="gz-hero-score">Score <b id="gz-hero-score-val">0</b>m</span>' +
-      '<span class="gz-hero-help">&#9664; &#9654; Move &nbsp;&middot;&nbsp; <span class="gz-key">SPACE</span> Jump</span>';
+      '<span class="gz-hero-help">&#9664; &#9654; Move &nbsp;&middot;&nbsp; <span class="gz-key">W</span> Jump</span>';
     document.body.appendChild(wrap);
     const style = document.createElement('style');
     style.textContent = `
@@ -257,21 +258,25 @@
     if (!visible || e.repeat) return;
     const tag = (e.target && e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-    // Only Left/Right move the character between sides, and Space jumps.
-    // Up/Down are intentionally left alone — they shouldn't touch gameplay.
+    // Only Left/Right move the character between sides, and W jumps. Space
+    // and Up/Down are intentionally left alone — those are default browser
+    // page-scroll keys, and hijacking them makes the whole page lurch.
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); selectWall(-1); }
     else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); selectWall(1); }
-    else if (e.code === 'Space') { e.preventDefault(); jump(); }
+    else if (e.code === 'KeyW') { e.preventDefault(); jump(); }
   });
 
   // The hero sits at a screen-anchored depth so it always stays in frame no
   // matter the window size — same trick regardless of which wall it's on,
   // since all 4 wall-center points are equidistant (A === B) from center.
   function heroDepth() {
-    // Cap how far off-center this can push the anchor in absolute pixels too,
-    // so on short viewports it still lands comfortably on screen instead of
-    // being pushed toward (or past) the bottom edge.
-    const desiredOffset = Math.min(H * 0.47, H * 0.5 - 60);
+    // Bound the offset by the SMALLER of width/height (not just height), with
+    // a fixed pixel margin — the anchor can land on a horizontal wall (left/
+    // right) just as easily as a vertical one (floor/ceiling), so both axes
+    // need headroom. Biased closer to center than before so it reliably
+    // stays on screen at any window size/aspect ratio.
+    const maxOffset = Math.min(W, H) / 2 - 56;
+    const desiredOffset = Math.max(40, Math.min(H * 0.38, maxOffset));
     return Math.max(Z_NEAR + 30, (F * A) / desiredOffset);
   }
 
@@ -351,71 +356,68 @@
     }
   }
 
-  // ---------------- egg-bot sprite ----------------
-  // A smooth vector egg (parametric egg curve, not a blocky pixel grid) is
-  // pre-rendered once — including its soft glow — to an offscreen canvas.
-  // Each frame we just stamp that image with a transform, which is far
-  // cheaper than redrawing dozens of shadowed shapes every tick and gives a
-  // properly smooth, rounded "egg" silhouette at any zoom level.
-  function buildEggSprite() {
-    const w = 180, h = 240;
+  // ---------------- running-man sprite ----------------
+  // Head + torso (the only static part) are pre-rendered once to an offscreen
+  // canvas in one flat solid color — cheaper than redrawing them every tick.
+  // Arms and legs are drawn live each frame, swinging from hip/shoulder
+  // pivots, so the figure actually reads as running rather than gliding.
+  const MAN_COLOR = 'rgba(224,238,255,1)';
+  function buildManSprite() {
+    const w = 64, h = 64;
     const off = document.createElement('canvas');
     off.width = w; off.height = h;
     const g = off.getContext('2d');
-    const ex = w / 2, ey = 92;
-    // The standard, geometrically-accurate way to draw an egg: two half
-    // ellipses sharing the same width at the equator — a smaller half on top,
-    // a taller/rounder half on the bottom — joined into one continuous
-    // outline. This is the classic egg silhouette (narrow top, round
-    // bottom), not an approximation via a skewed circle.
-    const halfW = 60, topH = 56, botH = 88;
-    g.fillStyle = 'rgba(224,238,255,1)'; // one flat, solid color — no glow/gradient
+    const ex = w / 2;
+    const headR = 10, headCy = 13;
+    const torsoTop = 25, torsoBot = 58, torsoW = 17, torsoR = 7;
+    g.fillStyle = MAN_COLOR;
     g.beginPath();
-    g.ellipse(ex, ey, halfW, topH, 0, Math.PI, Math.PI * 2);
-    g.ellipse(ex, ey, halfW, botH, 0, 0, Math.PI);
-    g.closePath();
+    g.arc(ex, headCy, headR, 0, Math.PI * 2);
     g.fill();
-    return { img: off, w, h, cx: ex, cy: ey, R: botH };
+    g.beginPath();
+    if (g.roundRect) g.roundRect(ex - torsoW / 2, torsoTop, torsoW, torsoBot - torsoTop, torsoR);
+    else g.rect(ex - torsoW / 2, torsoTop, torsoW, torsoBot - torsoTop);
+    g.fill();
+    // hip (torsoBot) is the sprite's anchor point — legs extend down from it,
+    // arms swing from the shoulder (torsoTop), both drawn live below.
+    return { img: off, w, h, cx: ex, cy: torsoBot, shoulderY: torsoTop - torsoBot, height: torsoBot + headR };
   }
-  const eggSprite = buildEggSprite();
+  const manSprite = buildManSprite();
+
+  function drawLimb(pivotY, angleDeg, w, len) {
+    ctx.save();
+    ctx.translate(0, pivotY);
+    ctx.rotate(angleDeg * Math.PI / 180);
+    ctx.fillRect(-w / 2, 0, w, len);
+    ctx.restore();
+  }
 
   function drawHero(anchorP, z, angle, elapsed, globalFade, groundCellW) {
     const f = fadeFor(z) * globalFade * charAlpha;
     if (f <= 0.02) return;
     const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
-    // Size the egg to sit inside the same grid square it's standing on, so it
-    // scales with the tunnel — but never let it shrink below a comfortably
-    // visible floor on small screens/windows, where the grid cell itself is
-    // small too.
-    const targetH = Math.max(42, groundCellW * 0.34);
-    const scale = targetH / eggSprite.h;
+    // Size the figure to sit inside the same grid square it's standing on, so
+    // it scales with the tunnel — but never let it shrink below a
+    // comfortably visible floor on small screens/windows, where the grid
+    // cell itself is small too. Kept smaller overall than the old egg was.
+    const totalH = Math.max(40, groundCellW * 0.28);
+    const scale = totalH / (manSprite.height + 34); // + rough leg length at native scale
 
     ctx.save();
     ctx.translate(p.x, p.y + heroY);
     ctx.rotate(angle);
     ctx.globalAlpha = f;
     ctx.scale(scale, scale);
-    ctx.drawImage(eggSprite.img, -eggSprite.cx, -eggSprite.cy);
+    ctx.fillStyle = MAN_COLOR;
+    ctx.drawImage(manSprite.img, -manSprite.cx, -manSprite.cy);
 
-    // Two short legs drawn live (cheap flat fills, no shadow) so they can
-    // animate a run cycle — one extends while the other tucks up short.
-    // Same exact flat color as the body — no separate shading.
-    ctx.fillStyle = 'rgba(224,238,255,1)';
-    const legW = eggSprite.w * 0.1, legShort = eggSprite.w * 0.09, legLong = eggSprite.w * 0.2;
-    // Sprite drawImage is offset by (-cx,-cy), so (0,0) here is the egg's own
-    // center — legs need to start near the bottom of the body *relative to
-    // that center*, not at an absolute sprite-space coordinate.
-    const legY = eggSprite.R * 0.86;
-    const legPhase = jumping ? null : Math.floor(elapsed * 8) % 2 === 0;
-    const leftLen = legPhase === false ? legShort : legLong;
-    const rightLen = legPhase === true ? legShort : legLong;
-    if (jumping) {
-      ctx.fillRect(-eggSprite.w * 0.16 - legW / 2, legY, legW, legShort);
-      ctx.fillRect(eggSprite.w * 0.16 - legW / 2, legY, legW, legShort);
-    } else {
-      ctx.fillRect(-eggSprite.w * 0.16 - legW / 2, legY, legW, leftLen);
-      ctx.fillRect(eggSprite.w * 0.16 - legW / 2, legY, legW, rightLen);
-    }
+    const runPhase = jumping ? 0 : Math.sin(elapsed * 11);
+    // Legs pivot at the hip (0,0); arms pivot at the shoulder, swinging
+    // opposite the legs — the natural cross-pattern of a running stride.
+    drawLimb(0, runPhase * 30, 6.5, 30);
+    drawLimb(0, -runPhase * 30, 6.5, 30);
+    drawLimb(manSprite.shoulderY, -runPhase * 24, 5, 22);
+    drawLimb(manSprite.shoulderY, runPhase * 24, 5, 22);
 
     ctx.restore();
   }
