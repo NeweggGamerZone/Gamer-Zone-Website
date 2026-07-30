@@ -125,7 +125,6 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; }
 .event-card { border-left: 4px solid var(--ne-orange); }
 .event-card .meta { font-size: .85rem; color: var(--ink-dim); }
-.event-card .dim { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; }
 .tag { display: inline-block; font-family: var(--head); font-size: .68rem; font-weight: 800; padding: .18rem .6rem; background: var(--ne-navy); color: #cfe0ff; text-transform: uppercase; letter-spacing: .08em; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
 .tag.orange { background: var(--ne-orange); color: #000; }
 
@@ -352,12 +351,14 @@ body.home-page { background: transparent; }
 .cal-detail>p.dim{font-family:var(--eu-body);color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cal-detail .cd-body{margin-top:.9rem}
 .cal-detail .cd-body p{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6)}
-.cal-detail .tag.cal-closed{background:var(--cal-closed);color:#fff}
-.cal-detail .tag.cal-free{background:var(--cal-free);color:#fff}
-.cal-detail .tag.cal-theme{background:var(--cal-theme);color:#000}
-.cal-detail .tag.cal-edu{background:var(--cal-edu);color:#000}
-.cal-detail .tag.cal-amb{background:var(--cal-amb);color:#000}
-.cal-detail .tag.cal-major{background:var(--cal-major);color:#000}
+/* Shared type-color coding for tags — used by both the calendar detail card
+   and the Event details cards, so a type reads the same color everywhere. */
+.tag.cal-closed{background:var(--cal-closed);color:#fff}
+.tag.cal-free{background:var(--cal-free);color:#fff}
+.tag.cal-theme{background:var(--cal-theme);color:#000}
+.tag.cal-edu{background:var(--cal-edu);color:#000}
+.tag.cal-amb{background:var(--cal-amb);color:#000}
+.tag.cal-major{background:var(--cal-major);color:#000}
 
 /* ===== v6: flat square corners (no chopped/rounded) ===== */
 .card,.hud,.btn,.btn.ghost,.tag,.chip,.cal,.cal-detail,.calendar-empty,.flyer-card,

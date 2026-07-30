@@ -17,6 +17,10 @@ function mondayOf(dateISO) {
 
 const TYPE_LABEL = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor Event', edu: 'Training / EDU', community: 'Community', major: 'Major Event' };
 const TYPE_ICON = { 'theme-night': 'gamepad', tournament: 'trophy', vendor: 'chip', edu: 'grad', community: 'users', major: 'medal' };
+// Same bucket-to-color mapping the calendar uses (see calendar.js TYPE_COLOR),
+// so an event's tag and accent bar always match its color on the calendar.
+const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major' };
+const TYPE_VAR = { 'theme-night': '--cal-theme', tournament: '--cal-major', vendor: '--cal-amb', edu: '--cal-edu', community: '--cal-amb', major: '--cal-major' };
 
 function flyerFallback(ev) {
   const d = new Date(ev.date + 'T12:00:00');
@@ -46,11 +50,12 @@ function calImg(item, folder) {
 }
 
 function eventCard(ev) {
-  return `<div class="card tilt event-card" style="border-left-color:${GZ.esc(ev.accent || '#FA9D28')}">
-    <span class="tag orange">${GZ.icon(TYPE_ICON[ev.type] || 'gamepad')} ${GZ.esc(TYPE_LABEL[ev.type] || ev.type)}</span>
+  const colorCls = TYPE_COLOR[ev.type] || 'cal-edu';
+  const colorVar = TYPE_VAR[ev.type] || '--cal-edu';
+  return `<div class="card tilt event-card" style="border-left-color:var(${colorVar})">
+    <span class="tag ${colorCls}">${GZ.icon(TYPE_ICON[ev.type] || 'gamepad')} ${GZ.esc(TYPE_LABEL[ev.type] || ev.type)}</span>
     <h3>${GZ.esc(ev.title)}</h3>
     <p class="meta">${GZ.icon('cal')} ${GZ.fmtDate(ev.date)}${ev.time ? ' · ' + GZ.esc(ev.time) : ''} · ${ev.reservation ? 'Reservation recommended' : 'Walk-ins welcome'}</p>
-    <p class="dim">${GZ.esc(ev.blurb)}</p>
   </div>`;
 }
 

@@ -268,7 +268,7 @@
   // matter the window size — same trick regardless of which wall it's on,
   // since all 4 wall-center points are equidistant (A === B) from center.
   function heroDepth() {
-    const desiredOffset = H * 0.42;
+    const desiredOffset = H * 0.47;
     return Math.max(Z_NEAR + 30, (F * A) / desiredOffset);
   }
 
@@ -358,7 +358,7 @@
     off.width = w; off.height = h;
     const g = off.getContext('2d');
     const ex = w / 2, ey = h / 2 + 6;
-    const R = 92, k = 0.30; // k>0 skews the egg narrower at the top, rounder at the bottom
+    const R = 92, k = 0.42; // k>0 skews the egg narrower at the top, rounder at the bottom — higher k reads as more distinctly "egg" rather than a ball
     g.save();
     g.shadowColor = 'rgba(125,180,255,.95)';
     g.shadowBlur = 26;
@@ -403,8 +403,9 @@
     if (f <= 0.02) return;
     const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
     // Size the egg to sit inside the same grid square it's standing on,
-    // rather than an arbitrary fixed size — and keep it on the small side.
-    const targetH = Math.max(6, groundCellW * 0.5);
+    // rather than an arbitrary fixed size — kept small and pushed toward the
+    // edge (via heroDepth's offset) so it never crowds the center headline.
+    const targetH = Math.max(6, groundCellW * 0.34);
     const scale = targetH / eggSprite.h;
 
     ctx.save();

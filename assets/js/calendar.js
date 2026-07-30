@@ -84,7 +84,6 @@
         ${e.subtitle ? `<p class="cd-sub">${GZ.esc(e.subtitle)}</p>` : ''}
         <p class="dim">${pretty(dt)} · ${GZ.esc(e.time || '')}</p>
         <div class="cd-body">
-          <p>${GZ.esc(e.blurb || '')}</p>
           ${preregBlock}
         </div>`;
     } else if (closed) {
