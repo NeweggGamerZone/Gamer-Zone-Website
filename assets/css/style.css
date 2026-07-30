@@ -52,9 +52,9 @@ img { max-width: 100%; display: block; }
 .hazard { height: 8px; background: repeating-linear-gradient(-55deg, var(--ne-orange) 0 14px, transparent 14px 28px); opacity: .85; border: none; margin: 0; }
 
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(6,7,8,.94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-.nav-wrap { max-width: 1140px; margin: 0 auto; padding: 1.05rem var(--safe-x); display: flex; align-items: center; gap: 1rem; }
+.nav-wrap { max-width: 1140px; margin: 0 auto; padding: 1.15rem var(--safe-x); display: flex; align-items: center; gap: 1rem; }
 .logo { display: flex; align-items: center; gap: .55rem; font-family: var(--head); font-weight: 800; font-size: 1.05rem; letter-spacing: .06em; color: var(--ink); white-space: nowrap; }
-.logo img.logo-img { height: 56px; width: auto; display: block; }
+.logo img.logo-img { height: 76px; width: auto; display: block; }
 .logo span { color: var(--ne-blue-text); }
 .logo em { font-style: normal; color: var(--ne-navy-glow); }
 nav.main-nav { display: flex; gap: .2rem; flex-wrap: wrap; margin-left: auto; }
@@ -215,7 +215,7 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .site-footer h4 { font-family: var(--head); color: var(--ne-orange); margin-bottom: .5rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
 .site-footer p, .site-footer a { font-size: .9rem; color: var(--ink); display: block; }
 .footer-brand { display: flex; align-items: center; gap: 1rem; justify-content: center; padding: 1.2rem 1rem .4rem; }
-.footer-brand img.ne-logo { width: 190px; height: auto; }
+.footer-brand img.ne-logo { width: 230px; height: auto; }
 .footer-brand img.eggbot { width: 44px; height: 44px; }
 .legal { max-width: 860px; margin: 0 auto; padding: .4rem var(--safe-x) 1rem; text-align: center; color: var(--ink-dim); font-size: .74rem; line-height: 1.55; }
 .footnote { text-align: center; padding: 0 1rem 1.5rem; color: var(--ink-dim); font-size: .78rem; }
@@ -226,7 +226,7 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
   nav.main-nav { display: none; width: 100%; flex-direction: column; gap: .15rem; padding: .5rem 0 .8rem; }
   #nav-toggle:checked ~ nav.main-nav { display: flex; }
   .nav-wrap { flex-wrap: wrap; }
-  .logo img.logo-img { height: 42px; }
+  .logo img.logo-img { height: 56px; }
   .hero { padding-top: 2rem; }
   .flyer-rail { grid-auto-columns: 84vw; }
 }

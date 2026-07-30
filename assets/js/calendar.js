@@ -107,6 +107,13 @@
     if (!c || c.classList.contains('closed')) return;
     show(c.dataset.d);
   });
+  // Preview a day's event just by hovering — no click needed on desktop.
+  // (Touch devices fire a click on tap, which the handler above still covers.)
+  grid.addEventListener('mouseover', e => {
+    const c = e.target.closest('.cal-cell[data-d]');
+    if (!c || c.classList.contains('closed')) return;
+    show(c.dataset.d);
+  });
   document.getElementById('cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); render(); });
   document.getElementById('cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); render(); });
 
