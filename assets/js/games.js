@@ -1,58 +1,71 @@
-/* Gamer Zone game library — grouped by platform (Steam, Epic Games, VR,
-   Arcade, Racing Simulator), with filter chips and an A-Z view. Flat
-   data-driven so filtering is just re-rendering, no duplicated markup. */
+/* Gamer Zone game library — grouped by platform/station type (PC, Consoles,
+   VR, Racing Simulator, Arcade, Party Games), with filter chips and an A-Z
+   view. Flat data-driven so filtering is just re-rendering, no duplicated
+   markup. PC folds together every launcher on the gaming PCs (Epic, Steam,
+   Riot, Roblox, Battle.net, Microsoft Store); Consoles is the Nintendo
+   Switch station; Arcade is fighting games only; Party Games covers the
+   Jackbox/rhythm/party titles that used to live under Arcade. */
 (function () {
   const list = document.getElementById('games-list');
   if (!list) return;
   const chipsWrap = document.getElementById('games-filters');
 
   const PLATFORMS = [
-    { key: 'steam', label: 'Steam', emoji: '🖥️' },
-    { key: 'epic', label: 'Epic Games', emoji: '🎮' },
+    { key: 'pc', label: 'PC', emoji: '🖥️' },
+    { key: 'console', label: 'Consoles', emoji: '🎮' },
     { key: 'vr', label: 'VR', emoji: '🥽' },
-    { key: 'arcade', label: 'Arcade', emoji: '🕹️' },
     { key: 'racing-sim', label: 'Racing Simulator', emoji: '🏁' },
+    { key: 'arcade', label: 'Arcade', emoji: '🕹️' },
+    { key: 'party', label: 'Party Games', emoji: '🎉' },
   ];
   const PLATFORM_BY_KEY = Object.fromEntries(PLATFORMS.map(p => [p.key, p]));
 
   const GAMES = [
-    ['Fortnite','epic'],['PUBG','steam'],['Fall Guys','epic'],
-    ['Super Animal Royale','steam'],['Naraka: Bladepoint','steam'],
-    ['Counterstrike 2','steam'],['Apex Legends','steam'],['Valorant','steam'],
-    ['Team Fortress 2','steam'],["Tom Clancy's Rainbow Six Siege",'steam'],
-    ['The Finals','steam'],['Overwatch','steam'],['Helldivers 2','steam'],
-    ['Left 4 Dead 2','steam'],['Deep Rock Galactic','steam'],['Marvel Rivals','steam'],
-    ['League of Legends','steam'],['Dota 2','steam'],
-    ['Teamfight Tactics','steam'],['Legends of Runeterra','steam'],
-    ['StarCraft','steam'],['StarCraft II','steam'],
-    ['Tekken 7','arcade'],['Tekken 8','arcade'],['Street Fighter 6','arcade'],
-    ['Street Fighter Collection 30th Anniversary','arcade'],['Soul Caliber VI','arcade'],
-    ['MARVEL vs. CAPCOM Fighting Collection: Arcade Classics','arcade'],
-    ['MARVEL Cosmic Invasion','arcade'],['2XKO','arcade'],['Brawlhalla','arcade'],
-    ['Among Us','arcade'],['Stumble Guys','arcade'],
-    ['Overcooked All You Can Eat','arcade'],['Party Animals','arcade'],
-    ['Golf With Your Friends','arcade'],['Ultimate Chicken Horse','arcade'],
-    ['Castle Crashers','arcade'],['Drawful 2','arcade'],
-    ['Jackbox Party Pack 4','arcade'],['Jackbox Party Pack 6','arcade'],
-    ['Jackbox Party Pack 7','arcade'],
-    ['Dead By Daylight','steam'],['Repo','steam'],['PEAK','steam'],
-    ['PC Building Simulator 2','steam'],['PowerWash Simulator 2','steam'],
-    ['Stardew Valley','steam'],['Minecraft','steam'],
-    ['Roblox','steam'],['Maple Story','steam'],
-    ['Guild Wars 2','steam'],['RV There Yet?','steam'],
-    ['Where Winds Meet','steam'],['Mecca Chameleon','steam'],
-    ['Bloons TD 6','steam'],
-    ['Hogwarts Legacy','steam'],['Cyberpunk 2077','steam'],
-    ['Hades 2','steam'],['Claire Obscure: Expedition 33','steam'],
-    ['Metal Gear Solid: Snake Eater','steam'],
-    ['Beat Saber','vr'],['Taiko no Tatsujin: Rhythm Festival The Setlist Edition','arcade'],
-    ['Geometry Dash','arcade'],
-    ['Forza Horizon 6','racing-sim'],['Asseto Corsa','racing-sim'],['Trackmania','racing-sim'],
-    ['Arizona Sunshine® VR 2','vr'],['The Thrill of the Fight 2','vr'],
-    ['Batman: Arkham Shadow','vr'],['Fruit Ninja','vr'],
-    ['Teenage Mutant Ninja Turtles Empire City','vr'],['Population One','vr'],
-    ['Kill It With Fire VR','vr'],['Among Us 3D: VR','vr'],
-    ['Elder Scrolls V: Skyrim VR','vr'],['VRChat','vr'],['Doctor Who: The Edge of Time','vr'],
+    // PC — Epic, Steam, Riot, Roblox, Battle.net, and Microsoft Store titles
+    // on the gaming PCs.
+    ['Fortnite', 'pc'], ['Rocket League', 'pc'], ['Fall Guys', 'pc'],
+    ['PC Building Simulator 2', 'pc'], ['Hogwarts Legacy', 'pc'],
+    ['Dota 2', 'pc'], ['Marvel Rivals', 'pc'], ['Naraka: Bladepoint', 'pc'],
+    ['Aimlabs', 'pc'], ['Brawlhalla', 'pc'], ['Where Winds Meet', 'pc'],
+    ['Team Fortress 2', 'pc'], ['Counter-Strike 2', 'pc'], ['Stumble Guys', 'pc'],
+    ['Super Animal Royale', 'pc'], ['Helldivers 2', 'pc'], ['REPO', 'pc'],
+    ['Among Us', 'pc'], ['Clair Obscur: Expedition 33', 'pc'],
+    ['Metal Gear Solid: Snake Eater', 'pc'], ['Hades 2', 'pc'],
+    ['Deep Rock Galactic', 'pc'], ['Arc Raiders', 'pc'],
+    ['Overcooked! All You Can Eat', 'pc'], ['Stardew Valley', 'pc'],
+    ['The Finals', 'pc'], ['MapleStory', 'pc'], ['Apex Legends', 'pc'],
+    ['Trackmania', 'pc'], ["Tom Clancy's Rainbow Six Siege", 'pc'],
+    ['Mecha Chameleon', 'pc'], ['Dead by Daylight', 'pc'], ['Cyberpunk 2077', 'pc'],
+    ['PUBG', 'pc'], ['Geometry Dash', 'pc'],
+    ['League of Legends', 'pc'], ['VALORANT', 'pc'], ['Teamfight Tactics', 'pc'],
+    ['Legends of Runeterra', 'pc'],
+    ['Roblox', 'pc'],
+    ['Call of Duty: Warzone', 'pc'], ['Overwatch', 'pc'],
+    ['Minecraft', 'pc'],
+
+    // Consoles — Nintendo Switch station.
+    ['Super Smash Bros.', 'console'], ['Mario Party', 'console'],
+    ['Super Mario 3D World', 'console'], ['Mario Kart', 'console'],
+
+    // VR headsets.
+    ['Dumb Ways to Die VR', 'vr'], ['Dentist Game', 'vr'],
+    ['Kill It With Fire VR', 'vr'], ['Beat Saber', 'vr'],
+
+    // Racing Simulator rigs.
+    ['Forza Horizon 6', 'racing-sim'], ['Assetto Corsa', 'racing-sim'],
+
+    // Arcade — fighting games only.
+    ['2XKO', 'arcade'], ['Street Fighter 6', 'arcade'],
+    ['Street Fighter Collection 30th Anniversary', 'arcade'],
+    ['MARVEL vs. CAPCOM Fighting Collection: Arcade Classics', 'arcade'],
+    ['MARVEL Cosmic Invasion', 'arcade'], ['Tekken 7', 'arcade'],
+    ['Tekken 8', 'arcade'], ['SoulCalibur VI', 'arcade'],
+
+    // Party Games — Jackbox/rhythm/party titles, split out from Arcade.
+    ['Taiko no Tatsujin: Rhythm Festival The Setlist Edition', 'party'],
+    ['Jackbox Party Pack 4', 'party'], ['Jackbox Party Pack 6', 'party'],
+    ['Jackbox Party Pack 7', 'party'], ['Drawful 2', 'party'],
+    ['Castle Crashers', 'party'],
   ].map(([name, platform]) => ({ name, platform }));
 
   function panel(title, emoji, games) {
