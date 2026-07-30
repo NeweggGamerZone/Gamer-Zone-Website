@@ -1,11 +1,15 @@
 /* Homepage-only fixed background: a full-page grid tunnel through the inside
-   of a PC — and a small interactive bit riding along it. An egg-bot character
-   sits on whichever of the tunnel's 4 sides (floor/right/ceiling/left) is
-   currently "down," rotating smoothly between them on Left/Right (or A/D),
-   and jumping (Space/Up) over the red hazard lines that travel out of the
-   vanishing point toward the viewer. Scrolling away from the hero fades the
-   character out and pauses scoring — the grid keeps drifting either way.
-   Pure canvas perspective-projection math, no images, no PC-part clutter. */
+   of a PC — and a small interactive bit riding along it. A single-color
+   pixel egg-bot rides the slow ambient spin of the grid, always centered on
+   whichever of the tunnel's 4 sides (floor/right/ceiling/left) it currently
+   occupies. Left/Right (or A/D) glide it over to a different side — the grid
+   itself never rotates in response, only the character moves. Space jumps
+   over the red hazard lines traveling out of the vanishing point toward the
+   viewer; the cyan RGB pulse instead grants a brief speed boost. Score ticks
+   up dino-runner style: slow at first, gradually accelerating after 100m.
+   Scrolling away from the hero fades the character out and pauses scoring —
+   the grid keeps drifting either way. Pure canvas perspective-projection
+   math, no images, no PC-part clutter. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -19,8 +23,9 @@
   let rings = [];
   let pulses = [];
   let hazards = [];
-  const ROT_SPEED = 0.045; // slow ambient roll, radians/sec — the grid always drifts
+  const ROT_SPEED = 0.045; // slow ambient roll, radians/sec — the grid always drifts on its own
 
+  let sizeInited = false;
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     W = canvas.clientWidth; H = canvas.clientHeight;
@@ -29,6 +34,9 @@
     cx = W / 2; cy = H / 2;
     A = Math.max(W, H) * 0.72; B = A;
     buildRings();
+    // A/B aren't known until the first size() call, so the hero's starting
+    // world position has to be set here rather than at declaration time.
+    if (!sizeInited) { sizeInited = true; heroLocal = wallPoint(WALL_NAMES[currentWall], 0, 0); }
   }
 
   function buildRings() {
@@ -56,8 +64,6 @@
   function fadeFor(z) {
     const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
     const farFade = Math.min(1, (Z_FAR - z) / 820); // fade in very slowly as it spawns near the vanishing point
-    // No opacity floor here — a freshly spawned ring must ease up from 0,
-    // not pop straight to a minimum brightness the instant it respawns.
     return Math.max(0, Math.min(1, nearFade * farFade));
   }
 
@@ -87,20 +93,34 @@
     ctx.stroke();
   }
 
-  // RGB pulse rings: spawn near the vanishing point and sweep OUWARD toward
-  // the viewer (same direction as everything else in the tunnel), hue-cycling,
-  // using the same symmetric fadeFor() as the structural rings.
+  // ---------------- dino-runner-style speed curve ----------------
+  // Flat & slow until 100m, then eases up toward a capped max — same shape as
+  // the Chrome dino game's acceleration. speed 6 -> ~9 pts/sec, speed 13 (cap)
+  // -> ~19.5 pts/sec (scoreRate = speed * 1.5 exactly reproduces both ends).
+  const SPEED_START = 6, SPEED_CAP = 13, RAMP_FROM = 100, RAMP_EASE = 500;
+  const BASE_GRID_SPEED = 230; // ring/hazard/pulse travel rate at SPEED_START
+  let runSpeed = SPEED_START;
+  function updateRunSpeed(distance) {
+    runSpeed = distance <= RAMP_FROM
+      ? SPEED_START
+      : SPEED_CAP - (SPEED_CAP - SPEED_START) * Math.exp(-(distance - RAMP_FROM) / RAMP_EASE);
+  }
+
+  // RGB pulse rings: spawn near the vanishing point and sweep outward toward
+  // the viewer — same direction and speed as the rest of the grid, so it
+  // reads as part of it. Reaching the player grants a brief speed boost.
   let pulseTimer = 0;
   function spawnPulse() {
-    pulses.push({ z: Z_FAR - 20, hue: Math.random() * 360 });
+    pulses.push({ z: Z_FAR - 20, hue: Math.random() * 360, passed: false });
   }
-  function updatePulses(dt, rot, globalFade) {
+  function updatePulses(dt, rot, globalFade, gridSpeed, heroZ) {
     pulseTimer -= dt;
     if (pulseTimer <= 0) { spawnPulse(); pulseTimer = 2.6 + Math.random() * 2.2; }
     for (let i = pulses.length - 1; i >= 0; i--) {
       const p = pulses[i];
-      p.z -= (Z_FAR - Z_NEAR) * 0.16 * dt * 3.2;
+      p.z -= gridSpeed * 1.4 * dt;
       p.hue = (p.hue + dt * 40) % 360;
+      if (visible && !p.passed && p.z <= heroZ) { p.passed = true; boost = 1; }
       if (p.z <= Z_NEAR) { pulses.splice(i, 1); continue; }
       const f = fadeFor(p.z) * globalFade;
       if (f <= 0.01) continue;
@@ -121,10 +141,10 @@
   }
 
   // ---------------- interactive egg-bot ----------------
-  let currentWall = 0; // 0 floor, 1 right, 2 ceiling, 3 left
-  let wallRot = 0, wallRotTarget = 0;
+  let currentWall = 0; // 0 floor, 1 right, 2 ceiling, 3 left — which side is "selected"
+  let heroLocal = { x: 0, y: 0 }; // smoothed world-space position, eases toward the selected wall's center — real value set on first size()
   let heroY = 0, heroVy = 0, jumping = false;
-  let distance = 0, speed = 60, hitFlash = 0;
+  let distance = 0, hitFlash = 0, boost = 0;
   let highScore = 0;
   try { highScore = parseFloat(localStorage.getItem('gz-hero-highscore') || '0') || 0; } catch {}
   let visible = true;      // is the hero section still roughly on screen?
@@ -152,11 +172,8 @@
     return wrap;
   }
 
-  function rotateToWall(delta) {
+  function selectWall(delta) {
     currentWall = (currentWall + delta + 4) % 4;
-    wallRotTarget = -currentWall * (Math.PI / 2);
-    while (wallRotTarget - wallRot > Math.PI) wallRotTarget -= Math.PI * 2;
-    while (wallRotTarget - wallRot < -Math.PI) wallRotTarget += Math.PI * 2;
   }
   function jump() {
     if (!jumping) { jumping = true; heroVy = -420; }
@@ -165,34 +182,34 @@
     if (!visible || e.repeat) return;
     const tag = (e.target && e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-    if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); rotateToWall(-1); }
-    else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); rotateToWall(1); }
-    else if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); jump(); }
+    // Only Left/Right move the character between sides, and Space jumps.
+    // Up/Down are intentionally left alone — they shouldn't touch gameplay.
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); selectWall(-1); }
+    else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); selectWall(1); }
+    else if (e.code === 'Space') { e.preventDefault(); jump(); }
   });
 
-  // The hero "stands" on the current wall at a screen-anchored depth so it
-  // always sits in frame no matter the window size (see desiredOffset trick).
-  function heroScreenAnchor(rot) {
+  // The hero sits at a screen-anchored depth so it always stays in frame no
+  // matter the window size — same trick regardless of which wall it's on,
+  // since all 4 wall-center points are equidistant (A === B) from center.
+  function heroDepth() {
     const desiredOffset = H * 0.42;
-    const z = Math.max(Z_NEAR + 30, (F * B) / desiredOffset);
-    const wp = wallPoint(WALL_NAMES[0], 0, 0); // local floor-center point; wall identity is baked into rot
-    return { z, p: project(wp.x, wp.y, z, rot) };
+    return Math.max(Z_NEAR + 30, (F * A) / desiredOffset);
   }
 
   function spawnHazard() {
     hazards.push({ wall: Math.floor(Math.random() * 4), z: Z_FAR, passed: false });
   }
 
-  function updateHazards(dt, rot, heroZ) {
+  function updateHazards(dt, heroZ, gridSpeed) {
     spawnTimer -= dt;
     if (spawnTimer <= 0) {
       spawnTimer = Math.max(1.1, 2.6 - distance * 0.002) + Math.random() * 0.8;
       spawnHazard();
     }
-    const depthSpeed = 230 * 2.1;
     for (let i = hazards.length - 1; i >= 0; i--) {
       const hz = hazards[i];
-      hz.z -= depthSpeed * dt;
+      hz.z -= gridSpeed * 1.4 * dt;
       if (visible && !hz.passed && hz.z <= heroZ) {
         hz.passed = true;
         if (hz.wall === currentWall && !jumping) {
@@ -228,54 +245,49 @@
     ctx.restore();
   }
 
-  // Egg-bot: cream body, orange trim, dark visor — same blocky pixel
-  // fidelity as the rest of the tunnel's glowing linework, echoing Newegg's
-  // own egg-shaped mascot.
-  function drawHero(anchor, elapsed, globalFade) {
-    const f = fadeFor(anchor.z) * globalFade * charAlpha;
+  // Egg-bot: a small, single-color, perfectly symmetrical pixel egg with two
+  // running feet — higher pixel density than before for a rounder silhouette.
+  const EGG_ROWS = 9; // row 8 = feet / ground line
+  const EGG_COLS = 9; // 0..8, centered on column 4
+  const EGG_SHAPE = [
+    [3, 5], // 0 — crown
+    [2, 6], // 1
+    [1, 7], // 2
+    [1, 7], // 3
+    [0, 8], // 4 — widest
+    [0, 8], // 5
+    [1, 7], // 6
+    [1, 7], // 7
+  ];
+  function drawHero(anchorP, z, elapsed, globalFade) {
+    const f = fadeFor(z) * globalFade * charAlpha;
     if (f <= 0.02) return;
-    const px = Math.max(1, anchor.p.s * 60);
+    const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
+    const px = Math.max(1, p.s * 30); // smaller unit, higher pixel density
     if (px < 1) return;
-    const bob = jumping ? 0 : Math.sin(elapsed * 2.4) * 0.3;
 
     ctx.save();
-    ctx.translate(anchor.p.x, anchor.p.y + heroY);
+    ctx.translate(p.x, p.y + heroY);
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = f;
+    ctx.fillStyle = 'rgba(215,235,255,.96)'; // one solid color
+    ctx.shadowColor = 'rgba(125,180,255,.85)';
+    ctx.shadowBlur = px * 0.6;
 
-    const ROWS = 8; // row 7 = feet/anchor row
-    const cream = 'rgba(240,244,255,.95)';
-    const orange = 'rgba(250,157,40,.95)';
-    const visor = 'rgba(8,20,46,.96)';
-    const eye = 'rgba(210,235,255,.95)';
-
-    function block(c, r, w, h, color, glow) {
-      ctx.fillStyle = color;
-      ctx.shadowColor = glow || color;
-      ctx.shadowBlur = px * 0.35;
-      ctx.fillRect((c - 3.5) * px, (r - (ROWS - 1) + bob) * px, w * px * 0.94, h * px * 0.94);
-    }
-
-    // egg body (narrow top, wide middle, tapered bottom)
-    block(2.5, 0, 2, 1, cream, 'rgba(180,200,255,.5)');
-    block(1.5, 1, 4, 1, cream);
-    block(1, 2, 5, 2, cream);
-    block(1.5, 4, 4, 1, cream);
-    block(2, 5, 3, 1, orange); // orange belly trim
-    // visor / face
-    block(1.6, 2.2, 3.8, 1.4, visor, 'rgba(61,139,255,.6)');
-    block(2, 2.6, 0.6, 0.6, eye);
-    block(3.4, 2.6, 0.6, 0.6, eye);
-    // feet
-    const stride = jumping ? 0 : Math.floor(elapsed * 3) % 2;
-    block(1.4 + stride * 0.3, 6, 1, 1, orange);
-    block(3.6 - stride * 0.3, 6, 1, 1, orange);
+    const block = (c0, c1, row) => {
+      const w = c1 - c0 + 1;
+      ctx.fillRect((c0 - EGG_COLS / 2 + 0.5) * px, (row - EGG_ROWS) * px, w * px * 0.92, px * 0.92);
+    };
+    EGG_SHAPE.forEach((range, r) => block(range[0], range[1], r));
+    // two feet, symmetric about the center column, alternating in a run cycle
+    const legUp = jumping ? null : Math.floor(elapsed * 8) % 2 === 0;
+    block(3, 3, legUp === false ? 7 : 8);
+    block(5, 5, legUp === true ? 7 : 8);
 
     ctx.restore();
   }
 
   let raf, last = 0, elapsed = 0;
-  const SPEED = 230;
 
   // Scroll pause: fade the character out and stop scoring once the hero
   // section is mostly scrolled past — the grid itself never stops moving.
@@ -288,13 +300,17 @@
   function frame(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts; elapsed += dt;
-    const ambientRot = elapsed * ROT_SPEED;
+    // Only the grid's own slow ambient roll drives its rotation — Left/Right
+    // never spins the tunnel, they only move where the character sits on it.
+    const rot = elapsed * ROT_SPEED;
     const globalFade = Math.min(1, elapsed / 3.2); // slow overall fade-in on load
     const hue = (200 + elapsed * 6) % 360;
-
-    wallRot += (wallRotTarget - wallRot) * Math.min(1, dt * 9);
-    const rot = ambientRot + wallRot;
     charAlpha += ((visible ? 1 : 0) - charAlpha) * Math.min(1, dt * 4);
+
+    updateRunSpeed(distance);
+    boost = Math.max(0, boost - dt / 2.5);
+    const speedMult = 1 + boost * 0.7;
+    const gridSpeed = BASE_GRID_SPEED * (runSpeed / SPEED_START) * speedMult;
 
     ctx.clearRect(0, 0, W, H);
 
@@ -303,17 +319,22 @@
     for (const v of stops) { strokeRail('left', 0, v, rot, globalFade, hue); strokeRail('right', 0, v, rot, globalFade, hue); }
 
     for (const r of rings) {
-      r.z -= SPEED * dt;
+      r.z -= gridSpeed * dt;
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
       drawRing(r.z, rot, globalFade);
     }
 
-    updatePulses(dt, rot, globalFade);
+    const heroZ = heroDepth();
+    updatePulses(dt, rot, globalFade, gridSpeed, heroZ);
 
-    const anchor = heroScreenAnchor(rot);
+    // Ease the character's world position toward whichever wall is selected —
+    // it glides across the tunnel's cross-section rather than the grid spinning.
+    const target = wallPoint(WALL_NAMES[currentWall], 0, 0);
+    heroLocal.x += (target.x - heroLocal.x) * Math.min(1, dt * 7);
+    heroLocal.y += (target.y - heroLocal.y) * Math.min(1, dt * 7);
 
     if (visible) {
-      distance += speed * dt * 0.01 * (1 + Math.min(2, distance * 0.002));
+      distance += runSpeed * 1.5 * speedMult * dt; // score rate: 9/sec at start -> 19.5/sec at cap
       hitFlash = Math.max(0, hitFlash - dt * 2.2);
       if (jumping) {
         heroVy += 1400 * dt;
@@ -325,17 +346,24 @@
         hud.querySelector('b').textContent = Math.floor(shown);
       }
     }
-    updateHazards(dt, rot, anchor.z);
+    updateHazards(dt, heroZ, gridSpeed);
 
     const sortedHz = hazards.slice().sort((a, b) => b.z - a.z);
     for (const hz of sortedHz) drawHazard(hz, rot, globalFade);
 
-    drawHero(anchor, elapsed, globalFade);
+    drawHero({ x: heroLocal.x, y: heroLocal.y, rot }, heroZ, elapsed, globalFade);
 
     if (hitFlash > 0.01) {
       ctx.save();
       ctx.globalAlpha = hitFlash * 0.22;
       ctx.fillStyle = '#ff2e78';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+    if (boost > 0.01) {
+      ctx.save();
+      ctx.globalAlpha = boost * 0.12;
+      ctx.fillStyle = '#5fd3e8';
       ctx.fillRect(0, 0, W, H);
       ctx.restore();
     }
@@ -349,8 +377,7 @@
     for (const u of stops) { strokeRail('floor', u, 0, 0, 1, 200); strokeRail('ceiling', u, 0, 0, 1, 200); }
     for (const v of stops) { strokeRail('left', 0, v, 0, 1, 200); strokeRail('right', 0, v, 0, 1, 200); }
     for (const r of rings) drawRing(r.z, 0, 1);
-    const anchor = heroScreenAnchor(0);
-    drawHero(anchor, 0, 1);
+    drawHero({ x: heroLocal.x, y: heroLocal.y, rot: 0 }, heroDepth(), 0, 1);
   }
 
   window.addEventListener('resize', size);
