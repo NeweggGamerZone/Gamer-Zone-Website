@@ -114,10 +114,13 @@
     if (!c || c.classList.contains('closed')) return;
     show(c.dataset.d);
   });
+  // Once the cursor leaves the grid entirely, fall back to today rather than
+  // leaving whatever day was last hovered on screen.
+  grid.addEventListener('mouseleave', () => show(today));
   document.getElementById('cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); render(); });
   document.getElementById('cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); render(); });
 
   render();
-  const up = (data.events || []).filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date))[0];
-  show(up ? up.date : today);
+  // Default to today — the same thing shown whenever nothing is hovered.
+  show(today);
 })();

@@ -70,7 +70,6 @@ section { margin: 3rem 0; }
 h1 { font-family: var(--head); font-weight: 800; font-size: clamp(1.9rem, 5vw, 3.1rem); line-height: 1.08; text-transform: uppercase; letter-spacing: .01em; }
 h2 { font-family: var(--head); font-weight: 800; font-size: clamp(1.2rem, 3vw, 1.6rem); margin-bottom: .85rem; text-transform: uppercase; letter-spacing: .02em; display: flex; align-items: center; gap: .55rem; }
 h2 .ic { color: var(--ne-orange); }
-h2::after { content: ""; flex: 1; height: 6px; margin-left: .6rem; background: repeating-linear-gradient(-55deg, var(--line) 0 8px, transparent 8px 16px); }
 h1 .accent, h2 .accent { color: var(--ne-blue-text); }
 .kicker { color: var(--ne-blue-text); font-family: var(--head); font-weight: 700; text-transform: uppercase; letter-spacing: .16em; font-size: .76rem; }
 .dim { color: var(--ink-dim); }
