@@ -268,7 +268,10 @@
   // matter the window size — same trick regardless of which wall it's on,
   // since all 4 wall-center points are equidistant (A === B) from center.
   function heroDepth() {
-    const desiredOffset = H * 0.47;
+    // Cap how far off-center this can push the anchor in absolute pixels too,
+    // so on short viewports it still lands comfortably on screen instead of
+    // being pushed toward (or past) the bottom edge.
+    const desiredOffset = Math.min(H * 0.47, H * 0.5 - 60);
     return Math.max(Z_NEAR + 30, (F * A) / desiredOffset);
   }
 
@@ -355,33 +358,24 @@
   // cheaper than redrawing dozens of shadowed shapes every tick and gives a
   // properly smooth, rounded "egg" silhouette at any zoom level.
   function buildEggSprite() {
-    const w = 200, h = 300;
+    const w = 180, h = 240;
     const off = document.createElement('canvas');
     off.width = w; off.height = h;
     const g = off.getContext('2d');
-    const ex = w / 2, ey = 108;
-    // A true egg curve: r(a)=R*(1-k*cos a) gives the narrow-top/round-bottom
-    // taper, and the extra `stretch` elongates it vertically so it reads as
-    // an egg rather than a lopsided ball (which is what a bare k-curve looks
-    // like, since it's exactly as wide as it is tall on its own).
-    const R = 78, k = 0.44, stretch = 1.32;
-    g.save();
-    g.shadowColor = 'rgba(125,180,255,.95)';
-    g.shadowBlur = 22;
-    g.fillStyle = 'rgba(218,236,255,.98)';
+    const ex = w / 2, ey = 92;
+    // The standard, geometrically-accurate way to draw an egg: two half
+    // ellipses sharing the same width at the equator — a smaller half on top,
+    // a taller/rounder half on the bottom — joined into one continuous
+    // outline. This is the classic egg silhouette (narrow top, round
+    // bottom), not an approximation via a skewed circle.
+    const halfW = 60, topH = 56, botH = 88;
+    g.fillStyle = 'rgba(224,238,255,1)'; // one flat, solid color — no glow/gradient
     g.beginPath();
-    const steps = 96;
-    for (let i = 0; i <= steps; i++) {
-      const a = (i / steps) * Math.PI * 2;
-      const r = R * (1 - k * Math.cos(a));
-      const x = ex + r * Math.sin(a);
-      const y = ey - r * Math.cos(a) * stretch;
-      if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
-    }
+    g.ellipse(ex, ey, halfW, topH, 0, Math.PI, Math.PI * 2);
+    g.ellipse(ex, ey, halfW, botH, 0, 0, Math.PI);
     g.closePath();
     g.fill();
-    g.restore();
-    return { img: off, w, h, cx: ex, cy: ey, R: R * (1 + k) * stretch };
+    return { img: off, w, h, cx: ex, cy: ey, R: botH };
   }
   const eggSprite = buildEggSprite();
 
@@ -399,14 +393,14 @@
     ctx.save();
     ctx.translate(p.x, p.y + heroY);
     ctx.rotate(angle);
-    ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = f;
     ctx.scale(scale, scale);
     ctx.drawImage(eggSprite.img, -eggSprite.cx, -eggSprite.cy);
 
     // Two short legs drawn live (cheap flat fills, no shadow) so they can
     // animate a run cycle — one extends while the other tucks up short.
-    ctx.fillStyle = 'rgba(218,236,255,.98)';
+    // Same exact flat color as the body — no separate shading.
+    ctx.fillStyle = 'rgba(224,238,255,1)';
     const legW = eggSprite.w * 0.1, legShort = eggSprite.w * 0.09, legLong = eggSprite.w * 0.2;
     // Sprite drawImage is offset by (-cx,-cy), so (0,0) here is the egg's own
     // center — legs need to start near the bottom of the body *relative to
