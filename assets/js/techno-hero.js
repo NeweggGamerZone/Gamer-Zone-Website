@@ -15,8 +15,8 @@
    read as part of the grid (single-wall, opposite-wall, adjacent-wall, or
    full-ring patterns); cyan/rainbow RGB pulses (same ring-attached approach)
    instead grant a brief speed boost tinted the pulse's own color when
-   caught. A soft ground shadow under the egg marks its hitbox. Score ticks
-   up dino-runner style: slow at first, gradually accelerating after 100m.
+   caught. Score ticks up dino-runner style: slow at first, gradually
+   accelerating after 100m.
    Scrolling away from the hero fades the character out and pauses scoring —
    the grid keeps drifting either way. Pure canvas perspective-projection
    math, no images, no PC-part clutter. */
@@ -319,7 +319,9 @@
     const dx = b.x - a.x, dy = b.y - a.y;
     const len = Math.hypot(dx, dy) || 1;
     const nx = -dy / len, ny = dx / len;
-    const spikeCount = Math.max(4, Math.floor(len / 30));
+    // Fixed spike count regardless of on-screen length, so the hazard doesn't
+    // visually sprout more/denser spikes as perspective makes it grow closer.
+    const spikeCount = 12;
     const spikeLen = isActive ? 10 : 6;
     ctx.lineWidth = isActive ? 2 : 1.1;
     ctx.strokeStyle = isActive ? 'rgba(255,180,90,.95)' : 'rgba(255,120,20,.35)';
@@ -353,59 +355,45 @@
   // cheaper than redrawing dozens of shadowed shapes every tick and gives a
   // properly smooth, rounded "egg" silhouette at any zoom level.
   function buildEggSprite() {
-    const w = 220, h = 260;
+    const w = 200, h = 300;
     const off = document.createElement('canvas');
     off.width = w; off.height = h;
     const g = off.getContext('2d');
-    const ex = w / 2, ey = h / 2 + 6;
-    const R = 92, k = 0.42; // k>0 skews the egg narrower at the top, rounder at the bottom — higher k reads as more distinctly "egg" rather than a ball
+    const ex = w / 2, ey = 108;
+    // A true egg curve: r(a)=R*(1-k*cos a) gives the narrow-top/round-bottom
+    // taper, and the extra `stretch` elongates it vertically so it reads as
+    // an egg rather than a lopsided ball (which is what a bare k-curve looks
+    // like, since it's exactly as wide as it is tall on its own).
+    const R = 78, k = 0.44, stretch = 1.32;
     g.save();
     g.shadowColor = 'rgba(125,180,255,.95)';
-    g.shadowBlur = 26;
+    g.shadowBlur = 22;
     g.fillStyle = 'rgba(218,236,255,.98)';
     g.beginPath();
-    const steps = 72;
+    const steps = 96;
     for (let i = 0; i <= steps; i++) {
       const a = (i / steps) * Math.PI * 2;
       const r = R * (1 - k * Math.cos(a));
       const x = ex + r * Math.sin(a);
-      const y = ey - r * Math.cos(a);
+      const y = ey - r * Math.cos(a) * stretch;
       if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
     }
     g.closePath();
     g.fill();
     g.restore();
-    return { img: off, w, h, cx: ex, cy: ey, R: R * (1 + k) };
+    return { img: off, w, h, cx: ex, cy: ey, R: R * (1 + k) * stretch };
   }
   const eggSprite = buildEggSprite();
-
-  function drawHeroShadow(anchorP, z, angle, groundCellW, globalFade) {
-    const f = fadeFor(z) * globalFade * charAlpha;
-    if (f <= 0.02) return;
-    const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
-    const w = groundCellW * 0.5, h = w * 0.32;
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.rotate(angle);
-    ctx.globalAlpha = f * 0.55;
-    const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, w / 2);
-    grad.addColorStop(0, 'rgba(255,140,40,.55)');
-    grad.addColorStop(1, 'rgba(255,140,40,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, w / 2, h / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
 
   function drawHero(anchorP, z, angle, elapsed, globalFade, groundCellW) {
     const f = fadeFor(z) * globalFade * charAlpha;
     if (f <= 0.02) return;
     const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
-    // Size the egg to sit inside the same grid square it's standing on,
-    // rather than an arbitrary fixed size — kept small and pushed toward the
-    // edge (via heroDepth's offset) so it never crowds the center headline.
-    const targetH = Math.max(6, groundCellW * 0.34);
+    // Size the egg to sit inside the same grid square it's standing on, so it
+    // scales with the tunnel — but never let it shrink below a comfortably
+    // visible floor on small screens/windows, where the grid cell itself is
+    // small too.
+    const targetH = Math.max(42, groundCellW * 0.34);
     const scale = targetH / eggSprite.h;
 
     ctx.save();
@@ -513,7 +501,6 @@
     for (const hz of sortedHz) drawHazard(hz, rot, globalFade);
 
     const groundCellW = cellWidthAt(heroZ, rot);
-    drawHeroShadow({ x: heroLocal.x, y: heroLocal.y, rot }, heroZ, heroAngle, groundCellW, globalFade);
     drawHero({ x: heroLocal.x, y: heroLocal.y, rot }, heroZ, heroAngle, elapsed, globalFade, groundCellW);
 
     if (hitFlash > 0.01) {
