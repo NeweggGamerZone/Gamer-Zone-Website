@@ -9,8 +9,10 @@
 
   const cfg = await GZ.config();
   const today = GZ.todayISO();
-  const verkada = (cfg.verkadaDailyUrl && cfg.verkadaDailyDate === today)
-    ? cfg.verkadaDailyUrl : (cfg.verkadaUrl || cfg.reservationUrl);
+  // Live reservation page — always resolves and shows today's open/closed
+  // status automatically (see main.js for why this replaced the old
+  // per-day Verkada token scheme).
+  const verkada = cfg.reservationUrl || cfg.verkadaUrl;
 
   let data = { events: [] };
   try { data = await (await fetch('data/events.json')).json(); } catch {}
@@ -74,7 +76,7 @@
     const closed = (wd === 0 || wd === 1) || closedByType;
     const isToday = dt === today;
     const preregBlock = isToday
-      ? `<p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}">Pre-register your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Verkada registration is required — one per visitor.</p>`
+      ? `<p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}" target="_blank" rel="noopener">Preregister your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Visiting today? Skip the line — reservations are one per visitor.</p>`
       : '';
     if (e && !closedByType) {
       const typeCls = TYPE_COLOR[e.type] || 'cal-edu';

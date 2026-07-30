@@ -20,6 +20,9 @@
   ];
   const PLATFORM_BY_KEY = Object.fromEntries(PLATFORMS.map(p => [p.key, p]));
 
+  // Physical systems at the Consoles station — shown alongside its game list.
+  const CONSOLE_SYSTEMS = ['Xbox', 'Nintendo Switch 2', 'PlayStation 5', 'Retro Games Emulator'];
+
   const GAMES = [
     // PC — Epic, Steam, Riot, Roblox, Battle.net, and Microsoft Store titles
     // on the gaming PCs.
@@ -68,10 +71,14 @@
     ['Castle Crashers', 'party'],
   ].map(([name, platform]) => ({ name, platform }));
 
-  function panel(title, emoji, games) {
+  function panel(key, title, emoji, games) {
     const items = games.map(g => `<li><span class="gl-emoji" aria-hidden="true">${emoji}</span>${GZ.esc(g.name)}</li>`).join('');
+    const systems = key === 'console'
+      ? `<p class="dim console-systems"><strong>Systems:</strong> ${CONSOLE_SYSTEMS.map(GZ.esc).join(' &middot; ')}</p>`
+      : '';
     return `<section class="reveal in" style="margin-top:1.6rem">
       <h2>${emoji} ${GZ.esc(title)}</h2>
+      ${systems}
       <div class="game-list-panel" style="margin-top:1rem"><ul class="game-list">${items}</ul></div>
     </section>`;
   }
@@ -79,19 +86,19 @@
   function renderByPlatform() {
     list.innerHTML = PLATFORMS.map(p => {
       const games = GAMES.filter(x => x.platform === p.key);
-      return games.length ? panel(p.label, p.emoji, games) : '';
+      return games.length ? panel(p.key, p.label, p.emoji, games) : '';
     }).join('');
   }
 
   function renderAZ() {
     const sorted = GAMES.slice().sort((a, b) => a.name.localeCompare(b.name));
-    list.innerHTML = panel('A–Z', '🔤', sorted);
+    list.innerHTML = panel(null, 'A–Z', '🔤', sorted);
   }
 
   function renderPlatform(key) {
     const p = PLATFORM_BY_KEY[key];
     const games = GAMES.filter(x => x.platform === key);
-    list.innerHTML = panel(p.label, p.emoji, games);
+    list.innerHTML = panel(key, p.label, p.emoji, games);
   }
 
   function setActive(btn) {

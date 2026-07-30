@@ -1,26 +1,27 @@
 /* Homepage-only fixed background: a full-page grid tunnel through the inside
-   of a PC — and a small interactive bit riding along it. A single-color,
-   smooth vector running-man figure (pre-rendered head+torso to an offscreen
-   canvas, then just stamped each frame with live-animated swinging arms and
-   legs — much cheaper than redrawing dozens of shadowed shapes) rides the
-   slow ambient spin of the grid, sized to match the grid square it's
-   standing on but capped so it always stays fully on screen, always
-   centered on whichever of the tunnel's 4 sides (floor/right/ceiling/left)
-   it currently occupies. It turns so its head always faces the center of
-   the screen and its feet always point outward — including compensating for
-   the grid's own continuous slow roll, so it always reads as "standing on"
-   that square. Left/Right (or A/D) glide it over to a different side — the
-   grid itself never rotates in response, only the character moves. W jumps
-   (not Space/Up, which the browser treats as page-scroll keys) over the
-   spiked orange hazard lines traveling out of the vanishing point toward the
-   viewer, riding along an actual background ring line so they read as part
-   of the grid (single-wall, opposite-wall, adjacent-wall, or full-ring
-   patterns); cyan/rainbow RGB pulses (same ring-attached approach) instead
-   grant a brief speed boost tinted the pulse's own color when caught. Score
-   ticks up dino-runner style: slow at first, gradually accelerating after
-   100m. Scrolling away from the hero fades the character out and pauses
-   scoring — the grid keeps drifting either way. Pure canvas
-   perspective-projection math, no images, no PC-part clutter. */
+   of a PC — and a small interactive bit riding along it. A small pseudo-3D
+   cube (three shaded faces — top/left/right — drawn each frame with simple
+   canvas paths, no images) rides the slow ambient spin of the grid, sized to
+   match the grid square it's standing on but capped so it always stays
+   fully on screen, always centered on whichever of the tunnel's 4 sides
+   (floor/right/ceiling/left) it currently occupies. It turns so it always
+   reads as "standing on" that square, including compensating for the grid's
+   own continuous slow roll. Left/Right (or A/D) glide it over to a
+   different side — the grid itself never rotates in response, only the
+   character moves. Up Arrow or W jumps (not Space/Down, which the browser
+   treats as page-scroll keys) over the spiked orange hazard lines traveling
+   out of the vanishing point toward the viewer, riding along an actual
+   background ring line so they read as part of the grid (single-wall,
+   opposite-wall, adjacent-wall, or full-ring patterns); cyan/rainbow RGB
+   pulses (same ring-attached approach) instead grant a brief speed boost
+   tinted the pulse's own color when caught. Grid lines, hazards, and pulses
+   that have already scrolled past the cube's depth (and so can no longer
+   affect it) fade down toward the viewer, making it visually obvious which
+   lines are still "live" versus already resolved. Score ticks up
+   dino-runner style: slow at first, gradually accelerating after 100m.
+   Scrolling away from the hero fades the character out and pauses scoring —
+   the grid keeps drifting either way. Pure canvas perspective-projection
+   math, no images, no PC-part clutter. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -81,6 +82,16 @@
     const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
     const farFade = Math.min(1, (Z_FAR - z) / 820); // fade in very slowly as it spawns near the vanishing point
     return Math.max(0, Math.min(1, nearFade * farFade));
+  }
+
+  // Once a grid line/hazard/pulse has scrolled past the cube's depth (z less
+  // than heroZ = closer to the viewer), it can no longer interact with the
+  // character — dim it down the further past it travels so it's visually
+  // obvious which lines are still "live" versus already resolved. Floors out
+  // at a low-but-visible level rather than vanishing entirely.
+  function pastFade(z, heroZ) {
+    if (z >= heroZ) return 1;
+    return Math.max(0.16, 1 - (heroZ - z) / 260);
   }
 
   function strokeRail(wall, u, v, rot, globalFade, hue) {
@@ -182,7 +193,7 @@
         p.passed = true;
         if (p.walls.includes(currentWall)) { boost = 1; boostHue = p.hue; }
       }
-      const f = fadeFor(z) * globalFade;
+      const f = fadeFor(z) * globalFade * pastFade(z, heroZ);
       if (f <= 0.01) continue;
       const isFull = p.walls.length === 4;
       ctx.save();
@@ -227,7 +238,7 @@
     wrap.id = 'gz-hero-hud';
     wrap.innerHTML = '<span class="gz-hero-high">High Score <b id="gz-hero-high-val">0</b>m</span>' +
       '<span class="gz-hero-score">Score <b id="gz-hero-score-val">0</b>m</span>' +
-      '<span class="gz-hero-help">&#9664; &#9654; Move &nbsp;&middot;&nbsp; <span class="gz-key">W</span> Jump</span>';
+      '<span class="gz-hero-help">&#9664; &#9654; Move &nbsp;&middot;&nbsp; <span class="gz-key">&#9650;</span> Jump</span>';
     document.body.appendChild(wrap);
     const style = document.createElement('style');
     style.textContent = `
@@ -258,12 +269,12 @@
     if (!visible || e.repeat) return;
     const tag = (e.target && e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-    // Only Left/Right move the character between sides, and W jumps. Space
-    // and Up/Down are intentionally left alone — those are default browser
-    // page-scroll keys, and hijacking them makes the whole page lurch.
+    // Left/Right move the character between sides; Up Arrow or W jumps.
+    // Space and Down are intentionally left alone — those are default
+    // browser page-scroll keys, and hijacking them makes the whole page lurch.
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); selectWall(-1); }
     else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); selectWall(1); }
-    else if (e.code === 'KeyW') { e.preventDefault(); jump(); }
+    else if (e.code === 'KeyW' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
   });
 
   // The hero sits at a screen-anchored depth so it always stays in frame no
@@ -345,9 +356,9 @@
     ctx.restore();
   }
 
-  function drawHazard(hz, rot, globalFade) {
+  function drawHazard(hz, rot, globalFade, heroZ) {
     const z = rings[hz.ringIdx].z;
-    const f = fadeFor(z) * globalFade;
+    const f = fadeFor(z) * globalFade * pastFade(z, heroZ);
     if (f <= 0.02) return;
     const isActive = hz.walls.includes(currentWall);
     for (const w of hz.walls) {
@@ -356,69 +367,73 @@
     }
   }
 
-  // ---------------- running-man sprite ----------------
-  // Head + torso (the only static part) are pre-rendered once to an offscreen
-  // canvas in one flat solid color — cheaper than redrawing them every tick.
-  // Arms and legs are drawn live each frame, swinging from hip/shoulder
-  // pivots, so the figure actually reads as running rather than gliding.
-  const MAN_COLOR = 'rgba(224,238,255,1)';
-  function buildManSprite() {
-    const w = 64, h = 64;
-    const off = document.createElement('canvas');
-    off.width = w; off.height = h;
-    const g = off.getContext('2d');
-    const ex = w / 2;
-    const headR = 10, headCy = 13;
-    const torsoTop = 25, torsoBot = 58, torsoW = 17, torsoR = 7;
-    g.fillStyle = MAN_COLOR;
-    g.beginPath();
-    g.arc(ex, headCy, headR, 0, Math.PI * 2);
-    g.fill();
-    g.beginPath();
-    if (g.roundRect) g.roundRect(ex - torsoW / 2, torsoTop, torsoW, torsoBot - torsoTop, torsoR);
-    else g.rect(ex - torsoW / 2, torsoTop, torsoW, torsoBot - torsoTop);
-    g.fill();
-    // hip (torsoBot) is the sprite's anchor point — legs extend down from it,
-    // arms swing from the shoulder (torsoTop), both drawn live below.
-    return { img: off, w, h, cx: ex, cy: torsoBot, shoulderY: torsoTop - torsoBot, height: torsoBot + headR };
-  }
-  const manSprite = buildManSprite();
+  // ---------------- pseudo-3D cube ----------------
+  // A simple shaded cube — top face lightest, left face mid-tone, right face
+  // darkest — read as a 3D block from three flat canvas paths, no images.
+  // Cheap enough to just draw fresh every frame (no offscreen pre-render
+  // needed, unlike the old limbed sprite).
+  const CUBE_TOP = 'rgba(255,255,255,1)';
+  const CUBE_LEFT = 'rgba(178,204,255,1)';
+  const CUBE_RIGHT = 'rgba(120,150,214,1)';
+  const CUBE_EDGE = 'rgba(20,30,50,.55)';
 
-  function drawLimb(pivotY, angleDeg, w, len) {
-    ctx.save();
-    ctx.translate(0, pivotY);
-    ctx.rotate(angleDeg * Math.PI / 180);
-    ctx.fillRect(-w / 2, 0, w, len);
-    ctx.restore();
+  // Cube is drawn anchored at its bottom-center ground point (0,0), extending
+  // up by `s`. `depth` controls how pronounced the 3D top/side skew looks.
+  function drawCube(s) {
+    const depth = s * 0.42;
+    const hw = s / 2;
+    // Front-left face (square, flat)
+    ctx.fillStyle = CUBE_LEFT;
+    ctx.beginPath();
+    ctx.moveTo(-hw, 0);
+    ctx.lineTo(-hw, -s);
+    ctx.lineTo(0, -s + depth * 0.28);
+    ctx.lineTo(0, depth * 0.28);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = CUBE_EDGE; ctx.lineWidth = 1; ctx.stroke();
+    // Front-right face
+    ctx.fillStyle = CUBE_RIGHT;
+    ctx.beginPath();
+    ctx.moveTo(hw, 0);
+    ctx.lineTo(hw, -s);
+    ctx.lineTo(0, -s + depth * 0.28);
+    ctx.lineTo(0, depth * 0.28);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // Top face
+    ctx.fillStyle = CUBE_TOP;
+    ctx.beginPath();
+    ctx.moveTo(-hw, -s);
+    ctx.lineTo(0, -s - depth * 0.55);
+    ctx.lineTo(hw, -s);
+    ctx.lineTo(0, -s + depth * 0.28);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   }
 
   function drawHero(anchorP, z, angle, elapsed, globalFade, groundCellW) {
     const f = fadeFor(z) * globalFade * charAlpha;
     if (f <= 0.02) return;
     const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
-    // Size the figure to sit inside the same grid square it's standing on, so
+    // Size the cube to sit inside the same grid square it's standing on, so
     // it scales with the tunnel — but never let it shrink below a
-    // comfortably visible floor on small screens/windows, where the grid
-    // cell itself is small too. Kept smaller overall than the old egg was.
-    const totalH = Math.max(40, groundCellW * 0.28);
-    const scale = totalH / (manSprite.height + 34); // + rough leg length at native scale
+    // comfortably visible floor on small screens/windows.
+    const s = Math.max(34, groundCellW * 0.26);
+
+    // A little run-cycle bounce (skipped mid-jump) so the cube doesn't just
+    // glide — subtle squash/stretch plus a slight side-to-side rock.
+    const runPhase = jumping ? 0 : Math.sin(elapsed * 11);
+    const bounce = jumping ? 0 : Math.abs(runPhase) * s * 0.06;
+    const rock = jumping ? 0 : runPhase * 0.05;
 
     ctx.save();
-    ctx.translate(p.x, p.y + heroY);
-    ctx.rotate(angle);
+    ctx.translate(p.x, p.y + heroY - bounce);
+    ctx.rotate(angle + rock);
     ctx.globalAlpha = f;
-    ctx.scale(scale, scale);
-    ctx.fillStyle = MAN_COLOR;
-    ctx.drawImage(manSprite.img, -manSprite.cx, -manSprite.cy);
-
-    const runPhase = jumping ? 0 : Math.sin(elapsed * 11);
-    // Legs pivot at the hip (0,0); arms pivot at the shoulder, swinging
-    // opposite the legs — the natural cross-pattern of a running stride.
-    drawLimb(0, runPhase * 30, 6.5, 30);
-    drawLimb(0, -runPhase * 30, 6.5, 30);
-    drawLimb(manSprite.shoulderY, -runPhase * 24, 5, 22);
-    drawLimb(manSprite.shoulderY, runPhase * 24, 5, 22);
-
+    drawCube(s);
     ctx.restore();
   }
 
@@ -448,6 +463,7 @@
     const gridSpeed = BASE_GRID_SPEED * (runSpeed / SPEED_START) * speedMult;
 
     ctx.clearRect(0, 0, W, H);
+    const heroZ = heroDepth();
 
     const stops = [-1, -0.5, 0, 0.5, 1];
     for (const u of stops) { strokeRail('floor', u, 0, rot, globalFade, hue); strokeRail('ceiling', u, 0, rot, globalFade, hue); }
@@ -456,10 +472,9 @@
     for (const r of rings) {
       r.z -= gridSpeed * dt;
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
-      drawRing(r.z, rot, globalFade);
+      drawRing(r.z, rot, globalFade * pastFade(r.z, heroZ));
     }
 
-    const heroZ = heroDepth();
     updatePulses(dt, rot, globalFade, heroZ);
 
     // Ease the character's world position toward whichever wall is selected —
@@ -494,7 +509,7 @@
     updateHazards(dt, heroZ);
 
     const sortedHz = hazards.slice().sort((a, b) => rings[b.ringIdx].z - rings[a.ringIdx].z);
-    for (const hz of sortedHz) drawHazard(hz, rot, globalFade);
+    for (const hz of sortedHz) drawHazard(hz, rot, globalFade, heroZ);
 
     const groundCellW = cellWidthAt(heroZ, rot);
     drawHero({ x: heroLocal.x, y: heroLocal.y, rot }, heroZ, heroAngle, elapsed, globalFade, groundCellW);

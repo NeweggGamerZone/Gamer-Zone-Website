@@ -98,7 +98,7 @@ async function renderAll() {
   if (elMonthly) {
     elMonthly.innerHTML = monthlyCur.length
       ? monthlyCur.map(x => calImg(x, 'monthly')).join('')
-      : `<div class="calendar-empty">This month's calendar graphic is being cooked up — the event lineup above is live. Follow <a href="https://www.instagram.com/newegggamerzone/">@newegggamerzone</a> for drops.</div>`;
+      : `<div class="calendar-empty">This month's calendar graphic is being cooked up — the event lineup above is live. Follow <a href="https://www.instagram.com/newegggamerzone/" target="_blank" rel="noopener">@newegggamerzone</a> for drops.</div>`;
   }
 
   const elUp = document.getElementById('events-upcoming');

@@ -70,19 +70,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const cfg = await GZ.config();
   document.querySelectorAll('[data-cfg]').forEach(el => { const v = cfg[el.dataset.cfg]; if (v) el.textContent = v; });
-  document.querySelectorAll('[data-cfg-href]').forEach(el => { const v = cfg[el.dataset.cfgHref]; if (v) el.href = v; });
+  // Phone/email displayed via data-cfg get turned into real tel:/mailto:
+  // links (not just plain text) when flagged with these attributes.
+  document.querySelectorAll('[data-cfg-href-tel]').forEach(el => {
+    const v = cfg.phone; if (!v) return;
+    const ext = v.match(/ext\.?\s*(\d+)/i);
+    const digits = v.split(/ext/i)[0].replace(/\D/g, '');
+    el.href = `tel:+1${digits}${ext ? ',' + ext[1] : ''}`;
+  });
+  document.querySelectorAll('[data-mailto]').forEach(el => { const v = cfg[el.dataset.cfg] || cfg.email; if (v) el.href = `mailto:${v}`; });
+  document.querySelectorAll('[data-cfg-href]').forEach(el => {
+    const v = cfg[el.dataset.cfgHref];
+    if (!v) return;
+    el.href = v;
+    if (!v.startsWith('mailto:') && !v.startsWith('tel:')) { el.target = '_blank'; el.rel = 'noopener'; }
+  });
   const ann = document.getElementById('announcement');
   if (ann && cfg.announcement) ann.textContent = cfg.announcement;
 
-  // Verkada-first visit link: today's daily link → static guest site → reservation
-  const today = GZ.todayISO();
-  const verkada = (cfg.verkadaDailyUrl && cfg.verkadaDailyDate === today)
-    ? cfg.verkadaDailyUrl
-    : (cfg.verkadaUrl || cfg.reservationUrl);
-  const freshToday = !!(cfg.verkadaDailyUrl && cfg.verkadaDailyDate === today);
-  document.querySelectorAll('[data-verkada]').forEach(el => { el.href = verkada; });
+  // Live reservation page (newegg.com/promotions/gamer-zone) — shows today's
+  // open/closed status automatically and always resolves, unlike the
+  // Verkada guest-checkin link which requires a fresh per-day token.
+  const verkada = cfg.reservationUrl || cfg.verkadaUrl;
+  document.querySelectorAll('[data-verkada]').forEach(el => { el.href = verkada; el.target = '_blank'; el.rel = 'noopener'; });
+  const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   document.querySelectorAll('[data-verkada-note]').forEach(el => {
-    el.textContent = freshToday ? "Today's sign-in is live — pre-register and skip the line." : "Pre-register your visit and skip the line at check-in.";
+    el.textContent = `It's ${todayName} — preregister below and walk right in, no waiting at check-in.`;
   });
 
   const page = location.pathname.split('/').pop() || 'index.html';
