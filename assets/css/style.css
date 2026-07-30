@@ -125,6 +125,7 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; }
 .event-card { border-left: 4px solid var(--ne-orange); }
 .event-card .meta { font-size: .85rem; color: var(--ink-dim); }
+.event-card .dim { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; }
 .tag { display: inline-block; font-family: var(--head); font-size: .68rem; font-weight: 800; padding: .18rem .6rem; background: var(--ne-navy); color: #cfe0ff; text-transform: uppercase; letter-spacing: .08em; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
 .tag.orange { background: var(--ne-orange); color: #000; }
 
