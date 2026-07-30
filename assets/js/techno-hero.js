@@ -2,14 +2,18 @@
    of a PC — and a small interactive bit riding along it. A single-color
    pixel egg-bot rides the slow ambient spin of the grid, always centered on
    whichever of the tunnel's 4 sides (floor/right/ceiling/left) it currently
-   occupies. Left/Right (or A/D) glide it over to a different side — the grid
+   occupies, and turns so its head always faces the center of the screen
+   (upright on the floor, upside-down on the ceiling, on its side on the
+   walls). Left/Right (or A/D) glide it over to a different side — the grid
    itself never rotates in response, only the character moves. Space jumps
-   over the red hazard lines traveling out of the vanishing point toward the
-   viewer; the cyan RGB pulse instead grants a brief speed boost. Score ticks
-   up dino-runner style: slow at first, gradually accelerating after 100m.
-   Scrolling away from the hero fades the character out and pauses scoring —
-   the grid keeps drifting either way. Pure canvas perspective-projection
-   math, no images, no PC-part clutter. */
+   over the spiked red hazard lines traveling out of the vanishing point
+   toward the viewer (in single-wall, opposite-wall, adjacent-wall, or
+   full-ring patterns, always riding along with the background grid); cyan/
+   rainbow RGB pulses instead grant a brief speed boost tinted the pulse's own
+   color when caught. Score ticks up dino-runner style: slow at first,
+   gradually accelerating after 100m. Scrolling away from the hero fades the
+   character out and pauses scoring — the grid keeps drifting either way.
+   Pure canvas perspective-projection math, no images, no PC-part clutter. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -60,6 +64,9 @@
   }
   // wall index (0=floor,1=right,2=ceiling,3=left) <-> the named walls above.
   const WALL_NAMES = ['floor', 'right', 'ceiling', 'left'];
+  // Rotation so the egg's head always points toward the screen's center,
+  // regardless of which side of the tunnel it's standing on.
+  const WALL_ANGLE = [0, -Math.PI / 2, Math.PI, Math.PI / 2];
 
   function fadeFor(z) {
     const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
@@ -80,10 +87,14 @@
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   }
 
+  function ringPts(z, rot) {
+    return [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, z, rot));
+  }
+
   function drawRing(z, rot, globalFade) {
     const f = fadeFor(z) * globalFade;
     if (f <= 0.01) return;
-    const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, z, rot));
+    const pts = ringPts(z, rot);
     ctx.strokeStyle = `rgba(138,180,237,${0.32 * f})`;
     ctx.lineWidth = 1.3;
     ctx.beginPath();
@@ -106,45 +117,86 @@
       : SPEED_CAP - (SPEED_CAP - SPEED_START) * Math.exp(-(distance - RAMP_FROM) / RAMP_EASE);
   }
 
+  // ---------------- shared wall-pattern pool ----------------
+  // Every hazard/pulse picks one of these combinations so danger + boosts can
+  // appear on a single wall, opposite walls, two adjacent walls, or the full
+  // ring — every shape the 4-sided grid can make. Singles are weighted more
+  // common by repetition.
+  const WALL_PATTERNS = [
+    [0], [1], [2], [3], [0], [1], [2], [3],
+    [0, 2], [1, 3],
+    [0, 1], [1, 2], [2, 3], [3, 0],
+    [0, 1, 2, 3],
+  ];
+  function randomWallPattern() { return WALL_PATTERNS[Math.floor(Math.random() * WALL_PATTERNS.length)]; }
+
+  function wallSegmentEnds(wall, z, rot) {
+    const isFloorLike = wall === 'floor' || wall === 'ceiling';
+    const p1 = wallPoint(wall, isFloorLike ? -1 : 0, isFloorLike ? 0 : -1);
+    const p2 = wallPoint(wall, isFloorLike ? 1 : 0, isFloorLike ? 0 : 1);
+    return [project(p1.x, p1.y, z, rot), project(p2.x, p2.y, z, rot)];
+  }
+
   // RGB pulse rings: spawn near the vanishing point and sweep outward toward
-  // the viewer — same direction and speed as the rest of the grid, so it
-  // reads as part of it. Reaching the player grants a brief speed boost.
+  // the viewer — same direction and speed as the rest of the grid, riding
+  // along the same z as the rings so it reads as part of the background.
+  // Catching one (on a wall it shares with the player) grants a speed boost
+  // tinted with that pulse's own color.
   let pulseTimer = 0;
   function spawnPulse() {
-    pulses.push({ z: Z_FAR - 20, hue: Math.random() * 360, passed: false });
+    pulses.push({ z: Z_FAR - 20, hue: Math.random() * 360, walls: randomWallPattern(), passed: false });
   }
   function updatePulses(dt, rot, globalFade, gridSpeed, heroZ) {
     pulseTimer -= dt;
     if (pulseTimer <= 0) { spawnPulse(); pulseTimer = 2.6 + Math.random() * 2.2; }
     for (let i = pulses.length - 1; i >= 0; i--) {
       const p = pulses[i];
-      p.z -= gridSpeed * 1.4 * dt;
+      p.z -= gridSpeed * dt;
       p.hue = (p.hue + dt * 40) % 360;
-      if (visible && !p.passed && p.z <= heroZ) { p.passed = true; boost = 1; }
+      if (visible && !p.passed && p.z <= heroZ) {
+        p.passed = true;
+        if (p.walls.includes(currentWall)) { boost = 1; boostHue = p.hue; }
+      }
       if (p.z <= Z_NEAR) { pulses.splice(i, 1); continue; }
       const f = fadeFor(p.z) * globalFade;
       if (f <= 0.01) continue;
-      const pts = [[-A, -B], [A, -B], [A, B], [-A, B]].map(([x, y]) => project(x, y, p.z, rot));
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.5 * f})`;
-      ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, .9)`;
-      ctx.shadowBlur = 14;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (let k = 1; k < 4; k++) ctx.lineTo(pts[k].x, pts[k].y);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.restore();
+      const isFull = p.walls.length === 4;
+      if (isFull) {
+        const pts = ringPts(p.z, rot);
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.5 * f})`;
+        ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, .9)`;
+        ctx.shadowBlur = 14;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let k = 1; k < 4; k++) ctx.lineTo(pts[k].x, pts[k].y);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        for (const w of p.walls) {
+          const [a, b] = wallSegmentEnds(WALL_NAMES[w], p.z, rot);
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.5 * f})`;
+          ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, .9)`;
+          ctx.shadowBlur = 14;
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.restore();
+        }
+      }
     }
   }
 
   // ---------------- interactive egg-bot ----------------
   let currentWall = 0; // 0 floor, 1 right, 2 ceiling, 3 left — which side is "selected"
   let heroLocal = { x: 0, y: 0 }; // smoothed world-space position, eases toward the selected wall's center — real value set on first size()
+  let heroAngleVec = { x: 1, y: 0 }; // smoothed facing direction (as a vector, to avoid angle-wrap jumps)
   let heroY = 0, heroVy = 0, jumping = false;
-  let distance = 0, hitFlash = 0, boost = 0;
+  let distance = 0, hitFlash = 0, boost = 0, boostHue = 190;
   let highScore = 0;
   try { highScore = parseFloat(localStorage.getItem('gz-hero-highscore') || '0') || 0; } catch {}
   let visible = true;      // is the hero section still roughly on screen?
@@ -156,17 +208,21 @@
     if (!document.body.classList.contains('home-page')) return null;
     const wrap = document.createElement('div');
     wrap.id = 'gz-hero-hud';
-    wrap.innerHTML = '<span class="gz-hero-score">High Score <b>0</b>m</span>';
+    wrap.innerHTML = '<span class="gz-hero-high">High Score <b id="gz-hero-high-val">0</b>m</span>' +
+      '<span class="gz-hero-score">Score <b id="gz-hero-score-val">0</b>m</span>';
     document.body.appendChild(wrap);
     const style = document.createElement('style');
     style.textContent = `
-      #gz-hero-hud{position:fixed;top:76px;left:clamp(1rem,4vw,2.2rem);z-index:40;
+      #gz-hero-hud{position:fixed;top:96px;left:clamp(1rem,4vw,2.2rem);z-index:40;
+        display:flex;flex-direction:column;gap:.2rem;
         font-family:'Montserrat','Segoe UI',sans-serif;font-weight:800;letter-spacing:.04em;
-        font-size:.78rem;text-transform:uppercase;color:#cfe0ff;text-shadow:0 0 10px rgba(61,139,255,.55);
-        pointer-events:none;transition:opacity .5s ease;opacity:1}
-      #gz-hero-hud b{color:#FA9D28;text-shadow:0 0 10px rgba(250,157,40,.6)}
+        text-transform:uppercase;pointer-events:none;transition:opacity .5s ease;opacity:1}
+      #gz-hero-hud .gz-hero-high{font-size:.68rem;color:#9db3d6;text-shadow:0 0 8px rgba(61,139,255,.4)}
+      #gz-hero-hud .gz-hero-high b{color:#cfe0ff}
+      #gz-hero-hud .gz-hero-score{font-size:.92rem;color:#cfe0ff;text-shadow:0 0 10px rgba(61,139,255,.55)}
+      #gz-hero-hud .gz-hero-score b{color:#FA9D28;text-shadow:0 0 10px rgba(250,157,40,.6)}
       #gz-hero-hud.hidden{opacity:0}
-      @media(max-width:640px){#gz-hero-hud{top:64px;font-size:.68rem}}
+      @media(max-width:640px){#gz-hero-hud{top:80px}#gz-hero-hud .gz-hero-high{font-size:.6rem}#gz-hero-hud .gz-hero-score{font-size:.8rem}}
     `;
     document.head.appendChild(style);
     return wrap;
@@ -198,7 +254,7 @@
   }
 
   function spawnHazard() {
-    hazards.push({ wall: Math.floor(Math.random() * 4), z: Z_FAR, passed: false });
+    hazards.push({ walls: randomWallPattern(), z: Z_FAR, passed: false });
   }
 
   function updateHazards(dt, heroZ, gridSpeed) {
@@ -209,10 +265,10 @@
     }
     for (let i = hazards.length - 1; i >= 0; i--) {
       const hz = hazards[i];
-      hz.z -= gridSpeed * 1.4 * dt;
+      hz.z -= gridSpeed * dt;
       if (visible && !hz.passed && hz.z <= heroZ) {
         hz.passed = true;
-        if (hz.wall === currentWall && !jumping) {
+        if (hz.walls.includes(currentWall) && !jumping) {
           if (distance > highScore) {
             highScore = distance;
             try { localStorage.setItem('gz-hero-highscore', String(Math.floor(highScore))); } catch {}
@@ -225,15 +281,9 @@
     }
   }
 
-  function drawHazard(hz, rot, globalFade) {
-    const f = fadeFor(hz.z) * globalFade;
-    if (f <= 0.02) return;
-    const wall = WALL_NAMES[hz.wall];
-    const isFloorLike = wall === 'floor' || wall === 'ceiling';
-    const p1 = wallPoint(wall, isFloorLike ? -1 : 0, isFloorLike ? 0 : -1);
-    const p2 = wallPoint(wall, isFloorLike ? 1 : 0, isFloorLike ? 0 : 1);
-    const a = project(p1.x, p1.y, hz.z, rot), b = project(p2.x, p2.y, hz.z, rot);
-    const isActive = hz.wall === currentWall;
+  // A single dangerous segment, with small perpendicular spikes along its
+  // length so it reads as a hazard rather than just a bright line.
+  function drawHazardSegment(a, b, isActive, f) {
     ctx.save();
     ctx.globalAlpha = f;
     ctx.globalCompositeOperation = 'lighter';
@@ -242,32 +292,62 @@
     ctx.strokeStyle = isActive ? 'rgba(255,70,140,1)' : 'rgba(255,46,120,.4)';
     ctx.lineWidth = isActive ? 2.6 : 1.4;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len, ny = dx / len;
+    const spikeCount = Math.max(4, Math.floor(len / 30));
+    const spikeLen = isActive ? 10 : 6;
+    ctx.lineWidth = isActive ? 2 : 1.1;
+    ctx.strokeStyle = isActive ? 'rgba(255,120,170,.95)' : 'rgba(255,46,120,.35)';
+    for (let i = 1; i < spikeCount; i++) {
+      const t = i / spikeCount;
+      const x = a.x + dx * t, y = a.y + dy * t;
+      const dir = i % 2 === 0 ? 1 : -1; // alternate in/out for a jagged silhouette
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + nx * spikeLen * dir, y + ny * spikeLen * dir);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 
-  // Egg-bot: a small, single-color, perfectly symmetrical pixel egg with two
-  // running feet — higher pixel density than before for a rounder silhouette.
-  const EGG_ROWS = 9; // row 8 = feet / ground line
-  const EGG_COLS = 9; // 0..8, centered on column 4
+  function drawHazard(hz, rot, globalFade) {
+    const f = fadeFor(hz.z) * globalFade;
+    if (f <= 0.02) return;
+    const isActive = hz.walls.includes(currentWall);
+    for (const w of hz.walls) {
+      const [a, b] = wallSegmentEnds(WALL_NAMES[w], hz.z, rot);
+      drawHazardSegment(a, b, isActive, f);
+    }
+  }
+
+  // Egg-bot: a small, single-color, perfectly symmetrical pixel egg — rounder
+  // silhouette via a finer pixel grid, with two longer running legs. Rotates
+  // so its head always faces the center of the screen on every wall.
+  const EGG_ROWS = 11; // rows 9-10 are the legs
+  const EGG_COLS = 11; // 0..10, centered on column 5
   const EGG_SHAPE = [
-    [3, 5], // 0 — crown
-    [2, 6], // 1
-    [1, 7], // 2
-    [1, 7], // 3
-    [0, 8], // 4 — widest
-    [0, 8], // 5
-    [1, 7], // 6
-    [1, 7], // 7
+    [4, 6], // 0 — crown
+    [3, 7], // 1
+    [2, 8], // 2
+    [1, 9], // 3
+    [0, 10], // 4 — widest
+    [0, 10], // 5
+    [0, 10], // 6
+    [1, 9], // 7
+    [2, 8], // 8 — tapers into the legs
   ];
-  function drawHero(anchorP, z, elapsed, globalFade) {
+  function drawHero(anchorP, z, angle, elapsed, globalFade) {
     const f = fadeFor(z) * globalFade * charAlpha;
     if (f <= 0.02) return;
     const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
-    const px = Math.max(1, p.s * 30); // smaller unit, higher pixel density
+    const px = Math.max(1, p.s * 22); // smaller, denser unit for a rounder look
     if (px < 1) return;
 
     ctx.save();
     ctx.translate(p.x, p.y + heroY);
+    ctx.rotate(angle);
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = f;
     ctx.fillStyle = 'rgba(215,235,255,.96)'; // one solid color
@@ -279,10 +359,19 @@
       ctx.fillRect((c0 - EGG_COLS / 2 + 0.5) * px, (row - EGG_ROWS) * px, w * px * 0.92, px * 0.92);
     };
     EGG_SHAPE.forEach((range, r) => block(range[0], range[1], r));
-    // two feet, symmetric about the center column, alternating in a run cycle
-    const legUp = jumping ? null : Math.floor(elapsed * 8) % 2 === 0;
-    block(3, 3, legUp === false ? 7 : 8);
-    block(5, 5, legUp === true ? 7 : 8);
+    // two longer legs, symmetric about the center column, alternating in a
+    // running cycle — one leg extends the full two rows while the other
+    // tucks up short.
+    const legPhase = jumping ? null : Math.floor(elapsed * 8) % 2 === 0;
+    if (legPhase === true) {
+      block(4, 4, 9); block(4, 4, 10);
+      block(6, 6, 9);
+    } else if (legPhase === false) {
+      block(4, 4, 9);
+      block(6, 6, 9); block(6, 6, 10);
+    } else {
+      block(4, 4, 9); block(6, 6, 9);
+    }
 
     ctx.restore();
   }
@@ -333,6 +422,14 @@
     heroLocal.x += (target.x - heroLocal.x) * Math.min(1, dt * 7);
     heroLocal.y += (target.y - heroLocal.y) * Math.min(1, dt * 7);
 
+    // Ease the facing angle too (via vector components, so it always turns
+    // the short way around rather than snapping through a wrap-around).
+    const targetAngle = WALL_ANGLE[currentWall];
+    const tv = { x: Math.cos(targetAngle), y: Math.sin(targetAngle) };
+    heroAngleVec.x += (tv.x - heroAngleVec.x) * Math.min(1, dt * 7);
+    heroAngleVec.y += (tv.y - heroAngleVec.y) * Math.min(1, dt * 7);
+    const heroAngle = Math.atan2(heroAngleVec.y, heroAngleVec.x);
+
     if (visible) {
       distance += runSpeed * 1.5 * speedMult * dt; // score rate: 9/sec at start -> 19.5/sec at cap
       hitFlash = Math.max(0, hitFlash - dt * 2.2);
@@ -342,8 +439,8 @@
         if (heroY >= 0) { heroY = 0; heroVy = 0; jumping = false; }
       }
       if (hud) {
-        const shown = Math.max(highScore, distance);
-        hud.querySelector('b').textContent = Math.floor(shown);
+        hud.querySelector('#gz-hero-high-val').textContent = Math.floor(highScore);
+        hud.querySelector('#gz-hero-score-val').textContent = Math.floor(distance);
       }
     }
     updateHazards(dt, heroZ, gridSpeed);
@@ -351,7 +448,7 @@
     const sortedHz = hazards.slice().sort((a, b) => b.z - a.z);
     for (const hz of sortedHz) drawHazard(hz, rot, globalFade);
 
-    drawHero({ x: heroLocal.x, y: heroLocal.y, rot }, heroZ, elapsed, globalFade);
+    drawHero({ x: heroLocal.x, y: heroLocal.y, rot }, heroZ, heroAngle, elapsed, globalFade);
 
     if (hitFlash > 0.01) {
       ctx.save();
@@ -362,8 +459,8 @@
     }
     if (boost > 0.01) {
       ctx.save();
-      ctx.globalAlpha = boost * 0.12;
-      ctx.fillStyle = '#5fd3e8';
+      ctx.globalAlpha = boost * 0.14;
+      ctx.fillStyle = `hsl(${boostHue}, 90%, 60%)`;
       ctx.fillRect(0, 0, W, H);
       ctx.restore();
     }
@@ -377,7 +474,7 @@
     for (const u of stops) { strokeRail('floor', u, 0, 0, 1, 200); strokeRail('ceiling', u, 0, 0, 1, 200); }
     for (const v of stops) { strokeRail('left', 0, v, 0, 1, 200); strokeRail('right', 0, v, 0, 1, 200); }
     for (const r of rings) drawRing(r.z, 0, 1);
-    drawHero({ x: heroLocal.x, y: heroLocal.y, rot: 0 }, heroDepth(), 0, 1);
+    drawHero({ x: heroLocal.x, y: heroLocal.y, rot: 0 }, heroDepth(), WALL_ANGLE[currentWall], 0, 1);
   }
 
   window.addEventListener('resize', size);
