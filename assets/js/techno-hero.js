@@ -1,18 +1,18 @@
-/* Homepage-only fixed background: an endless runner played directly on the
-   rotating perspective grid tunnel (previously just ambient decoration).
-   The tunnel's four walls (floor/ceiling/left/right) spin continuously while
-   its rings advance toward the camera — combined, that rotation + forward
-   motion is the "spiral": grid squares corkscrew in toward the player. The
-   player is a flat 2D square glued to the floor wall, so it spins and moves
-   forward together with the grid exactly like a marble stuck to the inside
-   of a rotating drum — camera-relative, only the level moves, Geometry-Dash
-   style. Spikes and floating platforms spawn along that same floor wall and
-   travel from the far end of the tunnel toward the player as it rotates in.
-   Only spikes reset the run; platforms are just optional footholds — missing
-   one, or standing on one, never costs anything. Jump (Up Arrow / W) is the
-   only control. Score ticks up dino-runner style: slow at first, gradually
-   accelerating. Scrolling away from the hero fades the game out and pauses
-   it — the tunnel keeps drifting either way. Pure canvas math, no images. */
+/* Homepage-only fixed background: an endless runner. A rotating perspective
+   grid tunnel spins in the background purely as ambient decoration (dim,
+   subtle) — the "spiraling squares" the site is themed around. Actual
+   gameplay lives in a separate, non-rotating lane anchored low on the
+   screen (clear of the headline/CTA text): two grid rails converge toward
+   the vanishing point, crossed by tile boundaries that advance toward the
+   camera exactly like the decorative rings, so the flat 2D player square
+   visibly runs from one grid square straight into the next as each tile
+   arrives and passes. Spikes and floating platforms spawn on that same
+   lane and approach the player the same way. Only spikes reset the run;
+   platforms are just optional footholds — missing one, or standing on one,
+   never costs anything. Jump (Up Arrow / W) is the only control. Score
+   ticks up dino-runner style: slow at first, gradually accelerating.
+   Scrolling away from the hero fades the game out and pauses it — the
+   decorative tunnel keeps drifting either way. Pure canvas math, no images. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -31,6 +31,7 @@
   const Z_PLAYER = 150;
   let UNIT, ULOCAL; // UNIT: on-screen px reference size at Z_PLAYER. ULOCAL: same size in tunnel-local units.
   let FLOOR_LOCAL_Y; // local y of the "floor" gameplay elements rest on, at Z_PLAYER's depth.
+  let LANE_HALF_W; // local half-width of the gameplay lane (the two grid rails the player runs between).
 
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -40,14 +41,17 @@
     cx = W / 2; cy = H / 2;
     A = Math.max(W, H) * 0.72; B = A;
     buildRings();
-    UNIT = Math.max(26, Math.min(H * 0.07, 52));
+    UNIT = Math.max(24, Math.min(H * 0.055, 42));
     ULOCAL = UNIT * Z_PLAYER / F;
     // The floor wall's true edge (B) is calibrated for the far-distance decor
     // rails and projects way off-canvas at the much-closer Z_PLAYER depth.
-    // Gameplay elements instead sit at a screen-calibrated floor position:
-    // roughly 3/4 down the canvas when the tunnel isn't rotated, converted
-    // back into local tunnel units at the player's fixed depth.
-    FLOOR_LOCAL_Y = (H * 0.74 - cy) * Z_PLAYER / F;
+    // Gameplay elements instead sit at a screen-calibrated floor position,
+    // low in the frame — clear of the centered headline/CTA copy — converted
+    // back into local tunnel units at the player's fixed depth. Unlike the
+    // decorative tunnel, this lane is never rotated, so it stays put instead
+    // of swinging past the text.
+    FLOOR_LOCAL_Y = (H * 0.90 - cy) * Z_PLAYER / F;
+    LANE_HALF_W = ULOCAL * 1.6;
   }
 
   function buildRings() {
@@ -235,14 +239,48 @@
     return Math.max(0, Math.min(1, nearFade * farFade));
   }
 
-  // ---------------- track rendering (projected onto the rotating floor wall) ----------------
-  function drawSpike(o, rot) {
-    const halfW = o.zThickness * 0.5;
+  // ---------------- the lane: two grid rails + advancing tile boundaries ----------------
+  // Never rotated (rot is always 0 here) — this is what keeps the game glued
+  // to a fixed spot low on screen instead of swinging past the headline text.
+  // The tile cross-ties reuse the same `rings` array as the decorative tunnel
+  // (already animated toward the camera), so each one visibly arrives at the
+  // player, and the square "ahead" of it becomes the new active tile — the
+  // cube runs from one grid square straight into the next.
+  function drawLane(globalFade) {
+    const railA = project(-LANE_HALF_W, FLOOR_LOCAL_Y, Z_FAR, 0);
+    const railAn = project(-LANE_HALF_W, FLOOR_LOCAL_Y, Z_NEAR, 0);
+    const railB = project(LANE_HALF_W, FLOOR_LOCAL_Y, Z_FAR, 0);
+    const railBn = project(LANE_HALF_W, FLOOR_LOCAL_Y, Z_NEAR, 0);
+    ctx.save();
+    ctx.globalAlpha = 0.5 * globalFade;
+    ctx.strokeStyle = 'rgba(140,185,255,.7)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(railA.x, railA.y); ctx.lineTo(railAn.x, railAn.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(railB.x, railB.y); ctx.lineTo(railBn.x, railBn.y); ctx.stroke();
+    ctx.restore();
+
+    for (const r of rings) {
+      const f = objFade(r.z) * globalFade;
+      if (f <= 0.02) continue;
+      const a = project(-LANE_HALF_W, FLOOR_LOCAL_Y, r.z, 0);
+      const b = project(LANE_HALF_W, FLOOR_LOCAL_Y, r.z, 0);
+      ctx.save();
+      ctx.globalAlpha = 0.45 * f;
+      ctx.strokeStyle = 'rgba(140,185,255,.9)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // ---------------- obstacle rendering (on the lane, never rotated) ----------------
+  function drawSpike(o) {
+    const halfW = Math.min(o.zThickness * 0.5, LANE_HALF_W * 0.9);
     const apexLocalY = FLOOR_LOCAL_Y - ULOCAL * 0.85;
     const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-    const base1 = project(-halfW, FLOOR_LOCAL_Y, z, rot);
-    const base2 = project(halfW, FLOOR_LOCAL_Y, z, rot);
-    const apex = project(0, apexLocalY, z, rot);
+    const base1 = project(-halfW, FLOOR_LOCAL_Y, z, 0);
+    const base2 = project(halfW, FLOOR_LOCAL_Y, z, 0);
+    const apex = project(0, apexLocalY, z, 0);
     const f = objFade(z);
     ctx.save();
     ctx.globalAlpha = Math.max(0.35, f);
@@ -259,14 +297,14 @@
     ctx.restore();
   }
 
-  function drawPlatform(o, rot) {
-    const halfW = o.zThickness * 0.5;
+  function drawPlatform(o) {
+    const halfW = Math.min(o.zThickness * 0.5, LANE_HALF_W * 0.9);
     const topLocalY = FLOOR_LOCAL_Y - o.height * ULOCAL;
     const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-    const p1 = project(-halfW, topLocalY, z, rot);
-    const p2 = project(halfW, topLocalY, z, rot);
-    const p3 = project(halfW, FLOOR_LOCAL_Y, z, rot);
-    const p4 = project(-halfW, FLOOR_LOCAL_Y, z, rot);
+    const p1 = project(-halfW, topLocalY, z, 0);
+    const p2 = project(halfW, topLocalY, z, 0);
+    const p3 = project(halfW, FLOOR_LOCAL_Y, z, 0);
+    const p4 = project(-halfW, FLOOR_LOCAL_Y, z, 0);
     const f = objFade(z);
     ctx.save();
     ctx.globalAlpha = Math.max(0.35, f);
@@ -279,10 +317,10 @@
     ctx.restore();
   }
 
-  function drawObstacles(rot) {
+  function drawObstacles() {
     for (const o of obstacles) {
-      if (o.kind === 'spike') drawSpike(o, rot);
-      else if (o.kind === 'platform') drawPlatform(o, rot);
+      if (o.kind === 'spike') drawSpike(o);
+      else if (o.kind === 'platform') drawPlatform(o);
     }
   }
 
@@ -360,16 +398,17 @@
       }
     }
 
-    drawObstacles(rot);
+    drawLane(globalFade);
+    drawObstacles();
 
     const f = globalFade * charAlpha;
     if (f > 0.02) {
       jumpAngle = jumping ? jumpAngle + dt * 9 : 0;
       const liftLocal = heroY * (Z_PLAYER / F); // convert screen-px lift back to local units at the player's depth
-      const p = project(0, FLOOR_LOCAL_Y - liftLocal, Z_PLAYER, rot);
+      const p = project(0, FLOOR_LOCAL_Y - liftLocal, Z_PLAYER, 0);
       ctx.save();
       ctx.globalAlpha = f;
-      drawPlayerSquare(p.x, p.y, UNIT, rot + jumpAngle);
+      drawPlayerSquare(p.x, p.y, UNIT, jumpAngle);
       ctx.restore();
     }
 
@@ -390,6 +429,7 @@
     for (const u of stops) { strokeRail('floor', u, 0, 0, 0.85, 200); strokeRail('ceiling', u, 0, 0, 0.5, 200); }
     for (const v of stops) { strokeRail('left', 0, v, 0, 0.5, 200); strokeRail('right', 0, v, 0, 0.5, 200); }
     for (const r of rings) drawRing(r.z, 0, 0.6);
+    drawLane(1);
     const p = project(0, FLOOR_LOCAL_Y, Z_PLAYER, 0);
     drawPlayerSquare(p.x, p.y, UNIT, 0);
   }

@@ -88,10 +88,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const ann = document.getElementById('announcement');
   if (ann && cfg.announcement) ann.textContent = cfg.announcement;
 
-  // Live reservation page (newegg.com/promotions/gamer-zone) — shows today's
-  // open/closed status automatically and always resolves, unlike the
-  // Verkada guest-checkin link which requires a fresh per-day token.
-  const verkada = cfg.reservationUrl || cfg.verkadaUrl;
+  // Verkada guest check-in/preregister link — the newegg.com/promotions
+  // reservation page is retired and no longer used.
+  const verkada = cfg.verkadaUrl || cfg.reservationUrl;
   document.querySelectorAll('[data-verkada]').forEach(el => { el.href = verkada; el.target = '_blank'; el.rel = 'noopener'; });
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   document.querySelectorAll('[data-verkada-note]').forEach(el => {
