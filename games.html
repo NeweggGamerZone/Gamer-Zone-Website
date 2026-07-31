@@ -38,17 +38,28 @@
   </section>
 
   <section class="reveal">
+    <h2><i data-ic="trophy"></i> Top 5 this month</h2>
+    <p class="dim">Most hours played at the Zone this month.</p>
+    <div id="games-top5" style="margin-top:1rem"></div>
+  </section>
+
+  <section class="reveal">
     <div class="chip-row" id="games-filters">
-      <span class="chip active" data-mode="platform">By Platform</span>
+      <span class="chip active" data-mode="platform">By Device</span>
       <span class="chip" data-mode="az">A&ndash;Z</span>
-      <span class="chip" data-platform="pc">🖥️ PC</span>
-      <span class="chip" data-platform="console">🎮 Consoles</span>
-      <span class="chip" data-platform="vr">🥽 VR</span>
-      <span class="chip" data-platform="racing-sim">🏁 Racing Simulator</span>
-      <span class="chip" data-platform="arcade">🕹️ Arcade</span>
-      <span class="chip" data-platform="party">🎉 Party Games</span>
+      <span class="chip" data-platform="pc"><i data-ic="pc"></i> PC</span>
+      <span class="chip" data-platform="console"><i data-ic="gamepad"></i> Consoles</span>
+      <span class="chip" data-platform="vr"><i data-ic="vr"></i> VR</span>
+      <span class="chip" data-platform="racing-sim"><i data-ic="wheel"></i> Racing Simulators</span>
+      <span class="chip" data-platform="arcade"><i data-ic="zero"></i> Arcade</span>
     </div>
-    <div id="games-list"></div>
+    <p class="dim" style="margin-top:.7rem">Or browse by genre:</p>
+    <div class="chip-row" id="games-genre-filters" style="margin-top:.4rem">
+      <span class="chip" data-genre="coop">Co-op</span>
+      <span class="chip" data-genre="single">Single Player</span>
+      <span class="chip" data-genre="competitive">Competitive</span>
+    </div>
+    <div id="games-list" style="margin-top:1rem"></div>
     <p class="dim" style="margin-top:1rem">Don't see your favorite? <a data-cfg-href="discordUrl" href="#">Let us know on Discord</a> &mdash; we're always adding to the library.</p>
   </section>
 </main>
@@ -61,7 +72,6 @@
   </div>
   <div class="footer-brand" aria-hidden="true"><img class="ne-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone"></div>
   <p class="legal">Minors under 18 must be accompanied by an adult (18+) at all times &middot; ID may be required &middot; Free play subject to availability; hours may change for private events &middot; All trademarks belong to their respective owners &middot; &copy; 2026 Newegg Commerce, Inc.</p>
-  <div class="hazard"></div>
 </footer>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/games.js"></script>

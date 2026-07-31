@@ -88,15 +88,12 @@
   <div class="modal">
     <button class="close" id="amb-close" aria-label="Close">&times;</button>
     <h3>Ambassador application</h3>
-    <p class="dim" style="font-size:.88rem">Submits straight to the Gamer Zone team — no email app needed. Fields marked <span class="req">*</span> are required.</p>
+    <p class="dim" style="font-size:.88rem">Submits straight to the Gamer Zone team. Fields marked <span class="req">*</span> are required.</p>
     <form id="amb-form" action="https://formspree.io/f/xrenvwra" method="POST">
       <label>Name <span class="req">*</span></label><input name="name" required>
       <label>Email <span class="req">*</span></label><input name="email" type="email" required>
-      <label>Phone</label><input name="phone" type="tel">
-      <label>Ambassador type <span class="req">*</span></label>
-      <select name="type" required><option value="">Select…</option><option>Community Leader</option><option>Esports Team</option><option>Event Organizer</option></select>
       <label>Organization / team (if any)</label><input name="org">
-      <label>How many events can you host? <span class="req">*</span></label><input name="events" type="number" min="1" required>
+      <label>How many events can you host in the next 6 months? <span class="req">*</span></label><input name="events" type="number" min="1" required>
       <label>Expected attendees per event? <span class="req">*</span></label><input name="attendees" type="number" min="1" required>
       <label>Would you like this event to recur monthly? <span class="req">*</span></label>
       <select name="recurMonthly" required><option value="">Select…</option><option>Yes</option><option>No</option></select>
@@ -120,7 +117,6 @@
   </div>
   <div class="footer-brand" aria-hidden="true"><img class="ne-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone"></div>
   <p class="legal">Minors under 18 must be accompanied by an adult (18+) at all times &middot; ID may be required &middot; Ambassador perks are discretionary and subject to hosting the cumulative events required for each tier &middot; All trademarks belong to their respective owners &middot; &copy; 2026 Newegg Commerce, Inc.</p>
-  <div class="hazard"></div>
 </footer>
 
 <script src="assets/js/main.js"></script>

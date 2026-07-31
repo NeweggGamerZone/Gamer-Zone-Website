@@ -50,32 +50,59 @@
   const weekEndD = new Date(weekStart + 'T12:00:00'); weekEndD.setDate(weekEndD.getDate() + 6);
   const weekEnd = weekEndD.toISOString().slice(0, 10);
 
-  const events = (data.events || [])
-    .filter(e => e.date >= today && e.date <= weekEnd && e.type !== 'closed')
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 5);
+  // This week's full slate (Mon–Sun) — used to find the week's theme even if
+  // the theme-night day has already passed, and to list remaining closures /
+  // special events for the rest of the week.
+  const weekAll = (data.events || []).filter(e => e.date >= weekStart && e.date <= weekEnd);
+  const remaining = weekAll.filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+
+  // The week's theme: whichever "theme-night" event is on the books for this
+  // week (weekly themes replace the old one-off theme-night model, but until
+  // themes are tagged directly on the data, we surface that day's title as
+  // the week's theme). Falls back to a generic label when nothing is set.
+  const themeEvent = weekAll.find(e => e.type === 'theme-night');
+  const themeName = themeEvent ? themeEvent.title : 'Free Play Week';
+
+  // Closures and special events (tournaments, majors, community, EDU, vendor)
+  // are called out below the theme — theme-night itself is folded into the
+  // theme line above, not repeated as its own row.
+  const closures = remaining.filter(e => e.type === 'closed');
+  const specials = remaining.filter(e => e.type !== 'closed' && e.type !== 'theme-night');
 
   const monthDate = iso => {
     const d = new Date(iso + 'T12:00:00');
-    return { mon: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(), day: d.getDate() };
+    return { mon: d.toLocaleDateString('en-US', { month: 'short' }), day: d.getDate() };
   };
 
-  function row(ev) {
+  const themeNameEl = document.getElementById('eu-theme-name');
+  const themeDatesEl = document.getElementById('eu-theme-dates');
+  if (themeNameEl) themeNameEl.innerHTML = `Weekly Theme: <span class="accent">${GZ.esc(themeName)}</span>`;
+  if (themeDatesEl) {
+    const s = monthDate(weekStart), e = monthDate(weekEnd);
+    themeDatesEl.textContent = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
+  }
+
+  function row(ev, { closure = false } = {}) {
     const { mon, day } = monthDate(ev.date);
-    const isMajor = ev.type === 'major' || ev.featured;
-    return `<div class="eu-row${isMajor ? ' eu-major' : ''}">
+    const isMajor = !closure && (ev.type === 'major' || ev.featured);
+    return `<div class="eu-row${isMajor ? ' eu-major' : ''}${closure ? ' eu-closure' : ''}">
       <div class="eu-date-wrap">
-        <span class="eu-date">${mon} ${day}</span>
+        <span class="eu-date">${mon.toUpperCase()} ${day}</span>
         ${isMajor ? '<span class="eu-major-mark" aria-hidden="true">&#9733;</span>' : ''}
       </div>
       <div class="eu-info">
-        <div class="eu-name">${GZ.esc(ev.title)}</div>
+        <div class="eu-name">${closure ? 'Closed — ' : ''}${GZ.esc(ev.title.replace(/^Closed\s*[—-]\s*/, ''))}</div>
         <div class="eu-meta">${ev.time ? GZ.esc(ev.time) : ''}</div>
       </div>
     </div>`;
   }
 
-  list.innerHTML = events.length
-    ? events.map(row).join('')
-    : '<div class="calendar-empty">New dates dropping soon &mdash; check back shortly.</div>';
+  const rows = [
+    ...closures.map(e => row(e, { closure: true })),
+    ...specials.map(e => row(e)),
+  ];
+
+  list.innerHTML = rows.length
+    ? rows.join('')
+    : '<div class="calendar-empty">Just the weekly theme this week — no closures or special events on the books.</div>';
 })();

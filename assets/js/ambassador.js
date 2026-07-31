@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.addEventListener('submit', async e => {
     e.preventDefault();
     const f = e.target;
-    const g = n => (f.elements[n].value || '').trim();
+    const g = n => (f.elements[n] ? f.elements[n].value : '' || '').trim();
     const recurMonthly = g('recurMonthly');
     f.elements['_subject'].value = recurMonthly === 'Yes'
       ? 'Ambassador Application Program — Recurring Monthly Event'
@@ -50,11 +50,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         '',
         `Name: ${g('name')}`,
         `Email: ${g('email')}`,
-        `Phone: ${g('phone')}`,
-        `Ambassador type: ${g('type')}`,
         `Organization / team: ${g('org')}`,
         '',
-        `Events you can host over 6 months: ${g('events')}`,
+        `Events you can host over the next 6 months: ${g('events')}`,
         `Expected attendees per event: ${g('attendees')}`,
         `Recurs monthly: ${recurMonthly}`,
         `Games / format: ${g('games')}`,

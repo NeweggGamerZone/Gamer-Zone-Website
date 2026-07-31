@@ -1,19 +1,18 @@
-/* Homepage-only fixed background: an endless side-scrolling runner in the
-   style of Geometry Dash. The rotating perspective grid tunnel from earlier
-   versions is kept, but purely as ambient decoration (dimmed, no gameplay
-   tied to it) — the actual game is a flat 2D track along the lower part of
-   the screen. A small pseudo-3D cube sits at a fixed screen position (it
-   never moves horizontally); the ground/platforms/spikes scroll from right
-   to left underneath and toward it, so relative to the camera only the
-   level moves, exactly like Geometry Dash's cube mode. Up Arrow or W jumps
-   (not Space/Down, which the browser treats as page-scroll keys) over spike
-   triangles and pits, or up onto floating platforms 1-3 cube-units tall —
-   clearing a platform requires jumping before its leading edge reaches the
-   player and staying at or above its height until it's passed; the cube
-   spins while airborne, Geometry-Dash style. Score ticks up dino-runner
-   style: slow at first, gradually accelerating. Scrolling away from the
-   hero fades the game out and pauses it — the decorative grid keeps
-   drifting either way. Pure canvas math, no images. */
+/* Homepage-only fixed background: an endless runner played directly on the
+   rotating perspective grid tunnel (previously just ambient decoration).
+   The tunnel's four walls (floor/ceiling/left/right) spin continuously while
+   its rings advance toward the camera — combined, that rotation + forward
+   motion is the "spiral": grid squares corkscrew in toward the player. The
+   player is a flat 2D square glued to the floor wall, so it spins and moves
+   forward together with the grid exactly like a marble stuck to the inside
+   of a rotating drum — camera-relative, only the level moves, Geometry-Dash
+   style. Spikes and floating platforms spawn along that same floor wall and
+   travel from the far end of the tunnel toward the player as it rotates in.
+   Only spikes reset the run; platforms are just optional footholds — missing
+   one, or standing on one, never costs anything. Jump (Up Arrow / W) is the
+   only control. Score ticks up dino-runner style: slow at first, gradually
+   accelerating. Scrolling away from the hero fades the game out and pauses
+   it — the tunnel keeps drifting either way. Pure canvas math, no images. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -25,10 +24,13 @@
   const Z_NEAR = 60, Z_FAR = 1500;
   let A, B;
   let rings = [];
-  const ROT_SPEED = 0.045; // slow ambient roll, radians/sec — purely decorative now
+  const ROT_SPEED = 0.045; // tunnel spin speed, radians/sec — this + forward motion is the "spiral"
 
-  // Side-scroll runner geometry — recomputed on resize in size().
-  let UNIT, GROUND_Y, PLAYER_X;
+  // Gameplay depth plane — the player always sits at this fixed z on the
+  // floor wall; obstacles travel from Z_FAR down to (and past) this point.
+  const Z_PLAYER = 150;
+  let UNIT, ULOCAL; // UNIT: on-screen px reference size at Z_PLAYER. ULOCAL: same size in tunnel-local units.
+  let FLOOR_LOCAL_Y; // local y of the "floor" gameplay elements rest on, at Z_PLAYER's depth.
 
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -39,8 +41,13 @@
     A = Math.max(W, H) * 0.72; B = A;
     buildRings();
     UNIT = Math.max(26, Math.min(H * 0.07, 52));
-    GROUND_Y = H * 0.72;
-    PLAYER_X = W * 0.16;
+    ULOCAL = UNIT * Z_PLAYER / F;
+    // The floor wall's true edge (B) is calibrated for the far-distance decor
+    // rails and projects way off-canvas at the much-closer Z_PLAYER depth.
+    // Gameplay elements instead sit at a screen-calibrated floor position:
+    // roughly 3/4 down the canvas when the tunnel isn't rotated, converted
+    // back into local tunnel units at the player's fixed depth.
+    FLOOR_LOCAL_Y = (H * 0.74 - cy) * Z_PLAYER / F;
   }
 
   function buildRings() {
@@ -49,7 +56,7 @@
     for (let i = 0; i < count; i++) rings.push({ z: Z_NEAR + (i / count) * (Z_FAR - Z_NEAR) });
   }
 
-  // ---------------- decorative background tunnel (unchanged math) ----------------
+  // ---------------- tunnel projection ----------------
   function project(x, y, z, rot) {
     const c = Math.cos(rot), s = Math.sin(rot);
     const rx = x * c - y * s, ry = x * s + y * c;
@@ -110,36 +117,30 @@
       : SPEED_CAP - (SPEED_CAP - SPEED_START) * Math.exp(-(distance - RAMP_FROM) / RAMP_EASE);
   }
 
-  // ---------------- pseudo-3D cube (player) ----------------
-  const CUBE_TOP = 'rgba(255,255,255,1)';
-  const CUBE_LEFT = 'rgba(178,204,255,1)';
-  const CUBE_RIGHT = 'rgba(120,150,214,1)';
-  const CUBE_EDGE = 'rgba(20,30,50,.55)';
-
-  function drawCube(s) {
-    const depth = s * 0.42;
-    const hw = s / 2;
-    ctx.fillStyle = CUBE_LEFT;
+  // ---------------- flat 2D square player, glued to the floor wall ----------------
+  function drawPlayerSquare(screenX, screenY, size, rot) {
+    ctx.save();
+    ctx.translate(screenX, screenY);
+    ctx.rotate(rot);
+    const h = size / 2;
+    ctx.fillStyle = 'rgba(235,242,255,.97)';
+    ctx.strokeStyle = 'rgba(90,150,255,.9)';
+    ctx.lineWidth = Math.max(1.5, size * 0.045);
+    ctx.shadowColor = 'rgba(120,170,255,.65)';
+    ctx.shadowBlur = size * 0.35;
     ctx.beginPath();
-    ctx.moveTo(-hw, 0); ctx.lineTo(-hw, -s); ctx.lineTo(0, -s + depth * 0.28); ctx.lineTo(0, depth * 0.28);
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = CUBE_EDGE; ctx.lineWidth = 1; ctx.stroke();
-    ctx.fillStyle = CUBE_RIGHT;
-    ctx.beginPath();
-    ctx.moveTo(hw, 0); ctx.lineTo(hw, -s); ctx.lineTo(0, -s + depth * 0.28); ctx.lineTo(0, depth * 0.28);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = CUBE_TOP;
-    ctx.beginPath();
-    ctx.moveTo(-hw, -s); ctx.lineTo(0, -s - depth * 0.55); ctx.lineTo(hw, -s); ctx.lineTo(0, -s + depth * 0.28);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.rect(-h, -h, size, size);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
   }
 
-  // ---------------- endless-runner track ----------------
-  let obstacles = [];       // { kind: 'spike'|'gap'|'platform', x, width, height? } — x is screen-space, decreasing over time
+  // ---------------- endless spiral track (lives on the floor wall) ----------------
+  // Obstacles travel in tunnel-depth (z), spawning far away (near Z_FAR) and
+  // approaching the fixed Z_PLAYER plane as the tunnel rotates them in.
+  let obstacles = [];   // { kind: 'spike'|'gap'|'platform', z (near/leading edge), zThickness, height? }
   let spawnTimer = 1.2;
   let heroY = 0, heroVy = 0, jumping = false, jumpAngle = 0;
-  // Tuned so a full jump (v^2/2g) clears a 3-unit platform at the largest
-  // UNIT size with comfortable margin, while staying reasonably snappy.
   const GRAVITY = 2300, JUMP_V = 950;
   let distance = 0, hitFlash = 0, invuln = 0;
   let highScore = 0;
@@ -152,39 +153,45 @@
     if (!visible || e.repeat) return;
     const tag = (e.target && e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-    // Only jump is bound — Space/Down are left alone (default browser
-    // page-scroll keys); there's no left/right in an auto-runner.
     if (e.code === 'KeyW' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
   });
 
   function spawnObstacle() {
     const r = Math.random();
-    if (r < 0.40) {
-      obstacles.push({ kind: 'spike', x: W + 40, width: UNIT * 0.8 });
-    } else if (r < 0.55) {
-      obstacles.push({ kind: 'gap', x: W + 40, width: UNIT * (1.1 + Math.random() * 0.4) });
+    if (r < 0.45) {
+      obstacles.push({ kind: 'spike', z: Z_FAR, zThickness: ULOCAL * 0.9 });
     } else {
       const heights = [1, 1, 2, 2, 3];
       const h = heights[Math.floor(Math.random() * heights.length)];
-      obstacles.push({ kind: 'platform', x: W + 40, width: UNIT * (1.6 + Math.random() * 0.9), height: h });
+      obstacles.push({ kind: 'platform', z: Z_FAR, zThickness: ULOCAL * (1.7 + Math.random() * 1.0), height: h });
     }
   }
 
-  function updateObstacles(dt, scrollSpeed) {
+  function updateObstacles(dt, zSpeed) {
     spawnTimer -= dt;
     if (spawnTimer <= 0) {
       spawnTimer = Math.max(0.95, 1.9 - distance * 0.0015) + Math.random() * 0.6;
       spawnObstacle();
     }
     for (let i = obstacles.length - 1; i >= 0; i--) {
-      obstacles[i].x -= scrollSpeed * dt;
-      if (obstacles[i].x + obstacles[i].width < -40) obstacles.splice(i, 1);
+      obstacles[i].z -= zSpeed * dt;
+      if (obstacles[i].z + obstacles[i].zThickness < Z_NEAR - 40) obstacles.splice(i, 1);
     }
   }
 
-  function obstacleAtPlayer() {
+  // Only spikes are checked for a reset — platforms are purely optional
+  // footholds. An obstacle is "at the player" while its z-span straddles Z_PLAYER.
+  function spikeAtPlayer() {
     for (const o of obstacles) {
-      if (PLAYER_X >= o.x && PLAYER_X <= o.x + o.width) return o;
+      if (o.kind !== 'spike') continue;
+      if (Z_PLAYER <= o.z && Z_PLAYER >= o.z - o.zThickness) return o;
+    }
+    return null;
+  }
+  function platformAtPlayer() {
+    for (const o of obstacles) {
+      if (o.kind !== 'platform') continue;
+      if (Z_PLAYER <= o.z && Z_PLAYER >= o.z - o.zThickness) return o;
     }
     return null;
   }
@@ -203,72 +210,79 @@
   function updatePlayer(dt) {
     heroVy -= GRAVITY * dt;
     heroY += heroVy * dt;
-    const o = obstacleAtPlayer();
-    let floor = 0, dangerTop = null;
-    if (o) {
-      if (o.kind === 'gap') floor = null;
-      else if (o.kind === 'platform') { floor = o.height * UNIT; dangerTop = floor; }
-      else if (o.kind === 'spike') { floor = 0; dangerTop = UNIT * 0.85; }
-    }
-    if (invuln <= 0 && dangerTop !== null && heroY < dangerTop - 0.5) {
-      triggerHit();
-    } else if (invuln <= 0 && floor === null && heroY <= 0) {
-      triggerHit();
-    } else if (floor !== null && heroY <= floor && heroVy <= 0) {
+
+    const plat = platformAtPlayer();
+    const floor = plat ? plat.height * UNIT : 0;
+    if (floor > 0 && heroY <= floor && heroVy <= 0) {
       heroY = floor; heroVy = 0; jumping = false;
+    } else if (heroY <= 0 && heroVy <= 0) {
+      heroY = 0; heroVy = 0; jumping = false;
+    }
+
+    // Spikes are the only thing that can reset the run — never platforms.
+    const spike = spikeAtPlayer();
+    if (invuln <= 0 && spike && heroY < UNIT * 0.85 - 0.5) {
+      triggerHit();
     }
   }
 
-  // ---------------- track rendering ----------------
-  function drawGround() {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(120,170,255,.55)';
-    ctx.lineWidth = 3;
-    ctx.shadowColor = 'rgba(90,150,255,.6)';
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    let x = 0;
-    const gaps = obstacles.filter(o => o.kind === 'gap').sort((a, b) => a.x - b.x);
-    for (const g of gaps) {
-      if (g.x > x) { ctx.moveTo(x, GROUND_Y); ctx.lineTo(g.x, GROUND_Y); }
-      x = g.x + g.width;
-    }
-    if (x < W) { ctx.moveTo(x, GROUND_Y); ctx.lineTo(W, GROUND_Y); }
-    ctx.stroke();
-    ctx.restore();
+  // Gameplay elements stay fully visible through the whole player-relevant
+  // range — only fade briefly at spawn (far) and right after they pass the
+  // camera (near), unlike the decorative rails' much steeper fadeFor().
+  function objFade(z) {
+    const nearFade = Math.min(1, (z - (Z_NEAR - 40)) / 70);
+    const farFade = Math.min(1, (Z_FAR - z) / 220);
+    return Math.max(0, Math.min(1, nearFade * farFade));
   }
 
-  function drawBlock(x, topY, width, height) {
-    const topH = Math.min(10, height * 0.3);
-    ctx.fillStyle = 'rgba(150,190,255,.92)';
-    ctx.fillRect(x, topY, width, topH);
-    ctx.fillStyle = 'rgba(70,100,160,.88)';
-    ctx.fillRect(x, topY + topH, width, height - topH);
-    ctx.strokeStyle = 'rgba(20,30,50,.6)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, topY + 0.5, width - 1, height - 1);
-  }
-
-  function drawSpike(o) {
-    const h = UNIT * 0.85;
+  // ---------------- track rendering (projected onto the rotating floor wall) ----------------
+  function drawSpike(o, rot) {
+    const halfW = o.zThickness * 0.5;
+    const apexLocalY = FLOOR_LOCAL_Y - ULOCAL * 0.85;
+    const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
+    const base1 = project(-halfW, FLOOR_LOCAL_Y, z, rot);
+    const base2 = project(halfW, FLOOR_LOCAL_Y, z, rot);
+    const apex = project(0, apexLocalY, z, rot);
+    const f = objFade(z);
     ctx.save();
+    ctx.globalAlpha = Math.max(0.35, f);
     ctx.fillStyle = 'rgba(255,150,40,.95)';
     ctx.shadowColor = 'rgba(255,140,40,.9)';
     ctx.shadowBlur = 10;
     ctx.beginPath();
-    ctx.moveTo(o.x, GROUND_Y);
-    ctx.lineTo(o.x + o.width / 2, GROUND_Y - h);
-    ctx.lineTo(o.x + o.width, GROUND_Y);
+    ctx.moveTo(base1.x, base1.y);
+    ctx.lineTo(apex.x, apex.y);
+    ctx.lineTo(base2.x, base2.y);
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,200,120,.9)'; ctx.lineWidth = 1.4; ctx.stroke();
     ctx.restore();
   }
 
-  function drawObstacles() {
+  function drawPlatform(o, rot) {
+    const halfW = o.zThickness * 0.5;
+    const topLocalY = FLOOR_LOCAL_Y - o.height * ULOCAL;
+    const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
+    const p1 = project(-halfW, topLocalY, z, rot);
+    const p2 = project(halfW, topLocalY, z, rot);
+    const p3 = project(halfW, FLOOR_LOCAL_Y, z, rot);
+    const p4 = project(-halfW, FLOOR_LOCAL_Y, z, rot);
+    const f = objFade(z);
+    ctx.save();
+    ctx.globalAlpha = Math.max(0.35, f);
+    ctx.fillStyle = 'rgba(70,100,160,.88)';
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(150,190,255,.85)'; ctx.lineWidth = 1.4; ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawObstacles(rot) {
     for (const o of obstacles) {
-      if (o.kind === 'platform') drawBlock(o.x, GROUND_Y - o.height * UNIT, o.width, o.height * UNIT);
-      else if (o.kind === 'spike') drawSpike(o);
+      if (o.kind === 'spike') drawSpike(o, rot);
+      else if (o.kind === 'platform') drawPlatform(o, rot);
     }
   }
 
@@ -311,7 +325,7 @@
   function frame(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts; elapsed += dt;
-    const rot = elapsed * ROT_SPEED; // reads clockwise on screen — ambient only
+    const rot = elapsed * ROT_SPEED; // tunnel spin — combined with forward z-motion, this is the spiral
     const globalFade = Math.min(1, elapsed / 3.2);
     const hue = (200 + elapsed * 6) % 360;
     charAlpha += ((visible ? 1 : 0) - charAlpha) * Math.min(1, dt * 4);
@@ -319,22 +333,24 @@
 
     ctx.clearRect(0, 0, W, H);
 
-    // Decorative rotating tunnel — dimmed, no gameplay tied to it.
-    const decorFade = globalFade * 0.5;
+    const decorFade = globalFade * 0.85;
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0, rot, decorFade, hue); strokeRail('ceiling', u, 0, rot, decorFade, hue); }
-    for (const v of stops) { strokeRail('left', 0, v, rot, decorFade, hue); strokeRail('right', 0, v, rot, decorFade, hue); }
+    for (const u of stops) { strokeRail('floor', u, 0, rot, decorFade, hue); strokeRail('ceiling', u, 0, rot, decorFade * 0.6, hue); }
+    for (const v of stops) { strokeRail('left', 0, v, rot, decorFade * 0.6, hue); strokeRail('right', 0, v, rot, decorFade * 0.6, hue); }
 
     updateRunSpeed(distance);
-    const scrollSpeed = BASE_GRID_SPEED * (runSpeed / SPEED_START);
+    const ringSpeed = BASE_GRID_SPEED * (runSpeed / SPEED_START);
     for (const r of rings) {
-      r.z -= scrollSpeed * 0.4 * dt; // slower parallax drift than the foreground track
+      r.z -= ringSpeed * 0.4 * dt;
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
       drawRing(r.z, rot, decorFade);
     }
 
+    // Obstacles travel faster than the decorative rings (foreground layer),
+    // same ratio the old flat runner used between ground speed and parallax.
+    const obstacleSpeed = ringSpeed * 2.5;
     if (visible) {
-      updateObstacles(dt, scrollSpeed);
+      updateObstacles(dt, obstacleSpeed);
       updatePlayer(dt);
       distance += runSpeed * 1.5 * dt;
       hitFlash = Math.max(0, hitFlash - dt * 2.2);
@@ -344,24 +360,23 @@
       }
     }
 
-    drawGround();
-    drawObstacles();
+    drawObstacles(rot);
 
     const f = globalFade * charAlpha;
     if (f > 0.02) {
       jumpAngle = jumping ? jumpAngle + dt * 9 : 0;
+      const liftLocal = heroY * (Z_PLAYER / F); // convert screen-px lift back to local units at the player's depth
+      const p = project(0, FLOOR_LOCAL_Y - liftLocal, Z_PLAYER, rot);
       ctx.save();
-      ctx.translate(PLAYER_X, GROUND_Y - heroY);
-      ctx.rotate(jumpAngle);
       ctx.globalAlpha = f;
-      drawCube(UNIT);
+      drawPlayerSquare(p.x, p.y, UNIT, rot + jumpAngle);
       ctx.restore();
     }
 
     if (hitFlash > 0.01) {
       ctx.save();
       ctx.globalAlpha = hitFlash * 0.22;
-      ctx.fillStyle = '#ff2e78';
+      ctx.fillStyle = '#FA9D28';
       ctx.fillRect(0, 0, W, H);
       ctx.restore();
     }
@@ -372,14 +387,11 @@
   function drawStatic() {
     ctx.clearRect(0, 0, W, H);
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0, 0, 0.5, 200); strokeRail('ceiling', u, 0, 0, 0.5, 200); }
+    for (const u of stops) { strokeRail('floor', u, 0, 0, 0.85, 200); strokeRail('ceiling', u, 0, 0, 0.5, 200); }
     for (const v of stops) { strokeRail('left', 0, v, 0, 0.5, 200); strokeRail('right', 0, v, 0, 0.5, 200); }
-    for (const r of rings) drawRing(r.z, 0, 0.5);
-    drawGround();
-    ctx.save();
-    ctx.translate(PLAYER_X, GROUND_Y);
-    drawCube(UNIT);
-    ctx.restore();
+    for (const r of rings) drawRing(r.z, 0, 0.6);
+    const p = project(0, FLOOR_LOCAL_Y, Z_PLAYER, 0);
+    drawPlayerSquare(p.x, p.y, UNIT, 0);
   }
 
   window.addEventListener('resize', size);

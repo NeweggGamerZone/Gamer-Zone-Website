@@ -160,6 +160,7 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .flyer-card .fc-foot b { color: var(--fc); }
 
 .calendar-img { border: 1px solid var(--line); clip-path: var(--clip); cursor: pointer; }
+.archive-month .calendar-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
 .calendar-empty { border: 2px dashed var(--line); clip-path: var(--clip); padding: 2.4rem 1.5rem; text-align: center; color: var(--ink-dim); }
 details.archive-month { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: .9rem 1.1rem; margin-bottom: .7rem; }
 details.archive-month summary { cursor: pointer; font-family: var(--head); font-weight: 700; text-transform: uppercase; font-size: .9rem; letter-spacing: .04em; }
@@ -460,6 +461,17 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-eyebrow p{font-family:var(--eu-body);font-size:max(14px,.9rem);color:var(--ink-dim);margin-top:.3rem}
 .eu-brand{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ne-orange);font-size:max(14px,.95rem);text-align:right;white-space:nowrap;flex:none}
 .eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
+
+.eu-theme-row{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-bottom:clamp(1rem,3vw,1.6rem);margin-bottom:clamp(.6rem,2vw,1rem);border-bottom:1px solid rgba(242,244,248,.22)}
+.eu-theme-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(1.05rem,2.6vw,1.6rem);color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.eu-theme-name .accent{color:var(--ne-orange)}
+.eu-theme-dates{font-family:var(--eu-body);font-weight:700;letter-spacing:.03em;color:var(--ink-dim);white-space:nowrap;font-size:max(14px,1rem)}
+.eu-row.eu-closure{opacity:.85}
+.eu-row.eu-closure .eu-name{color:var(--ink-dim)}
+.eu-row.eu-closure .eu-date{color:var(--ink-dim)}
+@media (max-width:640px){
+  .eu-theme-row{flex-direction:column;align-items:flex-start;gap:.3rem}
+}
 
 .eu-list{display:flex;flex-direction:column}
 .eu-row{display:flex;align-items:baseline;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
