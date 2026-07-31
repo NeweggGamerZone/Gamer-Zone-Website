@@ -1,27 +1,19 @@
-/* Homepage-only fixed background: a full-page grid tunnel through the inside
-   of a PC — and a small interactive bit riding along it. A small pseudo-3D
-   cube (three shaded faces — top/left/right — drawn each frame with simple
-   canvas paths, no images) rides the slow ambient spin of the grid, sized to
-   match the grid square it's standing on but capped so it always stays
-   fully on screen, always centered on whichever of the tunnel's 4 sides
-   (floor/right/ceiling/left) it currently occupies. It turns so it always
-   reads as "standing on" that square, including compensating for the grid's
-   own continuous slow roll. Left/Right (or A/D) glide it over to a
-   different side — the grid itself never rotates in response, only the
-   character moves. Up Arrow or W jumps (not Space/Down, which the browser
-   treats as page-scroll keys) over the spiked orange hazard lines traveling
-   out of the vanishing point toward the viewer, riding along an actual
-   background ring line so they read as part of the grid (single-wall,
-   opposite-wall, adjacent-wall, or full-ring patterns); cyan/rainbow RGB
-   pulses (same ring-attached approach) instead grant a brief speed boost
-   tinted the pulse's own color when caught. Grid lines, hazards, and pulses
-   that have already scrolled past the cube's depth (and so can no longer
-   affect it) fade down toward the viewer, making it visually obvious which
-   lines are still "live" versus already resolved. Score ticks up
-   dino-runner style: slow at first, gradually accelerating after 100m.
-   Scrolling away from the hero fades the character out and pauses scoring —
-   the grid keeps drifting either way. Pure canvas perspective-projection
-   math, no images, no PC-part clutter. */
+/* Homepage-only fixed background: an endless side-scrolling runner in the
+   style of Geometry Dash. The rotating perspective grid tunnel from earlier
+   versions is kept, but purely as ambient decoration (dimmed, no gameplay
+   tied to it) — the actual game is a flat 2D track along the lower part of
+   the screen. A small pseudo-3D cube sits at a fixed screen position (it
+   never moves horizontally); the ground/platforms/spikes scroll from right
+   to left underneath and toward it, so relative to the camera only the
+   level moves, exactly like Geometry Dash's cube mode. Up Arrow or W jumps
+   (not Space/Down, which the browser treats as page-scroll keys) over spike
+   triangles and pits, or up onto floating platforms 1-3 cube-units tall —
+   clearing a platform requires jumping before its leading edge reaches the
+   player and staying at or above its height until it's passed; the cube
+   spins while airborne, Geometry-Dash style. Score ticks up dino-runner
+   style: slow at first, gradually accelerating. Scrolling away from the
+   hero fades the game out and pauses it — the decorative grid keeps
+   drifting either way. Pure canvas math, no images. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -33,11 +25,11 @@
   const Z_NEAR = 60, Z_FAR = 1500;
   let A, B;
   let rings = [];
-  let pulses = [];
-  let hazards = [];
-  const ROT_SPEED = 0.045; // slow ambient roll, radians/sec — the grid always drifts on its own
+  const ROT_SPEED = 0.045; // slow ambient roll, radians/sec — purely decorative now
 
-  let sizeInited = false;
+  // Side-scroll runner geometry — recomputed on resize in size().
+  let UNIT, GROUND_Y, PLAYER_X;
+
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     W = canvas.clientWidth; H = canvas.clientHeight;
@@ -46,9 +38,9 @@
     cx = W / 2; cy = H / 2;
     A = Math.max(W, H) * 0.72; B = A;
     buildRings();
-    // A/B aren't known until the first size() call, so the hero's starting
-    // world position has to be set here rather than at declaration time.
-    if (!sizeInited) { sizeInited = true; heroLocal = wallPoint(WALL_NAMES[currentWall], 0, 0); }
+    UNIT = Math.max(26, Math.min(H * 0.07, 52));
+    GROUND_Y = H * 0.72;
+    PLAYER_X = W * 0.16;
   }
 
   function buildRings() {
@@ -57,6 +49,7 @@
     for (let i = 0; i < count; i++) rings.push({ z: Z_NEAR + (i / count) * (Z_FAR - Z_NEAR) });
   }
 
+  // ---------------- decorative background tunnel (unchanged math) ----------------
   function project(x, y, z, rot) {
     const c = Math.cos(rot), s = Math.sin(rot);
     const rx = x * c - y * s, ry = x * s + y * c;
@@ -70,28 +63,11 @@
     if (wall === 'left') return { x: -A, y: v * B };
     return { x: A, y: v * B };
   }
-  // wall index (0=floor,1=right,2=ceiling,3=left) <-> the named walls above.
-  const WALL_NAMES = ['floor', 'right', 'ceiling', 'left'];
-  // Relative rotation so the egg's head always points toward the screen's
-  // center on whichever wall it's on (the grid's own ambient spin is added
-  // on top of this each frame so the character always stays "upright"
-  // relative to the slowly-turning grid, feet pointing outward).
-  const WALL_ANGLE = [0, -Math.PI / 2, Math.PI, Math.PI / 2];
 
   function fadeFor(z) {
-    const nearFade = Math.min(1, (z - Z_NEAR) / 320); // fade out slowly as it nears the outer edge
-    const farFade = Math.min(1, (Z_FAR - z) / 820); // fade in very slowly as it spawns near the vanishing point
+    const nearFade = Math.min(1, (z - Z_NEAR) / 320);
+    const farFade = Math.min(1, (Z_FAR - z) / 820);
     return Math.max(0, Math.min(1, nearFade * farFade));
-  }
-
-  // Once a grid line/hazard/pulse has scrolled past the cube's depth (z less
-  // than heroZ = closer to the viewer), it can no longer interact with the
-  // character — dim it down the further past it travels so it's visually
-  // obvious which lines are still "live" versus already resolved. Floors out
-  // at a low-but-visible level rather than vanishing entirely.
-  function pastFade(z, heroZ) {
-    if (z >= heroZ) return 1;
-    return Math.max(0.16, 1 - (heroZ - z) / 260);
   }
 
   function strokeRail(wall, u, v, rot, globalFade, hue) {
@@ -124,21 +100,9 @@
     ctx.stroke();
   }
 
-  // Width of one background grid cell (between the two rail lines straddling
-  // the center of a wall) at a given depth — used both to size the egg so it
-  // visually matches a grid square, and to draw its ground-shadow hitbox.
-  function cellWidthAt(z, rot) {
-    const a = project(-0.5 * A, B, z, rot);
-    const b = project(0.5 * A, B, z, rot);
-    return Math.hypot(b.x - a.x, b.y - a.y);
-  }
-
   // ---------------- dino-runner-style speed curve ----------------
-  // Flat & slow until 100m, then eases up toward a capped max — same shape as
-  // the Chrome dino game's acceleration. speed 6 -> ~9 pts/sec, speed 13 (cap)
-  // -> ~19.5 pts/sec (scoreRate = speed * 1.5 exactly reproduces both ends).
   const SPEED_START = 6, SPEED_CAP = 13, RAMP_FROM = 100, RAMP_EASE = 500;
-  const BASE_GRID_SPEED = 230; // ring travel rate at SPEED_START
+  const BASE_GRID_SPEED = 230;
   let runSpeed = SPEED_START;
   function updateRunSpeed(distance) {
     runSpeed = distance <= RAMP_FROM
@@ -146,90 +110,167 @@
       : SPEED_CAP - (SPEED_CAP - SPEED_START) * Math.exp(-(distance - RAMP_FROM) / RAMP_EASE);
   }
 
-  // ---------------- shared wall-pattern pool ----------------
-  // Every hazard/pulse picks one of these combinations so danger + boosts can
-  // appear on a single wall, opposite walls, two adjacent walls, or the full
-  // ring — every shape the 4-sided grid can make. Singles are weighted more
-  // common by repetition.
-  const WALL_PATTERNS = [
-    [0], [1], [2], [3], [0], [1], [2], [3],
-    [0, 2], [1, 3],
-    [0, 1], [1, 2], [2, 3], [3, 0],
-    [0, 1, 2, 3],
-  ];
-  function randomWallPattern() { return WALL_PATTERNS[Math.floor(Math.random() * WALL_PATTERNS.length)]; }
+  // ---------------- pseudo-3D cube (player) ----------------
+  const CUBE_TOP = 'rgba(255,255,255,1)';
+  const CUBE_LEFT = 'rgba(178,204,255,1)';
+  const CUBE_RIGHT = 'rgba(120,150,214,1)';
+  const CUBE_EDGE = 'rgba(20,30,50,.55)';
 
-  function wallSegmentEnds(wall, z, rot) {
-    const isFloorLike = wall === 'floor' || wall === 'ceiling';
-    const p1 = wallPoint(wall, isFloorLike ? -1 : 0, isFloorLike ? 0 : -1);
-    const p2 = wallPoint(wall, isFloorLike ? 1 : 0, isFloorLike ? 0 : 1);
-    return [project(p1.x, p1.y, z, rot), project(p2.x, p2.y, z, rot)];
+  function drawCube(s) {
+    const depth = s * 0.42;
+    const hw = s / 2;
+    ctx.fillStyle = CUBE_LEFT;
+    ctx.beginPath();
+    ctx.moveTo(-hw, 0); ctx.lineTo(-hw, -s); ctx.lineTo(0, -s + depth * 0.28); ctx.lineTo(0, depth * 0.28);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = CUBE_EDGE; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = CUBE_RIGHT;
+    ctx.beginPath();
+    ctx.moveTo(hw, 0); ctx.lineTo(hw, -s); ctx.lineTo(0, -s + depth * 0.28); ctx.lineTo(0, depth * 0.28);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = CUBE_TOP;
+    ctx.beginPath();
+    ctx.moveTo(-hw, -s); ctx.lineTo(0, -s - depth * 0.55); ctx.lineTo(hw, -s); ctx.lineTo(0, -s + depth * 0.28);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
   }
 
-  // Hazards and pulses ride a specific background ring's z position every
-  // frame (rather than tracking their own independent depth), so they are
-  // always pixel-attached to an actual grid line. When that ring wraps back
-  // around to the far end, the event retires.
-  function backmostRingIndex() {
-    let best = 0, bestZ = rings[0].z;
-    for (let i = 1; i < rings.length; i++) { if (rings[i].z > bestZ) { bestZ = rings[i].z; best = i; } }
-    return best;
-  }
+  // ---------------- endless-runner track ----------------
+  let obstacles = [];       // { kind: 'spike'|'gap'|'platform', x, width, height? } — x is screen-space, decreasing over time
+  let spawnTimer = 1.2;
+  let heroY = 0, heroVy = 0, jumping = false, jumpAngle = 0;
+  // Tuned so a full jump (v^2/2g) clears a 3-unit platform at the largest
+  // UNIT size with comfortable margin, while staying reasonably snappy.
+  const GRAVITY = 2300, JUMP_V = 950;
+  let distance = 0, hitFlash = 0, invuln = 0;
+  let highScore = 0;
+  try { highScore = parseFloat(localStorage.getItem('gz-hero-highscore') || '0') || 0; } catch {}
+  let visible = true;
+  let charAlpha = 1;
 
-  let pulseTimer = 0;
-  function spawnPulse() {
-    pulses.push({ ringIdx: backmostRingIndex(), hue: Math.random() * 360, walls: randomWallPattern(), passed: false, lastZ: null });
-  }
-  function updatePulses(dt, rot, globalFade, heroZ) {
-    pulseTimer -= dt;
-    if (pulseTimer <= 0) { spawnPulse(); pulseTimer = 2.6 + Math.random() * 2.2; }
-    for (let i = pulses.length - 1; i >= 0; i--) {
-      const p = pulses[i];
-      const z = rings[p.ringIdx].z;
-      if (p.lastZ !== null && z > p.lastZ + 50) { pulses.splice(i, 1); continue; } // ring wrapped — retire
-      p.lastZ = z;
-      p.hue = (p.hue + dt * 40) % 360;
-      if (visible && !p.passed && z <= heroZ) {
-        p.passed = true;
-        if (p.walls.includes(currentWall)) { boost = 1; boostHue = p.hue; }
-      }
-      const f = fadeFor(z) * globalFade * pastFade(z, heroZ);
-      if (f <= 0.01) continue;
-      const isFull = p.walls.length === 4;
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${0.5 * f})`;
-      ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, .9)`;
-      ctx.shadowBlur = 12;
-      ctx.lineWidth = 2;
-      if (isFull) {
-        const pts = ringPts(z, rot);
-        ctx.beginPath();
-        ctx.moveTo(pts[0].x, pts[0].y);
-        for (let k = 1; k < 4; k++) ctx.lineTo(pts[k].x, pts[k].y);
-        ctx.closePath();
-        ctx.stroke();
-      } else {
-        for (const w of p.walls) {
-          const [a, b] = wallSegmentEnds(WALL_NAMES[w], z, rot);
-          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        }
-      }
-      ctx.restore();
+  function jump() { if (!jumping) { jumping = true; heroVy = JUMP_V; } }
+  window.addEventListener('keydown', e => {
+    if (!visible || e.repeat) return;
+    const tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    // Only jump is bound — Space/Down are left alone (default browser
+    // page-scroll keys); there's no left/right in an auto-runner.
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+  });
+
+  function spawnObstacle() {
+    const r = Math.random();
+    if (r < 0.40) {
+      obstacles.push({ kind: 'spike', x: W + 40, width: UNIT * 0.8 });
+    } else if (r < 0.55) {
+      obstacles.push({ kind: 'gap', x: W + 40, width: UNIT * (1.1 + Math.random() * 0.4) });
+    } else {
+      const heights = [1, 1, 2, 2, 3];
+      const h = heights[Math.floor(Math.random() * heights.length)];
+      obstacles.push({ kind: 'platform', x: W + 40, width: UNIT * (1.6 + Math.random() * 0.9), height: h });
     }
   }
 
-  // ---------------- interactive runner ----------------
-  let currentWall = 0; // 0 floor, 1 right, 2 ceiling, 3 left — which side is "selected"
-  let heroLocal = { x: 0, y: 0 }; // smoothed world-space position, eases toward the selected wall's center — real value set on first size()
-  let heroAngleVec = { x: 1, y: 0 }; // smoothed *relative* facing direction (as a vector, to avoid angle-wrap jumps) — ambient spin is added on top each frame
-  let heroY = 0, heroVy = 0, jumping = false;
-  let distance = 0, hitFlash = 0, boost = 0, boostHue = 190;
-  let highScore = 0;
-  try { highScore = parseFloat(localStorage.getItem('gz-hero-highscore') || '0') || 0; } catch {}
-  let visible = true;      // is the hero section still roughly on screen?
-  let charAlpha = 1;       // smoothed toward `visible`
-  let spawnTimer = 1.4;
+  function updateObstacles(dt, scrollSpeed) {
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) {
+      spawnTimer = Math.max(0.95, 1.9 - distance * 0.0015) + Math.random() * 0.6;
+      spawnObstacle();
+    }
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      obstacles[i].x -= scrollSpeed * dt;
+      if (obstacles[i].x + obstacles[i].width < -40) obstacles.splice(i, 1);
+    }
+  }
+
+  function obstacleAtPlayer() {
+    for (const o of obstacles) {
+      if (PLAYER_X >= o.x && PLAYER_X <= o.x + o.width) return o;
+    }
+    return null;
+  }
+
+  function triggerHit() {
+    if (distance > highScore) {
+      highScore = distance;
+      try { localStorage.setItem('gz-hero-highscore', String(Math.floor(highScore))); } catch {}
+    }
+    distance = 0;
+    hitFlash = 1;
+    invuln = 0.8;
+    heroY = 0; heroVy = 0; jumping = false;
+  }
+
+  function updatePlayer(dt) {
+    heroVy -= GRAVITY * dt;
+    heroY += heroVy * dt;
+    const o = obstacleAtPlayer();
+    let floor = 0, dangerTop = null;
+    if (o) {
+      if (o.kind === 'gap') floor = null;
+      else if (o.kind === 'platform') { floor = o.height * UNIT; dangerTop = floor; }
+      else if (o.kind === 'spike') { floor = 0; dangerTop = UNIT * 0.85; }
+    }
+    if (invuln <= 0 && dangerTop !== null && heroY < dangerTop - 0.5) {
+      triggerHit();
+    } else if (invuln <= 0 && floor === null && heroY <= 0) {
+      triggerHit();
+    } else if (floor !== null && heroY <= floor && heroVy <= 0) {
+      heroY = floor; heroVy = 0; jumping = false;
+    }
+  }
+
+  // ---------------- track rendering ----------------
+  function drawGround() {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(120,170,255,.55)';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = 'rgba(90,150,255,.6)';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    let x = 0;
+    const gaps = obstacles.filter(o => o.kind === 'gap').sort((a, b) => a.x - b.x);
+    for (const g of gaps) {
+      if (g.x > x) { ctx.moveTo(x, GROUND_Y); ctx.lineTo(g.x, GROUND_Y); }
+      x = g.x + g.width;
+    }
+    if (x < W) { ctx.moveTo(x, GROUND_Y); ctx.lineTo(W, GROUND_Y); }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBlock(x, topY, width, height) {
+    const topH = Math.min(10, height * 0.3);
+    ctx.fillStyle = 'rgba(150,190,255,.92)';
+    ctx.fillRect(x, topY, width, topH);
+    ctx.fillStyle = 'rgba(70,100,160,.88)';
+    ctx.fillRect(x, topY + topH, width, height - topH);
+    ctx.strokeStyle = 'rgba(20,30,50,.6)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, topY + 0.5, width - 1, height - 1);
+  }
+
+  function drawSpike(o) {
+    const h = UNIT * 0.85;
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,150,40,.95)';
+    ctx.shadowColor = 'rgba(255,140,40,.9)';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(o.x, GROUND_Y);
+    ctx.lineTo(o.x + o.width / 2, GROUND_Y - h);
+    ctx.lineTo(o.x + o.width, GROUND_Y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,200,120,.9)'; ctx.lineWidth = 1.4; ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawObstacles() {
+    for (const o of obstacles) {
+      if (o.kind === 'platform') drawBlock(o.x, GROUND_Y - o.height * UNIT, o.width, o.height * UNIT);
+      else if (o.kind === 'spike') drawSpike(o);
+    }
+  }
 
   const hud = buildHud();
   function buildHud() {
@@ -238,7 +279,7 @@
     wrap.id = 'gz-hero-hud';
     wrap.innerHTML = '<span class="gz-hero-high">High Score <b id="gz-hero-high-val">0</b>m</span>' +
       '<span class="gz-hero-score">Score <b id="gz-hero-score-val">0</b>m</span>' +
-      '<span class="gz-hero-help">&#9664; &#9654; Move &nbsp;&middot;&nbsp; <span class="gz-key">&#9650;</span> Jump</span>';
+      '<span class="gz-hero-help"><span class="gz-key">&#9650;</span> Jump</span>';
     document.body.appendChild(wrap);
     const style = document.createElement('style');
     style.textContent = `
@@ -259,188 +300,8 @@
     return wrap;
   }
 
-  function selectWall(delta) {
-    currentWall = (currentWall + delta + 4) % 4;
-  }
-  function jump() {
-    if (!jumping) { jumping = true; heroVy = -420; }
-  }
-  window.addEventListener('keydown', e => {
-    if (!visible || e.repeat) return;
-    const tag = (e.target && e.target.tagName || '').toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-    // Left/Right move the character between sides; Up Arrow or W jumps.
-    // Space and Down are intentionally left alone — those are default
-    // browser page-scroll keys, and hijacking them makes the whole page lurch.
-    if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); selectWall(-1); }
-    else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); selectWall(1); }
-    else if (e.code === 'KeyW' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
-  });
-
-  // The hero sits at a screen-anchored depth so it always stays in frame no
-  // matter the window size — same trick regardless of which wall it's on,
-  // since all 4 wall-center points are equidistant (A === B) from center.
-  function heroDepth() {
-    // Bound the offset by the SMALLER of width/height (not just height), with
-    // a fixed pixel margin — the anchor can land on a horizontal wall (left/
-    // right) just as easily as a vertical one (floor/ceiling), so both axes
-    // need headroom. Biased closer to center than before so it reliably
-    // stays on screen at any window size/aspect ratio.
-    const maxOffset = Math.min(W, H) / 2 - 56;
-    const desiredOffset = Math.max(40, Math.min(H * 0.38, maxOffset));
-    return Math.max(Z_NEAR + 30, (F * A) / desiredOffset);
-  }
-
-  function spawnHazard() {
-    hazards.push({ ringIdx: backmostRingIndex(), walls: randomWallPattern(), passed: false, lastZ: null });
-  }
-
-  function updateHazards(dt, heroZ) {
-    spawnTimer -= dt;
-    if (spawnTimer <= 0) {
-      spawnTimer = Math.max(1.1, 2.6 - distance * 0.002) + Math.random() * 0.8;
-      spawnHazard();
-    }
-    for (let i = hazards.length - 1; i >= 0; i--) {
-      const hz = hazards[i];
-      const z = rings[hz.ringIdx].z;
-      if (hz.lastZ !== null && z > hz.lastZ + 50) { hazards.splice(i, 1); continue; } // ring wrapped — retire
-      hz.lastZ = z;
-      if (visible && !hz.passed && z <= heroZ) {
-        hz.passed = true;
-        if (hz.walls.includes(currentWall) && !jumping) {
-          if (distance > highScore) {
-            highScore = distance;
-            try { localStorage.setItem('gz-hero-highscore', String(Math.floor(highScore))); } catch {}
-          }
-          distance = 0;
-          hitFlash = 1;
-        }
-      }
-    }
-  }
-
-  // A single dangerous segment, with small perpendicular spikes along its
-  // length so it reads as a hazard rather than just a bright line. Only the
-  // main line carries a shadow — the spikes are plain strokes, which keeps
-  // this cheap even with several hazards and full-ring patterns on screen.
-  function drawHazardSegment(a, b, isActive, f) {
-    ctx.save();
-    ctx.globalAlpha = f;
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.shadowColor = 'rgba(255,140,40,.9)';
-    ctx.shadowBlur = isActive ? 14 : 5;
-    ctx.strokeStyle = isActive ? 'rgba(255,150,40,1)' : 'rgba(255,120,20,.4)';
-    ctx.lineWidth = isActive ? 2.6 : 1.4;
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = -dy / len, ny = dx / len;
-    // Fixed spike count regardless of on-screen length, so the hazard doesn't
-    // visually sprout more/denser spikes as perspective makes it grow closer.
-    const spikeCount = 12;
-    const spikeLen = isActive ? 10 : 6;
-    ctx.lineWidth = isActive ? 2 : 1.1;
-    ctx.strokeStyle = isActive ? 'rgba(255,180,90,.95)' : 'rgba(255,120,20,.35)';
-    ctx.beginPath();
-    for (let i = 1; i < spikeCount; i++) {
-      const t = i / spikeCount;
-      const x = a.x + dx * t, y = a.y + dy * t;
-      const dir = i % 2 === 0 ? 1 : -1; // alternate in/out for a jagged silhouette
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + nx * spikeLen * dir, y + ny * spikeLen * dir);
-    }
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function drawHazard(hz, rot, globalFade, heroZ) {
-    const z = rings[hz.ringIdx].z;
-    const f = fadeFor(z) * globalFade * pastFade(z, heroZ);
-    if (f <= 0.02) return;
-    const isActive = hz.walls.includes(currentWall);
-    for (const w of hz.walls) {
-      const [a, b] = wallSegmentEnds(WALL_NAMES[w], z, rot);
-      drawHazardSegment(a, b, isActive, f);
-    }
-  }
-
-  // ---------------- pseudo-3D cube ----------------
-  // A simple shaded cube — top face lightest, left face mid-tone, right face
-  // darkest — read as a 3D block from three flat canvas paths, no images.
-  // Cheap enough to just draw fresh every frame (no offscreen pre-render
-  // needed, unlike the old limbed sprite).
-  const CUBE_TOP = 'rgba(255,255,255,1)';
-  const CUBE_LEFT = 'rgba(178,204,255,1)';
-  const CUBE_RIGHT = 'rgba(120,150,214,1)';
-  const CUBE_EDGE = 'rgba(20,30,50,.55)';
-
-  // Cube is drawn anchored at its bottom-center ground point (0,0), extending
-  // up by `s`. `depth` controls how pronounced the 3D top/side skew looks.
-  function drawCube(s) {
-    const depth = s * 0.42;
-    const hw = s / 2;
-    // Front-left face (square, flat)
-    ctx.fillStyle = CUBE_LEFT;
-    ctx.beginPath();
-    ctx.moveTo(-hw, 0);
-    ctx.lineTo(-hw, -s);
-    ctx.lineTo(0, -s + depth * 0.28);
-    ctx.lineTo(0, depth * 0.28);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = CUBE_EDGE; ctx.lineWidth = 1; ctx.stroke();
-    // Front-right face
-    ctx.fillStyle = CUBE_RIGHT;
-    ctx.beginPath();
-    ctx.moveTo(hw, 0);
-    ctx.lineTo(hw, -s);
-    ctx.lineTo(0, -s + depth * 0.28);
-    ctx.lineTo(0, depth * 0.28);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    // Top face
-    ctx.fillStyle = CUBE_TOP;
-    ctx.beginPath();
-    ctx.moveTo(-hw, -s);
-    ctx.lineTo(0, -s - depth * 0.55);
-    ctx.lineTo(hw, -s);
-    ctx.lineTo(0, -s + depth * 0.28);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-  }
-
-  function drawHero(anchorP, z, angle, elapsed, globalFade, groundCellW) {
-    const f = fadeFor(z) * globalFade * charAlpha;
-    if (f <= 0.02) return;
-    const p = project(anchorP.x, anchorP.y, z, anchorP.rot);
-    // Size the cube to sit inside the same grid square it's standing on, so
-    // it scales with the tunnel — but never let it shrink below a
-    // comfortably visible floor on small screens/windows.
-    const s = Math.max(34, groundCellW * 0.26);
-
-    // A little run-cycle bounce (skipped mid-jump) so the cube doesn't just
-    // glide — subtle squash/stretch plus a slight side-to-side rock.
-    const runPhase = jumping ? 0 : Math.sin(elapsed * 11);
-    const bounce = jumping ? 0 : Math.abs(runPhase) * s * 0.06;
-    const rock = jumping ? 0 : runPhase * 0.05;
-
-    ctx.save();
-    ctx.translate(p.x, p.y + heroY - bounce);
-    ctx.rotate(angle + rock);
-    ctx.globalAlpha = f;
-    drawCube(s);
-    ctx.restore();
-  }
-
   let raf, last = 0, elapsed = 0;
 
-  // Scroll pause: fade the character out and stop scoring once the hero
-  // section is mostly scrolled past — the grid itself never stops moving.
   function updateVisibility() {
     visible = window.scrollY < window.innerHeight * 0.55;
     if (hud) hud.classList.toggle('hidden', !visible);
@@ -450,81 +311,57 @@
   function frame(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts; elapsed += dt;
-    // Only the grid's own slow ambient roll drives its rotation — Left/Right
-    // never spins the tunnel, they only move where the character sits on it.
-    const rot = elapsed * ROT_SPEED;
-    const globalFade = Math.min(1, elapsed / 3.2); // slow overall fade-in on load
+    const rot = elapsed * ROT_SPEED; // reads clockwise on screen — ambient only
+    const globalFade = Math.min(1, elapsed / 3.2);
     const hue = (200 + elapsed * 6) % 360;
     charAlpha += ((visible ? 1 : 0) - charAlpha) * Math.min(1, dt * 4);
-
-    updateRunSpeed(distance);
-    boost = Math.max(0, boost - dt / 2.5);
-    const speedMult = 1 + boost * 0.7;
-    const gridSpeed = BASE_GRID_SPEED * (runSpeed / SPEED_START) * speedMult;
+    invuln = Math.max(0, invuln - dt);
 
     ctx.clearRect(0, 0, W, H);
-    const heroZ = heroDepth();
 
+    // Decorative rotating tunnel — dimmed, no gameplay tied to it.
+    const decorFade = globalFade * 0.5;
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0, rot, globalFade, hue); strokeRail('ceiling', u, 0, rot, globalFade, hue); }
-    for (const v of stops) { strokeRail('left', 0, v, rot, globalFade, hue); strokeRail('right', 0, v, rot, globalFade, hue); }
+    for (const u of stops) { strokeRail('floor', u, 0, rot, decorFade, hue); strokeRail('ceiling', u, 0, rot, decorFade, hue); }
+    for (const v of stops) { strokeRail('left', 0, v, rot, decorFade, hue); strokeRail('right', 0, v, rot, decorFade, hue); }
 
+    updateRunSpeed(distance);
+    const scrollSpeed = BASE_GRID_SPEED * (runSpeed / SPEED_START);
     for (const r of rings) {
-      r.z -= gridSpeed * dt;
+      r.z -= scrollSpeed * 0.4 * dt; // slower parallax drift than the foreground track
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
-      drawRing(r.z, rot, globalFade * pastFade(r.z, heroZ));
+      drawRing(r.z, rot, decorFade);
     }
 
-    updatePulses(dt, rot, globalFade, heroZ);
-
-    // Ease the character's world position toward whichever wall is selected —
-    // it glides across the tunnel's cross-section rather than the grid spinning.
-    const target = wallPoint(WALL_NAMES[currentWall], 0, 0);
-    heroLocal.x += (target.x - heroLocal.x) * Math.min(1, dt * 7);
-    heroLocal.y += (target.y - heroLocal.y) * Math.min(1, dt * 7);
-
-    // Ease the wall-relative facing angle (via vector components, so it
-    // always turns the short way around), then add the grid's own ambient
-    // spin on top — this keeps the egg's feet pointing outward and its head
-    // toward center even as the whole square slowly rotates underneath it.
-    const targetAngle = WALL_ANGLE[currentWall];
-    const tv = { x: Math.cos(targetAngle), y: Math.sin(targetAngle) };
-    heroAngleVec.x += (tv.x - heroAngleVec.x) * Math.min(1, dt * 7);
-    heroAngleVec.y += (tv.y - heroAngleVec.y) * Math.min(1, dt * 7);
-    const heroAngle = rot + Math.atan2(heroAngleVec.y, heroAngleVec.x);
-
     if (visible) {
-      distance += runSpeed * 1.5 * speedMult * dt; // score rate: 9/sec at start -> 19.5/sec at cap
+      updateObstacles(dt, scrollSpeed);
+      updatePlayer(dt);
+      distance += runSpeed * 1.5 * dt;
       hitFlash = Math.max(0, hitFlash - dt * 2.2);
-      if (jumping) {
-        heroVy += 1400 * dt;
-        heroY += heroVy * dt;
-        if (heroY >= 0) { heroY = 0; heroVy = 0; jumping = false; }
-      }
       if (hud) {
         hud.querySelector('#gz-hero-high-val').textContent = Math.floor(highScore);
         hud.querySelector('#gz-hero-score-val').textContent = Math.floor(distance);
       }
     }
-    updateHazards(dt, heroZ);
 
-    const sortedHz = hazards.slice().sort((a, b) => rings[b.ringIdx].z - rings[a.ringIdx].z);
-    for (const hz of sortedHz) drawHazard(hz, rot, globalFade, heroZ);
+    drawGround();
+    drawObstacles();
 
-    const groundCellW = cellWidthAt(heroZ, rot);
-    drawHero({ x: heroLocal.x, y: heroLocal.y, rot }, heroZ, heroAngle, elapsed, globalFade, groundCellW);
+    const f = globalFade * charAlpha;
+    if (f > 0.02) {
+      jumpAngle = jumping ? jumpAngle + dt * 9 : 0;
+      ctx.save();
+      ctx.translate(PLAYER_X, GROUND_Y - heroY);
+      ctx.rotate(jumpAngle);
+      ctx.globalAlpha = f;
+      drawCube(UNIT);
+      ctx.restore();
+    }
 
     if (hitFlash > 0.01) {
       ctx.save();
       ctx.globalAlpha = hitFlash * 0.22;
       ctx.fillStyle = '#ff2e78';
-      ctx.fillRect(0, 0, W, H);
-      ctx.restore();
-    }
-    if (boost > 0.01) {
-      ctx.save();
-      ctx.globalAlpha = boost * 0.14;
-      ctx.fillStyle = `hsl(${boostHue}, 90%, 60%)`;
       ctx.fillRect(0, 0, W, H);
       ctx.restore();
     }
@@ -535,12 +372,14 @@
   function drawStatic() {
     ctx.clearRect(0, 0, W, H);
     const stops = [-1, -0.5, 0, 0.5, 1];
-    for (const u of stops) { strokeRail('floor', u, 0, 0, 1, 200); strokeRail('ceiling', u, 0, 0, 1, 200); }
-    for (const v of stops) { strokeRail('left', 0, v, 0, 1, 200); strokeRail('right', 0, v, 0, 1, 200); }
-    for (const r of rings) drawRing(r.z, 0, 1);
-    const z = heroDepth();
-    const groundCellW = cellWidthAt(z, 0);
-    drawHero({ x: heroLocal.x, y: heroLocal.y, rot: 0 }, z, WALL_ANGLE[currentWall], 0, 1, groundCellW);
+    for (const u of stops) { strokeRail('floor', u, 0, 0, 0.5, 200); strokeRail('ceiling', u, 0, 0, 0.5, 200); }
+    for (const v of stops) { strokeRail('left', 0, v, 0, 0.5, 200); strokeRail('right', 0, v, 0, 0.5, 200); }
+    for (const r of rings) drawRing(r.z, 0, 0.5);
+    drawGround();
+    ctx.save();
+    ctx.translate(PLAYER_X, GROUND_Y);
+    drawCube(UNIT);
+    ctx.restore();
   }
 
   window.addEventListener('resize', size);
