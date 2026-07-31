@@ -88,8 +88,8 @@
   <div class="modal">
     <button class="close" id="amb-close" aria-label="Close">&times;</button>
     <h3>Ambassador application</h3>
-    <p class="dim" style="font-size:.88rem">This opens a pre-filled email to the Gamer Zone team. Fields marked <span class="req">*</span> are required.</p>
-    <form id="amb-form">
+    <p class="dim" style="font-size:.88rem">Submits straight to the Gamer Zone team — no email app needed. Fields marked <span class="req">*</span> are required.</p>
+    <form id="amb-form" action="https://formspree.io/f/xrenvwra" method="POST">
       <label>Name <span class="req">*</span></label><input name="name" required>
       <label>Email <span class="req">*</span></label><input name="email" type="email" required>
       <label>Phone</label><input name="phone" type="tel">
@@ -102,8 +102,10 @@
       <select name="recurMonthly" required><option value="">Select…</option><option>Yes</option><option>No</option></select>
       <label>Games / format</label><input name="games" placeholder="e.g. Fortnite tournaments, FGC locals, LAN night">
       <label>Tell us about your events / community</label><textarea name="about"></textarea>
+      <input type="hidden" name="_subject" value="Ambassador Application Program">
       <div class="btn-row" style="margin-top:1rem"><button class="btn" type="submit">Send application</button></div>
-      <p class="form-note" id="amb-sent" style="display:none;color:var(--ne-blue-text)">Your email draft is ready in your mail app — hit send and we'll be in touch to set your quota and dates.</p>
+      <p class="form-note" id="amb-sent" style="display:none;color:var(--ne-blue-text)">Application sent — we'll be in touch to set your quota and dates.</p>
+      <p class="form-note" id="amb-error" style="display:none;color:#ff6b6b">Something went wrong sending that — please email us directly at gamerzone@newegg.com.</p>
       <p class="form-note">Prefer to reach out directly? Email us and include how many events you can host and your expected attendance.</p>
     </form>
   </div>
