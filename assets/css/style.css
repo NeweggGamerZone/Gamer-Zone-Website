@@ -349,7 +349,7 @@ body.home-page { background: transparent; }
 .cal-cell.cal-edu{background:rgba(63,191,107,.26);border-color:var(--cal-edu)}
 .cal-cell.cal-amb{background:rgba(232,93,160,.26);border-color:var(--cal-amb)}
 .cal-cell.cal-major{background:rgba(250,157,40,.3);border-color:var(--cal-major)}
-.cal-cell:not(.cal-closed):not(.empty):hover{filter:brightness(1.25)}
+.cal-cell:not(.empty):hover{filter:brightness(1.25)}
 .cal-cell.today{box-shadow:inset 0 0 0 2px #fff}
 .cal-cell.today::after{content:"";position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;animation:cal-today-flash 15s ease-in-out infinite}
 @keyframes cal-today-flash{0%,4%,100%{opacity:0}1.6%,2.4%{opacity:.55}}

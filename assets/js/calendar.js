@@ -9,10 +9,9 @@
 
   const cfg = await GZ.config();
   const today = GZ.todayISO();
-  // Live reservation page — always resolves and shows today's open/closed
-  // status automatically (see main.js for why this replaced the old
-  // per-day Verkada token scheme).
-  const verkada = cfg.reservationUrl || cfg.verkadaUrl;
+  // Verkada guest check-in link — the newegg.com/promotions reservation
+  // page is retired and no longer used (see main.js).
+  const verkada = cfg.verkadaUrl || cfg.reservationUrl;
 
   let data = { events: [] };
   try { data = await (await fetch('data/events.json')).json(); } catch {}
@@ -65,7 +64,8 @@
       else if (e) cls.push(TYPE_COLOR[e.type] || 'cal-edu');
       else cls.push('cal-free');
       if (dt === today) cls.push('today');
-      html += `<div class="${cls.join(' ')}" data-d="${dt}"><span class="dn">${d}</span></div>`;
+      const title = closed ? ' title="Closed"' : '';
+      html += `<div class="${cls.join(' ')}" data-d="${dt}"${title}><span class="dn">${d}</span></div>`;
     }
     grid.innerHTML = html;
   }
@@ -105,14 +105,15 @@
 
   grid.addEventListener('click', e => {
     const c = e.target.closest('.cal-cell[data-d]');
-    if (!c || c.classList.contains('closed')) return;
+    if (!c) return;
     show(c.dataset.d);
   });
   // Preview a day's event just by hovering — no click needed on desktop.
-  // (Touch devices fire a click on tap, which the handler above still covers.)
+  // Closed days show too (with a "Closed" tag), so hovering always tells
+  // you something rather than silently doing nothing.
   grid.addEventListener('mouseover', e => {
     const c = e.target.closest('.cal-cell[data-d]');
-    if (!c || c.classList.contains('closed')) return;
+    if (!c) return;
     show(c.dataset.d);
   });
   // Once the cursor leaves the grid entirely, fall back to today rather than

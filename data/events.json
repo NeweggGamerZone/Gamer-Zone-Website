@@ -85,14 +85,16 @@
       "flyerWeb": "assets/img/flyers/2026-07-31-xp-tournament-party.jpg"
     },
     {
-      "id": "closed-eastern-harmony-2026-08-01",
-      "title": "Closed — Eastern Harmony Mental Health Game Day",
+      "id": "gaming-for-good-eastern-harmony-2026-08-01",
+      "title": "Gaming for Good: Eastern Harmony Mental Health",
+      "subtitle": "A charity tournament supporting mental health awareness",
       "date": "2026-08-01",
-      "time": "",
-      "type": "closed",
-      "blurb": "Venue reserved for the Eastern Harmony Mental Health Game Day event.",
-      "featured": false,
-      "reservation": false
+      "time": "11:00 AM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "A charity gaming tournament presented with Eastern Harmony, raising awareness and support for mental health. Bracket play open to all skill levels — walk-ins welcome.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
     },
     {
       "id": "xp-fortnite-training-2026-08-05",
