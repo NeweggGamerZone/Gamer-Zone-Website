@@ -85,13 +85,13 @@
       "flyerWeb": "assets/img/flyers/2026-07-31-xp-tournament-party.jpg"
     },
     {
-      "id": "gaming-for-good-eastern-harmony-2026-08-01",
-      "title": "Gaming for Good: Eastern Harmony Mental Health",
+      "id": "eastern-harmony-gaming-for-good-2026-08-01",
+      "title": "Eastern Harmony: Gaming for Good — Street Fighter Tournament",
       "subtitle": "A charity tournament supporting mental health awareness",
       "date": "2026-08-01",
       "time": "11:00 AM – 7:00 PM",
       "type": "tournament",
-      "blurb": "A charity gaming tournament presented with Eastern Harmony, raising awareness and support for mental health. Bracket play open to all skill levels — walk-ins welcome.",
+      "blurb": "A charity Street Fighter tournament presented with Eastern Harmony, raising awareness and support for mental health. Bracket play open to all skill levels — walk-ins welcome.",
       "featured": true,
       "reservation": false,
       "accent": "#FF2E97"
@@ -109,18 +109,6 @@
       "accent": "#7ED321"
     },
     {
-      "id": "switch-sports-day-2026-08-06",
-      "title": "Switch Sports Day",
-      "subtitle": "Bowling, tennis, volleyball — get off the keyboard and swing.",
-      "date": "2026-08-06",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "theme-night",
-      "blurb": "A full day of Nintendo Switch Sports — bowling, tennis, volleyball, and more, all motion-controlled. At 5PM, an open Bowling Showdown for top score.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#5FD3E8"
-    },
-    {
       "id": "xp-fortnite-tournament-2026-08-07",
       "title": "XP League Fortnite Tournament",
       "subtitle": "Compete, win, and prove your build is better.",
@@ -131,18 +119,6 @@
       "featured": true,
       "reservation": false,
       "accent": "#FF2E97"
-    },
-    {
-      "id": "marvel-day-2026-08-08",
-      "title": "Marvel Day",
-      "subtitle": "Rivals, Tokon, movies on the big screen, and comics to read.",
-      "date": "2026-08-08",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "theme-night",
-      "blurb": "A full Saturday of Marvel — Rivals and Tokon stations, movies on the big screen from 12PM, and a comic lounge to read. Walk in any time.",
-      "featured": true,
-      "reservation": false,
-      "accent": "#FA9D28"
     },
     {
       "id": "closed-intel-gamer-days-setup-2026-08-11",
@@ -165,42 +141,6 @@
       "reservation": false
     },
     {
-      "id": "riot-thursday-drop-day-2026-08-13",
-      "title": "Riot Thursday: Drop Day",
-      "subtitle": "League and TFT all day — RP drops every hour.",
-      "date": "2026-08-13",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "theme-night",
-      "blurb": "League and TFT running all day, with RP drops for players in the room every hour from 12PM–6PM. Bring a squad or drop in solo.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#E31B54"
-    },
-    {
-      "id": "anime-night-2026-08-14",
-      "title": "Anime Night",
-      "subtitle": "Watch together. React together. All day.",
-      "date": "2026-08-14",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "theme-night",
-      "blurb": "All-day anime marathon with a community-voted lineup. Walk-ins welcome all day.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#9B6BFF"
-    },
-    {
-      "id": "rocket-league-community-cup-2026-08-15",
-      "title": "Rocket League Community Cup",
-      "subtitle": "College club bracket on the big screen. Open play all day.",
-      "date": "2026-08-15",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "community",
-      "blurb": "College club teams play a 3v3 bracket 12PM–3PM on the main screen with live commentary. Open Rocket League lobbies run all day for everyone else.",
-      "featured": true,
-      "reservation": false,
-      "accent": "#E85DA0"
-    },
-    {
       "id": "xp-fortnite-training-2026-08-19",
       "title": "XP League: Fortnite Training",
       "subtitle": "Train with the Pros from XP League!",
@@ -211,18 +151,6 @@
       "featured": false,
       "reservation": false,
       "accent": "#7ED321"
-    },
-    {
-      "id": "tcg-thursday-2026-08-20",
-      "title": "TCG Thursday",
-      "subtitle": "Bring your deck. Pull up a seat. Trade, battle, and open packs all day.",
-      "date": "2026-08-20",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "theme-night",
-      "blurb": "Tables set up for casual trading card matches — bring your own deck or borrow one at the desk. Open play runs alongside all day.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#5FD3E8"
     },
     {
       "id": "xp-fortnite-tournament-2026-08-21",
@@ -237,64 +165,23 @@
       "accent": "#FF2E97"
     },
     {
-      "id": "coop-game-day-2026-08-22",
-      "title": "Coop Game Day",
-      "subtitle": "Grab a partner and play together — no solo queue today.",
-      "date": "2026-08-22",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "theme-night",
-      "blurb": "A full day of couch and squad co-op — pair up or team with whoever's around. Staff can pair up solo walk-ins.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#3FBF6B"
-    },
-    {
-      "id": "anime-night-2026-08-26",
-      "title": "Anime Night",
-      "subtitle": "Watch together. React together. Free Japanese snacks while they last.",
-      "date": "2026-08-26",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "theme-night",
-      "blurb": "All-day anime marathon with a community-voted lineup. Free Japanese snacks out at 5PM while supplies last.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#9B6BFF"
-    },
-    {
-      "id": "game-jam-day1-2026-08-27",
-      "title": "Game Jam: Day 1",
-      "subtitle": "Build a game in two days. Submit it for a prize.",
-      "date": "2026-08-27",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "community",
-      "blurb": "Kickoff of a two-day Game Jam — sign up online, then drop in to build solo or with a team. Submissions due by the end of Day 2.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#E85DA0"
-    },
-    {
-      "id": "game-jam-day2-2026-08-28",
-      "title": "Game Jam: Day 2",
-      "subtitle": "Final day. Finish your build and submit.",
-      "date": "2026-08-28",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "community",
-      "blurb": "Final day of the Game Jam — finish your build, polish it up, and submit before close. Staff and stations on hand.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#E85DA0"
-    },
-    {
       "id": "august-finale-street-fighter-2026-08-29",
       "title": "August Finale: Street Fighter Saturday Slam",
-      "subtitle": "Run it back. Bracket play all day, one champion by close.",
+      "subtitle": "Fighting Games Week finale. Bracket play all day, one champion by close.",
       "date": "2026-08-29",
       "time": "11:00 AM – 7:00 PM",
       "type": "major",
-      "blurb": "A full day of Street Fighter bracket play, open to all skill levels. At 5PM: a month recap and the Game Jam winner announcement.",
+      "blurb": "A full day of Street Fighter bracket play, open to all skill levels. Top finishers take home Newegg gift cards and product prizing, with catered food all day.",
       "featured": true,
       "reservation": false,
       "accent": "#FFC400"
     }
+  ],
+  "weeklyThemes": [
+    { "start": "2026-07-28", "end": "2026-08-01", "theme": "Eastern Harmony: Gaming for Good" },
+    { "start": "2026-08-04", "end": "2026-08-08", "theme": "Marvel Week" },
+    { "start": "2026-08-11", "end": "2026-08-15", "theme": "Riot Games Week" },
+    { "start": "2026-08-18", "end": "2026-08-22", "theme": "Co-op Games Week" },
+    { "start": "2026-08-25", "end": "2026-08-29", "theme": "Fighting Games Week" }
   ]
 }

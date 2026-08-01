@@ -38,36 +38,31 @@
   if (!data || !Array.isArray(data.events) || !data.events.length) data = embedded();
 
   const today = GZ.todayISO();
-  // Show only the current week's remaining lineup (Mon–Sun containing today),
-  // capped at 5 days — not the entire running schedule.
-  const mondayOf = dateISO => {
-    const d = new Date(dateISO + 'T12:00:00');
-    const day = (d.getDay() + 6) % 7;
-    d.setDate(d.getDate() - day);
-    return d.toISOString().slice(0, 10);
-  };
-  const weekStart = mondayOf(today);
-  const weekEndD = new Date(weekStart + 'T12:00:00'); weekEndD.setDate(weekEndD.getDate() + 6);
-  const weekEnd = weekEndD.toISOString().slice(0, 10);
 
-  // This week's full slate (Mon–Sun) — used to find the week's theme even if
-  // the theme-night day has already passed, and to list remaining closures /
-  // special events for the rest of the week.
+  // Weekly themes are explicit, named ranges (data.weeklyThemes, e.g. "Marvel
+  // Week" Aug 4–8) rather than derived from a one-off theme-night event —
+  // themes now stand on their own, with any specific special events for that
+  // week called out separately below.
+  const themeWeeks = (data.weeklyThemes || []).slice().sort((a, b) => a.start.localeCompare(b.start));
+  const currentTheme = themeWeeks.find(w => today >= w.start && today <= w.end);
+
+  let weekStart, weekEnd, themeName;
+  if (currentTheme) {
+    weekStart = currentTheme.start; weekEnd = currentTheme.end; themeName = currentTheme.theme;
+  } else {
+    // No theme defined for this stretch yet — show a plain 5-day window
+    // starting today rather than guessing at a name.
+    const endD = new Date(today + 'T12:00:00'); endD.setDate(endD.getDate() + 4);
+    weekStart = today; weekEnd = endD.toISOString().slice(0, 10);
+    themeName = 'Free Play Week';
+  }
+
+  // This theme week's full slate — used to list closures and any special
+  // events (tournaments, majors, community, EDU, vendor) still on the books.
   const weekAll = (data.events || []).filter(e => e.date >= weekStart && e.date <= weekEnd);
   const remaining = weekAll.filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
-
-  // The week's theme: whichever "theme-night" event is on the books for this
-  // week (weekly themes replace the old one-off theme-night model, but until
-  // themes are tagged directly on the data, we surface that day's title as
-  // the week's theme). Falls back to a generic label when nothing is set.
-  const themeEvent = weekAll.find(e => e.type === 'theme-night');
-  const themeName = themeEvent ? themeEvent.title : 'Free Play Week';
-
-  // Closures and special events (tournaments, majors, community, EDU, vendor)
-  // are called out below the theme — theme-night itself is folded into the
-  // theme line above, not repeated as its own row.
   const closures = remaining.filter(e => e.type === 'closed');
-  const specials = remaining.filter(e => e.type !== 'closed' && e.type !== 'theme-night');
+  const specials = remaining.filter(e => e.type !== 'closed');
 
   const monthDate = iso => {
     const d = new Date(iso + 'T12:00:00');
