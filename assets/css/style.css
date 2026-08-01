@@ -197,16 +197,21 @@ details.archive-month .grid { margin-top: 1rem; }
 .chip.active { background: var(--ne-orange); color: #000; border-color: var(--ne-orange); }
 .chip .ic { width: .95em; height: .95em; }
 
-.gz-arcade { position: relative; width: 100%; max-width: 560px; margin: 2rem auto 0; background: rgba(8,10,16,.7); border: 1px solid var(--line); clip-path: var(--clip); padding: .9rem; backdrop-filter: blur(2px); }
-.gz-arcade-tabs { position: absolute; top: .7rem; right: .7rem; z-index: 2; display: flex; gap: .4rem; }
+/* v10: the mini-games are no longer a boxed "cabinet" — they're rendered
+   straight into the hero background, filling .hero-stage behind the
+   headline/CTA (which get z-index below to stay on top and readable).
+   Tabs/HUD/help float over the top-right/bottom as a lightweight overlay. */
+.gz-arcade { position: absolute; inset: 0; z-index: 0; width: auto; max-width: none; margin: 0; background: none; border: none; clip-path: none; padding: 0; backdrop-filter: none; pointer-events: none; }
+.gz-arcade-tabs { position: absolute; top: 1rem; right: 1rem; z-index: 2; display: flex; gap: .4rem; pointer-events: auto; }
 .gz-arcade-tabs .chip { padding: .28rem .7rem; font-size: .68rem; }
-.gz-arcade-hud { display: flex; gap: 1rem; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; color: #cfe0ff; margin-bottom: .5rem; }
+.gz-arcade-hud { position: absolute; top: 1rem; left: 1rem; z-index: 2; display: flex; gap: 1rem; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; color: #cfe0ff; margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,.9); pointer-events: none; }
 .gz-arcade-hud b { color: var(--ne-orange); }
-.gz-arcade-canvas { display: block; width: 100%; height: clamp(180px, 34vw, 260px); touch-action: manipulation; cursor: pointer; }
-.gz-arcade-help { margin: .5rem 0 0; font-size: .72rem; color: var(--ink-dim); text-align: center; }
+.gz-arcade-canvas { display: block; width: 100%; height: 100%; touch-action: manipulation; cursor: crosshair; pointer-events: auto; }
+.gz-arcade-help { position: absolute; bottom: .9rem; left: 50%; transform: translateX(-50%); z-index: 2; margin: 0; font-size: .72rem; color: var(--ink-dim); text-align: center; text-shadow: 0 1px 8px rgba(0,0,0,.9); pointer-events: none; white-space: nowrap; }
 @media (max-width: 640px) {
-  .gz-arcade-tabs { position: static; justify-content: center; margin-bottom: .6rem; }
-  .gz-arcade-hud { justify-content: center; }
+  .gz-arcade-tabs { top: .6rem; right: .6rem; }
+  .gz-arcade-hud { top: .6rem; left: .6rem; font-size: .68rem; gap: .6rem; }
+  .gz-arcade-help { font-size: .64rem; white-space: normal; max-width: 90%; }
 }
 
 form.gz-form { display: grid; gap: .8rem; max-width: 540px; }
@@ -252,14 +257,14 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 }
 
 /* ---- v3: hero title stage (reference-style) ---- */
-.hero-stage { min-height: 76vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; padding: 3rem 0 2rem; }
-.hero-stack { position: relative; line-height: .92; margin: .8rem 0 1rem; }
+.hero-stage { min-height: 76vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; padding: 3rem 0 2rem; overflow: hidden; }
+.hero-stack { position: relative; line-height: .92; margin: .8rem 0 1rem; z-index: 1; }
 .hs-line { display: block; font-family: var(--head); font-weight: 800; font-size: clamp(2.9rem, 11vw, 7.4rem); text-transform: uppercase; letter-spacing: .01em; }
 .hs-line.solid { color: #fff; position: relative; z-index: 0; text-shadow: 0 3px 30px rgba(0,0,0,.95), 0 1px 3px rgba(0,0,0,.9); }
 .hs-line.outline { color: var(--ne-blue-text); position: relative; z-index: 2; }
 .hs-bot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%); width: clamp(110px, 15vw, 180px); z-index: 1; filter: drop-shadow(0 0 34px rgba(10,77,166,.85)); pointer-events: none; }
-.hero-stage .lead { font-size: clamp(1rem, 2.4vw, 1.25rem); max-width: 640px; margin: 0 auto 1.4rem; text-shadow: 0 1px 12px rgba(0,0,0,.9); }
-.hero-stage .btn-row { justify-content: center; }
+.hero-stage .lead { position: relative; z-index: 1; font-size: clamp(1rem, 2.4vw, 1.25rem); max-width: 640px; margin: 0 auto 1.4rem; text-shadow: 0 1px 12px rgba(0,0,0,.9); }
+.hero-stage .btn-row { position: relative; z-index: 1; justify-content: center; }
 .hero-stage .hero-decor .stripe.s1 { top: 8%; }
 .hero-stage .hero-decor .stripe.s2 { top: auto; bottom: 10%; left: -4%; right: auto; }
 .scroll-cue { margin-top: 2.2rem; color: var(--ink-dim); font-size: .74rem; font-family: var(--head); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; animation: cue 2s ease-in-out infinite; }
@@ -442,11 +447,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 }
 
 /* ===== Ambassador Featured Hosts placeholder cards ===== */
-.host-card{text-align:center}
-.host-avatar{width:56px;height:56px;border-radius:50%;background:var(--ne-navy);color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:1.05rem;margin:0 auto .7rem}
-.host-email{font-size:.8rem;word-break:break-all;margin-top:.1rem}
-.host-cat{font-size:.85rem;margin-top:.5rem;color:var(--ink)}
-.host-count{margin-top:.6rem;font-family:var(--head);text-transform:uppercase;font-size:.74rem;letter-spacing:.03em;color:var(--ink-dim)}
+/* Fixed height + truncation so every host card matches exactly, no matter
+   how long a real ambassador's name/email/category text ends up being. */
+.host-card{text-align:center;display:flex;flex-direction:column;height:236px;overflow:hidden}
+.host-avatar{width:56px;height:56px;border-radius:50%;background:var(--ne-navy);color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:1.05rem;margin:0 auto .7rem;flex-shrink:0}
+.host-card h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.host-email{font-size:.8rem;margin-top:.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.host-cat{font-size:.85rem;margin-top:.5rem;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em;flex-shrink:0}
+.host-count{margin-top:auto;padding-top:.6rem;font-family:var(--head);text-transform:uppercase;font-size:.74rem;letter-spacing:.03em;color:var(--ink-dim);flex-shrink:0}
 .host-count b{color:var(--ne-orange);font-size:1.05rem}
 
 /* ===== v9: home leaderboard + refined dark polish ===== */

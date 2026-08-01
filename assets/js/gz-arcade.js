@@ -1,5 +1,6 @@
-/* Homepage arcade panel — a small bounded canvas (not full-page) with a
-   top-right tab switcher between two mini-games:
+/* Homepage arcade — rendered straight into the hero background (fills
+   .hero-stage, sitting behind the headline/CTA which stay on top via
+   z-index) with a top-right tab switcher between two mini-games:
    - Zone Dash: a Geometry-Dash-style lane runner. The flat square player
      auto-weaves left/center/right across the lane in step with the grid
      tiles arriving. Jump (Up/W or tap) over spikes; runs of small
@@ -9,10 +10,9 @@
      point. Click/tap a part before it gets too close to pop it into
      confetti and score a point. Let any part reach the front unclicked
      and the score resets.
-   Both games share one small perspective projection scaled to the panel's
-   own size, so nothing here ever overlaps the headline or CTA — the panel
-   is a self-contained "arcade cabinet" lower in the hero. Pure canvas
-   math, no images. */
+   Both games share one perspective projection scaled to the canvas' own
+   size, anchored low in the frame so the running/flying action stays clear
+   of the headline text above it. Pure canvas math, no images. */
 (function () {
   const panel = document.getElementById('gz-arcade');
   const canvas = document.getElementById('gz-arcade-canvas');
@@ -75,10 +75,10 @@
       try { this.highScore = parseFloat(localStorage.getItem('gz-arcade-dash-high') || '0') || 0; } catch {}
     },
     onResize() {
-      this.UNIT = Math.max(18, Math.min(H * 0.16, 32));
+      this.UNIT = Math.max(22, Math.min(H * 0.09, 56));
       this.Z_PLAYER = 150;
       this.ULOCAL = this.UNIT * this.Z_PLAYER / F;
-      this.FLOOR_LOCAL_Y = (H * 0.80 - cy) * this.Z_PLAYER / F;
+      this.FLOOR_LOCAL_Y = (H * 0.82 - cy) * this.Z_PLAYER / F;
       this.LANE_HALF_W = this.ULOCAL * 1.9;
       this.COLS = [-this.LANE_HALF_W * 0.55, 0, this.LANE_HALF_W * 0.55];
       this.rings = [];
@@ -318,9 +318,9 @@
     },
     onResize() {
       this.Z_REF = 150;
-      this.BASE = Math.max(20, Math.min(H * 0.15, 36)) * this.Z_REF / F;
-      this.SPREAD_X = (W * 0.40) * this.Z_REF / F;
-      this.SPREAD_Y = (H * 0.34) * this.Z_REF / F;
+      this.BASE = Math.max(24, Math.min(H * 0.09, 60)) * this.Z_REF / F;
+      this.SPREAD_X = (W * 0.42) * this.Z_REF / F;
+      this.SPREAD_Y = (H * 0.36) * this.Z_REF / F;
       this.MISS_Z = 150;
     },
     reset() { this.parts = []; this.confetti = []; this.score = 0; this.spawnTimer = 0.7; this.missFlash = 0; },
