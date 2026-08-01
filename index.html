@@ -42,6 +42,19 @@
     <div class="btn-row hero-in" style="--d:.68s">
       <a class="btn" href="events.html#calendar">Plan your visit</a>
     </div>
+
+    <div class="gz-arcade hero-in" style="--d:.85s" id="gz-arcade">
+      <div class="gz-arcade-tabs" role="tablist" aria-label="Choose a mini-game">
+        <button class="chip active" data-game="dash" role="tab" aria-selected="true">Zone Dash</button>
+        <button class="chip" data-game="hunt" role="tab" aria-selected="false">Zone Hunt</button>
+      </div>
+      <div class="gz-arcade-hud">
+        <span>High <b id="gz-arcade-high">0</b></span>
+        <span>Score <b id="gz-arcade-score">0</b></span>
+      </div>
+      <canvas id="gz-arcade-canvas" class="gz-arcade-canvas"></canvas>
+      <p class="gz-arcade-help" id="gz-arcade-help">&#9650; / tap to jump &mdash; clear the gaps, dodge the spikes.</p>
+    </div>
   </section>
 
   <section class="reveal eu-section" id="week">
@@ -213,6 +226,7 @@
 </footer>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/techno-hero.js"></script>
+<script src="assets/js/gz-arcade.js"></script>
 <script src="assets/js/events.js"></script>
 <script src="assets/js/event-update.js"></script>
 <script src="assets/js/leaderboard.js"></script>
