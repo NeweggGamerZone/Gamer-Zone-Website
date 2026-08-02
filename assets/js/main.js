@@ -119,6 +119,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, { passive: true });
   }
 
+  // About Gamer Zone zone list: open on hover, close when the pointer
+  // leaves — no click needed. Touch/keyboard devices (no real hover) keep
+  // the native click-to-toggle behavior instead, since they can't hover.
+  const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+  document.querySelectorAll('.zone-item').forEach(item => {
+    if (!canHover) return;
+    item.addEventListener('mouseenter', () => { item.open = true; });
+    item.addEventListener('mouseleave', () => { item.open = false; });
+    const summary = item.querySelector('summary');
+    if (summary) summary.addEventListener('click', e => e.preventDefault());
+  });
+
   const lb = document.createElement('div');
   lb.className = 'lightbox';
   lb.innerHTML = '<img alt="Full size view">';

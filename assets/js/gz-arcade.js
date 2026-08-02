@@ -138,18 +138,29 @@
     },
     // Hazards for the current layer only, fixed to specific points along
     // that same square's edges (never near a corner) so they read as
-    // riding the line right alongside the egg as it all approaches.
+    // riding the line right alongside the egg as it all approaches. Each
+    // spot is either a single spike (one jump) or a Geometry-Dash-style
+    // ascending stair — three quick steps in a row, each its own hop.
     spawnLayerObstacles() {
       this.obstacles = [];
-      const count = 2 + Math.floor(Math.random() * 3);
+      const groupCount = 2 + Math.floor(Math.random() * 3);
       const used = [];
       let tries = 0;
-      while (this.obstacles.length < count && tries < 40) {
+      while (used.length < groupCount && tries < 40) {
         tries++;
-        const t = 0.35 + Math.random() * 3.3;
-        if (used.some(u => Math.abs(u - t) < 0.55)) continue;
+        const t = 0.35 + Math.random() * 3.0;
+        if (used.some(u => Math.abs(u - t) < 0.7)) continue;
         used.push(t);
-        this.obstacles.push({ edgeT: t, judged: false });
+      }
+      used.sort((a, b) => a - b);
+      for (const t of used) {
+        if (Math.random() < 0.45) {
+          for (let i = 0; i < 3; i++) {
+            this.obstacles.push({ edgeT: t + i * 0.1, kind: 'stair', step: i, judged: false });
+          }
+        } else {
+          this.obstacles.push({ edgeT: t, kind: 'spike', judged: false });
+        }
       }
       this.obstacles.sort((a, b) => a.edgeT - b.edgeT);
     },
@@ -170,7 +181,10 @@
 
     update(dt) {
       this.updateRunSpeed();
-      this.z -= 230 * (this.runSpeed / 6) * dt;
+      // Same base speed as the ambient tunnel's own rings (techno-hero.js)
+      // — the layer should approach at the background's pace, not rush
+      // ahead of it, so the two stay visually locked together.
+      this.z -= 92 * (this.runSpeed / 6) * dt;
       if (this.z <= Z_NEAR) {
         // Lap complete: this layer has reached the camera. Swap it for a
         // fresh one starting back at the far edge and keep going, forever
@@ -223,15 +237,19 @@
       ctx.closePath(); ctx.stroke();
       ctx.restore();
     },
-    drawObstacle(o) {
-      const near = !o.judged && Math.abs(this.edgeT - o.edgeT) < 0.35;
-      const pt = squareEdgePoint(o.edgeT, this.HALF);
-      // Push the marker slightly outward from whichever edge it's on, so
-      // it reads as a spike riding the line rather than sitting flush on
-      // it — all computed in local space, then rotated + projected as one
-      // piece so it turns with the square instead of staying screen-locked.
+    // Shared by both obstacle kinds: which way is "outward" from whichever
+    // edge this point sits on, computed in local space so it can be rotated
+    // + projected as one piece and turn with the square, not screen-locked.
+    outwardDir(pt) {
       const outX = pt.x >= this.HALF - 0.01 ? 1 : pt.x <= -this.HALF + 0.01 ? -1 : 0;
       const outY = outX !== 0 ? 0 : (pt.y >= this.HALF - 0.01 ? 1 : -1);
+      return { outX, outY };
+    },
+    drawObstacle(o) {
+      if (o.kind === 'stair') { this.drawStair(o); return; }
+      const near = !o.judged && Math.abs(this.edgeT - o.edgeT) < 0.35;
+      const pt = squareEdgePoint(o.edgeT, this.HALF);
+      const { outX, outY } = this.outwardDir(pt);
       const push = this.HALF * 0.16;
       const wLocal = this.ULOCAL * 0.28;
       const aLocal = outX !== 0 ? { x: pt.x, y: pt.y - wLocal } : { x: pt.x - wLocal, y: pt.y };
@@ -249,6 +267,34 @@
       ctx.beginPath();
       ctx.moveTo(a.x, a.y); ctx.lineTo(tip.x, tip.y); ctx.lineTo(b.x, b.y);
       ctx.closePath(); ctx.fill();
+      ctx.restore();
+    },
+    // A Geometry-Dash-style ascending step: a small flat-topped block riding
+    // the edge, pushed outward a bit further with each step index so three
+    // of them in a row read as a little staircase climbing off the line.
+    drawStair(o) {
+      const near = !o.judged && Math.abs(this.edgeT - o.edgeT) < 0.35;
+      const pt = squareEdgePoint(o.edgeT, this.HALF);
+      const { outX, outY } = this.outwardDir(pt);
+      const push = this.HALF * (0.09 + o.step * 0.07);
+      const wLocal = this.ULOCAL * 0.3;
+      const aLocal = outX !== 0 ? { x: pt.x, y: pt.y - wLocal } : { x: pt.x - wLocal, y: pt.y };
+      const bLocal = outX !== 0 ? { x: pt.x, y: pt.y + wLocal } : { x: pt.x + wLocal, y: pt.y };
+      const outALocal = { x: aLocal.x + outX * push, y: aLocal.y + outY * push };
+      const outBLocal = { x: bLocal.x + outX * push, y: bLocal.y + outY * push };
+      const a = projectRot(aLocal.x, aLocal.y, this.z);
+      const b = projectRot(bLocal.x, bLocal.y, this.z);
+      const oa = projectRot(outALocal.x, outALocal.y, this.z);
+      const ob = projectRot(outBLocal.x, outBLocal.y, this.z);
+      const f = objFade(this.z);
+      ctx.save();
+      ctx.globalAlpha = Math.max(0.35, f) * (near ? 1 : 0.85);
+      ctx.fillStyle = near ? 'rgba(120,220,255,.92)' : 'rgba(120,220,255,.68)';
+      ctx.strokeStyle = 'rgba(200,240,255,.9)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y); ctx.lineTo(oa.x, oa.y); ctx.lineTo(ob.x, ob.y); ctx.lineTo(b.x, b.y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.restore();
     },
     draw() {
