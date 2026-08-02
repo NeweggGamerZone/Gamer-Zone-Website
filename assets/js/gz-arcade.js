@@ -1,19 +1,17 @@
 /* Homepage arcade — rendered straight into the hero background (fills
    .hero-stage, sitting behind the headline/CTA which stay on top via
    z-index) with a top-right tab switcher between two mini-games:
-   - Zone Dash: the glowing blue egg sits fixed in one spot, just under the
-     "Plan your visit" button — it never travels. It's rendered rolling in
-     place (a continuous self-spin, faster as the run speeds up) so it
-     reads as in motion even though its screen position never changes.
-     The grid lines it's rolling on are the SAME receding rings/rails the
-     ambient background already draws — obstacles ride those grid lines in
-     from the vanishing point at the grid's center, same as the ambient
-     tunnel, and flash orange as they near the egg. Jump (Up/W or tap) each
-     one as it arrives; runs of small platforms separated by gaps need one
-     well-timed jump per gap. Every ring that finishes its pass is one
-     "layer" cleared — that always pads the score, whether or not the
-     latest hazard landed, since a miss only zeroes the combo, never the
-     run itself (no game over, ever).
+   - Zone Dash: one square of the background grid is "live" at a time — the
+     same receding-toward-camera square the ambient tunnel already draws.
+     The egg walks that square's own edges (corner to corner, all the way
+     around) while the whole square approaches, and the obstacles for that
+     lap are fixed points riding along those same edges — everything
+     (egg + hazards) is attached to that one layer, growing together as it
+     nears the camera. Jump (Up/W or tap) each hazard right as the egg's
+     lap reaches it. The moment that layer reaches the camera, it's swapped
+     for a fresh one starting back at the far edge — lap complete, next
+     layer, forever — and a miss only zeroes the combo, it never stops the
+     loop (no game over, ever).
    - Zone Hunt: PC parts fly toward the camera out of the grid's vanishing
      point. Click/tap a part before it gets too close to pop it into
      confetti and score a point. Let any part reach the front unclicked
@@ -40,6 +38,22 @@
     return { x: cx + x * sc, y: cy + y * sc, s: sc };
   }
 
+  // The ambient background tunnel (techno-hero.js) spins its own squares
+  // slowly at this same rate. Zone Dash's "live" square rotates in step
+  // with it so the game reads as attached to that same background layer,
+  // not a separate overlay — this is what turns the plain square into the
+  // tilted/diamond look at any given moment.
+  const BG_ROT_SPEED = 0.045;
+  let bgRot = 0;
+  function rotXY(x, y, rot) {
+    const c = Math.cos(rot), s = Math.sin(rot);
+    return { x: x * c - y * s, y: x * s + y * c };
+  }
+  function projectRot(x, y, z) {
+    const p = rotXY(x, y, bgRot);
+    return project(p.x, p.y, z);
+  }
+
   // Fades an element in near spawn (far) and gives it a brief exit fade
   // right as it passes the camera — avoids anything popping harshly.
   function objFade(z) {
@@ -57,11 +71,15 @@
     ctx.save();
     ctx.translate(x, y - (bob || 0));
     ctx.rotate(rot || 0);
-    const w = size * 0.68, h = size * 0.94;
+    // A real egg silhouette: narrow rounded top tapering down into a wide,
+    // fully-rounded bottom (not a point) — matches a classic egg photo,
+    // not a symmetric teardrop.
+    const w = size * 0.82, hTop = size * 0.5, hBot = size * 0.48;
     ctx.beginPath();
-    ctx.moveTo(0, -h / 2);
-    ctx.bezierCurveTo(w / 2, -h / 2, w / 2, h / 3, 0, h / 2);
-    ctx.bezierCurveTo(-w / 2, h / 3, -w / 2, -h / 2, 0, -h / 2);
+    ctx.moveTo(0, -hTop);
+    ctx.bezierCurveTo(w * 0.56, -hTop * 0.86, w * 0.62, hBot * 0.28, w * 0.52, hBot * 0.78);
+    ctx.bezierCurveTo(w * 0.42, hBot, -w * 0.42, hBot, -w * 0.52, hBot * 0.78);
+    ctx.bezierCurveTo(-w * 0.62, hBot * 0.28, -w * 0.56, -hTop * 0.86, 0, -hTop);
     ctx.closePath();
     ctx.fillStyle = 'rgba(70,150,255,.96)';
     ctx.strokeStyle = 'rgba(180,220,255,.95)';
@@ -73,41 +91,67 @@
     ctx.restore();
   }
 
+  // A point along the perimeter of a square centered on the vanishing-point
+  // axis, walked clockwise starting at the top-left corner. `t` is 0..4 —
+  // each whole number is one full edge (top, right, bottom, left) — and
+  // `half` is the square's local half-width, the same at every depth (so it
+  // only grows on screen from perspective, never changes in world space).
+  function squareEdgePoint(t, half) {
+    const s = ((t % 4) + 4) % 4;
+    if (s < 1) return { x: -half + s * 2 * half, y: -half };
+    if (s < 2) return { x: half, y: -half + (s - 1) * 2 * half };
+    if (s < 3) return { x: half - (s - 2) * 2 * half, y: half };
+    return { x: -half, y: half - (s - 3) * 2 * half };
+  }
+
   // ============================================================
   //  ZONE DASH
   // ============================================================
   const Dash = {
     name: 'dash',
-    help: '▲ / tap to jump — clear the gaps, dodge the spikes.',
-    score: 0, highScore: 0, layer: 1,
-    rings: [], obstacles: [], spawnTimer: 1.2,
+    help: '▲ / tap to jump — clear each hazard as the egg’s lap reaches it.',
+    score: 0, highScore: 0, layer: 1, combo: 0,
+    z: 1500, edgeT: 0, obstacles: [],
     heroY: 0, heroVy: 0, jumping: false, jumpAngle: 0, rollAngle: 0,
-    hitFlash: 0, invuln: 0, runSpeed: 6,
+    hitFlash: 0, runSpeed: 6,
     GRAVITY: 2300, JUMP_V: 950,
-    AIR_TIME: (2 * 950) / 2300,
 
     init() {
       try { this.highScore = parseFloat(localStorage.getItem('gz-arcade-dash-high') || '0') || 0; } catch {}
     },
-    // Same grid the ambient background already draws: rings receding from
-    // the vanishing point at screen center, rails converging toward it. The
-    // egg's own spot never moves — fixed low in the frame, right under the
-    // "Plan your visit" button — it just rolls in place while the grid
-    // does the traveling, same as the background behind it.
+    // One square of the grid is "live" at a time. Its local half-width is
+    // fixed — the same at every depth — so the only thing that changes as
+    // it travels from Z_FAR to Z_NEAR is its on-screen size, exactly like
+    // the ambient tunnel's own receding rings.
     onResize() {
       this.UNIT = Math.max(22, Math.min(H * 0.09, 56));
-      this.Z_PLAYER = 150;
-      this.ULOCAL = this.UNIT * this.Z_PLAYER / F;
-      this.FLOOR_LOCAL_Y = (H * 0.82 - cy) * this.Z_PLAYER / F;
-      this.LANE_HALF_W = this.ULOCAL * 1.9;
-      this.rings = [];
-      const count = 7;
-      for (let i = 0; i < count; i++) this.rings.push({ z: Z_NEAR + (i / count) * (Z_FAR - Z_NEAR) });
+      this.Z_REF = 150;
+      this.ULOCAL = this.UNIT * this.Z_REF / F;
+      this.HALF = this.ULOCAL * 3.2;
     },
     reset() {
-      this.score = 0; this.layer = 1; this.obstacles = []; this.spawnTimer = 1.1;
+      this.score = 0; this.layer = 1; this.combo = 0;
+      this.z = Z_FAR; this.edgeT = 0;
       this.heroY = 0; this.heroVy = 0; this.jumping = false; this.jumpAngle = 0; this.rollAngle = 0;
-      this.hitFlash = 0; this.invuln = 0; this.runSpeed = 6;
+      this.hitFlash = 0; this.runSpeed = 6;
+      this.spawnLayerObstacles();
+    },
+    // Hazards for the current layer only, fixed to specific points along
+    // that same square's edges (never near a corner) so they read as
+    // riding the line right alongside the egg as it all approaches.
+    spawnLayerObstacles() {
+      this.obstacles = [];
+      const count = 2 + Math.floor(Math.random() * 3);
+      const used = [];
+      let tries = 0;
+      while (this.obstacles.length < count && tries < 40) {
+        tries++;
+        const t = 0.35 + Math.random() * 3.3;
+        if (used.some(u => Math.abs(u - t) < 0.55)) continue;
+        used.push(t);
+        this.obstacles.push({ edgeT: t, judged: false });
+      }
+      this.obstacles.sort((a, b) => a.edgeT - b.edgeT);
     },
     jump() { if (!this.jumping) { this.jumping = true; this.heroVy = this.JUMP_V; } },
     onJumpKey() { this.jump(); },
@@ -117,168 +161,104 @@
       const START = 6, CAP = 13, FROM = 100, EASE = 500;
       this.runSpeed = this.score <= FROM ? START : CAP - (CAP - START) * Math.exp(-(this.score - FROM) / EASE);
     },
-    spawnSpike() { this.obstacles.push({ kind: 'spike', z: Z_FAR, zThickness: this.ULOCAL * 0.9 }); },
-    spawnJumpRun(speed) {
-      const jumpRange = this.AIR_TIME * speed;
-      const gapW = jumpRange * 0.52, padW = jumpRange * 0.24;
-      const count = 2 + Math.floor(Math.random() * 3);
-      let z = Z_FAR;
-      for (let i = 0; i < count; i++) {
-        this.obstacles.push({ kind: 'platform', z, zThickness: padW, height: 0.5 });
-        z -= padW;
-        this.obstacles.push({ kind: 'gap', z, zThickness: gapW });
-        z -= gapW;
-      }
-      this.obstacles.push({ kind: 'platform', z, zThickness: padW, height: 0.5 });
-    },
-    spawnObstacle(speed) { if (Math.random() < 0.4) this.spawnSpike(); else this.spawnJumpRun(speed); },
-    atPlayer(kind) {
-      for (const o of this.obstacles) {
-        if (o.kind !== kind) continue;
-        if (this.Z_PLAYER <= o.z && this.Z_PLAYER >= o.z - o.zThickness) return o;
-      }
-      return null;
-    },
-    triggerHit() {
+    saveHigh() {
       if (this.score > this.highScore) {
         this.highScore = this.score;
         try { localStorage.setItem('gz-arcade-dash-high', String(Math.floor(this.highScore))); } catch {}
       }
-      this.score = 0; this.hitFlash = 1; this.invuln = 0.8;
-      this.heroY = 0; this.heroVy = 0; this.jumping = false;
     },
 
     update(dt) {
       this.updateRunSpeed();
-      const ringSpeed = 230 * (this.runSpeed / 6);
-      for (const r of this.rings) {
-        const prevZ = r.z;
-        r.z -= ringSpeed * 0.4 * dt;
-        // A ring wrapping back out past the player is one lap of the grid
-        // finished under the egg — one "layer" cleared, win or lose, ever
-        // padding the run rather than resetting it.
-        if (prevZ > this.Z_PLAYER && r.z <= this.Z_PLAYER) this.layer++;
-        if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
+      this.z -= 230 * (this.runSpeed / 6) * dt;
+      if (this.z <= Z_NEAR) {
+        // Lap complete: this layer has reached the camera. Swap it for a
+        // fresh one starting back at the far edge and keep going, forever
+        // — consecutive layers push the score up further.
+        this.layer++;
+        this.score += 25 * this.layer;
+        this.saveHigh();
+        this.z = Z_FAR;
+        this.spawnLayerObstacles();
       }
+      this.edgeT = 4 * (Z_FAR - this.z) / (Z_FAR - Z_NEAR);
 
-      const obstacleSpeed = ringSpeed * 2.5;
-      this.spawnTimer -= dt;
-      if (this.spawnTimer <= 0) {
-        this.spawnTimer = Math.max(1.3, 2.4 - this.score * 0.0015) + Math.random() * 0.6;
-        this.spawnObstacle(obstacleSpeed);
-      }
-      for (let i = this.obstacles.length - 1; i >= 0; i--) {
-        this.obstacles[i].z -= obstacleSpeed * dt;
-        if (this.obstacles[i].z + this.obstacles[i].zThickness < Z_NEAR - 40) this.obstacles.splice(i, 1);
+      for (const o of this.obstacles) {
+        if (o.judged || this.edgeT < o.edgeT) continue;
+        o.judged = true;
+        if (this.heroY > this.UNIT * 0.3) {
+          this.combo++;
+          this.score += 10 + this.combo * 2;
+          this.saveHigh();
+        } else {
+          // A miss only zeroes the combo — it never stops the loop.
+          this.combo = 0;
+          this.hitFlash = 1;
+        }
       }
 
       this.heroVy -= this.GRAVITY * dt;
       this.heroY += this.heroVy * dt;
-      const plat = this.atPlayer('platform'), gap = this.atPlayer('gap');
-      const floor = plat ? plat.height * this.UNIT : (gap ? null : 0);
-      if (floor !== null && this.heroY <= floor && this.heroVy <= 0) {
-        this.heroY = floor; this.heroVy = 0; this.jumping = false;
-      }
-      this.invuln = Math.max(0, this.invuln - dt);
-      const spike = this.atPlayer('spike');
-      if (this.invuln <= 0 && spike && this.heroY < this.UNIT * 0.85 - 0.5) { this.triggerHit(); }
-      else if (this.invuln <= 0 && floor === null && this.heroY < this.UNIT * 0.3) { this.triggerHit(); }
+      if (this.heroY <= 0 && this.heroVy <= 0) { this.heroY = 0; this.heroVy = 0; this.jumping = false; }
 
       this.jumpAngle = this.jumping ? this.jumpAngle + dt * 9 : 0;
-      // Rolling-in-place: the egg spins continuously, in step with how
-      // fast the grid is moving, so it reads as in motion on its own even
-      // though its screen position is fixed.
+      // Rolling in step with the lap itself, so the egg reads as under its
+      // own power even though its screen path is dictated by the square.
       this.rollAngle += dt * (this.runSpeed / this.UNIT) * 26;
-      this.score += this.runSpeed * 1.5 * dt;
       this.hitFlash = Math.max(0, this.hitFlash - dt * 2.2);
     },
 
-    laneRail(x, alpha, width) {
-      const far = project(x, this.FLOOR_LOCAL_Y, Z_FAR);
-      const near = project(x, this.FLOOR_LOCAL_Y, Z_NEAR);
+    drawSquare() {
+      const half = this.HALF, z = this.z;
+      const f = objFade(z);
+      if (f <= 0.02) return;
+      const tl = projectRot(-half, -half, z), tr = projectRot(half, -half, z);
+      const br = projectRot(half, half, z), bl = projectRot(-half, half, z);
       ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = 'rgba(140,185,255,.8)';
-      ctx.lineWidth = width;
-      ctx.beginPath(); ctx.moveTo(far.x, far.y); ctx.lineTo(near.x, near.y); ctx.stroke();
+      ctx.globalAlpha = 0.55 * f;
+      ctx.strokeStyle = 'rgba(140,185,255,.9)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y); ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
+      ctx.closePath(); ctx.stroke();
       ctx.restore();
     },
-    drawLane() {
-      this.laneRail(-this.LANE_HALF_W, 0.5, 1.6);
-      this.laneRail(this.LANE_HALF_W, 0.5, 1.6);
-      for (const r of this.rings) {
-        const f = objFade(r.z);
-        if (f <= 0.02) continue;
-        const a = project(-this.LANE_HALF_W, this.FLOOR_LOCAL_Y, r.z);
-        const b = project(this.LANE_HALF_W, this.FLOOR_LOCAL_Y, r.z);
-        ctx.save();
-        ctx.globalAlpha = 0.45 * f;
-        ctx.strokeStyle = 'rgba(140,185,255,.9)';
-        ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        ctx.restore();
-      }
-    },
-    drawSpike(o) {
-      const halfW = this.LANE_HALF_W;
-      const apexLocalY = this.FLOOR_LOCAL_Y - this.ULOCAL * 0.85;
-      const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-      const base1 = project(-halfW, this.FLOOR_LOCAL_Y, z);
-      const base2 = project(halfW, this.FLOOR_LOCAL_Y, z);
-      const apex = project(0, apexLocalY, z);
-      const f = objFade(z);
+    drawObstacle(o) {
+      const near = !o.judged && Math.abs(this.edgeT - o.edgeT) < 0.35;
+      const pt = squareEdgePoint(o.edgeT, this.HALF);
+      // Push the marker slightly outward from whichever edge it's on, so
+      // it reads as a spike riding the line rather than sitting flush on
+      // it — all computed in local space, then rotated + projected as one
+      // piece so it turns with the square instead of staying screen-locked.
+      const outX = pt.x >= this.HALF - 0.01 ? 1 : pt.x <= -this.HALF + 0.01 ? -1 : 0;
+      const outY = outX !== 0 ? 0 : (pt.y >= this.HALF - 0.01 ? 1 : -1);
+      const push = this.HALF * 0.16;
+      const wLocal = this.ULOCAL * 0.28;
+      const aLocal = outX !== 0 ? { x: pt.x, y: pt.y - wLocal } : { x: pt.x - wLocal, y: pt.y };
+      const bLocal = outX !== 0 ? { x: pt.x, y: pt.y + wLocal } : { x: pt.x + wLocal, y: pt.y };
+      const tipLocal = { x: pt.x + outX * push, y: pt.y + outY * push };
+      const a = projectRot(aLocal.x, aLocal.y, this.z);
+      const b = projectRot(bLocal.x, bLocal.y, this.z);
+      const tip = projectRot(tipLocal.x, tipLocal.y, this.z);
+      const f = objFade(this.z);
       ctx.save();
-      ctx.globalAlpha = Math.max(0.35, f);
-      ctx.fillStyle = 'rgba(255,150,40,.95)';
-      ctx.shadowColor = 'rgba(255,140,40,.9)'; ctx.shadowBlur = 8;
+      ctx.globalAlpha = Math.max(0.35, f) * (near ? 1 : 0.85);
+      ctx.fillStyle = near ? 'rgba(255,150,40,.98)' : 'rgba(255,150,40,.8)';
+      ctx.shadowColor = 'rgba(255,140,40,.95)';
+      ctx.shadowBlur = near ? 16 : 6;
       ctx.beginPath();
-      ctx.moveTo(base1.x, base1.y); ctx.lineTo(apex.x, apex.y); ctx.lineTo(base2.x, base2.y);
+      ctx.moveTo(a.x, a.y); ctx.lineTo(tip.x, tip.y); ctx.lineTo(b.x, b.y);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,200,120,.9)'; ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.restore();
-    },
-    drawPlatform(o) {
-      const halfW = this.LANE_HALF_W;
-      const topLocalY = this.FLOOR_LOCAL_Y - o.height * this.ULOCAL;
-      const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-      const p1 = project(-halfW, topLocalY, z), p2 = project(halfW, topLocalY, z);
-      const p3 = project(halfW, this.FLOOR_LOCAL_Y, z), p4 = project(-halfW, this.FLOOR_LOCAL_Y, z);
-      const f = objFade(z);
-      ctx.save();
-      ctx.globalAlpha = Math.max(0.35, f);
-      ctx.fillStyle = 'rgba(70,100,160,.88)';
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
-      ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(150,190,255,.85)'; ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.restore();
-    },
-    drawGap(o) {
-      const halfW = this.LANE_HALF_W;
-      const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-      const pitY = this.FLOOR_LOCAL_Y + this.ULOCAL * 0.5;
-      const p1 = project(-halfW, this.FLOOR_LOCAL_Y, z), p2 = project(halfW, this.FLOOR_LOCAL_Y, z);
-      const p3 = project(halfW, pitY, z), p4 = project(-halfW, pitY, z);
-      const f = objFade(z);
-      ctx.save();
-      ctx.globalAlpha = Math.max(0.35, f);
-      ctx.fillStyle = 'rgba(5,7,12,.92)';
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
-      ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,150,40,.7)'; ctx.lineWidth = 1; ctx.stroke();
       ctx.restore();
     },
     draw() {
-      this.drawLane();
-      for (const o of this.obstacles) {
-        if (o.kind === 'spike') this.drawSpike(o);
-        else if (o.kind === 'platform') this.drawPlatform(o);
-        else if (o.kind === 'gap') this.drawGap(o);
-      }
-      const liftLocal = this.heroY * (this.Z_PLAYER / F);
-      const p = project(0, this.FLOOR_LOCAL_Y - liftLocal, this.Z_PLAYER);
-      drawEgg(p.x, p.y, this.UNIT, 0, this.rollAngle + this.jumpAngle);
+      this.drawSquare();
+      for (const o of this.obstacles) this.drawObstacle(o);
+      const pt = squareEdgePoint(this.edgeT, this.HALF);
+      const liftLocal = this.heroY * (this.z / F);
+      const p = projectRot(pt.x, pt.y - liftLocal, this.z);
+      const size = this.UNIT * (this.Z_REF / this.z);
+      drawEgg(p.x, p.y, size, 0, this.rollAngle + this.jumpAngle);
       if (this.hitFlash > 0.01) {
         ctx.save();
         ctx.globalAlpha = this.hitFlash * 0.25;
@@ -333,12 +313,23 @@
     init() {
       try { this.highScore = parseFloat(localStorage.getItem('gz-arcade-hunt-high') || '0') || 0; } catch {}
     },
+    // Parts fly across the WHOLE background now, not just a central patch.
+    // You only actually lose one you let sail past the headline — anything
+    // that drifts up, sideways, or off past the edges without crossing
+    // that line just despawns, no penalty.
     onResize() {
       this.Z_REF = 150;
       this.BASE = Math.max(24, Math.min(H * 0.09, 60)) * this.Z_REF / F;
-      this.SPREAD_X = (W * 0.42) * this.Z_REF / F;
-      this.SPREAD_Y = (H * 0.36) * this.Z_REF / F;
+      this.SPREAD_X = (W * 0.92) * this.Z_REF / F;
+      this.SPREAD_Y = (H * 0.85) * this.Z_REF / F;
       this.MISS_Z = 150;
+      this.missLineY = H * 0.72;
+      const stack = document.querySelector('.hero-stack');
+      if (stack) {
+        const sRect = stack.getBoundingClientRect();
+        const cRect = canvas.getBoundingClientRect();
+        if (cRect.height) this.missLineY = sRect.bottom - cRect.top;
+      }
     },
     reset() { this.parts = []; this.confetti = []; this.score = 0; this.spawnTimer = 0.7; this.missFlash = 0; },
     onJumpKey() {},
@@ -394,7 +385,15 @@
       for (let i = this.parts.length - 1; i >= 0; i--) {
         const p = this.parts[i];
         p.z -= zSpeed * dt;
-        if (p.z <= this.MISS_Z) { this.parts.splice(i, 1); this.triggerMiss(); }
+        const pr = project(p.x, p.y, p.z);
+        if (pr.y >= this.missLineY) {
+          // Only crossing down past the headline counts as a miss — a part
+          // that happened to drift up or sideways just despawns quietly.
+          this.parts.splice(i, 1);
+          this.triggerMiss();
+        } else if (p.z <= Z_NEAR - 30) {
+          this.parts.splice(i, 1);
+        }
       }
       for (let i = this.confetti.length - 1; i >= 0; i--) {
         const c = this.confetti[i];
@@ -485,6 +484,7 @@
   function frame(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts;
+    bgRot += dt * BG_ROT_SPEED;
     ctx.clearRect(0, 0, W, H);
     if (inViewport()) current.update(dt);
     current.draw();
