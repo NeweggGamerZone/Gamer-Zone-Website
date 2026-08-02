@@ -106,8 +106,12 @@
   function byName(a, b) { return a.name.localeCompare(b.name); }
 
   function itemLine(g) {
-    const sub = g.platform === 'vr' && VR_SYSTEM[g.name] ? ` <span class="dim" style="font-size:.82em">— ${GZ.esc(VR_SYSTEM[g.name])}</span>` : '';
-    return `<li>${GZ.esc(g.name)}${sub}</li>`;
+    const subText = g.platform === 'vr' && VR_SYSTEM[g.name] ? ` — ${VR_SYSTEM[g.name]}` : '';
+    const sub = subText ? ` <span class="dim" style="font-size:.82em">${GZ.esc(subText)}</span>` : '';
+    // Full name (+ VR system, if any) truncates to one line with an ellipsis so
+    // every row is the same length regardless of title length; data-full
+    // drives a pure-CSS hover popup showing the untruncated text.
+    return `<li data-full="${GZ.esc(g.name + subText)}"><span class="gl-name">${GZ.esc(g.name)}</span>${sub}</li>`;
   }
 
   function panel(title, iconName, games, note) {

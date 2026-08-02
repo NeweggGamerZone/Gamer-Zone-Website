@@ -1,11 +1,16 @@
 /* Homepage arcade — rendered straight into the hero background (fills
    .hero-stage, sitting behind the headline/CTA which stay on top via
    z-index) with a top-right tab switcher between two mini-games:
-   - Zone Dash: a Geometry-Dash-style lane runner. The flat square player
-     auto-weaves left/center/right across the lane in step with the grid
-     tiles arriving. Jump (Up/W or tap) over spikes; runs of small
-     platforms separated by gaps need one well-timed jump per gap — miss
-     any single one in the sequence and the run resets, same as a spike.
+   - Zone Dash: the glowing blue egg sits fixed in place — it never moves
+     on screen. Instead, the grid square itself (the "layer") spins in
+     place around it, sweeping left-to-right like a track reeling in, while
+     it also shrinks toward the egg the way the ambient tunnel's rings
+     recede. Hazard marks ride along that rotating square edge; as one
+     nears the egg it flashes orange as a warning — jump (Up/W or tap) the
+     instant it arrives or your combo resets, same idea as dodging a spike.
+     Each full shrink cycle is one "layer" cleared — clearing layers keeps
+     the score climbing even after a miss, since a miss only zeroes your
+     combo, not the run itself (no game over, ever).
    - Zone Hunt: PC parts fly toward the camera out of the grid's vanishing
      point. Click/tap a part before it gets too close to pop it into
      confetti and score a point. Let any part reach the front unclicked
@@ -40,18 +45,23 @@
     return Math.max(0, Math.min(1, nearFade * farFade));
   }
 
-  function drawSquare(x, y, size, rot) {
+  // The player: a flat, glowing blue egg — same "flat fill + stroke + glow,
+  // no shading" 2D look the old square player had, just egg-shaped and blue.
+  // `bob` is a small vertical offset used for the jump hop.
+  function drawEgg(x, y, size, bob) {
     ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(rot);
-    const h = size / 2;
-    ctx.fillStyle = 'rgba(235,242,255,.97)';
-    ctx.strokeStyle = 'rgba(90,150,255,.9)';
-    ctx.lineWidth = Math.max(1.4, size * 0.05);
-    ctx.shadowColor = 'rgba(120,170,255,.65)';
-    ctx.shadowBlur = size * 0.35;
+    ctx.translate(x, y - (bob || 0));
+    const w = size * 0.68, h = size * 0.94;
     ctx.beginPath();
-    ctx.rect(-h, -h, size, size);
+    ctx.moveTo(0, -h / 2);
+    ctx.bezierCurveTo(w / 2, -h / 2, w / 2, h / 3, 0, h / 2);
+    ctx.bezierCurveTo(-w / 2, h / 3, -w / 2, -h / 2, 0, -h / 2);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(70,150,255,.96)';
+    ctx.strokeStyle = 'rgba(180,220,255,.95)';
+    ctx.lineWidth = Math.max(1.4, size * 0.05);
+    ctx.shadowColor = 'rgba(70,150,255,.9)';
+    ctx.shadowBlur = size * 0.55;
     ctx.fill();
     ctx.stroke();
     ctx.restore();
@@ -62,206 +72,148 @@
   // ============================================================
   const Dash = {
     name: 'dash',
-    help: '▲ / tap to jump — clear the gaps, dodge the spikes.',
-    score: 0, highScore: 0,
-    rings: [], obstacles: [], spawnTimer: 1.2,
-    heroY: 0, heroVy: 0, jumping: false, jumpAngle: 0,
-    hitFlash: 0, invuln: 0, runSpeed: 6,
-    weaveIndex: 1, weaveDir: 1, playerLocalX: 0,
-    GRAVITY: 2300, JUMP_V: 950,
-    AIR_TIME: (2 * 950) / 2300,
+    help: "▲ / tap the instant it flashes orange — chain hits for a bigger score, a miss just resets your combo.",
+    score: 0, highScore: 0, layer: 1,
+    rings: [], hazards: [], spawnTimer: 0.9,
+    angle: 0, rotSpeed: 0, layerTimer: 9,
+    jumping: false, jumpT: 0,
+    hitFlash: 0, invuln: 0,
+    JUMP_DUR: 0.4,
+    ROT_BASE: 0.55, ROT_STEP: 0.045,
 
     init() {
       try { this.highScore = parseFloat(localStorage.getItem('gz-arcade-dash-high') || '0') || 0; } catch {}
     },
+    // The egg's anchor point never moves — centered horizontally, fixed low
+    // in the frame (clear of the headline above it). Everything else — the
+    // grid square and its hazards — rotates and shrinks toward that one
+    // fixed point instead of the egg traveling through the scene.
     onResize() {
-      this.UNIT = Math.max(22, Math.min(H * 0.09, 56));
-      this.Z_PLAYER = 150;
-      this.ULOCAL = this.UNIT * this.Z_PLAYER / F;
-      this.FLOOR_LOCAL_Y = (H * 0.82 - cy) * this.Z_PLAYER / F;
-      this.LANE_HALF_W = this.ULOCAL * 1.9;
-      this.COLS = [-this.LANE_HALF_W * 0.55, 0, this.LANE_HALF_W * 0.55];
+      this.px = cx; this.py = cy + H * 0.28;
+      this.R_MAX = Math.min(W * 0.42, H * 0.48);
+      this.JUDGE_R = Math.max(16, this.R_MAX * 0.06);
+      this.UNIT = Math.max(20, Math.min(H * 0.08, 46));
       this.rings = [];
-      const count = 7;
-      for (let i = 0; i < count; i++) this.rings.push({ z: Z_NEAR + (i / count) * (Z_FAR - Z_NEAR) });
+      const n = 5;
+      for (let i = 0; i < n; i++) this.rings.push({ r: (i / n) * this.R_MAX });
     },
     reset() {
-      this.score = 0; this.obstacles = []; this.spawnTimer = 1.1;
-      this.heroY = 0; this.heroVy = 0; this.jumping = false; this.jumpAngle = 0;
-      this.hitFlash = 0; this.invuln = 0; this.runSpeed = 6;
-      this.weaveIndex = 1; this.weaveDir = 1; this.playerLocalX = 0;
+      this.score = 0; this.layer = 1; this.hazards = [];
+      this.angle = 0; this.rotSpeed = this.ROT_BASE; this.layerTimer = 9;
+      this.spawnTimer = 0.9;
+      this.jumping = false; this.jumpT = 0;
+      this.hitFlash = 0; this.invuln = 0;
     },
-    jump() { if (!this.jumping) { this.jumping = true; this.heroVy = this.JUMP_V; } },
+    jump() { if (!this.jumping) { this.jumping = true; this.jumpT = 0; } },
     onJumpKey() { this.jump(); },
     onPointer() { this.jump(); },
 
-    advanceWeave() {
-      this.weaveIndex += this.weaveDir;
-      if (this.weaveIndex >= this.COLS.length - 1) { this.weaveIndex = this.COLS.length - 1; this.weaveDir = -1; }
-      else if (this.weaveIndex <= 0) { this.weaveIndex = 0; this.weaveDir = 1; }
-    },
-    updateRunSpeed() {
-      const START = 6, CAP = 13, FROM = 100, EASE = 500;
-      this.runSpeed = this.score <= FROM ? START : CAP - (CAP - START) * Math.exp(-(this.score - FROM) / EASE);
-    },
-    spawnSpike() { this.obstacles.push({ kind: 'spike', z: Z_FAR, zThickness: this.ULOCAL * 0.9 }); },
-    spawnJumpRun(speed) {
-      const jumpRange = this.AIR_TIME * speed;
-      const gapW = jumpRange * 0.52, padW = jumpRange * 0.24;
-      const count = 2 + Math.floor(Math.random() * 3);
-      let z = Z_FAR;
-      for (let i = 0; i < count; i++) {
-        this.obstacles.push({ kind: 'platform', z, zThickness: padW, height: 0.5 });
-        z -= padW;
-        this.obstacles.push({ kind: 'gap', z, zThickness: gapW });
-        z -= gapW;
-      }
-      this.obstacles.push({ kind: 'platform', z, zThickness: padW, height: 0.5 });
-    },
-    spawnObstacle(speed) { if (Math.random() < 0.4) this.spawnSpike(); else this.spawnJumpRun(speed); },
-    atPlayer(kind) {
-      for (const o of this.obstacles) {
-        if (o.kind !== kind) continue;
-        if (this.Z_PLAYER <= o.z && this.Z_PLAYER >= o.z - o.zThickness) return o;
-      }
-      return null;
-    },
     triggerHit() {
       if (this.score > this.highScore) {
         this.highScore = this.score;
         try { localStorage.setItem('gz-arcade-dash-high', String(Math.floor(this.highScore))); } catch {}
       }
-      this.score = 0; this.hitFlash = 1; this.invuln = 0.8;
-      this.heroY = 0; this.heroVy = 0; this.jumping = false;
+      this.score = 0; this.hitFlash = 1; this.invuln = 0.5;
+    },
+    spawnHazard() {
+      this.hazards.push({ r: this.R_MAX, edge: Math.floor(Math.random() * 4), t: Math.random(), judged: false });
+    },
+    // A point at fraction t along one edge of a square of half-side r,
+    // in the square's own (unrotated) local frame. Edges run
+    // top(L->R), right(T->B), bottom(R->L), left(B->T) — a full lap is one
+    // continuous clockwise trip around the square, matching the square's
+    // own clockwise spin so hazards always ride the grid line itself.
+    edgeLocal(edge, t, r) {
+      const d = r * 2;
+      switch (edge) {
+        case 0: return { x: -r + d * t, y: -r };
+        case 1: return { x: r, y: -r + d * t };
+        case 2: return { x: r - d * t, y: r };
+        default: return { x: -r, y: r - d * t };
+      }
+    },
+    toScreen(local) {
+      const c = Math.cos(this.angle), s = Math.sin(this.angle);
+      return { x: this.px + local.x * c - local.y * s, y: this.py + local.x * s + local.y * c };
     },
 
     update(dt) {
-      this.updateRunSpeed();
-      const ringSpeed = 230 * (this.runSpeed / 6);
-      for (const r of this.rings) {
-        const prevZ = r.z;
-        r.z -= ringSpeed * 0.4 * dt;
-        if (prevZ > this.Z_PLAYER && r.z <= this.Z_PLAYER) this.advanceWeave();
-        if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
+      this.rotSpeed = this.ROT_BASE + (this.layer - 1) * this.ROT_STEP;
+      this.angle += this.rotSpeed * dt; // clockwise spin — the grid sweeps left-to-right past the egg
+      const shrinkSpeed = this.R_MAX * (0.5 + (this.layer - 1) * 0.05);
+      for (const ring of this.rings) {
+        ring.r -= shrinkSpeed * dt;
+        if (ring.r < 0) ring.r += this.R_MAX;
       }
-      this.playerLocalX += (this.COLS[this.weaveIndex] - this.playerLocalX) * Math.min(1, dt * 5);
 
-      const obstacleSpeed = ringSpeed * 2.5;
       this.spawnTimer -= dt;
       if (this.spawnTimer <= 0) {
-        this.spawnTimer = Math.max(1.3, 2.4 - this.score * 0.0015) + Math.random() * 0.6;
-        this.spawnObstacle(obstacleSpeed);
+        this.spawnTimer = Math.max(0.55, 1.25 - this.layer * 0.04) + Math.random() * 0.3;
+        this.spawnHazard();
       }
-      for (let i = this.obstacles.length - 1; i >= 0; i--) {
-        this.obstacles[i].z -= obstacleSpeed * dt;
-        if (this.obstacles[i].z + this.obstacles[i].zThickness < Z_NEAR - 40) this.obstacles.splice(i, 1);
+      const hazSpeed = shrinkSpeed * 1.1;
+      for (let i = this.hazards.length - 1; i >= 0; i--) {
+        const hz = this.hazards[i];
+        hz.r -= hazSpeed * dt;
+        if (!hz.judged && hz.r <= this.JUDGE_R) {
+          hz.judged = true;
+          if (this.invuln <= 0) {
+            if (this.jumping && this.jumpT < this.JUMP_DUR) this.score++;
+            else this.triggerHit();
+          }
+        }
+        if (hz.r < -this.R_MAX * 0.08) this.hazards.splice(i, 1);
       }
 
-      this.heroVy -= this.GRAVITY * dt;
-      this.heroY += this.heroVy * dt;
-      const plat = this.atPlayer('platform'), gap = this.atPlayer('gap');
-      const floor = plat ? plat.height * this.UNIT : (gap ? null : 0);
-      if (floor !== null && this.heroY <= floor && this.heroVy <= 0) {
-        this.heroY = floor; this.heroVy = 0; this.jumping = false;
+      if (this.jumping) {
+        this.jumpT += dt;
+        if (this.jumpT > this.JUMP_DUR) { this.jumping = false; this.jumpT = 0; }
       }
       this.invuln = Math.max(0, this.invuln - dt);
-      const spike = this.atPlayer('spike');
-      if (this.invuln <= 0 && spike && this.heroY < this.UNIT * 0.85 - 0.5) { this.triggerHit(); }
-      else if (this.invuln <= 0 && floor === null && this.heroY < this.UNIT * 0.3) { this.triggerHit(); }
-
-      this.jumpAngle = this.jumping ? this.jumpAngle + dt * 9 : 0;
-      this.score += this.runSpeed * 1.5 * dt;
       this.hitFlash = Math.max(0, this.hitFlash - dt * 2.2);
-    },
 
-    laneRail(x, alpha, width) {
-      const far = project(x, this.FLOOR_LOCAL_Y, Z_FAR);
-      const near = project(x, this.FLOOR_LOCAL_Y, Z_NEAR);
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = 'rgba(140,185,255,.8)';
-      ctx.lineWidth = width;
-      ctx.beginPath(); ctx.moveTo(far.x, far.y); ctx.lineTo(near.x, near.y); ctx.stroke();
-      ctx.restore();
-    },
-    drawLane() {
-      this.laneRail(-this.LANE_HALF_W, 0.5, 1.6);
-      this.laneRail(this.LANE_HALF_W, 0.5, 1.6);
-      this.laneRail((this.COLS[0] + this.COLS[1]) / 2, 0.22, 1);
-      this.laneRail((this.COLS[1] + this.COLS[2]) / 2, 0.22, 1);
-      for (const r of this.rings) {
-        const f = objFade(r.z);
-        if (f <= 0.02) continue;
-        const a = project(-this.LANE_HALF_W, this.FLOOR_LOCAL_Y, r.z);
-        const b = project(this.LANE_HALF_W, this.FLOOR_LOCAL_Y, r.z);
-        ctx.save();
-        ctx.globalAlpha = 0.45 * f;
-        ctx.strokeStyle = 'rgba(140,185,255,.9)';
-        ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        ctx.restore();
+      // A layer finishing its shrink-to-center cycle always advances the
+      // run and pads the score, whether or not the last hazard landed —
+      // a miss only zeroes the combo above, it never stops the run.
+      this.layerTimer -= dt;
+      if (this.layerTimer <= 0) {
+        this.layer++;
+        this.score += 10;
+        this.layerTimer = Math.max(5, 9 - this.layer * 0.2);
       }
     },
-    drawSpike(o) {
-      const halfW = this.LANE_HALF_W;
-      const apexLocalY = this.FLOOR_LOCAL_Y - this.ULOCAL * 0.85;
-      const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-      const base1 = project(-halfW, this.FLOOR_LOCAL_Y, z);
-      const base2 = project(halfW, this.FLOOR_LOCAL_Y, z);
-      const apex = project(0, apexLocalY, z);
-      const f = objFade(z);
+
+    drawRingSquare(r, alpha) {
+      if (r <= 1) return;
       ctx.save();
-      ctx.globalAlpha = Math.max(0.35, f);
+      ctx.translate(this.px, this.py);
+      ctx.rotate(this.angle);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = 'rgba(140,185,255,.85)';
+      ctx.lineWidth = 1.3;
+      ctx.strokeRect(-r, -r, r * 2, r * 2);
+      ctx.restore();
+    },
+    drawHazard(hz) {
+      const p = this.toScreen(this.edgeLocal(hz.edge, hz.t, hz.r));
+      const near = Math.max(0, 1 - hz.r / (this.R_MAX * 0.5));
+      const pulse = 0.55 + 0.45 * Math.sin(performance.now() * 0.02 * (1 + near * 3));
+      const size = Math.max(5, this.UNIT * 0.3 * (0.6 + 0.4 * (1 - hz.r / this.R_MAX)));
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, Math.max(0.35, near) * pulse + 0.3);
       ctx.fillStyle = 'rgba(255,150,40,.95)';
-      ctx.shadowColor = 'rgba(255,140,40,.9)'; ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(255,140,40,.95)';
+      ctx.shadowBlur = size * 1.4;
       ctx.beginPath();
-      ctx.moveTo(base1.x, base1.y); ctx.lineTo(apex.x, apex.y); ctx.lineTo(base2.x, base2.y);
-      ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,200,120,.9)'; ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.restore();
-    },
-    drawPlatform(o) {
-      const halfW = this.LANE_HALF_W;
-      const topLocalY = this.FLOOR_LOCAL_Y - o.height * this.ULOCAL;
-      const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-      const p1 = project(-halfW, topLocalY, z), p2 = project(halfW, topLocalY, z);
-      const p3 = project(halfW, this.FLOOR_LOCAL_Y, z), p4 = project(-halfW, this.FLOOR_LOCAL_Y, z);
-      const f = objFade(z);
-      ctx.save();
-      ctx.globalAlpha = Math.max(0.35, f);
-      ctx.fillStyle = 'rgba(70,100,160,.88)';
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
-      ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(150,190,255,.85)'; ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.restore();
-    },
-    drawGap(o) {
-      const halfW = this.LANE_HALF_W;
-      const z = Math.max(o.z - o.zThickness * 0.5, Z_NEAR - 40);
-      const pitY = this.FLOOR_LOCAL_Y + this.ULOCAL * 0.5;
-      const p1 = project(-halfW, this.FLOOR_LOCAL_Y, z), p2 = project(halfW, this.FLOOR_LOCAL_Y, z);
-      const p3 = project(halfW, pitY, z), p4 = project(-halfW, pitY, z);
-      const f = objFade(z);
-      ctx.save();
-      ctx.globalAlpha = Math.max(0.35, f);
-      ctx.fillStyle = 'rgba(5,7,12,.92)';
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
-      ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,150,40,.7)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     },
     draw() {
-      this.drawLane();
-      for (const o of this.obstacles) {
-        if (o.kind === 'spike') this.drawSpike(o);
-        else if (o.kind === 'platform') this.drawPlatform(o);
-        else if (o.kind === 'gap') this.drawGap(o);
-      }
-      const liftLocal = this.heroY * (this.Z_PLAYER / F);
-      const p = project(this.playerLocalX, this.FLOOR_LOCAL_Y - liftLocal, this.Z_PLAYER);
-      drawSquare(p.x, p.y, this.UNIT, this.jumpAngle);
+      for (const ring of this.rings) this.drawRingSquare(ring.r, 0.15 + 0.5 * (1 - ring.r / this.R_MAX));
+      for (const hz of this.hazards) this.drawHazard(hz);
+      const bob = this.jumping ? Math.sin((this.jumpT / this.JUMP_DUR) * Math.PI) * this.UNIT * 0.9 : 0;
+      drawEgg(this.px, this.py, this.UNIT, bob);
       if (this.hitFlash > 0.01) {
         ctx.save();
         ctx.globalAlpha = this.hitFlash * 0.25;
