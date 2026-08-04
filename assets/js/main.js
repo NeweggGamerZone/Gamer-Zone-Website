@@ -120,14 +120,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, { passive: true });
   }
 
-  // About Gamer Zone zone list: open on hover, close when the pointer
-  // leaves — no click needed. Touch/keyboard devices (no real hover) keep
-  // the native click-to-toggle behavior instead, since they can't hover.
+  // About Gamer Zone zone list: hovering toggles it open/closed — no click
+  // needed. The first hover opens it and it stays open after the pointer
+  // leaves; hovering over it again closes it. Touch/keyboard devices (no
+  // real hover) keep the native click-to-toggle behavior instead, since
+  // they can't hover.
   const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
   document.querySelectorAll('.zone-item').forEach(item => {
     if (!canHover) return;
-    item.addEventListener('mouseenter', () => { item.open = true; });
-    item.addEventListener('mouseleave', () => { item.open = false; });
+    item.addEventListener('mouseenter', () => { item.open = !item.open; });
     const summary = item.querySelector('summary');
     if (summary) summary.addEventListener('click', e => e.preventDefault());
   });

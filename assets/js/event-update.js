@@ -75,17 +75,19 @@
   // Weekly Lineup" text, never actually tied to the week) and the subtitle
   // underneath becomes a short line on what's being played, replacing the
   // static "Diamond Bar, CA · Free to play". The theme name itself is
-  // highlighted in orange right in the masthead, with the week's date
-  // range immediately following it on that same title line (e.g. "MARVEL
-  // WEEK AUG 4 – 8") rather than off on the far right of the subtitle.
+  // highlighted in blue right in the masthead, and the week's date range
+  // sits on the right side of that same masthead row, at the same
+  // weight/size as the title (not a smaller caption).
   const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
   const eyebrowDescEl = document.getElementById('eu-eyebrow-desc');
-  if (eyebrowTitleEl) {
+  const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
+  if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `GAMER ZONE: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
+  if (eyebrowDescEl) eyebrowDescEl.textContent = themeDesc;
+  if (eyebrowDatesEl) {
     const s = monthDate(weekStart), e = monthDate(weekEnd);
     const dateRange = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
-    eyebrowTitleEl.innerHTML = `GAMER ZONE: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span><span class="eu-theme-dates">${GZ.esc(dateRange.toUpperCase())}</span>`;
+    eyebrowDatesEl.textContent = dateRange.toUpperCase();
   }
-  if (eyebrowDescEl) eyebrowDescEl.textContent = themeDesc;
 
   function row(ev, { closure = false } = {}) {
     const { mon, day } = monthDate(ev.date);
