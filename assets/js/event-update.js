@@ -46,15 +46,17 @@
   const themeWeeks = (data.weeklyThemes || []).slice().sort((a, b) => a.start.localeCompare(b.start));
   const currentTheme = themeWeeks.find(w => today >= w.start && today <= w.end);
 
-  let weekStart, weekEnd, themeName;
+  let weekStart, weekEnd, themeName, themeDesc;
   if (currentTheme) {
     weekStart = currentTheme.start; weekEnd = currentTheme.end; themeName = currentTheme.theme;
+    themeDesc = currentTheme.desc || '';
   } else {
     // No theme defined for this stretch yet — show a plain 5-day window
     // starting today rather than guessing at a name.
     const endD = new Date(today + 'T12:00:00'); endD.setDate(endD.getDate() + 4);
     weekStart = today; weekEnd = endD.toISOString().slice(0, 10);
     themeName = 'Free Play Week';
+    themeDesc = 'Free-to-play PCs, consoles, and VR — all week.';
   }
 
   // This theme week's full slate — used to list closures and any special
@@ -76,6 +78,15 @@
     const s = monthDate(weekStart), e = monthDate(weekEnd);
     themeDatesEl.textContent = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
   }
+
+  // Eyebrow title now leads with the theme itself (was static "Gamer Zone
+  // Weekly Lineup" text, never actually tied to the week) and the subtitle
+  // underneath becomes a short line on what's being played, replacing the
+  // static "Diamond Bar, CA · Free to play".
+  const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
+  const eyebrowDescEl = document.getElementById('eu-eyebrow-desc');
+  if (eyebrowTitleEl) eyebrowTitleEl.textContent = `Gamer Zone: ${themeName}`.toUpperCase();
+  if (eyebrowDescEl) eyebrowDescEl.textContent = themeDesc;
 
   function row(ev, { closure = false } = {}) {
     const { mon, day } = monthDate(ev.date);

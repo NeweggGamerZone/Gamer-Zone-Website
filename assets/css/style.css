@@ -9,7 +9,7 @@
   --bg: #060708;
   --bg-2: #0E1013;
   --bg-3: #16181D;
-  --ink: #F2F4F8;
+  --ink: #FFFFFF;
   --ink-dim: #98A0AE;
   --line: #23262d;
   --radius: 4px;
@@ -546,7 +546,8 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.6),rgba(4,5,7,.82) 55%,rgba(4,5,7,.94));}
 .eu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:clamp(1.6rem,4.5vw,3rem);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
-.eu-top .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
+.eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
+.eu-location-row{margin-bottom:clamp(1rem,3vw,1.6rem);padding-bottom:clamp(.8rem,2.5vw,1.2rem);border-bottom:1px solid rgba(255,255,255,.14)}
 .eu-eyebrow .ic{width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);color:var(--ne-orange);flex:none}
 /* masthead: the instantly-recognizable ID of this board */
 .eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:.005em;line-height:1.1;margin:0;display:block;white-space:nowrap;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
