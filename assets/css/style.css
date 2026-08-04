@@ -209,23 +209,6 @@ details.archive-month .grid { margin-top: 1rem; }
 .chip.active { background: var(--ne-orange); color: #000; border-color: var(--ne-orange); }
 .chip .ic { width: .95em; height: .95em; }
 
-/* v10: the mini-games are no longer a boxed "cabinet" — they're rendered
-   straight into the hero background, filling .hero-stage behind the
-   headline/CTA (which get z-index below to stay on top and readable).
-   Tabs/HUD/help float over the top-right/bottom as a lightweight overlay. */
-.gz-arcade { position: absolute; inset: 0; z-index: 0; width: auto; max-width: none; margin: 0; background: none; border: none; clip-path: none; padding: 0; backdrop-filter: none; pointer-events: none; }
-.gz-arcade-tabs { position: absolute; top: 1rem; right: 1rem; z-index: 2; display: flex; gap: .4rem; pointer-events: auto; }
-.gz-arcade-tabs .chip { padding: .28rem .7rem; font-size: .68rem; }
-.gz-arcade-hud { position: absolute; top: 1rem; left: 1rem; z-index: 2; display: flex; gap: 1rem; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; color: #cfe0ff; margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,.9); pointer-events: none; }
-.gz-arcade-hud b { color: var(--ne-orange); }
-.gz-arcade-canvas { display: block; width: 100%; height: 100%; touch-action: manipulation; cursor: crosshair; pointer-events: auto; }
-.gz-arcade-help { position: absolute; bottom: .9rem; left: 50%; transform: translateX(-50%); z-index: 2; margin: 0; font-size: .72rem; color: var(--ink-dim); text-align: center; text-shadow: 0 1px 8px rgba(0,0,0,.9); pointer-events: none; white-space: nowrap; }
-@media (max-width: 640px) {
-  .gz-arcade-tabs { top: .6rem; right: .6rem; }
-  .gz-arcade-hud { top: .6rem; left: .6rem; font-size: .68rem; gap: .6rem; }
-  .gz-arcade-help { font-size: .64rem; white-space: normal; max-width: 90%; }
-}
-
 form.gz-form { display: grid; gap: .8rem; max-width: 540px; }
 form.gz-form label { font-weight: 600; font-size: .9rem; }
 form.gz-form input, form.gz-form textarea, form.gz-form select { width: 100%; background: var(--bg-3); border: 1px solid var(--line); color: var(--ink); padding: .65rem .8rem; font-family: var(--sans); font-size: .95rem; }
@@ -453,29 +436,22 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .node{z-index:1;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 .mile .node{position:absolute;left:1.1rem;top:-14px}
 .mile .mo{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.78rem;color:var(--ne-blue-text);display:block}
-.mile .goal{display:inline-block;margin-top:.35rem;font-family:var(--head);font-weight:700;font-size:.6rem;text-transform:uppercase;letter-spacing:.04em;background:var(--ne-navy);color:#cfe0ff;padding:.12rem .5rem}
 .mile .unlock{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:.5rem 0 .45rem}
 .mile ul{color:var(--ink-dim);font-size:.83rem;margin:0;padding-left:1.05rem;display:grid;gap:.3rem}
 .mile ul li::marker{color:var(--ne-orange)}
 
-/* Rank-style frames, one per tier — brightness/glow steps up silver ->
-   gold -> platinum -> diamond, same visual language as game rank badges.
-   Shared between the Ambassador Journey tiles (.mile) and the Featured
-   Ambassador cards (.host-card), which carry the same tier-* class for
-   whichever rank that ambassador has actually earned. */
-.mile.tier-silver, .host-card.tier-silver{border-color:#a9bccd;box-shadow:0 0 15px rgba(180,200,220,.32),inset 0 0 16px rgba(180,200,220,.1)}
+/* Rank-style frames, one per tier — flat border + node color per rank, no
+   glow/bloom/animation. Shared between the Ambassador Journey tiles (.mile)
+   and the Featured Ambassador cards (.host-card), which carry the same
+   tier-* class for whichever rank that ambassador has actually earned. */
+.mile.tier-silver, .host-card.tier-silver{border-color:#a9bccd}
 .mile.tier-silver .node, .host-card.tier-silver .node{background:#cddae6;color:#0c1620}
-.mile.tier-gold, .host-card.tier-gold{border-color:var(--ne-orange);box-shadow:0 0 22px rgba(250,157,40,.5),inset 0 0 20px rgba(250,157,40,.14)}
+.mile.tier-gold, .host-card.tier-gold{border-color:var(--ne-orange)}
 .mile.tier-gold .node, .host-card.tier-gold .node{background:var(--ne-orange);color:#000}
-.mile.tier-platinum, .host-card.tier-platinum{border-color:#e3e9ec;box-shadow:0 0 26px rgba(227,233,236,.55),inset 0 0 22px rgba(227,233,236,.16)}
-.mile.tier-platinum .node, .host-card.tier-platinum .node{background:linear-gradient(135deg,#f5f7f8,#cfd8dc);color:#10161a}
-.mile.tier-diamond, .host-card.tier-diamond{border-color:#8fe3ff;box-shadow:0 0 22px rgba(120,220,255,.5),inset 0 0 22px rgba(120,220,255,.16);animation:mile-pulse 2.6s ease-in-out infinite}
-.mile.tier-diamond .node, .host-card.tier-diamond .node{background:linear-gradient(135deg,#b9f0ff,#6fb8ff);color:#00131f}
-@keyframes mile-pulse{
-  0%,100%{box-shadow:0 0 20px rgba(120,220,255,.4),inset 0 0 18px rgba(120,220,255,.12)}
-  50%{box-shadow:0 0 38px rgba(120,220,255,.85),inset 0 0 30px rgba(120,220,255,.24)}
-}
-@media (prefers-reduced-motion:reduce){.mile.tier-diamond, .host-card.tier-diamond{animation:none}}
+.mile.tier-platinum, .host-card.tier-platinum{border-color:#e3e9ec}
+.mile.tier-platinum .node, .host-card.tier-platinum .node{background:#e3e9ec;color:#10161a}
+.mile.tier-diamond, .host-card.tier-diamond{border-color:#8fe3ff}
+.mile.tier-diamond .node, .host-card.tier-diamond .node{background:#8fe3ff;color:#00131f}
 @media (max-width:820px){
   .tl{grid-template-columns:1fr;gap:2.2rem 0}
   .tl::before{left:13px;top:6px;bottom:6px;right:auto;width:3px;height:auto;background:repeating-linear-gradient(to bottom,var(--ne-orange) 0 10px,transparent 10px 18px)}
@@ -547,13 +523,13 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.6),rgba(4,5,7,.82) 55%,rgba(4,5,7,.94));}
 .eu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:clamp(1.6rem,4.5vw,3rem);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
-.eu-location-row{margin-bottom:clamp(1rem,3vw,1.6rem);padding-bottom:clamp(.8rem,2.5vw,1.2rem);border-bottom:1px solid rgba(255,255,255,.14)}
+.eu-location-row{margin-top:clamp(1rem,3vw,1.6rem);padding-top:clamp(.8rem,2.5vw,1.2rem);border-top:1px solid rgba(255,255,255,.14)}
 .eu-eyebrow .ic{width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);color:var(--ne-orange);flex:none}
 /* masthead: the instantly-recognizable ID of this board */
 .eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:.005em;line-height:1.1;margin:0;display:block;white-space:nowrap;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-eyebrow-title::after{content:none}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
-.eu-eyebrow p{font-family:var(--eu-body);font-size:max(14px,.9rem);color:var(--ink-dim);margin-top:.3rem}
+.eu-eyebrow p{font-family:var(--eu-body);font-size:max(15px,1.15rem);color:var(--ink-dim);margin-top:.3rem}
 .eu-brand{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ne-orange);font-size:max(14px,.95rem);text-align:right;white-space:nowrap;flex:none}
 .eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
 
@@ -572,7 +548,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-row{display:flex;align-items:baseline;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
 .eu-list .eu-row:last-child{border-bottom:1px solid rgba(242,244,248,.22)}
 .eu-date-wrap{display:flex;align-items:center;gap:.6rem;min-width:0}
-.eu-date{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:var(--eu-date-size);line-height:1;color:#F4EFC8;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.eu-date{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:var(--eu-date-size);line-height:1;color:#fff;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
 .eu-major .eu-date{color:var(--ne-blue-text)}
 .eu-major-mark{flex:none;font-size:clamp(18px,3.2vw,30px);line-height:1;color:var(--ne-orange)}
 .eu-info{text-align:right;min-width:0}

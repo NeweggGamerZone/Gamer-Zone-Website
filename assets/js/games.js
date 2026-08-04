@@ -34,7 +34,7 @@
     { key: 'console', label: 'Consoles', icon: 'gamepad' },
     { key: 'vr', label: 'VR', icon: 'vr' },
     { key: 'racing-sim', label: 'Racing Simulators', icon: 'wheel' },
-    { key: 'arcade', label: 'Arcade', icon: 'zero' },
+    { key: 'arcade', label: 'Arcade', icon: 'coin' },
   ];
   const PLATFORM_BY_KEY = Object.fromEntries(PLATFORMS.map(p => [p.key, p]));
 

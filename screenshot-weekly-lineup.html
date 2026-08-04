@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" class="board-mode">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Weekly Lineup — screenshot capture (not a site page)</title>
+<!-- Not linked from anywhere in the site nav or sitemap — exists purely so
+     this one section can be screenshotted in isolation, full-viewport, on
+     the same clean static background events.html uses (no animated hero
+     tunnel behind it). Uses the site's existing "board-mode" CSS (see
+     style.css) which was already built for exactly this: hides header/
+     footer/hero and blows the eu-board up to fill the frame. Safe to
+     delete once no longer needed. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css?v=6">
+</head>
+<body>
+<div id="gz-veil" aria-hidden="true"></div>
+<div class="geo-bg" aria-hidden="true"></div>
+<main class="container">
+  <section class="reveal eu-section">
+    <div class="eu-board">
+      <div class="eu-top">
+        <div class="eu-eyebrow">
+          <i data-ic="cal" data-lg></i>
+          <div>
+            <h3 class="eu-eyebrow-title" id="eu-eyebrow-title">Gamer Zone <span class="accent">Weekly Lineup</span></h3>
+            <p id="eu-eyebrow-desc">Diamond Bar, CA &middot; Free to play</p>
+          </div>
+        </div>
+      </div>
+      <div class="eu-theme-row" id="eu-theme-row">
+        <div class="eu-theme-name" id="eu-theme-name">Weekly Theme: &mdash;</div>
+        <div class="eu-theme-dates" id="eu-theme-dates">&mdash;</div>
+      </div>
+      <div class="eu-list" id="eu-list"></div>
+      <div class="eu-eyebrow eu-location-row eu-location-bottom">
+        <i data-ic="pin" data-lg></i>
+        <p data-cfg="address"></p>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/main.js?v=6"></script>
+<script src="assets/js/event-update.js?v=6"></script>
+</body>
+</html>
