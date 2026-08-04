@@ -168,10 +168,6 @@
     onJumpKey() { this.jump(); },
     onPointer() { this.jump(); },
 
-    updateRunSpeed() {
-      const START = 6, CAP = 13, FROM = 100, EASE = 500;
-      this.runSpeed = this.score <= FROM ? START : CAP - (CAP - START) * Math.exp(-(this.score - FROM) / EASE);
-    },
     saveHigh() {
       if (this.score > this.highScore) {
         this.highScore = this.score;
@@ -180,18 +176,18 @@
     },
 
     update(dt) {
-      this.updateRunSpeed();
-      // Same base speed as the ambient tunnel's own rings (techno-hero.js)
-      // — the layer should approach at the background's pace, not rush
-      // ahead of it, so the two stay visually locked together.
-      this.z -= 92 * (this.runSpeed / 6) * dt;
+      // Fixed pace, exactly matching the ambient tunnel's own rings
+      // (techno-hero.js uses this same 92/dt rate) — no score-based
+      // ramp-up, so the layer never rushes ahead of the background it's
+      // attached to, no matter how long a run goes on.
+      this.z -= 92 * dt;
       if (this.z <= Z_NEAR) {
         // Lap complete: this layer has reached the camera. Swap it for a
-        // fresh one starting back at the far edge and keep going, forever
-        // — consecutive layers push the score up further.
+        // fresh one starting back at the far edge and keep going, forever.
+        // No score for simply completing a lap — score only comes from
+        // actually timed jumps below, so an idle/unwatched run just holds
+        // steady instead of climbing on its own.
         this.layer++;
-        this.score += 25 * this.layer;
-        this.saveHigh();
         this.z = Z_FAR;
         this.spawnLayerObstacles();
       }
@@ -229,9 +225,12 @@
       const tl = projectRot(-half, -half, z), tr = projectRot(half, -half, z);
       const br = projectRot(half, half, z), bl = projectRot(-half, half, z);
       ctx.save();
-      ctx.globalAlpha = 0.55 * f;
-      ctx.strokeStyle = 'rgba(140,185,255,.9)';
-      ctx.lineWidth = 1.6;
+      // Same rgba/alpha/width recipe as the ambient tunnel's own rings
+      // (techno-hero.js drawRing) so this "live" square reads as part of
+      // that same grid instead of a distinct overlay sitting on top of it.
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = `rgba(138,180,237,${0.32 * f})`;
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
       ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y); ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
       ctx.closePath(); ctx.stroke();
