@@ -10,9 +10,9 @@
        clear 4.5:1 against every solid surface in this file (--bg/--bg-2/
        --bg-3/--ne-navy) — safe to reuse as-is on those surfaces.
      - Colored badges/tags need BLACK text, not white, on brighter/lighter
-       swatches (orange, cyan, green, pink, yellow) — but red (--cal-closed)
-       and blue (--cal-free) specifically fail with white text at ~3.3-3.9:1,
-       so those two use black text instead (see .tag.cal-closed/.cal-free).
+       swatches (orange, cyan, green, pink, yellow, gray) — but blue
+       (--cal-free) specifically fails with white text at ~3.9:1, so it
+       uses black text instead (see .tag.cal-closed/.cal-free).
      - Any new accent color meant to be used AS text color on a near-black
        card (e.g. --fc in .flyer-card) needs to independently clear 4.5:1
        against #0a0b0d — don't assume a brand color is bright enough just
@@ -23,6 +23,12 @@
        tuned (.86/.90/.96 alpha stops) so --ink-dim and --ne-blue-text both
        still clear 4.5:1 even in a worst-case bright-photo test. Don't lower
        those alpha values without re-running that check.
+     - --cal-closed is now a neutral gray (#7C838F, 5.5:1 with black text)
+       instead of red — still needs black text like the other tag colors.
+       --cal-major (the site's orange) used as text on the eu-board photo
+       overlay measures 7.6:1 even in the worst-case bright-photo test —
+       reuse it (not a fresh color) for anything meant to read as
+       "tournament/major" so it's pre-verified safe on that surface.
    ------------------------------------------------------------------------ */
 :root {
   --ne-orange: #FA9D28;
@@ -116,7 +122,9 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 @keyframes tilescroll { from { transform: translateY(0); } to { transform: translateY(-920px); } }
 @media (prefers-reduced-motion: reduce) { .geo-bg::before { animation: none; } }
 
-.btn { position: relative; overflow: hidden; display: inline-block; background: var(--ne-orange); color: #000; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: .72rem 1.35rem; border: none; cursor: pointer; font-size: .92rem; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+/* Newegg CTA button standard: pill shape, Open Sans, sentence case (only
+   the first letter capitalized — no forced uppercase/title-case). */
+.btn { position: relative; overflow: hidden; display: inline-block; background: var(--ne-orange); color: #000; font-family: var(--eu-body); font-weight: 700; text-transform: none; letter-spacing: normal; padding: .72rem 1.6rem; border: none; cursor: pointer; font-size: .95rem; border-radius: 999px; }
 .btn:hover { background: #ffb54d; text-decoration: none; }
 .btn.ghost { background: transparent; color: var(--ne-orange); box-shadow: inset 0 0 0 2px var(--ne-orange); }
 .btn.navy { background: var(--ne-navy-glow); color: #fff; }
@@ -244,7 +252,7 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 
 .pending-item { background: var(--bg-2); border: 1px solid var(--line); padding: 1rem; margin-bottom: .8rem; }
 .pending-item .actions { margin-top: .6rem; display: flex; gap: .5rem; }
-.btn.small { padding: .4rem .85rem; font-size: .8rem; }
+.btn.small { padding: .45rem 1.05rem; font-size: .8rem; }
 .btn.danger { background: #a13030; color: #fff; }
 
 .faq details { border-bottom: 1px solid var(--line); padding: .8rem 0; }
@@ -354,7 +362,7 @@ body.home-page { background: transparent; }
 /* Color-code legend: Closed=red, Free Play=blue, Theme Day=light blue,
    EDU/Esports=green, Ambassador=pink, Major/Tournament=orange. */
 :root{
-  --cal-closed:#E5484D; --cal-free:#3D8BFF; --cal-theme:#5FD3E8;
+  --cal-closed:#7C838F; --cal-free:#3D8BFF; --cal-theme:#5FD3E8;
   --cal-edu:#3FBF6B; --cal-amb:#E85DA0; --cal-major:var(--ne-orange);
 }
 .cal-board{position:relative;padding:clamp(1.4rem,3.6vw,2.2rem);overflow:hidden}
@@ -374,7 +382,7 @@ body.home-page { background: transparent; }
 .cal-dow{font-family:var(--head);font-size:.6rem;color:var(--ink-dim);text-transform:uppercase;text-align:center;padding:.15rem 0}
 .cal-cell{position:relative;aspect-ratio:1;border:1px solid rgba(242,244,248,.14);background:rgba(22,24,29,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
-.cal-cell.cal-closed{background:rgba(229,72,77,.32);border-color:var(--cal-closed);color:var(--ink-dim);cursor:default}
+.cal-cell.cal-closed{background:rgba(124,131,143,.32);border-color:var(--cal-closed);color:var(--ink-dim);cursor:default}
 .cal-cell.cal-free{background:rgba(61,139,255,.24);border-color:var(--cal-free)}
 .cal-cell.cal-theme{background:rgba(95,211,232,.26);border-color:var(--cal-theme)}
 .cal-cell.cal-edu{background:rgba(63,191,107,.26);border-color:var(--cal-edu)}
@@ -403,6 +411,13 @@ body.home-page { background: transparent; }
 .cal-detail>p.dim{font-family:var(--eu-body);color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cal-detail .cd-body{margin-top:.9rem}
 .cal-detail .cd-body p{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+/* Reorganized detail-card layout: tag -> title -> subtitle -> a clear
+   date/time meta row (icon + text) -> description -> CTA, same order and
+   spacing for every day type (event, closed, free play). */
+.cd-meta{display:flex;flex-wrap:wrap;gap:.5rem 1.1rem;margin:.6rem 0 .8rem}
+.cd-meta-item{display:flex;align-items:center;gap:.4rem;font-family:var(--eu-body);font-size:.85rem;font-weight:600;color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.cd-meta-item .ic{width:15px;height:15px;color:var(--ne-orange);flex:none}
+.cd-blurb{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);line-height:1.55;margin-top:.2rem}
 /* Shared type-color coding for tags — used by both the calendar detail card
    and the Event details cards, so a type reads the same color everywhere. */
 /* Black text on both — white measured under 4.5:1 WCAG AA against these two
@@ -415,7 +430,9 @@ body.home-page { background: transparent; }
 .tag.cal-major{background:var(--cal-major);color:#000}
 
 /* ===== v6: flat square corners (no chopped/rounded) ===== */
-.card,.hud,.btn,.btn.ghost,.tag,.chip,.cal,.cal-detail,.calendar-empty,.flyer-card,
+/* .btn / .btn.ghost intentionally excluded — CTA buttons use the pill
+   shape per Newegg design guidelines instead (see the .btn rule above). */
+.card,.hud,.tag,.chip,.cal,.cal-detail,.calendar-empty,.flyer-card,
 .session-pill,.pending-item,nav.main-nav a,.flyer img,.calendar-img,.cal-cell,
 .track-badge,.event-card,.lightbox img,.score-guide .sg,.game-list-panel,
 details.archive-month,.quota,.eu-board { clip-path: none !important; border-radius: 0 !important; }
@@ -464,8 +481,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    the Featured Ambassador cards — only the position differs per context. */
 .node{z-index:1;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 .mile .node{position:absolute;left:1.1rem;top:-14px}
-.mile .mo{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.78rem;color:var(--ne-blue-text);display:block}
-.mile .unlock{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:.5rem 0 .45rem}
+/* Progression is the headline here: a big event-count badge sits right
+   alongside the benefit it unlocks, instead of a small caption above it —
+   so "how many events" and "what you get" read together at a glance. */
+.mile-head{display:flex;align-items:center;gap:.85rem;margin:.4rem 0 .7rem}
+.mile-count{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;background:var(--bg-3);border:2px solid var(--line)}
+.mc-num{font-family:var(--head);font-weight:800;font-size:1.5rem;line-height:1}
+.mc-lbl{font-family:var(--head);font-weight:700;font-size:.52rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin-top:.1rem}
+.mile .unlock{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:0}
 .mile ul{color:var(--ink-dim);font-size:.83rem;margin:0;padding-left:1.05rem;display:grid;gap:.3rem}
 .mile ul li::marker{color:var(--ne-orange)}
 
@@ -475,12 +498,20 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    tier-* class for whichever rank that ambassador has actually earned. */
 .mile.tier-silver, .host-card.tier-silver{border-color:#a9bccd}
 .mile.tier-silver .node, .host-card.tier-silver .node{background:#cddae6;color:#0c1620}
+.mile.tier-silver .mile-count{border-color:#a9bccd}
+.mile.tier-silver .mc-num{color:#a9bccd}
 .mile.tier-gold, .host-card.tier-gold{border-color:var(--ne-orange)}
 .mile.tier-gold .node, .host-card.tier-gold .node{background:var(--ne-orange);color:#000}
+.mile.tier-gold .mile-count{border-color:var(--ne-orange)}
+.mile.tier-gold .mc-num{color:var(--ne-orange)}
 .mile.tier-platinum, .host-card.tier-platinum{border-color:#e3e9ec}
 .mile.tier-platinum .node, .host-card.tier-platinum .node{background:#e3e9ec;color:#10161a}
+.mile.tier-platinum .mile-count{border-color:#e3e9ec}
+.mile.tier-platinum .mc-num{color:#e3e9ec}
 .mile.tier-diamond, .host-card.tier-diamond{border-color:#8fe3ff}
 .mile.tier-diamond .node, .host-card.tier-diamond .node{background:#8fe3ff;color:#00131f}
+.mile.tier-diamond .mile-count{border-color:#8fe3ff}
+.mile.tier-diamond .mc-num{color:#8fe3ff}
 @media (max-width:820px){
   .tl{grid-template-columns:1fr;gap:2.2rem 0}
   .tl::before{left:13px;top:6px;bottom:6px;right:auto;width:3px;height:auto;background:repeating-linear-gradient(to bottom,var(--ne-orange) 0 10px,transparent 10px 18px)}
@@ -504,9 +535,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 }
 
 /* ===== Ambassador Featured Hosts placeholder cards ===== */
-/* Fixed height + truncation so every host card matches exactly, no matter
-   how long a real ambassador's name/email/category text ends up being. */
-.host-card{position:relative;text-align:center;display:flex;flex-direction:column;height:280px;overflow:hidden;transition:box-shadow .25s,border-color .25s}
+/* Every card sizes to its own content (no fixed height/clipping) — CSS
+   Grid's default row-stretch then auto-equalizes every card in the same
+   row to whichever one is tallest, so the whole row always matches the
+   tallest card currently in rotation without any JS. Reusable pattern:
+   any `.grid` row of flex-column cards gets this for free. Truncation on
+   individual fields (name/email/category below) still keeps any one
+   card from growing huge on its own. */
+.host-card{position:relative;text-align:center;display:flex;flex-direction:column;height:100%;padding-bottom:1.7rem;transition:box-shadow .25s,border-color .25s}
 /* Inset, not poking above like .mile's — the card clips overflow to keep
    its fixed height, so the rank pill sits inside the top-left corner. */
 .host-card .node{position:absolute;left:.7rem;top:.7rem}
@@ -552,10 +588,10 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
 .eu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:clamp(1.6rem,4.5vw,3rem);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
-.eu-location-row{margin-top:clamp(1rem,3vw,1.6rem);padding-top:clamp(.8rem,2.5vw,1.2rem);border-top:1px solid rgba(255,255,255,.14)}
+.eu-location-row{margin-top:clamp(1rem,3vw,1.6rem);padding-top:clamp(.8rem,2.5vw,1.2rem)}
 .eu-eyebrow .ic{width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);color:var(--ne-orange);flex:none}
 /* masthead: the instantly-recognizable ID of this board */
-.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:.005em;line-height:1.1;margin:0;display:block;white-space:nowrap;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-eyebrow-title::after{content:none}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
 .eu-eyebrow p{font-family:var(--eu-body);font-size:max(15px,1.15rem);color:var(--ink-dim);margin-top:.3rem}
@@ -568,31 +604,33 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    "Weekly Theme: ..." row used to give it before that row was folded into
    this one. */
 .eu-theme-highlight{color:var(--ne-orange)}
-/* Subtitle row: what's playing on the left, the week's date range on the
-   far right — replaces the old standalone theme/dates row. */
-.eu-eyebrow-descrow{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:.3rem}
-.eu-eyebrow-descrow p{margin:0}
-.eu-eyebrow-dates{font-family:var(--eu-body);font-weight:700;letter-spacing:.03em;color:var(--ink-dim);white-space:nowrap;font-size:max(14px,1rem);flex:none}
+/* Week's date range sits right after the theme name on the same masthead
+   line (e.g. "MARVEL WEEK AUG 4 – 8") — sized relative to the title with
+   em so it scales with the same clamp(). */
+.eu-theme-dates{font-size:.55em;font-weight:700;letter-spacing:.02em;text-transform:none;color:var(--ink-dim);white-space:nowrap;margin-left:.5rem;vertical-align:middle}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
-@media (max-width:640px){
-  .eu-eyebrow-descrow{flex-direction:column;align-items:flex-start;gap:.2rem}
-}
 
 .eu-list{display:flex;flex-direction:column}
 .eu-row{display:flex;align-items:baseline;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
-.eu-list .eu-row:last-child{border-bottom:1px solid rgba(242,244,248,.22)}
+/* No border directly under the thick orange divider (first row) and no
+   doubled-up line stacking against the location row below the list
+   (last row) — keeps just one clean rule between adjacent event rows. */
+.eu-list .eu-row:first-child{border-top:none}
 .eu-date-wrap{display:flex;align-items:center;gap:.6rem;min-width:0}
 .eu-date{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:var(--eu-date-size);line-height:1;color:#fff;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
-.eu-major .eu-date{color:var(--ne-blue-text)}
+/* Major/tournament rows use the same orange as the calendar's "Major /
+   Tournament" legend swatch (--cal-major), not blue, so a tournament reads
+   the same color everywhere on the site. */
+.eu-major .eu-date{color:var(--cal-major)}
 .eu-major-mark{flex:none;font-size:clamp(18px,3.2vw,30px);line-height:1;color:var(--ne-orange)}
 .eu-info{text-align:right;min-width:0}
 /* event title: only 30% smaller than the date (was much smaller before) */
 .eu-name{font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1.15;color:var(--ink)}
 /* subtagline: exactly 50% of the event title, floored at 14px */
 .eu-meta{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
-.eu-major .eu-name{color:var(--ne-blue-text)}
+.eu-major .eu-name{color:var(--cal-major)}
 
 /* ---- native responsive breakpoints (normal in-page browsing) ----
    Keyed to real viewport width, same convention as the rest of the site
