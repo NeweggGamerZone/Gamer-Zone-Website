@@ -1,13 +1,15 @@
 /* Homepage-only fixed background: a purely decorative, non-interactive
    perspective tunnel — the camera flies forever toward a vanishing point
    while a series of ring outlines travel from far away toward the viewer,
-   same as the site's original grid-tunnel look. The difference: each ring
-   isn't always a square. Every ring works through the same fixed shape
-   sequence (square -> triangle -> star -> pentagon -> hexagon -> circle)
-   one step at a time, advancing a shape each time it laps back out to the
-   far distance — so the tunnel itself is constantly changing shape as you
-   travel through it, not just receding squares. No score, no input, no
-   game logic here — purely decorative. Pure canvas math, no images. */
+   same as the site's original grid-tunnel look. The difference: the ring
+   shape itself smoothly morphs through a fixed sequence (square ->
+   triangle -> star -> pentagon -> hexagon -> circle) — holding each shape
+   for a beat, then blending into the next one over a couple of seconds,
+   rather than ever cutting instantly from one shape to another. Each ring
+   runs the same hold/morph cycle slightly offset from its neighbors, so
+   the shape-change reads as a wave rippling through the tunnel's depth as
+   it comes toward you. No score, no input, no game logic — purely
+   decorative. Pure canvas math, no images. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -22,9 +24,12 @@
 
   // Fixed progression every ring works through, one step at a time.
   const SHAPES = ['square', 'triangle', 'star', 'pentagon', 'hexagon', 'circle'];
+  const HOLD_DUR = 2.6, MORPH_DUR = 1.8, CYCLE = HOLD_DUR + MORPH_DUR;
+  const RING_LAG = 0.22; // seconds of stagger per ring, depth-to-depth
 
   let A; // ring radius, sized to the viewport
   let rings = [];
+  const RING_COUNT = 9;
   const SPOKE_COUNT = 10;
   const SPOKES = Array.from({ length: SPOKE_COUNT }, (_, i) => (Math.PI * 2 / SPOKE_COUNT) * i - Math.PI / 2);
 
@@ -40,9 +45,8 @@
 
   function buildRings() {
     rings = [];
-    const count = 9;
-    for (let i = 0; i < count; i++) {
-      rings.push({ z: Z_NEAR + (i / count) * (Z_FAR - Z_NEAR), shapeIdx: i % SHAPES.length });
+    for (let i = 0; i < RING_COUNT; i++) {
+      rings.push({ z: Z_NEAR + (i / RING_COUNT) * (Z_FAR - Z_NEAR) });
     }
   }
 
@@ -59,18 +63,19 @@
     return Math.max(0, Math.min(1, nearFade * farFade));
   }
 
-  // Local (unrotated, unprojected) outline points for a shape, radius r.
-  function shapePoints(type, r) {
+  // Local (unrotated, unprojected) corner points for a shape at radius 1 —
+  // the raw vertices, before perimeter-resampling below.
+  function shapeVertices(type) {
     if (type === 'circle') {
-      const n = 44, pts = [];
+      const n = 48, pts = [];
       for (let i = 0; i < n; i++) {
-        const a = (Math.PI * 2 / n) * i;
-        pts.push([Math.cos(a) * r, Math.sin(a) * r]);
+        const a = (Math.PI * 2 / n) * i - Math.PI / 2;
+        pts.push([Math.cos(a), Math.sin(a)]);
       }
       return pts;
     }
     if (type === 'star') {
-      const spikes = 5, outer = r, inner = r * 0.45, pts = [];
+      const spikes = 5, outer = 1, inner = 0.45, pts = [];
       for (let i = 0; i < spikes * 2; i++) {
         const rad = i % 2 === 0 ? outer : inner;
         const a = (Math.PI / spikes) * i - Math.PI / 2;
@@ -82,9 +87,68 @@
     const pts = [];
     for (let i = 0; i < sides; i++) {
       const a = (Math.PI * 2 / sides) * i - Math.PI / 2;
-      pts.push([Math.cos(a) * r, Math.sin(a) * r]);
+      pts.push([Math.cos(a), Math.sin(a)]);
     }
     return pts;
+  }
+
+  // Resample a closed polygon into N points evenly spaced by arc length,
+  // starting at its first vertex — so any two shapes end up with the same
+  // point count, aligned to the same "start near the top" convention, and
+  // can be smoothly interpolated point-for-point without ever needing
+  // matching vertex counts between e.g. a triangle and a star.
+  const MORPH_N = 56;
+  function resamplePerimeter(verts, n) {
+    const segs = []; let total = 0;
+    for (let i = 0; i < verts.length; i++) {
+      const a = verts[i], b = verts[(i + 1) % verts.length];
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      segs.push({ a, b, len, start: total });
+      total += len;
+    }
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const d = (i / n) * total;
+      let seg = segs[segs.length - 1];
+      for (let s = 0; s < segs.length; s++) {
+        if (d >= segs[s].start && d < segs[s].start + segs[s].len) { seg = segs[s]; break; }
+      }
+      const t = seg.len > 0 ? (d - seg.start) / seg.len : 0;
+      out.push([seg.a[0] + (seg.b[0] - seg.a[0]) * t, seg.a[1] + (seg.b[1] - seg.a[1]) * t]);
+    }
+    return out;
+  }
+
+  // Every shape pre-resampled once at startup — cheap to blend at runtime.
+  const RESAMPLED = {};
+  SHAPES.forEach(t => { RESAMPLED[t] = resamplePerimeter(shapeVertices(t), MORPH_N); });
+
+  function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+  // Where a ring at time t sits in the hold/morph cycle: which shape it's
+  // currently based on, and how far blended toward the next one (0 = pure
+  // current shape, 1 = fully arrived at the next shape).
+  function morphStateAt(t) {
+    if (t < 0) t = 0;
+    const cycles = Math.floor(t / CYCLE);
+    const local = t - cycles * CYCLE;
+    const idx = cycles % SHAPES.length;
+    if (local < HOLD_DUR) return { idx, blend: 0 };
+    return { idx, blend: easeInOutCubic((local - HOLD_DUR) / MORPH_DUR) };
+  }
+
+  function morphedPoints(state) {
+    const from = RESAMPLED[SHAPES[state.idx]];
+    if (state.blend <= 0) return from;
+    const to = RESAMPLED[SHAPES[(state.idx + 1) % SHAPES.length]];
+    const out = new Array(MORPH_N);
+    for (let i = 0; i < MORPH_N; i++) {
+      out[i] = [
+        from[i][0] + (to[i][0] - from[i][0]) * state.blend,
+        from[i][1] + (to[i][1] - from[i][1]) * state.blend,
+      ];
+    }
+    return out;
   }
 
   // Radiating spokes from the vanishing point out to the frame edge —
@@ -105,16 +169,18 @@
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   }
 
-  function drawRing(ring, rot, globalFade, hue) {
+  function drawRing(ring, unitPts, rot, globalFade, hue) {
     const f = fadeFor(ring.z) * globalFade;
     if (f <= 0.01) return;
-    const pts = shapePoints(SHAPES[ring.shapeIdx], A);
-    const proj = pts.map(([x, y]) => project(x, y, ring.z, rot));
     ctx.strokeStyle = `hsla(${hue}, 72%, 62%, ${0.36 * f})`;
     ctx.lineWidth = 1.3;
     ctx.beginPath();
-    ctx.moveTo(proj[0].x, proj[0].y);
-    for (let i = 1; i < proj.length; i++) ctx.lineTo(proj[i].x, proj[i].y);
+    let p = project(unitPts[0][0] * A, unitPts[0][1] * A, ring.z, rot);
+    ctx.moveTo(p.x, p.y);
+    for (let i = 1; i < unitPts.length; i++) {
+      p = project(unitPts[i][0] * A, unitPts[i][1] * A, ring.z, rot);
+      ctx.lineTo(p.x, p.y);
+    }
     ctx.closePath();
     ctx.stroke();
   }
@@ -133,8 +199,9 @@
     for (let i = 0; i < rings.length; i++) {
       const r = rings[i];
       r.z -= SPEED * dt;
-      if (r.z < Z_NEAR) { r.z += (Z_FAR - Z_NEAR); r.shapeIdx = (r.shapeIdx + 1) % SHAPES.length; }
-      drawRing(r, rot, globalFade, (hue + i * 12) % 360);
+      if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
+      const pts = morphedPoints(morphStateAt(elapsed - i * RING_LAG));
+      drawRing(r, pts, rot, globalFade, (hue + i * 12) % 360);
     }
     raf = requestAnimationFrame(frame);
   }
@@ -142,7 +209,7 @@
   function drawStatic() {
     ctx.clearRect(0, 0, W, H);
     for (const a of SPOKES) strokeSpoke(a, 0, 0.6, 200);
-    rings.forEach((r, i) => drawRing(r, 0, 0.6, (200 + i * 12) % 360));
+    rings.forEach((r, i) => drawRing(r, RESAMPLED[SHAPES[0]], 0, 0.6, (200 + i * 12) % 360));
   }
 
   window.addEventListener('resize', size);

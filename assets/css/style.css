@@ -590,6 +590,12 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
 .eu-location-row{margin-top:clamp(1rem,3vw,1.6rem);padding-top:clamp(.8rem,2.5vw,1.2rem)}
 .eu-eyebrow .ic{width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);color:var(--ne-orange);flex:none}
+.eu-eyebrow-textcol{min-width:0}
+/* Title and date range are true flex siblings on the same row/line —
+   not just vertically centered against the whole eyebrow block, which
+   could visually drift off the title's own baseline when the
+   description line below varies in length. */
+.eu-eyebrow-titlerow{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 /* masthead: the instantly-recognizable ID of this board */
 .eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-eyebrow-title::after{content:none}
