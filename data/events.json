@@ -122,21 +122,21 @@
     },
     {
       "id": "closed-intel-gamer-days-setup-2026-08-11",
-      "title": "Closed — Intel Gamer Days Setup",
+      "title": "Closed — Private Event",
       "date": "2026-08-11",
       "time": "",
       "type": "closed",
-      "blurb": "Venue closed to the public for Intel Gamer Days setup.",
+      "blurb": "Venue closed to the public for a private event.",
       "featured": false,
       "reservation": false
     },
     {
       "id": "closed-intel-gamer-days-2026-08-12",
-      "title": "Closed — Intel Gamer Days",
+      "title": "Closed — Private Event",
       "date": "2026-08-12",
       "time": "",
       "type": "closed",
-      "blurb": "Venue closed to the public for the Intel Gamer Days event.",
+      "blurb": "Venue closed to the public for a private event.",
       "featured": false,
       "reservation": false
     },
