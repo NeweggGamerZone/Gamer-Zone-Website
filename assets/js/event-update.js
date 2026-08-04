@@ -71,22 +71,22 @@
     return { mon: d.toLocaleDateString('en-US', { month: 'short' }), day: d.getDate() };
   };
 
-  const themeNameEl = document.getElementById('eu-theme-name');
-  const themeDatesEl = document.getElementById('eu-theme-dates');
-  if (themeNameEl) themeNameEl.innerHTML = `Weekly Theme: <span class="accent">${GZ.esc(themeName)}</span>`;
-  if (themeDatesEl) {
-    const s = monthDate(weekStart), e = monthDate(weekEnd);
-    themeDatesEl.textContent = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
-  }
-
   // Eyebrow title now leads with the theme itself (was static "Gamer Zone
   // Weekly Lineup" text, never actually tied to the week) and the subtitle
   // underneath becomes a short line on what's being played, replacing the
-  // static "Diamond Bar, CA · Free to play".
+  // static "Diamond Bar, CA · Free to play". The theme name itself is
+  // highlighted in orange right in the masthead, and the week's date range
+  // now sits on the far right of that same subtitle line — this replaces
+  // the old separate "Weekly Theme: ..." row, which duplicated both.
   const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
   const eyebrowDescEl = document.getElementById('eu-eyebrow-desc');
-  if (eyebrowTitleEl) eyebrowTitleEl.textContent = `Gamer Zone: ${themeName}`.toUpperCase();
+  const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
+  if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `GAMER ZONE: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
   if (eyebrowDescEl) eyebrowDescEl.textContent = themeDesc;
+  if (eyebrowDatesEl) {
+    const s = monthDate(weekStart), e = monthDate(weekEnd);
+    eyebrowDatesEl.textContent = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
+  }
 
   function row(ev, { closure = false } = {}) {
     const { mon, day } = monthDate(ev.date);

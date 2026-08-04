@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="board-mode">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,12 +7,13 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Weekly Lineup — screenshot capture (not a site page)</title>
 <!-- Not linked from anywhere in the site nav or sitemap — exists purely so
-     this one section can be screenshotted in isolation, full-viewport, on
-     the same clean static background events.html uses (no animated hero
-     tunnel behind it). Uses the site's existing "board-mode" CSS (see
-     style.css) which was already built for exactly this: hides header/
-     footer/hero and blows the eu-board up to fill the frame. Safe to
-     delete once no longer needed. -->
+     this one section can be screenshotted in isolation, on the same clean
+     static background events.html uses (no animated hero tunnel behind
+     it). This markup is an exact copy of the "Weekly lineup" section from
+     index.html/events.html (same classes, same heading, no board-mode
+     stretching) so it renders pixel-for-pixel like it does embedded on
+     those pages. Keep this block in sync whenever that section changes.
+     Safe to delete once no longer needed. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
@@ -22,20 +23,20 @@
 <div id="gz-veil" aria-hidden="true"></div>
 <div class="geo-bg" aria-hidden="true"></div>
 <main class="container">
-  <section class="reveal eu-section">
+  <section class="reveal eu-section in" id="week">
+    <h2><i data-ic="gamepad"></i> Weekly lineup</h2>
     <div class="eu-board">
       <div class="eu-top">
         <div class="eu-eyebrow">
           <i data-ic="cal" data-lg></i>
           <div>
-            <h3 class="eu-eyebrow-title" id="eu-eyebrow-title">Gamer Zone <span class="accent">Weekly Lineup</span></h3>
-            <p id="eu-eyebrow-desc">Diamond Bar, CA &middot; Free to play</p>
+            <h3 class="eu-eyebrow-title" id="eu-eyebrow-title">Gamer Zone <span class="eu-theme-highlight">Weekly Lineup</span></h3>
+            <div class="eu-eyebrow-descrow">
+              <p id="eu-eyebrow-desc">Diamond Bar, CA &middot; Free to play</p>
+              <span class="eu-eyebrow-dates" id="eu-eyebrow-dates">&mdash;</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="eu-theme-row" id="eu-theme-row">
-        <div class="eu-theme-name" id="eu-theme-name">Weekly Theme: &mdash;</div>
-        <div class="eu-theme-dates" id="eu-theme-dates">&mdash;</div>
       </div>
       <div class="eu-list" id="eu-list"></div>
       <div class="eu-eyebrow eu-location-row eu-location-bottom">

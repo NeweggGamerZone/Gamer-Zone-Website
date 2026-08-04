@@ -534,14 +534,21 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
 
 .eu-theme-row{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-bottom:clamp(1rem,3vw,1.6rem);margin-bottom:clamp(.6rem,2vw,1rem);border-bottom:1px solid rgba(242,244,248,.22)}
-.eu-theme-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(1.05rem,2.6vw,1.6rem);color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.6)}
-.eu-theme-name .accent{color:var(--ne-orange)}
-.eu-theme-dates{font-family:var(--eu-body);font-weight:700;letter-spacing:.03em;color:var(--ink-dim);white-space:nowrap;font-size:max(14px,1rem)}
+/* Theme name highlighted right in the eyebrow masthead itself (e.g.
+   "GAMER ZONE: MARVEL WEEK") — orange, same treatment the old separate
+   "Weekly Theme: ..." row used to give it before that row was folded into
+   this one. */
+.eu-theme-highlight{color:var(--ne-orange)}
+/* Subtitle row: what's playing on the left, the week's date range on the
+   far right — replaces the old standalone theme/dates row. */
+.eu-eyebrow-descrow{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:.3rem}
+.eu-eyebrow-descrow p{margin:0}
+.eu-eyebrow-dates{font-family:var(--eu-body);font-weight:700;letter-spacing:.03em;color:var(--ink-dim);white-space:nowrap;font-size:max(14px,1rem);flex:none}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
 @media (max-width:640px){
-  .eu-theme-row{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .eu-eyebrow-descrow{flex-direction:column;align-items:flex-start;gap:.2rem}
 }
 
 .eu-list{display:flex;flex-direction:column}
