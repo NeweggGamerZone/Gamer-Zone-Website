@@ -707,8 +707,19 @@ html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
    row's date/title/time proportionally. */
 html.board-mode .eu-eyebrow p{font-size:max(26px,2rem)}
 /* The row aligns date and title by top edge instead of text baseline,
-   so a wrapped multi-line title still starts flush with the date/star. */
+   so a wrapped multi-line title still starts flush with the date/star.
+   .eu-name's normal line-height (1.15) is taller than .eu-date's (1),
+   so even with matching box tops the *glyphs* read slightly lower —
+   matching line-height here is what makes them look flush. */
 html.board-mode .eu-row{align-items:flex-start}
+html.board-mode .eu-name{line-height:1}
+/* Masthead title and date range get the same top-edge + line-height
+   treatment as the event rows above — align-items:baseline (the
+   default) plus their differing line-heights (1.25 vs 1.1) was
+   pushing the date range a few px lower than the title. */
+html.board-mode .eu-eyebrow-titlerow{align-items:flex-start}
+html.board-mode .eu-eyebrow-title{line-height:1}
+html.board-mode .eu-theme-dates{line-height:1}
 /* Previous pass over-brightened this (brightness .85 / .5-.68 scrim)
    to the point text legibility suffered. Board-mode should still read
    as a dark board — just ~10% lighter than the original .55 brightness
