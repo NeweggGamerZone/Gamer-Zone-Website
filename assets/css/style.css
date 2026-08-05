@@ -746,7 +746,15 @@ html.board-mode .hero,
 html.board-mode .hero-stage,
 html.board-mode .tech-bg,
 html.board-mode .tech-canvas,
-html.board-mode .tech-scan{display:none}
+html.board-mode .tech-scan,
+/* The plain "Weekly lineup" <h2> that sits above .eu-board in normal page
+   flow (used for in-page navigation/scannability) isn't part of the board
+   graphic itself — the board has its own "Gamer Zone Weekly Lineup"
+   masthead inside .eu-top. Left visible, it renders at the very top-left
+   of the exported screenshot, above/outside the intended board art, and
+   pushes .eu-board's 100vh down past the clipped capture area. Hide it in
+   board-mode so the capture is only ever the board itself. */
+html.board-mode section.eu-section>h2{display:none}
 html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
 html.board-mode .eu-board{margin:0;width:100vw;height:100vh;min-height:100vh;padding:clamp(1.6rem,5vw,4.5rem)}

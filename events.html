@@ -38,16 +38,16 @@
   </section>
 
   <section class="reveal" id="preregister">
-    <h2><i data-ic="ticket"></i> How preregistering works</h2>
+    <h2>How preregistering works</h2>
     <p class="dim">Preregistering isn't required &mdash; walk-ins are always welcome &mdash; but it's the fastest way in. Here's how it works, start to finish.</p>
     <div class="grid cols-3" style="margin-top:1rem">
       <div class="card tilt">
         <i data-ic="run" data-lg></i><h3>1. Preregister online</h3>
-        <p class="dim">Tap the Preregister button and fill out the quick form. Once you register, you'll get a guest pass on file for quicker check-ins on future visits.</p>
+        <p class="dim">Tap the Preregister button and fill out the quick form. Once you register, you'll get a guest pass in your email inbox for quicker check-ins on future visits.</p>
       </div>
       <div class="card tilt">
         <i data-ic="users" data-lg></i><h3>2. Check in at the door</h3>
-        <p class="dim">When you arrive, show your preregistration &mdash; or, if you didn't preregister, just sign in at the front desk.</p>
+        <p class="dim">When you arrive, scan your preregistration/guest pass &mdash; or, if you didn't preregister, just sign in at the front desk.</p>
       </div>
       <div class="card tilt">
         <i data-ic="chip" data-lg></i><h3>3. Register a SENET ID</h3>
@@ -58,7 +58,7 @@
   </section>
 
   <section class="reveal" id="calendar">
-    <h2><i data-ic="cal"></i> Plan your visit</h2>
+    <h2>Plan your visit</h2>
     <p class="dim">Free to play, open Tuesday&ndash;Saturday 10am&ndash;7pm. Pick a date to see what's on &mdash; then pre-register to skip the line.</p>
     <div class="cal-board">
       <div class="cal-wrap">
@@ -72,9 +72,14 @@
     </div>
   </section>
 
-  <section class="reveal eu-section">
-    <h2><i data-ic="gamepad"></i> Weekly lineup</h2>
+  <section class="reveal eu-section" id="week">
+    <h2>Weekly lineup</h2>
     <div class="eu-board">
+      <!-- Only rendered in board-mode (see style.css) — a brand mark in the
+           top-center of the exported board screenshot. Kept identical to
+           index.html's Weekly Lineup markup so both pages render the same
+           board. -->
+      <img class="board-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone">
       <div class="eu-top">
         <div class="eu-eyebrow">
           <i data-ic="cal" data-lg></i>
@@ -96,12 +101,12 @@
   </section>
 
   <section class="reveal">
-    <h2><i data-ic="medal"></i> Event details</h2>
+    <h2>Event details</h2>
     <div class="grid cols-2" id="events-upcoming"></div>
   </section>
 
   <section class="reveal">
-    <h2><i data-ic="ticket"></i> Past Events</h2>
+    <h2>Past Events</h2>
     <p class="dim">A look back at our most recent major public event.</p>
     <div style="margin-top:1rem">
       <details class="archive-month" open><summary>Street Fighter Saturday Slam &mdash; 07/25/2026</summary>
