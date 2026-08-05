@@ -626,6 +626,10 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
 
+/* Sub-section label between two .eu-list blocks on the same board (e.g.
+   "Special Events" under a "theme weeks" list) — same divider language
+   as the row border-tops, orange/uppercase like other eyebrow text. */
+.eu-sublist-head{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1rem,2vw,1.35rem);color:var(--ne-orange);margin:clamp(1.3rem,3vw,2.1rem) 0 .5rem;padding-top:clamp(1rem,2.5vw,1.6rem);border-top:1px solid rgba(242,244,248,.22)}
 .eu-list{display:flex;flex-direction:column}
 .eu-row{display:flex;align-items:baseline;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
 /* No border directly under the thick orange divider (first row) and no

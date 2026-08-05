@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Monthly Calendar — screenshot capture (not a site page)</title>
+<!-- Not linked from anywhere in the site nav or sitemap — same purpose as
+     screenshot-weekly-lineup.html, but for a month-at-a-glance board:
+     theme weeks (with date ranges) plus a curated Special Events list
+     (closures, tournaments, one-off parties), instead of a day-by-day
+     lineup. Content here is hand-authored per month, not pulled from
+     data/events.json — update it manually when the month's theme weeks
+     or special events change. Safe to delete once no longer needed. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css?v=18">
+</head>
+<body>
+<div id="gz-veil" aria-hidden="true"></div>
+<div class="geo-bg" aria-hidden="true"></div>
+<main class="container">
+  <section class="reveal eu-section in" id="month">
+    <h2><i data-ic="cal"></i> Monthly calendar</h2>
+    <div class="eu-board">
+      <!-- Only rendered in board-mode (see style.css) — a brand mark
+           top-center of the exported screenshot. -->
+      <img class="board-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone">
+      <div class="eu-top">
+        <div class="eu-eyebrow">
+          <i data-ic="cal" data-lg></i>
+          <div class="eu-eyebrow-textcol">
+            <div class="eu-eyebrow-titlerow">
+              <h3 class="eu-eyebrow-title">Gamer Zone: <span class="eu-theme-highlight">August 2026</span></h3>
+            </div>
+            <p>Diamond Bar, CA &middot; Free to play</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="eu-list">
+        <div class="eu-row">
+          <div class="eu-date-wrap"><span class="eu-date">WEEK 1</span></div>
+          <div class="eu-info">
+            <div class="eu-name">Marvel Week</div>
+            <div class="eu-meta">Aug 4 &ndash; 8</div>
+          </div>
+        </div>
+        <div class="eu-row">
+          <div class="eu-date-wrap"><span class="eu-date">WEEK 2</span></div>
+          <div class="eu-info">
+            <div class="eu-name">Riot Games Week</div>
+            <div class="eu-meta">Aug 11 &ndash; 15</div>
+          </div>
+        </div>
+        <div class="eu-row">
+          <div class="eu-date-wrap"><span class="eu-date">WEEK 3</span></div>
+          <div class="eu-info">
+            <div class="eu-name">Co-op Games Week</div>
+            <div class="eu-meta">Aug 18 &ndash; 22</div>
+          </div>
+        </div>
+        <div class="eu-row">
+          <div class="eu-date-wrap"><span class="eu-date">WEEK 4</span></div>
+          <div class="eu-info">
+            <div class="eu-name">Fighting Games Week</div>
+            <div class="eu-meta">Aug 25 &ndash; 29</div>
+          </div>
+        </div>
+      </div>
+
+      <h4 class="eu-sublist-head">Special Events</h4>
+      <div class="eu-list">
+        <div class="eu-row eu-major">
+          <div class="eu-date-wrap">
+            <span class="eu-date">AUG 7</span>
+            <span class="eu-major-mark" aria-hidden="true">&#9733;</span>
+          </div>
+          <div class="eu-info">
+            <div class="eu-name">XP League Fortnite Tournament</div>
+            <div class="eu-meta">4:00 PM &ndash; 7:00 PM</div>
+          </div>
+        </div>
+        <div class="eu-row eu-closure">
+          <div class="eu-date-wrap"><span class="eu-date">AUG 11</span></div>
+          <div class="eu-info">
+            <div class="eu-name">Closed &mdash; Private Event</div>
+            <div class="eu-meta">&nbsp;</div>
+          </div>
+        </div>
+        <div class="eu-row eu-closure">
+          <div class="eu-date-wrap"><span class="eu-date">AUG 12</span></div>
+          <div class="eu-info">
+            <div class="eu-name">Closed &mdash; Private Event</div>
+            <div class="eu-meta">&nbsp;</div>
+          </div>
+        </div>
+        <div class="eu-row eu-major">
+          <div class="eu-date-wrap">
+            <span class="eu-date">AUG 21</span>
+            <span class="eu-major-mark" aria-hidden="true">&#9733;</span>
+          </div>
+          <div class="eu-info">
+            <div class="eu-name">XP League Fortnite Tournament</div>
+            <div class="eu-meta">4:00 PM &ndash; 7:00 PM</div>
+          </div>
+        </div>
+        <div class="eu-row eu-major">
+          <div class="eu-date-wrap">
+            <span class="eu-date">AUG 22</span>
+            <span class="eu-major-mark" aria-hidden="true">&#9733;</span>
+          </div>
+          <div class="eu-info">
+            <div class="eu-name">Gamer Zone Anniversary Party</div>
+            <div class="eu-meta">1:00 PM &ndash; 7:00 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="eu-eyebrow eu-location-row eu-location-bottom">
+        <i data-ic="pin" data-lg></i>
+        <p data-cfg="address"></p>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/main.js?v=18"></script>
+</body>
+</html>
