@@ -704,11 +704,24 @@ html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
    read clearly at a glance. --eu-date-size drives --eu-name-size and
    --eu-meta-size via calc(), so bumping it alone scales every event
    row's date/title/time proportionally. */
-html.board-mode .eu-eyebrow p{font-size:max(18.75px,1.4375rem)}
+html.board-mode .eu-eyebrow p{font-size:max(22px,1.7rem)}
+/* Background image was reading as near-black on exports (base .55
+   brightness plus a .86-.96 opacity scrim on top) — board-mode gets a
+   lighter treatment so the photo behind the text is actually visible. */
+html.board-mode .eu-board::before{filter:blur(5px) brightness(.85) saturate(1.2)}
+html.board-mode .eu-board::after{background:linear-gradient(180deg,rgba(4,5,7,.5),rgba(4,5,7,.58) 55%,rgba(4,5,7,.68))}
+/* More breathing room around rows/masthead so content fills more of a
+   sparse board (e.g. the square export) instead of leaving it mostly
+   empty around a couple of short lists. */
+html.board-mode .eu-row{padding:clamp(1.1rem,3vw,2rem) 0}
+html.board-mode .eu-top{margin-bottom:clamp(2rem,5.5vw,3.6rem)}
+html.board-mode .eu-location-row{margin-top:clamp(1.3rem,3.6vw,2rem)}
 @media (max-aspect-ratio: 6/5){
-  html.board-mode .eu-board{--eu-date-size: clamp(2.125rem, 8.75vw, 3.625rem)}
-  html.board-mode .eu-eyebrow-title{font-size:clamp(1.5rem,3.25vw,2.5rem)}
-  html.board-mode .eu-theme-dates{font-size:clamp(1.5rem,3.25vw,2.5rem)}
+  html.board-mode .eu-board{--eu-date-size: clamp(2.65rem, 11vw, 4.5rem)}
+  html.board-mode .eu-eyebrow-title{font-size:clamp(1.9rem,4vw,3.1rem)}
+  html.board-mode .eu-theme-dates{font-size:clamp(1.9rem,4vw,3.1rem)}
+  html.board-mode .eu-eyebrow .ic{width:clamp(46px,7.5vw,76px);height:clamp(46px,7.5vw,76px)}
+  html.board-mode .eu-major-mark{font-size:clamp(24px,4.5vw,42px)}
 }
 @media (min-aspect-ratio: 3/2){
   html.board-mode .eu-board{--eu-date-size: clamp(2.25rem, 4.5vw, 4.625rem)}
