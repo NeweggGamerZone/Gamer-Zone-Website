@@ -62,10 +62,15 @@ function mondayOf(dateStr) {
 }
 
 function parseArgs(argv) {
-  const args = { out: path.join(ROOT, 'out'), date: null };
+  const args = { out: path.join(ROOT, 'out'), date: null, weeks: 0 };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--out') args.out = path.resolve(argv[++i]);
     else if (argv[i] === '--date') args.date = argv[++i];
+    // --weeks N: in addition to the usual "current week" 1:1 + 16:9 pair,
+    // also render a 1:1 square for each of the next N upcoming weekly
+    // themes (data/events.json's weeklyThemes) — one social image per
+    // week, e.g. `--weeks 4` for this week plus the next three.
+    else if (argv[i] === '--weeks') args.weeks = parseInt(argv[++i], 10) || 0;
   }
   return args;
 }
@@ -149,12 +154,44 @@ async function main() {
       if (overflowing) overflowWarnings.push(w);
     }
 
+    // --- optional: one 1:1 square per upcoming weekly theme (--weeks N) ---
+    const weekCaptures = [];
+    if (args.weeks > 0) {
+      let themes = [];
+      try {
+        const eventsData = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'events.json'), 'utf8'));
+        themes = (eventsData.weeklyThemes || []).slice().sort((a, b) => a.start.localeCompare(b.start));
+      } catch {}
+      const todayIso = args.date || new Date().toISOString().slice(0, 10);
+      const upcoming = themes.filter(t => t.end >= todayIso).slice(0, args.weeks);
+      for (let i = 0; i < upcoming.length; i++) {
+        const theme = upcoming[i];
+        // Fake the page clock to a moment inside this theme's window (noon
+        // on its start date) so event-update.js's GZ.todayISO() — and the
+        // board-background week-of-month rotation — pick this week's
+        // events/art instead of whatever week it really is right now.
+        await page.clock.setFixedTime(new Date(`${theme.start}T12:00:00Z`));
+        await page.goto(`${base}/index.html`, { waitUntil: 'networkidle' });
+        await page.evaluate(() => document.documentElement.classList.add('board-mode'));
+        await page.evaluate(() => document.getElementById('gz-veil')?.remove());
+        await page.waitForFunction(() => {
+          const list = document.getElementById('eu-list');
+          return !!list && list.children.length > 0;
+        }, { timeout: 10000 });
+        await page.waitForTimeout(300);
+        const weekPath = path.join(args.out, `week${i + 1}-${theme.start}-1x1.png`);
+        await captureViewport(1200, 1200, weekPath);
+        weekCaptures.push({ week: i + 1, weekStart: theme.start, weekEnd: theme.end, theme: theme.theme, path: weekPath });
+      }
+    }
+
     console.log(JSON.stringify({
       ok: true,
       monday,
       oneToOne: oneToOnePath,
       sixteenNine: sixteenNinePath,
       overflowWarnings,
+      weekCaptures,
     }));
   } finally {
     await browser.close();

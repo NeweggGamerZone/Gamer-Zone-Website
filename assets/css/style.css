@@ -764,85 +764,24 @@ html.board-mode .reveal{opacity:1;transform:none}
    overrides .eu-board's flex-column stretch so the logo keeps its own
    aspect ratio (height set, width:auto) instead of stretching full-width. */
 .board-logo{display:block;align-self:center;height:clamp(30px,6vw,50px);width:auto;margin:0 0 clamp(1rem,3vw,1.6rem)}
-/* In board-mode the export is full-bleed to the viewport, so the logo
-   switches to a larger, absolutely-positioned top-center mark instead —
-   plain in-flow width:auto would otherwise stretch to the cross-axis. */
-html.board-mode .board-logo{position:absolute;left:50%;top:clamp(1.6rem,5vw,4.5rem);transform:translateX(-50%);height:clamp(84px,12.6vw,138px);margin:0;z-index:2}
-/* Reserve room above the masthead equal to the (now large) top-center
-   logo's height + a gap, so the title row doesn't sit underneath it.
-   margin-bottom is pinned back to its original (larger) value here too —
-   the live-page base rule below now uses a smaller --eu-row-pad-based
-   value tuned for normal browsing, but board-mode's own row-gap math a
-   little further down was tuned against this original clamp and expects
-   it unchanged. */
-html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px);margin-bottom:clamp(1.6rem,4.5vw,3rem)}
-/* Square/near-square boards (e.g. the 1200x1200 export) keep the exact
-   same single-row structure as wide boards — date left, title+time
-   right, date range flush right in the masthead — just with a smaller
-   date size so it still fits. No column-stacking here; titles must
-   never land underneath the dates. */
-/* All board-mode text sized ~25% larger than the equivalent normal-
-   browsing sizes, in both aspect brackets, so exported screenshots
-   read clearly at a glance. --eu-date-size drives --eu-name-size and
-   --eu-meta-size via calc(), so bumping it alone scales every event
-   row's date/title/time proportionally. */
-html.board-mode .eu-eyebrow p{font-size:max(26px,2rem)}
-/* Time range ("4:00 PM – 6:00 PM") bumped up from the default 50% of
-   the title size to 62% so it reads a bit larger on the exports. */
-html.board-mode .eu-board{--eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.62))}
-/* The row aligns date and title by top edge instead of text baseline,
-   so a wrapped multi-line title still starts flush with the date/star.
-   .eu-name's normal line-height (1.15) is taller than .eu-date's (1),
-   so even with matching box tops the *glyphs* read slightly lower —
-   matching line-height here is what makes them look flush. */
-html.board-mode .eu-row{align-items:flex-start}
-html.board-mode .eu-name{line-height:1}
-/* Every row after the first was only getting its own padding-top as
-   the gap above it, while the first row additionally inherited
-   .eu-top's much larger margin-bottom — so the space above "AUG 5"
-   (masthead divider + that margin + the row's padding) was bigger
-   than the space above "AUG 7" (just the row's padding). Adding half
-   of that margin above the divider line and the other half as extra
-   padding below it keeps the *total* gap the same as before (so it
-   still matches the gap above "AUG 5") while centering the white
-   divider line inside that gap instead of hugging its bottom edge. */
-html.board-mode .eu-list{--eu-row-gap-half: calc(clamp(1.6rem,4.5vw,3rem) / 2)}
-html.board-mode .eu-row{margin-top:var(--eu-row-gap-half)}
-html.board-mode .eu-list .eu-row:first-child{margin-top:0}
-html.board-mode .eu-list .eu-row:not(:first-child){padding-top:calc(clamp(.7rem,2vw,1.15rem) + var(--eu-row-gap-half))}
-/* Masthead title and date range get the same top-edge + line-height
-   treatment as the event rows above — align-items:baseline (the
-   default) plus their differing line-heights (1.25 vs 1.1) was
-   pushing the date range a few px lower than the title. */
-html.board-mode .eu-eyebrow-titlerow{align-items:flex-start}
-html.board-mode .eu-eyebrow-title{line-height:1}
-html.board-mode .eu-theme-dates{line-height:1}
-/* Previous pass over-brightened this (brightness .85 / .5-.68 scrim)
-   to the point text legibility suffered. Board-mode should still read
-   as a dark board — just ~10% lighter than the original .55 brightness
-   / .86-.96 scrim, not anywhere near "bright". */
-html.board-mode .eu-board::before{filter:blur(6px) brightness(.6) saturate(1.1)}
-html.board-mode .eu-board::after{background:linear-gradient(180deg,rgba(4,5,7,.78),rgba(4,5,7,.81) 55%,rgba(4,5,7,.86))}
+/* Board-mode is an isolation mode only: it hides the surrounding chrome
+   and lets .eu-board fill the export canvas, but every size/spacing
+   value inside the board (logo, type scale, row gaps) is intentionally
+   left at the exact same rules used for normal in-page browsing above —
+   so a 1200x1200 or 1920x1080 export always matches what a visitor
+   actually sees on the live home/events page, just cropped to fill the
+   frame instead of sitting inline in the page. Don't reintroduce
+   export-only size bumps here without a reason tied to the isolation
+   itself (e.g. preventing a wrap that only happens at these exact
+   pixel widths) — see git history for the previous "~25% bigger for
+   social" tuning this replaced. */
 @media (max-aspect-ratio: 6/5){
-  /* All square-export sizes dialed back ~20% from the prior round —
-     that round's masthead size was wide enough that "GAMER ZONE:
-     MARVEL WEEK" plus "AUG 4 – 8" no longer fit on one line at 1200px.
-     --eu-name-size is intentionally left at its default (~70% of
-     --eu-date-size) here, not overridden to match the date, so the
-     event title reads smaller than "AUG 5"/"AUG 7" as before. */
-  html.board-mode .eu-board{--eu-date-size: clamp(2.56rem, 10.56vw, 4.32rem)}
-  html.board-mode .eu-eyebrow-title{font-size:clamp(1.68rem,3.52vw,2.76rem)}
-  html.board-mode .eu-theme-dates{font-size:clamp(1.68rem,3.52vw,2.76rem)}
-  html.board-mode .eu-eyebrow-titlerow{gap:.5rem}
-  html.board-mode .eu-eyebrow .ic{width:clamp(44px,7.2vw,73px);height:clamp(44px,7.2vw,73px)}
-  html.board-mode .eu-major-mark{font-size:clamp(23px,4.3vw,40px)}
+  /* Near-square export: nothing to override — the masthead title still
+     fits on one line at 1200px with the normal-browsing type scale. */
 }
 @media (min-aspect-ratio: 3/2){
-  html.board-mode .eu-board{--eu-date-size: clamp(2.25rem, 4.5vw, 4.625rem)}
-  html.board-mode .eu-eyebrow-title{font-size:clamp(1.75rem,3vw,3.25rem);white-space:nowrap}
-  html.board-mode .eu-theme-dates{font-size:clamp(1.75rem,3vw,3.25rem)}
-  /* Event title reads the same size as its date here (not the default
-     70%) — kept for the wide/horizontal export only; the square export
-     uses the smaller default ratio (see max-aspect-ratio bracket above). */
-  html.board-mode .eu-board{--eu-name-size: var(--eu-date-size)}
+  /* Wide export: prevent the masthead title from wrapping — there's
+     ample horizontal room at 1920px wide that a real narrow browser
+     window never has, so normal browsing never needed this rule. */
+  html.board-mode .eu-eyebrow-title{white-space:nowrap}
 }

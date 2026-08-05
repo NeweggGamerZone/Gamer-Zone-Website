@@ -165,6 +165,18 @@
       "accent": "#FF2E97"
     },
     {
+      "id": "gamer-zone-anniversary-2026-08-22",
+      "title": "Newegg Gamer Zone Anniversary",
+      "subtitle": "Free play and prizes",
+      "date": "2026-08-22",
+      "time": "1:00 PM – 7:00 PM",
+      "type": "major",
+      "blurb": "Gamer Zone celebrates its one year anniversary of being open! 15 product prizes (3 every 2 hours) and $500 in Newegg gift cards raffled throughout the day. Extra raffle tickets for new Yelp/Google reviews — already reviewed? Bring a friend for another ticket.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FFC400"
+    },
+    {
       "id": "august-finale-street-fighter-2026-08-29",
       "title": "August Finale: Street Fighter Saturday Slam",
       "subtitle": "Fighting Games Week finale. Bracket play all day, one champion by close.",
