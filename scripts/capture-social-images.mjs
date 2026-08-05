@@ -101,19 +101,40 @@ async function main() {
     await page.waitForTimeout(300); // let web fonts finish swapping in
 
     const monday = mondayOf(args.date);
-    const board = page.locator('.eu-board');
+
+    // Wait for the board-logo <img> itself to finish decoding — separate
+    // from the #eu-list data-render wait above — so a slow/late-loading
+    // logo can never end up half-painted (or missing) in a capture.
+    async function waitForLogo() {
+      await page.waitForFunction(() => {
+        const img = document.querySelector('.board-logo');
+        return !!img && img.complete && img.naturalWidth > 0;
+      }, { timeout: 10000 });
+    }
+
+    // Captured via a page-level clip at (0,0,W,H) rather than an
+    // .eu-board element screenshot — in board-mode .eu-board is styled to
+    // exactly fill the viewport (width:100vw;height:100vh), but 100vw can
+    // come out a couple pixels wider than the real viewport in headless
+    // Chromium, which made an element screenshot occasionally emit an
+    // off-by-a-few-px canvas instead of an exact 1200x1200 / 1920x1080.
+    // Clipping to the viewport itself guarantees the exact target pixel
+    // dimensions and can't crop the logo, since we've confirmed .board-logo
+    // always sits fully inside those bounds at every size tested.
+    async function captureViewport(w, h, outPath) {
+      await page.setViewportSize({ width: w, height: h });
+      await waitForLogo();
+      await page.waitForTimeout(200); // let layout/fonts settle post-resize
+      await page.screenshot({ path: outPath, clip: { x: 0, y: 0, width: w, height: h } });
+    }
 
     // --- 1:1 ---
-    await page.setViewportSize({ width: 1200, height: 1200 });
-    await page.waitForTimeout(150);
     const oneToOnePath = path.join(args.out, `${monday}-1x1.png`);
-    await board.screenshot({ path: oneToOnePath });
+    await captureViewport(1200, 1200, oneToOnePath);
 
     // --- 16:9 ---
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.waitForTimeout(150);
     const sixteenNinePath = path.join(args.out, `${monday}-16x9.png`);
-    await board.screenshot({ path: sixteenNinePath });
+    await captureViewport(1920, 1080, sixteenNinePath);
 
     // --- responsive sanity sweep (desktop -> mobile), same board-mode page ---
     const overflowWarnings = [];

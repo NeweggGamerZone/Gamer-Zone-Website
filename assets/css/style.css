@@ -632,10 +632,15 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
   --eu-date-size: clamp(1.5rem, 4.6vw, 3.2rem);
   --eu-name-size: max(14px, calc(var(--eu-date-size) * 0.70));
   --eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.50));
+  /* Shared with .eu-row's own padding below, and reused as .eu-top's
+     margin-bottom, so the gap above the first event row (divider ->
+     "AUG 5") comes out equal to the gap above every later row
+     (row -> border-top -> next row) — both resolve to 2x this value. */
+  --eu-row-pad: clamp(.7rem, 2vw, 1.15rem);
   position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(2.2rem,6vw,4.5rem) var(--safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
-.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:clamp(1.6rem,4.5vw,3rem);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
+.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
 /* Masthead icon+textcol block grows to fill the full width of .eu-top
    (its only child otherwise sits at natural content width), so the
@@ -680,7 +685,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    as the row border-tops, orange/uppercase like other eyebrow text. */
 .eu-sublist-head{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1rem,2vw,1.35rem);color:var(--ne-orange);margin:clamp(1.3rem,3vw,2.1rem) 0 .5rem;padding-top:clamp(1rem,2.5vw,1.6rem);border-top:1px solid rgba(242,244,248,.22)}
 .eu-list{display:flex;flex-direction:column}
-.eu-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
+.eu-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.2rem;padding:var(--eu-row-pad) 0;border-top:1px solid rgba(242,244,248,.22)}
 /* No border directly under the thick orange divider (first row) and no
    doubled-up line stacking against the location row below the list
    (last row) — keeps just one clean rule between adjacent event rows. */
@@ -709,10 +714,14 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
   .eu-brand{text-align:left}
 }
 @media (max-width: 640px){
-  .eu-board{--eu-date-size: clamp(2.1rem, 11vw, 3rem);padding:clamp(1.6rem,7vw,2.6rem) var(--safe-x)}
+  /* Redefining --eu-row-pad here (rather than hardcoding .eu-row's
+     padding directly) keeps .eu-top's margin-bottom in lockstep with the
+     row padding at this breakpoint too, so the gap above the first event
+     still matches the gap above every other one on mobile widths. */
+  .eu-board{--eu-date-size: clamp(2.1rem, 11vw, 3rem);--eu-row-pad: clamp(.9rem,4vw,1.3rem);padding:clamp(1.6rem,7vw,2.6rem) var(--safe-x)}
   .eu-eyebrow-title{font-size:clamp(1.05rem,4.6vw,1.5rem);white-space:normal}
   .eu-eyebrow .ic{width:28px;height:28px}
-  .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem;padding:clamp(.9rem,4vw,1.3rem) 0}
+  .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem}
   .eu-info{text-align:left}
   .eu-date-wrap{gap:.4rem}
 }
@@ -728,7 +737,16 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 html.board-mode{overflow:hidden}
 html.board-mode .site-header,
 html.board-mode .site-footer,
-html.board-mode .hero{display:none}
+html.board-mode .hero,
+/* The home page's hero section is .hero-stage (not the generic .hero
+   other pages use), with its own fixed-position techno-tunnel background
+   layers (.tech-bg/.tech-canvas/.tech-scan) — all of these need hiding
+   too, or board-mode on index.html leaves the hero and tunnel background
+   showing through above/behind the board instead of isolating it. */
+html.board-mode .hero-stage,
+html.board-mode .tech-bg,
+html.board-mode .tech-canvas,
+html.board-mode .tech-scan{display:none}
 html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
 html.board-mode .eu-board{margin:0;width:100vw;height:100vh;min-height:100vh;padding:clamp(1.6rem,5vw,4.5rem)}
@@ -743,8 +761,13 @@ html.board-mode .reveal{opacity:1;transform:none}
    plain in-flow width:auto would otherwise stretch to the cross-axis. */
 html.board-mode .board-logo{position:absolute;left:50%;top:clamp(1.6rem,5vw,4.5rem);transform:translateX(-50%);height:clamp(84px,12.6vw,138px);margin:0;z-index:2}
 /* Reserve room above the masthead equal to the (now large) top-center
-   logo's height + a gap, so the title row doesn't sit underneath it. */
-html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
+   logo's height + a gap, so the title row doesn't sit underneath it.
+   margin-bottom is pinned back to its original (larger) value here too —
+   the live-page base rule below now uses a smaller --eu-row-pad-based
+   value tuned for normal browsing, but board-mode's own row-gap math a
+   little further down was tuned against this original clamp and expects
+   it unchanged. */
+html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px);margin-bottom:clamp(1.6rem,4.5vw,3rem)}
 /* Square/near-square boards (e.g. the 1200x1200 export) keep the exact
    same single-row structure as wide boards — date left, title+time
    right, date range flush right in the masthead — just with a smaller
