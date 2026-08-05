@@ -45,9 +45,13 @@
   --radius: 4px;
   --clip: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
   --marker: 'Permanent Marker', 'Comic Sans MS', cursive;
+  /* Titles: Montserrat everywhere. Body copy: Open Sans everywhere — --sans
+     and --eu-body are kept as two variables (lots of existing rules
+     reference one or the other) but now resolve to the same stack, with
+     Inter dropped entirely so no page can silently fall back to it. */
   --head: 'Montserrat', 'Segoe UI', sans-serif;
-  --sans: 'Inter', 'Open Sans', 'Segoe UI', system-ui, sans-serif;
-  --eu-body: 'Open Sans', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --sans: 'Open Sans', 'Segoe UI', system-ui, sans-serif;
+  --eu-body: 'Open Sans', 'Segoe UI', system-ui, sans-serif;
   --safe-x: clamp(1rem, 4vw, 2.2rem);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -513,6 +517,24 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mile.tier-diamond .node, .host-card.tier-diamond .node{background:#8fe3ff;color:#00131f}
 .mile.tier-diamond .mile-count{border-color:#8fe3ff}
 .mile.tier-diamond .mc-num{color:#8fe3ff}
+/* Diamond is the top rank, so — unlike every other tier above — it gets an
+   occasional flash on its border edge and its "Diamond" node tag, reusing
+   the same 15s cal-today-flash pulse already used for "today" on the
+   Plan-your-visit calendar (see @keyframes cal-today-flash below). */
+.mile.tier-diamond::after, .host-card.tier-diamond::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  box-shadow:0 0 0 1px #8fe3ff,0 0 18px 3px #8fe3ff;opacity:0;
+  animation:cal-today-flash 15s ease-in-out infinite;
+}
+.mile.tier-diamond .node::after, .host-card.tier-diamond .node::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:#fff;opacity:0;
+  animation:cal-today-flash 15s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce){
+  .mile.tier-diamond::after, .host-card.tier-diamond::after,
+  .mile.tier-diamond .node::after, .host-card.tier-diamond .node::after{animation:none}
+}
 @media (max-width:820px){
   .tl{grid-template-columns:1fr;gap:2.2rem 0}
   /* The node is now a rank-name pill (e.g. "PLATINUM"), too wide for the old

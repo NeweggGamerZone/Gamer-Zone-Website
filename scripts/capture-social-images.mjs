@@ -4,11 +4,13 @@
  *   - 1:1  (1200x1200)  -> out/<mondayDate>-1x1.png
  *   - 16:9 (1920x1080)  -> out/<mondayDate>-16x9.png
  *
- * Renders screenshot-weekly-lineup.html (the isolated capture page that
- * already exists in the repo, kept in sync with events.html) with the
- * `board-mode` class applied — the same CSS aspect-ratio machinery
- * (@media max-aspect-ratio: 6/5 / min-aspect-ratio: 3/2 in style.css)
- * that lets the board reflow between near-square and widescreen layouts.
+ * Renders the live home page (index.html) itself with the `board-mode`
+ * class applied — the same CSS aspect-ratio machinery (@media
+ * max-aspect-ratio: 6/5 / min-aspect-ratio: 3/2 in style.css) that lets
+ * the Weekly Lineup board reflow between near-square and widescreen
+ * layouts. Capturing straight from the real page (rather than a separate
+ * mirror page) means the social screenshots always match what's actually
+ * live — nothing to keep hand-in-sync.
  *
  * Also does a quick responsive sanity sweep across a handful of
  * intermediate viewport widths (desktop -> mobile) and reports any
@@ -82,7 +84,7 @@ async function main() {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage();
-    await page.goto(`${base}/screenshot-weekly-lineup.html`, { waitUntil: 'networkidle' });
+    await page.goto(`${base}/index.html`, { waitUntil: 'networkidle' });
     // Turn on board-mode (normally toggled by hand via devtools before a
     // manual screenshot) and wait for event-update.js to finish rendering
     // #eu-list from data/events.json before capturing anything.
