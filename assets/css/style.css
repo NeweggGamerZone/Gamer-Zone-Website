@@ -682,11 +682,14 @@ html.board-mode .reveal{opacity:1;transform:none}
 /* Brand mark for the screenshot-only board exports — hidden everywhere
    else, since .board-logo only exists on screenshot-weekly-lineup.html. */
 .board-logo{display:none}
-/* Positioned absolutely (bottom-center of the board) rather than left
-   in the flex flow, since .eu-board is a column flexbox and a plain
+/* Positioned absolutely (top-center of the board) rather than left in
+   the flex flow, since .eu-board is a column flexbox and a plain
    width:auto child would otherwise stretch to the full cross-axis
    width instead of its natural aspect ratio. */
-html.board-mode .board-logo{display:block;position:absolute;left:50%;bottom:clamp(1.6rem,5vw,4.5rem);transform:translateX(-50%);height:clamp(42px,6.3vw,69px);width:auto;margin:0;z-index:2}
+html.board-mode .board-logo{display:block;position:absolute;left:50%;top:clamp(1.6rem,5vw,4.5rem);transform:translateX(-50%);height:clamp(84px,12.6vw,138px);width:auto;margin:0;z-index:2}
+/* Reserve room above the masthead equal to the (now large) top-center
+   logo's height + a gap, so the title row doesn't sit underneath it. */
+html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
 /* Square/near-square boards (e.g. the 1200x1200 export) keep the exact
    same single-row structure as wide boards — date left, title+time
    right, date range flush right in the masthead — just with a smaller
