@@ -719,12 +719,14 @@ html.board-mode .eu-board::before{filter:blur(6px) brightness(.6) saturate(1.1)}
 html.board-mode .eu-board::after{background:linear-gradient(180deg,rgba(4,5,7,.78),rgba(4,5,7,.81) 55%,rgba(4,5,7,.86))}
 @media (max-aspect-ratio: 6/5){
   html.board-mode .eu-board{--eu-date-size: clamp(3.2rem, 13.2vw, 5.4rem)}
-  /* Kept at the pre-bump masthead size (not the event-row size above)
-     so the title and "AUG 4 – 8" still fit on one line in the
-     narrower square masthead width — going bigger here is what made
-     the date range wrap onto its own line. */
-  html.board-mode .eu-eyebrow-title{font-size:clamp(1.9rem,4vw,3.1rem)}
-  html.board-mode .eu-theme-dates{font-size:clamp(1.9rem,4vw,3.1rem)}
+  /* Bumped up from the pre-bump masthead size while still fitting the
+     title and "AUG 4 – 8" on one line in the narrower square masthead
+     width — larger than this wraps the date range onto its own line.
+     Tightened gap so the title and date range sit closer together
+     now that both read larger. */
+  html.board-mode .eu-eyebrow-title{font-size:clamp(2.1rem,4.4vw,3.45rem)}
+  html.board-mode .eu-theme-dates{font-size:clamp(2.1rem,4.4vw,3.45rem)}
+  html.board-mode .eu-eyebrow-titlerow{gap:.3rem}
   html.board-mode .eu-eyebrow .ic{width:clamp(55px,9vw,91px);height:clamp(55px,9vw,91px)}
   html.board-mode .eu-major-mark{font-size:clamp(29px,5.4vw,50px)}
 }
