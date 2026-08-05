@@ -5,11 +5,13 @@
    shape itself smoothly morphs through a fixed sequence (square ->
    triangle -> star -> pentagon -> hexagon -> circle) — holding each shape
    for a beat, then blending into the next one over a couple of seconds,
-   rather than ever cutting instantly from one shape to another. Each ring
-   runs the same hold/morph cycle slightly offset from its neighbors, so
-   the shape-change reads as a wave rippling through the tunnel's depth as
-   it comes toward you. No score, no input, no game logic — purely
-   decorative. Pure canvas math, no images. */
+   rather than ever cutting instantly from one shape to another. Every ring,
+   regardless of depth, runs the exact same hold/morph cycle in lockstep
+   (no per-ring offset) — the whole tunnel resolves as one shape at any
+   given moment and the entire tunnel transitions to the next shape
+   together, a single seamless line-transition rather than a staggered
+   ripple. No score, no input, no game logic — purely decorative. Pure
+   canvas math, no images. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -25,7 +27,9 @@
   // Fixed progression every ring works through, one step at a time.
   const SHAPES = ['square', 'triangle', 'star', 'pentagon', 'hexagon', 'circle'];
   const HOLD_DUR = 2.6, MORPH_DUR = 1.8, CYCLE = HOLD_DUR + MORPH_DUR;
-  const RING_LAG = 0.22; // seconds of stagger per ring, depth-to-depth
+  // Every ring reads morphStateAt(elapsed) directly (no per-ring time
+  // offset) so all rings hold/morph in perfect unison — one synchronized
+  // shape-change across the whole tunnel instead of a depth-staggered wave.
 
   let A; // ring radius, sized to the viewport
   let rings = [];
@@ -200,7 +204,7 @@
       const r = rings[i];
       r.z -= SPEED * dt;
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
-      const pts = morphedPoints(morphStateAt(elapsed - i * RING_LAG));
+      const pts = morphedPoints(morphStateAt(elapsed));
       drawRing(r, pts, rot, globalFade, (hue + i * 12) % 360);
     }
     raf = requestAnimationFrame(frame);
