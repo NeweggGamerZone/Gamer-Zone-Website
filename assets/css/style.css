@@ -706,6 +706,11 @@ html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
    --eu-meta-size via calc(), so bumping it alone scales every event
    row's date/title/time proportionally. */
 html.board-mode .eu-eyebrow p{font-size:max(26px,2rem)}
+/* Event title reads the same size as its date (not the default 70%)
+   and the row aligns them by top edge instead of text baseline, so a
+   wrapped multi-line title still starts flush with the date/star. */
+html.board-mode .eu-board{--eu-name-size: var(--eu-date-size)}
+html.board-mode .eu-row{align-items:flex-start}
 /* Previous pass over-brightened this (brightness .85 / .5-.68 scrim)
    to the point text legibility suffered. Board-mode should still read
    as a dark board — just ~10% lighter than the original .55 brightness
@@ -714,8 +719,12 @@ html.board-mode .eu-board::before{filter:blur(6px) brightness(.6) saturate(1.1)}
 html.board-mode .eu-board::after{background:linear-gradient(180deg,rgba(4,5,7,.78),rgba(4,5,7,.81) 55%,rgba(4,5,7,.86))}
 @media (max-aspect-ratio: 6/5){
   html.board-mode .eu-board{--eu-date-size: clamp(3.2rem, 13.2vw, 5.4rem)}
-  html.board-mode .eu-eyebrow-title{font-size:clamp(2.3rem,4.8vw,3.7rem)}
-  html.board-mode .eu-theme-dates{font-size:clamp(2.3rem,4.8vw,3.7rem)}
+  /* Kept at the pre-bump masthead size (not the event-row size above)
+     so the title and "AUG 4 – 8" still fit on one line in the
+     narrower square masthead width — going bigger here is what made
+     the date range wrap onto its own line. */
+  html.board-mode .eu-eyebrow-title{font-size:clamp(1.9rem,4vw,3.1rem)}
+  html.board-mode .eu-theme-dates{font-size:clamp(1.9rem,4vw,3.1rem)}
   html.board-mode .eu-eyebrow .ic{width:clamp(55px,9vw,91px);height:clamp(55px,9vw,91px)}
   html.board-mode .eu-major-mark{font-size:clamp(29px,5.4vw,50px)}
 }
