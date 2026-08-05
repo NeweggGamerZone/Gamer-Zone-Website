@@ -713,6 +713,15 @@ html.board-mode .eu-eyebrow p{font-size:max(26px,2rem)}
    matching line-height here is what makes them look flush. */
 html.board-mode .eu-row{align-items:flex-start}
 html.board-mode .eu-name{line-height:1}
+/* Every row after the first was only getting its own padding-top as
+   the gap above it, while the first row additionally inherited
+   .eu-top's much larger margin-bottom — so the space above "AUG 5"
+   (masthead divider + that margin + the row's padding) was bigger
+   than the space above "AUG 7" (just the row's padding). Adding the
+   same margin here to every row but the first equalizes the gap
+   above every event, board-wide, regardless of how many rows exist. */
+html.board-mode .eu-row{margin-top:clamp(1.6rem,4.5vw,3rem)}
+html.board-mode .eu-list .eu-row:first-child{margin-top:0}
 /* Masthead title and date range get the same top-edge + line-height
    treatment as the event rows above — align-items:baseline (the
    default) plus their differing line-heights (1.25 vs 1.1) was
