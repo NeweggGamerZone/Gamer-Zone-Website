@@ -706,6 +706,9 @@ html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
    --eu-meta-size via calc(), so bumping it alone scales every event
    row's date/title/time proportionally. */
 html.board-mode .eu-eyebrow p{font-size:max(26px,2rem)}
+/* Time range ("4:00 PM – 6:00 PM") bumped up from the default 50% of
+   the title size to 62% so it reads a bit larger on the exports. */
+html.board-mode .eu-board{--eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.62))}
 /* The row aligns date and title by top edge instead of text baseline,
    so a wrapped multi-line title still starts flush with the date/star.
    .eu-name's normal line-height (1.15) is taller than .eu-date's (1),
@@ -717,11 +720,15 @@ html.board-mode .eu-name{line-height:1}
    the gap above it, while the first row additionally inherited
    .eu-top's much larger margin-bottom — so the space above "AUG 5"
    (masthead divider + that margin + the row's padding) was bigger
-   than the space above "AUG 7" (just the row's padding). Adding the
-   same margin here to every row but the first equalizes the gap
-   above every event, board-wide, regardless of how many rows exist. */
-html.board-mode .eu-row{margin-top:clamp(1.6rem,4.5vw,3rem)}
+   than the space above "AUG 7" (just the row's padding). Adding half
+   of that margin above the divider line and the other half as extra
+   padding below it keeps the *total* gap the same as before (so it
+   still matches the gap above "AUG 5") while centering the white
+   divider line inside that gap instead of hugging its bottom edge. */
+html.board-mode .eu-list{--eu-row-gap-half: calc(clamp(1.6rem,4.5vw,3rem) / 2)}
+html.board-mode .eu-row{margin-top:var(--eu-row-gap-half)}
 html.board-mode .eu-list .eu-row:first-child{margin-top:0}
+html.board-mode .eu-list .eu-row:not(:first-child){padding-top:calc(clamp(.7rem,2vw,1.15rem) + var(--eu-row-gap-half))}
 /* Masthead title and date range get the same top-edge + line-height
    treatment as the event rows above — align-items:baseline (the
    default) plus their differing line-heights (1.25 vs 1.1) was
