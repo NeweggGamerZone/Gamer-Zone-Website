@@ -679,12 +679,13 @@ html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
 html.board-mode .eu-board{margin:0;width:100vw;height:100vh;min-height:100vh;padding:clamp(1.6rem,5vw,4.5rem)}
 html.board-mode .reveal{opacity:1;transform:none}
+/* Square/near-square boards (e.g. the 1200x1200 export) keep the exact
+   same single-row structure as wide boards — date left, title+time
+   right, date range flush right in the masthead — just with a smaller
+   date size so it still fits. No column-stacking here; titles must
+   never land underneath the dates. */
 @media (max-aspect-ratio: 6/5){
   html.board-mode .eu-board{--eu-date-size: clamp(1.7rem, 7vw, 2.9rem)}
-  html.board-mode .eu-top{flex-direction:column;align-items:flex-start;gap:.6rem}
-  html.board-mode .eu-brand{text-align:left}
-  html.board-mode .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem;padding:clamp(.7rem,2.2vw,1.1rem) 0}
-  html.board-mode .eu-info{text-align:left}
 }
 @media (min-aspect-ratio: 3/2){
   html.board-mode .eu-board{--eu-date-size: clamp(1.8rem, 3.6vw, 3.7rem)}
