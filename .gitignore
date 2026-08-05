@@ -13,3 +13,7 @@ assets/Leaderboard/
 gz-referrals.html
 data/referrals.json
 archive/
+
+# local dev/build artifacts
+node_modules/
+out/
