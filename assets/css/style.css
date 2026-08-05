@@ -644,8 +644,9 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-major .eu-date{color:var(--cal-major)}
 .eu-major-mark{flex:none;font-size:clamp(18px,3.2vw,30px);line-height:1;color:var(--ne-orange)}
 .eu-info{text-align:right;min-width:0}
-/* event title: only 30% smaller than the date (was much smaller before) */
-.eu-name{font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1.15;color:var(--ink)}
+/* event title: only 30% smaller than the date (was much smaller before);
+   same font-weight as the date (800) so the two read as equally bold. */
+.eu-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1.15;color:var(--ink)}
 /* subtagline: exactly 50% of the event title, floored at 14px */
 .eu-meta{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
 .eu-major .eu-name{color:var(--cal-major)}
@@ -704,24 +705,19 @@ html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
    read clearly at a glance. --eu-date-size drives --eu-name-size and
    --eu-meta-size via calc(), so bumping it alone scales every event
    row's date/title/time proportionally. */
-html.board-mode .eu-eyebrow p{font-size:max(22px,1.7rem)}
-/* Background image was reading as near-black on exports (base .55
-   brightness plus a .86-.96 opacity scrim on top) — board-mode gets a
-   lighter treatment so the photo behind the text is actually visible. */
-html.board-mode .eu-board::before{filter:blur(5px) brightness(.85) saturate(1.2)}
-html.board-mode .eu-board::after{background:linear-gradient(180deg,rgba(4,5,7,.5),rgba(4,5,7,.58) 55%,rgba(4,5,7,.68))}
-/* More breathing room around rows/masthead so content fills more of a
-   sparse board (e.g. the square export) instead of leaving it mostly
-   empty around a couple of short lists. */
-html.board-mode .eu-row{padding:clamp(1.1rem,3vw,2rem) 0}
-html.board-mode .eu-top{margin-bottom:clamp(2rem,5.5vw,3.6rem)}
-html.board-mode .eu-location-row{margin-top:clamp(1.3rem,3.6vw,2rem)}
+html.board-mode .eu-eyebrow p{font-size:max(26px,2rem)}
+/* Previous pass over-brightened this (brightness .85 / .5-.68 scrim)
+   to the point text legibility suffered. Board-mode should still read
+   as a dark board — just ~10% lighter than the original .55 brightness
+   / .86-.96 scrim, not anywhere near "bright". */
+html.board-mode .eu-board::before{filter:blur(6px) brightness(.6) saturate(1.1)}
+html.board-mode .eu-board::after{background:linear-gradient(180deg,rgba(4,5,7,.78),rgba(4,5,7,.81) 55%,rgba(4,5,7,.86))}
 @media (max-aspect-ratio: 6/5){
-  html.board-mode .eu-board{--eu-date-size: clamp(2.65rem, 11vw, 4.5rem)}
-  html.board-mode .eu-eyebrow-title{font-size:clamp(1.9rem,4vw,3.1rem)}
-  html.board-mode .eu-theme-dates{font-size:clamp(1.9rem,4vw,3.1rem)}
-  html.board-mode .eu-eyebrow .ic{width:clamp(46px,7.5vw,76px);height:clamp(46px,7.5vw,76px)}
-  html.board-mode .eu-major-mark{font-size:clamp(24px,4.5vw,42px)}
+  html.board-mode .eu-board{--eu-date-size: clamp(3.2rem, 13.2vw, 5.4rem)}
+  html.board-mode .eu-eyebrow-title{font-size:clamp(2.3rem,4.8vw,3.7rem)}
+  html.board-mode .eu-theme-dates{font-size:clamp(2.3rem,4.8vw,3.7rem)}
+  html.board-mode .eu-eyebrow .ic{width:clamp(55px,9vw,91px);height:clamp(55px,9vw,91px)}
+  html.board-mode .eu-major-mark{font-size:clamp(29px,5.4vw,50px)}
 }
 @media (min-aspect-ratio: 3/2){
   html.board-mode .eu-board{--eu-date-size: clamp(2.25rem, 4.5vw, 4.625rem)}
