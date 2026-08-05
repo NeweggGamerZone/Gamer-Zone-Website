@@ -706,10 +706,8 @@ html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
    --eu-meta-size via calc(), so bumping it alone scales every event
    row's date/title/time proportionally. */
 html.board-mode .eu-eyebrow p{font-size:max(26px,2rem)}
-/* Event title reads the same size as its date (not the default 70%)
-   and the row aligns them by top edge instead of text baseline, so a
-   wrapped multi-line title still starts flush with the date/star. */
-html.board-mode .eu-board{--eu-name-size: var(--eu-date-size)}
+/* The row aligns date and title by top edge instead of text baseline,
+   so a wrapped multi-line title still starts flush with the date/star. */
 html.board-mode .eu-row{align-items:flex-start}
 /* Previous pass over-brightened this (brightness .85 / .5-.68 scrim)
    to the point text legibility suffered. Board-mode should still read
@@ -718,20 +716,25 @@ html.board-mode .eu-row{align-items:flex-start}
 html.board-mode .eu-board::before{filter:blur(6px) brightness(.6) saturate(1.1)}
 html.board-mode .eu-board::after{background:linear-gradient(180deg,rgba(4,5,7,.78),rgba(4,5,7,.81) 55%,rgba(4,5,7,.86))}
 @media (max-aspect-ratio: 6/5){
-  html.board-mode .eu-board{--eu-date-size: clamp(3.2rem, 13.2vw, 5.4rem)}
-  /* Bumped up from the pre-bump masthead size while still fitting the
-     title and "AUG 4 – 8" on one line in the narrower square masthead
-     width — larger than this wraps the date range onto its own line.
-     Tightened gap so the title and date range sit closer together
-     now that both read larger. */
-  html.board-mode .eu-eyebrow-title{font-size:clamp(2.1rem,4.4vw,3.45rem)}
-  html.board-mode .eu-theme-dates{font-size:clamp(2.1rem,4.4vw,3.45rem)}
-  html.board-mode .eu-eyebrow-titlerow{gap:.3rem}
-  html.board-mode .eu-eyebrow .ic{width:clamp(55px,9vw,91px);height:clamp(55px,9vw,91px)}
-  html.board-mode .eu-major-mark{font-size:clamp(29px,5.4vw,50px)}
+  /* All square-export sizes dialed back ~20% from the prior round —
+     that round's masthead size was wide enough that "GAMER ZONE:
+     MARVEL WEEK" plus "AUG 4 – 8" no longer fit on one line at 1200px.
+     --eu-name-size is intentionally left at its default (~70% of
+     --eu-date-size) here, not overridden to match the date, so the
+     event title reads smaller than "AUG 5"/"AUG 7" as before. */
+  html.board-mode .eu-board{--eu-date-size: clamp(2.56rem, 10.56vw, 4.32rem)}
+  html.board-mode .eu-eyebrow-title{font-size:clamp(1.68rem,3.52vw,2.76rem)}
+  html.board-mode .eu-theme-dates{font-size:clamp(1.68rem,3.52vw,2.76rem)}
+  html.board-mode .eu-eyebrow-titlerow{gap:.5rem}
+  html.board-mode .eu-eyebrow .ic{width:clamp(44px,7.2vw,73px);height:clamp(44px,7.2vw,73px)}
+  html.board-mode .eu-major-mark{font-size:clamp(23px,4.3vw,40px)}
 }
 @media (min-aspect-ratio: 3/2){
   html.board-mode .eu-board{--eu-date-size: clamp(2.25rem, 4.5vw, 4.625rem)}
   html.board-mode .eu-eyebrow-title{font-size:clamp(1.75rem,3vw,3.25rem);white-space:nowrap}
   html.board-mode .eu-theme-dates{font-size:clamp(1.75rem,3vw,3.25rem)}
+  /* Event title reads the same size as its date here (not the default
+     70%) — kept for the wide/horizontal export only; the square export
+     uses the smaller default ratio (see max-aspect-ratio bracket above). */
+  html.board-mode .eu-board{--eu-name-size: var(--eu-date-size)}
 }
