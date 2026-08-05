@@ -178,12 +178,25 @@
     if (f <= 0.01) return;
     ctx.strokeStyle = `hsla(${hue}, 72%, 62%, ${0.36 * f})`;
     ctx.lineWidth = 1.3;
+    const n = unitPts.length;
+    const pts = new Array(n);
+    for (let i = 0; i < n; i++) {
+      pts[i] = project(unitPts[i][0] * A, unitPts[i][1] * A, ring.z, rot);
+    }
+    // Smooth closed path through every point via a quadratic curve between
+    // each successive pair of edge midpoints (using the original point as
+    // the curve's control point) — this rounds every corner, including a
+    // triangle's or star's sharp vertices, into continuous curvature
+    // instead of a hard-angled line, so the outline itself reads as one
+    // seamless line no matter which shape it currently is.
     ctx.beginPath();
-    let p = project(unitPts[0][0] * A, unitPts[0][1] * A, ring.z, rot);
-    ctx.moveTo(p.x, p.y);
-    for (let i = 1; i < unitPts.length; i++) {
-      p = project(unitPts[i][0] * A, unitPts[i][1] * A, ring.z, rot);
-      ctx.lineTo(p.x, p.y);
+    let mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+    ctx.moveTo(mid.x, mid.y);
+    for (let i = 1; i <= n; i++) {
+      const cur = pts[i % n];
+      const next = pts[(i + 1) % n];
+      const nextMid = { x: (cur.x + next.x) / 2, y: (cur.y + next.y) / 2 };
+      ctx.quadraticCurveTo(cur.x, cur.y, nextMid.x, nextMid.y);
     }
     ctx.closePath();
     ctx.stroke();

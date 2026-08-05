@@ -680,7 +680,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    as the row border-tops, orange/uppercase like other eyebrow text. */
 .eu-sublist-head{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1rem,2vw,1.35rem);color:var(--ne-orange);margin:clamp(1.3rem,3vw,2.1rem) 0 .5rem;padding-top:clamp(1rem,2.5vw,1.6rem);border-top:1px solid rgba(242,244,248,.22)}
 .eu-list{display:flex;flex-direction:column}
-.eu-row{display:flex;align-items:baseline;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
+.eu-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.2rem;padding:clamp(.7rem,2vw,1.15rem) 0;border-top:1px solid rgba(242,244,248,.22)}
 /* No border directly under the thick orange divider (first row) and no
    doubled-up line stacking against the location row below the list
    (last row) — keeps just one clean rule between adjacent event rows. */
@@ -733,14 +733,15 @@ html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
 html.board-mode .eu-board{margin:0;width:100vw;height:100vh;min-height:100vh;padding:clamp(1.6rem,5vw,4.5rem)}
 html.board-mode .reveal{opacity:1;transform:none}
-/* Brand mark for the screenshot-only board exports — hidden everywhere
-   else, since .board-logo only exists on screenshot-weekly-lineup.html. */
-.board-logo{display:none}
-/* Positioned absolutely (top-center of the board) rather than left in
-   the flex flow, since .eu-board is a column flexbox and a plain
-   width:auto child would otherwise stretch to the full cross-axis
-   width instead of its natural aspect ratio. */
-html.board-mode .board-logo{display:block;position:absolute;left:50%;top:clamp(1.6rem,5vw,4.5rem);transform:translateX(-50%);height:clamp(84px,12.6vw,138px);width:auto;margin:0;z-index:2}
+/* Brand mark at the top of the Weekly Lineup board — visible on the live
+   page now too (not just the board-mode screenshot export). align-self
+   overrides .eu-board's flex-column stretch so the logo keeps its own
+   aspect ratio (height set, width:auto) instead of stretching full-width. */
+.board-logo{display:block;align-self:center;height:clamp(30px,6vw,50px);width:auto;margin:0 0 clamp(1rem,3vw,1.6rem)}
+/* In board-mode the export is full-bleed to the viewport, so the logo
+   switches to a larger, absolutely-positioned top-center mark instead —
+   plain in-flow width:auto would otherwise stretch to the cross-axis. */
+html.board-mode .board-logo{position:absolute;left:50%;top:clamp(1.6rem,5vw,4.5rem);transform:translateX(-50%);height:clamp(84px,12.6vw,138px);margin:0;z-index:2}
 /* Reserve room above the masthead equal to the (now large) top-center
    logo's height + a gap, so the title row doesn't sit underneath it. */
 html.board-mode .eu-top{margin-top:clamp(100px,15vw,164px)}
