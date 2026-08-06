@@ -15,6 +15,25 @@
      or special events change. Safe to delete once no longer needed. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="stylesheet" href="assets/css/style.css?v=29">
+<!-- Page-scoped tweaks for this screenshot only — do not touch the shared
+     .eu-major/.eu-row rules in style.css, since those also drive the real
+     live Weekly Lineup on index.html/events.html and this month-at-a-glance
+     layout intentionally differs from that design. -->
+<style>
+  #month .eu-row{align-items:flex-start}
+  /* Theme-week rows: date+range and theme title share one line each, same
+     size, so both columns are naturally top (and bottom) aligned. */
+  #month .eu-week-row .eu-date{font-size:var(--eu-name-size);line-height:1.15}
+  #month .eu-week-row .eu-info{display:flex;align-items:flex-start}
+  /* .eu-name's own color:var(--ink) rule and .eu-theme-highlight's
+     color:var(--ne-blue-text) rule have equal specificity, so .eu-name
+     (defined later in style.css) would otherwise win the tie — this
+     scoped selector out-specifies both to make the theme title blue. */
+  #month .eu-week-row .eu-name{color:var(--ne-blue-text)}
+  /* Special Events: keep the date white; only the event title itself
+     highlights orange for a major/featured event. */
+  #month .eu-major .eu-date{color:#fff}
+</style>
 </head>
 <body>
 <div id="gz-veil" aria-hidden="true"></div>
@@ -39,32 +58,28 @@
       </div>
 
       <div class="eu-list">
-        <div class="eu-row">
-          <div class="eu-date-wrap"><span class="eu-date">WEEK 1</span></div>
+        <div class="eu-row eu-week-row">
+          <div class="eu-date-wrap"><span class="eu-date">Week 1: Aug 4 &ndash; 8</span></div>
           <div class="eu-info">
-            <div class="eu-name">Marvel Week</div>
-            <div class="eu-meta">Aug 4 &ndash; 8</div>
+            <div class="eu-name eu-theme-highlight">Marvel Week</div>
           </div>
         </div>
-        <div class="eu-row">
-          <div class="eu-date-wrap"><span class="eu-date">WEEK 2</span></div>
+        <div class="eu-row eu-week-row">
+          <div class="eu-date-wrap"><span class="eu-date">Week 2: Aug 11 &ndash; 15</span></div>
           <div class="eu-info">
-            <div class="eu-name">Riot Games Week</div>
-            <div class="eu-meta">Aug 11 &ndash; 15</div>
+            <div class="eu-name eu-theme-highlight">Riot Games Week</div>
           </div>
         </div>
-        <div class="eu-row">
-          <div class="eu-date-wrap"><span class="eu-date">WEEK 3</span></div>
+        <div class="eu-row eu-week-row">
+          <div class="eu-date-wrap"><span class="eu-date">Week 3: Aug 18 &ndash; 22</span></div>
           <div class="eu-info">
-            <div class="eu-name">Co-op Games Week</div>
-            <div class="eu-meta">Aug 18 &ndash; 22</div>
+            <div class="eu-name eu-theme-highlight">Co-op Games Week</div>
           </div>
         </div>
-        <div class="eu-row">
-          <div class="eu-date-wrap"><span class="eu-date">WEEK 4</span></div>
+        <div class="eu-row eu-week-row">
+          <div class="eu-date-wrap"><span class="eu-date">Week 4: Aug 25 &ndash; 29</span></div>
           <div class="eu-info">
-            <div class="eu-name">Fighting Games Week</div>
-            <div class="eu-meta">Aug 25 &ndash; 29</div>
+            <div class="eu-name eu-theme-highlight">Fighting Games Week</div>
           </div>
         </div>
       </div>
