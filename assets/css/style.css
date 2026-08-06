@@ -30,6 +30,35 @@
        reuse it (not a fresh color) for anything meant to read as
        "tournament/major" so it's pre-verified safe on that surface.
    ------------------------------------------------------------------------ */
+/* Self-hosted Montserrat/Open Sans — previously loaded from Google Fonts'
+   CDN (fonts.googleapis.com / fonts.gstatic.com). That's fine for real
+   visitors, but any headless/automated render of this site (screenshot
+   tooling, sandboxed CI, a network policy that only allowlists certain
+   domains) can silently fail that external request and fall back to a
+   system font with zero warning — which is exactly what made automated
+   social-media screenshots of this site render in the wrong typeface
+   even though the live page (in a normal browser, with normal internet
+   access) looked correct. Self-hosting removes that dependency entirely:
+   the exact same two variable-font files now back every weight below,
+   for every renderer, every time. Latin character set only (matches
+   this site's actual content — no need for the cyrillic/greek/etc.
+   subsets Google splits out for broader-language pages). */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 600 800;
+  font-display: swap;
+  src: url('../fonts/montserrat-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/open-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 :root {
   --ne-orange: #FA9D28;
   --ne-orange-deep: #E07C00;

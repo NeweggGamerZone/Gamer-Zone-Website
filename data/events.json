@@ -175,18 +175,6 @@
       "featured": true,
       "reservation": false,
       "accent": "#FFC400"
-    },
-    {
-      "id": "august-finale-street-fighter-2026-08-29",
-      "title": "August Finale: Street Fighter Saturday Slam",
-      "subtitle": "Fighting Games Week finale. Bracket play all day, one champion by close.",
-      "date": "2026-08-29",
-      "time": "11:00 AM – 7:00 PM",
-      "type": "major",
-      "blurb": "A full day of Street Fighter bracket play, open to all skill levels. Top finishers take home Newegg gift cards and product prizing, with catered food all day.",
-      "featured": true,
-      "reservation": false,
-      "accent": "#FFC400"
     }
   ],
   "weeklyThemes": [
