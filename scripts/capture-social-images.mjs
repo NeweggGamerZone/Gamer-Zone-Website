@@ -1,28 +1,41 @@
 #!/usr/bin/env node
 /**
  * Capture the "Weekly lineup" events board as two social-ready PNGs:
- *   - 1:1  (1200x1200)  -> out/<mondayDate>-1x1.png
- *   - 16:9 (1920x1080)  -> out/<mondayDate>-16x9.png
+ *   - 16:9 (1920x1080) -> out/<mondayDate>-16x9.png   ("basic desktop version")
+ *   - 1:1  (1200x1200)  -> out/<mondayDate>-1x1.png    ("as it shrinks for mobile")
  *
  * Renders the live home page (index.html) itself with the `board-mode`
- * class applied — the same CSS aspect-ratio machinery (@media
- * max-aspect-ratio: 6/5 / min-aspect-ratio: 3/2 in style.css) that lets
- * the Weekly Lineup board reflow between near-square and widescreen
- * layouts. Capturing straight from the real page (rather than a separate
- * mirror page) means the social screenshots always match what's actually
- * live — nothing to keep hand-in-sync.
+ * class applied. Board-mode does isolation ONLY (hides header/footer/hero,
+ * lets .eu-board span the full viewport width) — it does not force a
+ * height or an aspect ratio, and there is no board-mode-only breakpoint.
+ * The board's rendered width:height ratio at any given viewport width is
+ * simply whatever the site's ordinary responsive CSS (the 900px/640px/
+ * 400px width breakpoints already used for normal browsing) produces —
+ * exactly like resizing a real browser window.
+ *
+ * So instead of forcing a square/widescreen viewport, this script scans a
+ * range of viewport widths, measures the real rendered .eu-board element
+ * at each one, and picks whichever width's natural aspect ratio lands
+ * closest to the target (16:9 for desktop, 1:1 for mobile/square). That
+ * width's actual rendering — same fonts, same CSS, same layout a visitor
+ * would see at that width — is what gets captured. The element screenshot
+ * is then fit to the exact target pixel dimensions (social platforms need
+ * exact sizes) with a minimal center-crop, since the width search already
+ * gets the aspect ratio close before any resizing happens.
  *
  * Also does a quick responsive sanity sweep across a handful of
  * intermediate viewport widths (desktop -> mobile) and reports any
  * horizontal overflow, so a broken breakpoint doesn't ship silently.
  *
  * Usage:
- *   node scripts/capture-social-images.mjs [--out <dir>] [--date YYYY-MM-DD]
+ *   node scripts/capture-social-images.mjs [--out <dir>] [--date YYYY-MM-DD] [--weeks N]
  *
- * No dependencies beyond the `playwright` package (already resolvable
- * globally in this environment) and Node's built-in http server.
+ * Dependencies: `playwright` (browser automation) and `sharp` (final
+ * resize-to-exact-dimensions step), both already resolvable globally in
+ * this environment via the node_modules/ symlinks alongside this script.
  */
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -66,16 +79,20 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--out') args.out = path.resolve(argv[++i]);
     else if (argv[i] === '--date') args.date = argv[++i];
-    // --weeks N: in addition to the usual "current week" 1:1 + 16:9 pair,
-    // also render a 1:1 square for each of the next N upcoming weekly
-    // themes (data/events.json's weeklyThemes) — one social image per
-    // week, e.g. `--weeks 4` for this week plus the next three.
+    // --weeks N: in addition to the usual "current week" 16:9 + 1:1 pair,
+    // also render both for each of the next N upcoming weekly themes
+    // (data/events.json's weeklyThemes) — one pair per week.
     else if (argv[i] === '--weeks') args.weeks = parseInt(argv[++i], 10) || 0;
   }
   return args;
 }
 
+// Desktop-to-mobile scan range. Wide enough steps to keep the search fast;
+// the site's real breakpoints (900/640/400px) all fall inside this range,
+// so the scan naturally samples both sides of every reflow.
+const SCAN_WIDTHS = [1920, 1680, 1440, 1280, 1150, 1024, 900, 834, 768, 700, 640, 580, 520, 460, 400, 360, 320];
 const SWEEP_WIDTHS = [1920, 1440, 1280, 1024, 834, 768, 430, 375, 320];
+const TALL_ENOUGH = 2400; // viewport height, generous so nothing ever clips during measurement/capture
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -89,27 +106,22 @@ async function main() {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage();
-    await page.goto(`${base}/index.html`, { waitUntil: 'networkidle' });
-    // Turn on board-mode (normally toggled by hand via devtools before a
-    // manual screenshot) and wait for event-update.js to finish rendering
-    // #eu-list from data/events.json before capturing anything.
-    await page.evaluate(() => document.documentElement.classList.add('board-mode'));
-    // Every headless run looks like a "first visit" (fresh, storage-less
-    // context), which would otherwise hold the #gz-veil load-in animation
-    // on screen for ~900ms+transition. Drop it immediately so captures
-    // never include that transient veil graphic.
-    await page.evaluate(() => document.getElementById('gz-veil')?.remove());
-    await page.waitForFunction(() => {
-      const list = document.getElementById('eu-list');
-      return !!list && list.children.length > 0;
-    }, { timeout: 10000 });
-    await page.waitForTimeout(300); // let web fonts finish swapping in
 
-    const monday = mondayOf(args.date);
+    async function loadBoard() {
+      await page.goto(`${base}/index.html`, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.documentElement.classList.add('board-mode'));
+      // Every headless run looks like a "first visit" (fresh, storage-less
+      // context), which would otherwise hold the #gz-veil load-in animation
+      // on screen for ~900ms+transition. Drop it immediately so captures
+      // never include that transient veil graphic.
+      await page.evaluate(() => document.getElementById('gz-veil')?.remove());
+      await page.waitForFunction(() => {
+        const list = document.getElementById('eu-list');
+        return !!list && list.children.length > 0;
+      }, { timeout: 10000 });
+      await page.waitForTimeout(300); // let web fonts finish swapping in
+    }
 
-    // Wait for the board-logo <img> itself to finish decoding — separate
-    // from the #eu-list data-render wait above — so a slow/late-loading
-    // logo can never end up half-painted (or missing) in a capture.
     async function waitForLogo() {
       await page.waitForFunction(() => {
         const img = document.querySelector('.board-logo');
@@ -117,34 +129,63 @@ async function main() {
       }, { timeout: 10000 });
     }
 
-    // Captured via a page-level clip at (0,0,W,H) rather than an
-    // .eu-board element screenshot — in board-mode .eu-board is styled to
-    // exactly fill the viewport (width:100vw;height:100vh), but 100vw can
-    // come out a couple pixels wider than the real viewport in headless
-    // Chromium, which made an element screenshot occasionally emit an
-    // off-by-a-few-px canvas instead of an exact 1200x1200 / 1920x1080.
-    // Clipping to the viewport itself guarantees the exact target pixel
-    // dimensions and can't crop the logo, since we've confirmed .board-logo
-    // always sits fully inside those bounds at every size tested.
-    async function captureViewport(w, h, outPath) {
-      await page.setViewportSize({ width: w, height: h });
+    // Measure .eu-board's real rendered box at a given viewport width —
+    // no forced height, no aspect-ratio CSS; whatever the ordinary
+    // responsive rules produce at that width.
+    async function boardBoxAt(width) {
+      await page.setViewportSize({ width, height: TALL_ENOUGH });
       await waitForLogo();
-      await page.waitForTimeout(200); // let layout/fonts settle post-resize
-      await page.screenshot({ path: outPath, clip: { x: 0, y: 0, width: w, height: h } });
+      await page.waitForTimeout(150); // let layout/fonts settle post-resize
+      return page.locator('.eu-board').boundingBox();
     }
 
-    // --- 1:1 ---
-    const oneToOnePath = path.join(args.out, `${monday}-1x1.png`);
-    await captureViewport(1200, 1200, oneToOnePath);
+    // Scan SCAN_WIDTHS and return the width whose natural aspect ratio
+    // (rendered width / rendered height) is closest to targetRatio.
+    async function findBestWidth(targetRatio) {
+      let best = null;
+      for (const w of SCAN_WIDTHS) {
+        const box = await boardBoxAt(w);
+        if (!box || !box.height) continue;
+        const ratio = box.width / box.height;
+        const diff = Math.abs(ratio - targetRatio);
+        if (!best || diff < best.diff) best = { width: w, ratio, diff, box };
+      }
+      return best;
+    }
 
-    // --- 16:9 ---
-    const sixteenNinePath = path.join(args.out, `${monday}-16x9.png`);
-    await captureViewport(1920, 1080, sixteenNinePath);
+    // Capture .eu-board's natural rendering at the given width, then fit
+    // (minimal center-crop) to the exact target pixel dimensions.
+    async function captureBoardFit(width, targetW, targetH, outPath) {
+      await page.setViewportSize({ width, height: TALL_ENOUGH });
+      await waitForLogo();
+      await page.waitForTimeout(150);
+      const buf = await page.locator('.eu-board').screenshot();
+      await sharp(buf)
+        .resize(targetW, targetH, { fit: 'cover', position: 'top' })
+        .png()
+        .toFile(outPath);
+    }
+
+    async function captureDesktopAndSquare(outPrefix) {
+      const desktop = await findBestWidth(16 / 9);
+      await captureBoardFit(desktop.width, 1920, 1080, `${outPrefix}-16x9.png`);
+      const square = await findBestWidth(1);
+      await captureBoardFit(square.width, 1200, 1200, `${outPrefix}-1x1.png`);
+      return {
+        sixteenNine: { path: `${outPrefix}-16x9.png`, atWidth: desktop.width, naturalRatio: +desktop.ratio.toFixed(3) },
+        oneToOne: { path: `${outPrefix}-1x1.png`, atWidth: square.width, naturalRatio: +square.ratio.toFixed(3) },
+      };
+    }
+
+    // --- current week ---
+    await loadBoard();
+    const monday = mondayOf(args.date);
+    const current = await captureDesktopAndSquare(path.join(args.out, monday));
 
     // --- responsive sanity sweep (desktop -> mobile), same board-mode page ---
     const overflowWarnings = [];
     for (const w of SWEEP_WIDTHS) {
-      const h = Math.round(w * (w >= 1000 ? 9 / 16 : 1)); // widescreen-ish above 1000px, square-ish below
+      const h = Math.round(w * (w >= 1000 ? 9 / 16 : 1));
       await page.setViewportSize({ width: w, height: h });
       await page.waitForTimeout(80);
       const overflowing = await page.evaluate(() => {
@@ -154,7 +195,7 @@ async function main() {
       if (overflowing) overflowWarnings.push(w);
     }
 
-    // --- optional: one 1:1 square per upcoming weekly theme (--weeks N) ---
+    // --- optional: one 16:9 + 1:1 pair per upcoming weekly theme (--weeks N) ---
     const weekCaptures = [];
     if (args.weeks > 0) {
       let themes = [];
@@ -171,28 +212,20 @@ async function main() {
         // board-background week-of-month rotation — pick this week's
         // events/art instead of whatever week it really is right now.
         await page.clock.setFixedTime(new Date(`${theme.start}T12:00:00Z`));
-        await page.goto(`${base}/index.html`, { waitUntil: 'networkidle' });
-        await page.evaluate(() => document.documentElement.classList.add('board-mode'));
-        await page.evaluate(() => document.getElementById('gz-veil')?.remove());
-        await page.waitForFunction(() => {
-          const list = document.getElementById('eu-list');
-          return !!list && list.children.length > 0;
-        }, { timeout: 10000 });
-        await page.waitForTimeout(300);
-        const weekPath = path.join(args.out, `week${i + 1}-${theme.start}-1x1.png`);
-        await captureViewport(1200, 1200, weekPath);
-        weekCaptures.push({ week: i + 1, weekStart: theme.start, weekEnd: theme.end, theme: theme.theme, path: weekPath });
+        await loadBoard();
+        const outPrefix = path.join(args.out, `week${i + 1}-${theme.start}`);
+        const result = await captureDesktopAndSquare(outPrefix);
+        weekCaptures.push({ week: i + 1, weekStart: theme.start, weekEnd: theme.end, theme: theme.theme, ...result });
       }
     }
 
     console.log(JSON.stringify({
       ok: true,
       monday,
-      oneToOne: oneToOnePath,
-      sixteenNine: sixteenNinePath,
+      current,
       overflowWarnings,
       weekCaptures,
-    }));
+    }, null, 2));
   } finally {
     await browser.close();
     server.close();

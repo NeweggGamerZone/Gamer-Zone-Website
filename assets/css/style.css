@@ -730,11 +730,18 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
   .eu-eyebrow-title{font-size:clamp(.95rem,5vw,1.3rem);white-space:normal}
 }
 
-/* ---- board-only render mode: isolates just the calendar block, full-bleed to the
-   viewport, for clean 1200x1200 / 1920x1080 screenshot capture. The aspect-ratio
-   tuning below only applies here, where the board *is* the viewport exactly —
-   it's intentionally not used for normal responsive browsing above. */
-html.board-mode{overflow:hidden}
+/* ---- board-only render mode: isolates just the calendar block, full-bleed
+   to the viewport width, for clean social screenshot capture. Board-mode
+   does isolation ONLY — hide the surrounding chrome and let .eu-board span
+   the full viewport width — it never forces a height or an aspect ratio.
+   The board's actual height (and therefore its width:height ratio at any
+   given viewport width) is always whatever the ordinary width-based
+   responsive rules above (900px/640px/400px) naturally produce, exactly
+   like resizing a real browser window. The capture script finds the width
+   that lands closest to 16:9 (desktop) or 1:1 (mobile) by measuring the
+   real rendered board at a range of widths — nothing here fakes either
+   ratio directly. */
+html.board-mode{overflow:visible}
 html.board-mode .site-header,
 html.board-mode .site-footer,
 html.board-mode .hero,
@@ -751,13 +758,12 @@ html.board-mode .tech-scan,
    flow (used for in-page navigation/scannability) isn't part of the board
    graphic itself — the board has its own "Gamer Zone Weekly Lineup"
    masthead inside .eu-top. Left visible, it renders at the very top-left
-   of the exported screenshot, above/outside the intended board art, and
-   pushes .eu-board's 100vh down past the clipped capture area. Hide it in
-   board-mode so the capture is only ever the board itself. */
+   of the exported screenshot, above/outside the intended board art. Hide
+   it in board-mode so the capture is only ever the board itself. */
 html.board-mode section.eu-section>h2{display:none}
 html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
-html.board-mode .eu-board{margin:0;width:100vw;height:100vh;min-height:100vh;padding:clamp(1.6rem,5vw,4.5rem)}
+html.board-mode .eu-board{margin:0;width:100vw;padding:clamp(1.6rem,5vw,4.5rem)}
 html.board-mode .reveal{opacity:1;transform:none}
 /* Brand mark at the top of the Weekly Lineup board — visible on the live
    page now too (not just the board-mode screenshot export). align-self
@@ -768,23 +774,12 @@ html.board-mode .reveal{opacity:1;transform:none}
    section's top edge instead of sitting at the padding's full depth. */
 .board-logo{display:block;align-self:center;height:clamp(45px,9vw,75px);width:auto;margin:clamp(-1.6rem,-3.2vw,-.9rem) 0 clamp(1rem,3vw,1.6rem)}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
-   and lets .eu-board fill the export canvas, but every size/spacing
-   value inside the board (logo, type scale, row gaps) is intentionally
-   left at the exact same rules used for normal in-page browsing above —
-   so a 1200x1200 or 1920x1080 export always matches what a visitor
-   actually sees on the live home/events page, just cropped to fill the
-   frame instead of sitting inline in the page. Don't reintroduce
-   export-only size bumps here without a reason tied to the isolation
-   itself (e.g. preventing a wrap that only happens at these exact
-   pixel widths) — see git history for the previous "~25% bigger for
-   social" tuning this replaced. */
-@media (max-aspect-ratio: 6/5){
-  /* Near-square export: nothing to override — the masthead title still
-     fits on one line at 1200px with the normal-browsing type scale. */
-}
-@media (min-aspect-ratio: 3/2){
-  /* Wide export: prevent the masthead title from wrapping — there's
-     ample horizontal room at 1920px wide that a real narrow browser
-     window never has, so normal browsing never needed this rule. */
-  html.board-mode .eu-eyebrow-title{white-space:nowrap}
-}
+   and lets .eu-board span the full viewport width, but every size/spacing
+   value inside the board (logo, type scale, row gaps) — and its overall
+   height — is left at exactly the same rules used for normal in-page
+   browsing above. There is no board-mode-only aspect-ratio CSS: the
+   board's width:height ratio at any viewport width is whatever the
+   ordinary 900px/640px/400px width breakpoints naturally produce, same
+   as resizing a real browser window. The capture script picks whichever
+   width lands closest to the target ratio (16:9 for desktop, 1:1 for
+   mobile) instead of forcing either shape here. */
