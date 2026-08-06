@@ -762,8 +762,11 @@ html.board-mode .reveal{opacity:1;transform:none}
 /* Brand mark at the top of the Weekly Lineup board — visible on the live
    page now too (not just the board-mode screenshot export). align-self
    overrides .eu-board's flex-column stretch so the logo keeps its own
-   aspect ratio (height set, width:auto) instead of stretching full-width. */
-.board-logo{display:block;align-self:center;height:clamp(30px,6vw,50px);width:auto;margin:0 0 clamp(1rem,3vw,1.6rem)}
+   aspect ratio (height set, width:auto) instead of stretching full-width.
+   Sized 50% larger than the original mark, with a negative top margin
+   that pulls it up into .eu-board's own top padding — closer to the
+   section's top edge instead of sitting at the padding's full depth. */
+.board-logo{display:block;align-self:center;height:clamp(45px,9vw,75px);width:auto;margin:clamp(-1.6rem,-3.2vw,-.9rem) 0 clamp(1rem,3vw,1.6rem)}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
    and lets .eu-board fill the export canvas, but every size/spacing
    value inside the board (logo, type scale, row gaps) is intentionally
