@@ -109,18 +109,6 @@
       "accent": "#7ED321"
     },
     {
-      "id": "xp-fortnite-tournament-2026-08-07",
-      "title": "XP League Fortnite Tournament",
-      "subtitle": "Compete, win, and prove your build is better.",
-      "date": "2026-08-07",
-      "time": "4:00 PM – 7:00 PM",
-      "type": "tournament",
-      "blurb": "Bracket play with coached warm-up sets and live commentary. Walk-ins welcome — winner takes a $50 Newegg gift card.",
-      "featured": true,
-      "reservation": false,
-      "accent": "#FF2E97"
-    },
-    {
       "id": "closed-intel-gamer-days-setup-2026-08-11",
       "title": "Closed — Private Event",
       "date": "2026-08-11",
@@ -141,6 +129,18 @@
       "reservation": false
     },
     {
+      "id": "xp-fortnite-tournament-2026-08-14",
+      "title": "XP League Fortnite Tournament",
+      "subtitle": "Compete, win, and prove your build is better.",
+      "date": "2026-08-14",
+      "time": "4:00 PM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "Bracket play with coached warm-up sets and live commentary. Walk-ins welcome — winner takes a $50 Newegg gift card.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
+    },
+    {
       "id": "xp-fortnite-training-2026-08-19",
       "title": "XP League: Fortnite Training",
       "subtitle": "Train with the Pros from XP League!",
@@ -153,18 +153,6 @@
       "accent": "#7ED321"
     },
     {
-      "id": "xp-fortnite-tournament-2026-08-21",
-      "title": "XP League Fortnite Tournament",
-      "subtitle": "Compete, win, and prove your build is better.",
-      "date": "2026-08-21",
-      "time": "4:00 PM – 7:00 PM",
-      "type": "tournament",
-      "blurb": "Second tournament of the cadence — bracket play, coached warm-up sets. Winner takes a $50 Newegg gift card.",
-      "featured": true,
-      "reservation": false,
-      "accent": "#FF2E97"
-    },
-    {
       "id": "gamer-zone-anniversary-2026-08-22",
       "title": "Newegg Gamer Zone Anniversary",
       "subtitle": "Free play and prizes",
@@ -175,6 +163,18 @@
       "featured": true,
       "reservation": false,
       "accent": "#FFC400"
+    },
+    {
+      "id": "xp-fortnite-tournament-2026-08-28",
+      "title": "XP League Fortnite Tournament",
+      "subtitle": "Compete, win, and prove your build is better.",
+      "date": "2026-08-28",
+      "time": "4:00 PM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "Second tournament of the cadence — bracket play, coached warm-up sets. Winner takes a $50 Newegg gift card.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
     }
   ],
   "weeklyThemes": [
