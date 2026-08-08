@@ -15,7 +15,7 @@ function mondayOf(dateISO) {
   return d.toISOString().slice(0, 10);
 }
 
-const TYPE_LABEL = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor Event', edu: 'Training / EDU', community: 'Community', major: 'Major Event' };
+const TYPE_LABEL = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major' };
 const TYPE_ICON = { 'theme-night': 'gamepad', tournament: 'trophy', vendor: 'chip', edu: 'grad', community: 'users', major: 'medal' };
 // Same bucket-to-color mapping the calendar uses (see calendar.js TYPE_COLOR),
 // so an event's tag and accent bar always match its color on the calendar.

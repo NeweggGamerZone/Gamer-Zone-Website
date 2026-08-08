@@ -76,42 +76,42 @@
     <p class="dim">A 2,300 sq. ft. gaming and content-creation space inside Newegg HQ in Diamond Bar &mdash; built for free play, esports, streaming, and hands-on tech education. Tap a zone below to see what's inside.</p>
     <div class="zone-accordion" style="margin-top:1rem">
       <details class="zone-item">
-        <summary><i data-ic="pc"></i> PC Gaming Zone</summary>
+        <summary>PC Gaming Zone</summary>
         <div class="zone-body">
           <img class="calendar-img zone-img" src="assets/calendar/BGAssets/dailyplay-bg.jpg" alt="PC Gaming Zone at Newegg Gamer Zone" loading="lazy">
           <p class="dim">25+ prebuilt gaming PCs with Intel and AMD Ryzen processors, NVIDIA GeForce RTX and AMD Radeon graphics, and pro-grade peripherals, webcams, and Stream Decks &mdash; all set up with CORSAIR gaming chairs and COUGAR desks.</p>
         </div>
       </details>
       <details class="zone-item">
-        <summary><i data-ic="wheel"></i> Racing &amp; Immersive Zone</summary>
+        <summary>Racing &amp; Immersive Zone</summary>
         <div class="zone-body">
           <img class="calendar-img zone-img" src="assets/calendar/BGAssets/tournament-major-bg.jpg" alt="Racing and immersive zone at Newegg Gamer Zone" loading="lazy">
           <p class="dim">Triple-monitor racing rigs with force-feedback wheels and pedals from Fanatec, MOZA, and Thermaltake, plus a semi-enclosed Cooler Master ORB X pod for a fully wrapped-in driving experience.</p>
         </div>
       </details>
       <details class="zone-item">
-        <summary><i data-ic="vr"></i> VR &amp; Mixed Reality Zone</summary>
+        <summary>VR &amp; Mixed Reality Zone</summary>
         <div class="zone-body">
           <img class="calendar-img zone-img" src="assets/calendar/BGAssets/vr-station-bg.jpg" alt="VR and mixed reality zone at Newegg Gamer Zone" loading="lazy">
           <p class="dim">Meta Quest VR paired with the Virtuix Omni One treadmill for full 360&deg; motion tracking &mdash; walk, crouch, and jump right in the game. A favorite for first-timers and livestream demos alike.</p>
         </div>
       </details>
       <details class="zone-item">
-        <summary><i data-ic="gamepad"></i> Console Gaming Zone</summary>
+        <summary>Console Gaming Zone</summary>
         <div class="zone-body">
           <img class="calendar-img zone-img" src="assets/calendar/BGAssets/console-lounge-bg.jpg" alt="Console gaming zone at Newegg Gamer Zone" loading="lazy">
           <p class="dim">Xbox, Nintendo Switch 2, PlayStation 5, and a retro games emulator, ready for couch co-op, classic showcases, and casual multiplayer nights.</p>
         </div>
       </details>
       <details class="zone-item">
-        <summary><i data-ic="chip"></i> The Latest Gaming Technology</summary>
+        <summary>The Latest Gaming Technology</summary>
         <div class="zone-body">
           <img class="calendar-img zone-img" src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="The latest gaming technology on display at Newegg Gamer Zone" loading="lazy">
           <p class="dim">Hands-on with the newest gear before it hits shelves &mdash; from motion-simulator racing pods to the latest GPUs, headsets, and peripherals from our partner brands.</p>
         </div>
       </details>
       <details class="zone-item">
-        <summary><i data-ic="twitch"></i> Broadcast</summary>
+        <summary>Broadcast</summary>
         <div class="zone-body">
           <img class="calendar-img zone-img" src="assets/calendar/BGAssets/broadcast-bg.jpg" alt="Broadcast setup at Newegg Gamer Zone" loading="lazy">
           <p class="dim">A dedicated setup for livestreaming, tournaments, and shoutcasting &mdash; built to bring the action to viewers watching from home.</p>
@@ -123,6 +123,7 @@
   <section class="reveal">
     <h2>Top visitors this month</h2>
     <p class="dim">Our most dedicated regulars. Rack up hours at the Zone and climb the board.</p>
+    <p class="dim" style="font-size:.85rem;margin-top:.3rem">Zone Points = (hours played &times; 10) + (avg. hours per session &times; 10) + (referrals &times; 100).</p>
     <div id="home-leaderboard" style="margin-top:1rem"></div>
   </section>
 
@@ -130,16 +131,16 @@
     <h2>Plan your next visit</h2>
     <div class="grid cols-2">
       <div class="card tilt">
-        <i data-ic="run" data-lg></i><h3>Visiting today? Preregister now!</h3>
+        <i data-ic="run" data-lg></i><h3>Preregister Now</h3>
         <p class="dim" data-verkada-note>Preregister below for a faster check-in.</p>
-        <p style="margin-top:.7rem"><a class="btn" data-verkada href="#">Preregister now</a></p>
+        <p style="margin-top:.7rem"><a class="btn" data-verkada href="#">Preregister</a></p>
         <p class="visit-cta-note">Walk-ins always welcome. Reservation also available in the footer.</p>
       </div>
       <div class="card tilt">
-        <i data-ic="clock" data-lg></i><h3>Hours</h3>
+        <i data-ic="clock" data-lg></i><h3>Visit Us</h3>
         <p data-cfg="hours"></p>
-        <p class="dim" data-cfg="hoursNote"></p>
-        <p style="margin-top:.4rem"><a href="events.html">Check Events for closures</a></p>
+        <p style="margin-top:.4rem"><a data-cfg="phone" data-cfg-href-tel href="#"></a></p>
+        <p style="margin-top:.2rem"><a data-cfg-href="gamerZoneUrl" href="#">Newegg Gamer Zone</a></p>
       </div>
       <div class="card tilt">
         <i data-ic="pin" data-lg></i><h3>Location</h3>
@@ -147,19 +148,13 @@
         <p class="dim">Inside Newegg HQ. Free parking. Tap the address for directions.</p>
         <p style="margin-top:.5rem"><a data-cfg-href="googlePageUrl" href="#">Our Google page</a> &middot; <a data-cfg-href="yelpUrl" href="#">Reviews on Yelp</a></p>
       </div>
-      <div class="card tilt">
-        <i data-ic="chat" data-lg></i><h3>Contact</h3>
-        <p><a data-cfg="phone" data-cfg-href-tel href="#"></a></p>
-        <p><a data-cfg="email" href="#" data-mailto></a></p>
-        <p class="dim" style="margin-top:.5rem">Minors under 18 welcome &mdash; must be accompanied by an adult (18+) at all times. ID may be requested.</p>
-      </div>
     </div>
   </section>
 
   <section class="reveal">
-    <h2>Become a Gamer Zone Ambassador</h2>
+    <h2>BECOME A GAMER ZONE AMBASSADOR</h2>
     <div class="card">
-      <p>Community leaders, esports teams, and event organizers: bring your community to the Zone. Host recurring events with us &mdash; and unlock deeper perks (gift card &amp; product prizing, catered meals, co-branded promotion) the more events you host.</p>
+      <p>Community leaders, esports teams, event organizers, and influencers &mdash; we're giving you the power to bring your community to the Zone! Host recurring events with us and unlock perks like (gift card &amp; product prizing, catered meals, co-branded promotion) the more events you host.</p>
       <p style="margin-top:.9rem"><a class="btn" href="ambassador.html">Explore the Ambassador program</a></p>
     </div>
   </section>

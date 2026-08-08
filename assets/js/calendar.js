@@ -18,7 +18,7 @@
   const byDate = {};
   (data.events || []).forEach(e => { byDate[e.date] = e; });
 
-  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor Event', edu: 'Training / EDU', community: 'Community', major: 'Major Event' };
+  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major' };
   // Color-code buckets: Closed=red, Free Play=blue, Theme Day=light blue,
   // EDU/Esports=green, Ambassador (vendor/community-hosted)=pink, Major/Tournament=orange.
   const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major' };
@@ -102,7 +102,7 @@
     } else {
       setCardBg(FREE_PLAY_BG);
       detail.innerHTML = `<span class="tag cal-free">Free Play</span>
-        <h3>${pretty(dt)}</h3>
+        <h3>FREE PLAY: ${pretty(dt)}</h3>
         <div class="cd-meta"><span class="cd-meta-item"><i data-ic="clock"></i>10am – 7pm</span></div>
         <p class="cd-blurb">Open 10am–7pm. Try the latest tech for free — walk in, or pre-register to skip the line at check-in.</p>
         ${preregBlock}`;

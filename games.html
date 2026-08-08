@@ -35,6 +35,23 @@
     <p class="lead">Everything on deck at the Zone &mdash; PC, VR, party, esports, and fighting titles. New adds drop regularly.</p>
   </section>
 
+  <section class="reveal" id="senet-chart-section">
+    <h2><i data-ic="chip"></i> Live at the Zone</h2>
+    <p class="dim">Top 10 games by hours played, pulled from SENET check-in activity &mdash; the chart below updates continuously.</p>
+    <div class="chip-row" id="senet-chart-range" style="margin-top:.8rem">
+      <span class="chip active" data-range="week">This Week</span>
+      <span class="chip" data-range="month">This Month</span>
+      <span class="chip" data-range="alltime">All Time</span>
+    </div>
+    <div class="senetdb-chart" style="margin-top:1rem">
+      <div class="senetdb-head">
+        <span class="senetdb-live"><span class="live-dot"></span>Live</span>
+        <span class="senetdb-updated" id="senet-updated">Updated just now</span>
+      </div>
+      <div class="senetdb-rows" id="senet-chart-rows"></div>
+    </div>
+  </section>
+
   <section class="reveal">
     <div class="chip-row" id="games-filters">
       <span class="chip active" data-mode="platform">By Device</span>
@@ -69,5 +86,6 @@
 </footer>
 <script src="assets/js/main.js?v=29"></script>
 <script src="assets/js/games.js?v=29"></script>
+<script src="assets/js/senet-chart.js?v=29"></script>
 </body>
 </html>
