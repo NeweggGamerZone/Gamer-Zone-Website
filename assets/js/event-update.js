@@ -89,18 +89,38 @@
     eyebrowDatesEl.textContent = dateRange.toUpperCase();
   }
 
+  // Optional per-week badge art (data.weeklyThemes[].icon) shown bottom-
+  // center of the board, above the address — e.g. a crown for a tournament
+  // week. Weeks without an icon field just show the address alone.
+  const boardIconEl = document.getElementById('eu-board-icon');
+  const boardIconImg = document.getElementById('eu-board-icon-img');
+  if (boardIconEl && boardIconImg) {
+    if (currentTheme && currentTheme.icon) {
+      boardIconImg.src = currentTheme.icon;
+      boardIconEl.hidden = false;
+    } else {
+      boardIconEl.hidden = true;
+      boardIconImg.removeAttribute('src');
+    }
+  }
+
   function row(ev, { closure = false } = {}) {
     const { mon, day } = monthDate(ev.date);
     const isMajor = !closure && (ev.type === 'major' || ev.featured);
+    // boardTitle is an optional shorter stand-in for this one spot only —
+    // the calendar, event detail card, etc. all keep reading ev.title as
+    // usual. Exists because the title column here now matches the date's
+    // (much larger) font size, so a long title needs a tighter variant to
+    // still fit on one line.
+    const name = closure ? ev.title : (ev.boardTitle || ev.title);
     return `<div class="eu-row${isMajor ? ' eu-major' : ''}${closure ? ' eu-closure' : ''}">
       <div class="eu-date-wrap">
         <span class="eu-date">${mon.toUpperCase()} ${day}</span>
         ${isMajor ? '<span class="eu-major-mark" aria-hidden="true">&#9733;</span>' : ''}
       </div>
       <div class="eu-info">
-        <div class="eu-name">${closure ? 'Closed — ' : ''}${GZ.esc(ev.title.replace(/^Closed\s*[—-]\s*/, ''))}</div>
+        <div class="eu-name">${closure ? 'Closed — ' : ''}${GZ.esc(name.replace(/^Closed\s*[—-]\s*/, ''))}</div>
         <div class="eu-meta">${ev.time ? GZ.esc(ev.time) : ''}</div>
-        ${isMajor && ev.boardDesc ? `<div class="eu-desc">${GZ.esc(ev.boardDesc)}</div>` : ''}
       </div>
     </div>`;
   }

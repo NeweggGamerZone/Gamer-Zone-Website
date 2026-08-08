@@ -280,7 +280,6 @@ details.archive-month .grid { margin-top: 1rem; }
 .wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; }
 
 .zone-item { background: var(--bg-2); border: 1px solid var(--line); padding: .9rem 1.1rem; margin-bottom: .7rem; transition: border-color .2s, box-shadow .2s, background .2s; }
-.zone-item { border-color: var(--ne-orange); background: var(--bg-3); box-shadow: 0 0 18px rgba(250,157,40,.28), inset 0 0 16px rgba(250,157,40,.08); }
 .zone-item summary { cursor: default; font-family: var(--head); font-weight: 700; text-transform: uppercase; font-size: .88rem; letter-spacing: .04em; display: flex; align-items: center; gap: .5rem; list-style: none; }
 .zone-item summary::-webkit-details-marker { display: none; }
 .zone-item summary::marker { content: ""; }
@@ -743,6 +742,17 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    edge — not the location row, which stays at its own natural size. */
 .eu-top>.eu-eyebrow{flex:1}
 .eu-location-row{margin-top:clamp(1rem,3vw,1.6rem);padding-top:clamp(.8rem,2.5vw,1.2rem)}
+/* Optional per-week badge art, centered above the address row. Hidden
+   (via the [hidden] attribute, set in event-update.js) on weeks with no
+   icon field, so the address alone sits in its spot with no empty gap. */
+.eu-board-icon{display:flex;justify-content:center;padding-bottom:clamp(.8rem,2.5vw,1.2rem)}
+.eu-board-icon img{height:clamp(64px,10vw,104px);width:auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.55))}
+/* Board-mode only: pin the icon+address group to the very bottom of the
+   capture instead of the whole board's content centering as one block —
+   .eu-board's justify-content:center still governs everything above this
+   group. Scoped to board-mode so normal in-page browsing keeps the
+   existing centered look. */
+html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-eyebrow .ic{width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);color:var(--ne-orange);flex:none}
 /* flex:1 so the title row spans all space after the icon — the date
    range (inside eu-eyebrow-titlerow) then sits flush against the true

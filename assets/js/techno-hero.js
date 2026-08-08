@@ -163,7 +163,6 @@
   // mid-jump). Keeping the arc short also keeps the timing snappy.
   const GRAVITY = 1500, JUMP_V = -390, CHAR_R = 10;
   const HAZARD_SPEED = 230;
-  const HAZARD_SHAPES = ['square', 'triangle', 'star', 'pentagon', 'hexagon'];
 
   if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
 
@@ -191,8 +190,10 @@
   }
 
   function spawnHazard() {
-    const shape = HAZARD_SHAPES[Math.floor(Math.random() * HAZARD_SHAPES.length)];
-    hazards.push({ z: Z_FAR, shape, resolved: false });
+    // No shape of its own — it's whichever shape the tunnel is currently
+    // showing (see drawHazard), so it reads as one of the real background
+    // rings that happens to be red, not a foreign game object.
+    hazards.push({ z: Z_FAR, resolved: false });
   }
 
   // The same project() used for every decorative ring point tells us
@@ -228,28 +229,33 @@
     if (flashT > 0) flashT = Math.max(0, flashT - dt);
   }
 
-  function drawHazard(hz, rot) {
-    const f = fadeFor(hz.z);
-    if (f <= 0.01) return;
-    const pts = RESAMPLED[hz.shape];
-    const n = pts.length;
-    const proj = new Array(n);
-    for (let i = 0; i < n; i++) proj[i] = project(pts[i][0] * A, pts[i][1] * A, hz.z, rot);
+  // A hazard is drawn with the exact same drawRing() geometry/curve-smoothing
+  // as every decorative ring, using whatever shape the tunnel currently
+  // shows (morphedPoints/morphStateAt — the same call the decorative loop
+  // makes) — the only difference is color. That's what makes it read as
+  // "one of the background's own shapes, just red" instead of a separate
+  // game object rendered on top of the scene.
+  function drawHazard(hz, rot, globalFade) {
+    const pts = morphedPoints(morphStateAt(elapsed));
+    drawRing(hz, pts, rot, globalFade, 0, f => `rgba(255,53,53,${Math.min(1, f * 1.7)})`);
+  }
+
+  // A fixed target line at the character's spot — always visible while the
+  // game is active, whether or not a hazard is nearby — so it's obvious
+  // exactly where an approaching red shape needs to be jumped, rather than
+  // the player having to guess the timing from the shape's motion alone.
+  function drawHitLine() {
+    if (!gameActive) return;
+    const w = CHAR_R * 6.5;
+    ctx.save();
+    ctx.setLineDash([5, 6]);
+    ctx.strokeStyle = 'rgba(255,255,255,.4)';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    let mid = { x: (proj[0].x + proj[1].x) / 2, y: (proj[0].y + proj[1].y) / 2 };
-    ctx.moveTo(mid.x, mid.y);
-    for (let i = 1; i <= n; i++) {
-      const cur = proj[i % n];
-      const next = proj[(i + 1) % n];
-      const nextMid = { x: (cur.x + next.x) / 2, y: (cur.y + next.y) / 2 };
-      ctx.quadraticCurveTo(cur.x, cur.y, nextMid.x, nextMid.y);
-    }
-    ctx.closePath();
-    ctx.fillStyle = `rgba(255,59,59,${0.16 * f})`;
-    ctx.fill();
-    ctx.strokeStyle = `rgba(255,64,64,${0.9 * f})`;
-    ctx.lineWidth = 2.4;
+    ctx.moveTo(anchorX - w, anchorY);
+    ctx.lineTo(anchorX + w, anchorY);
     ctx.stroke();
+    ctx.restore();
   }
 
   function drawCharacter() {
@@ -352,11 +358,11 @@
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   }
 
-  function drawRing(ring, unitPts, rot, globalFade, hue) {
+  function drawRing(ring, unitPts, rot, globalFade, hue, colorFn) {
     const f = fadeFor(ring.z) * globalFade;
     if (f <= 0.01) return;
-    ctx.strokeStyle = `hsla(${hue}, 72%, 62%, ${0.36 * f})`;
-    ctx.lineWidth = 1.3;
+    ctx.strokeStyle = colorFn ? colorFn(f) : `hsla(${hue}, 72%, 62%, ${0.36 * f})`;
+    ctx.lineWidth = colorFn ? 1.6 : 1.3;
     const n = unitPts.length;
     const pts = new Array(n);
     for (let i = 0; i < n; i++) {
@@ -402,7 +408,8 @@
 
     if (gameOn) {
       updateGame(dt, rot);
-      for (const hz of hazards) drawHazard(hz, rot);
+      for (const hz of hazards) drawHazard(hz, rot, globalFade);
+      drawHitLine();
       drawCharacter();
     }
 

@@ -143,8 +143,8 @@
     {
       "id": "gamer-zone-anniversary-2026-08-22",
       "title": "Gamer Zone Anniversary",
+      "boardTitle": "GZ Anniversary",
       "subtitle": "Free play and prizes",
-      "boardDesc": "Free Peripheral Prizes, Free Food, and Free Play All Day!",
       "date": "2026-08-22",
       "time": "1:00 PM – 7:00 PM",
       "type": "major",
@@ -191,8 +191,8 @@
   "weeklyThemes": [
     { "start": "2026-07-28", "end": "2026-08-01", "theme": "Eastern Harmony: Gaming for Good", "desc": "A charity Street Fighter tournament supporting mental health awareness." },
     { "start": "2026-08-04", "end": "2026-08-08", "theme": "Marvel Week", "desc": "Marvel Rivals, Marvel Vs Capcom, and Marvel Tokon — Always Free to Play in the Gamer Zone." },
-    { "start": "2026-08-11", "end": "2026-08-15", "theme": "Riot Games Week", "desc": "Bring friends to play League of Legends, Valorant, and TFT." },
-    { "start": "2026-08-18", "end": "2026-08-22", "theme": "Co-op Games Week", "desc": "Helldivers 2, Overcooked!, Jackbox Party, RV There Yet, Mecha Chameleon, and more!" },
+    { "start": "2026-08-11", "end": "2026-08-15", "theme": "Riot Games Week", "desc": "Bring friends to play League of Legends, Valorant, and TFT.", "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png" },
+    { "start": "2026-08-18", "end": "2026-08-22", "theme": "Co-op Games Week", "desc": "Helldivers 2, Overcooked!, Jackbox Party, RV There Yet, Mecha Chameleon, and more!", "icon": "assets/calendar/LineupAssets/GZAnniversaryAsset.png" },
     { "start": "2026-08-25", "end": "2026-08-29", "theme": "Fighting Games Week", "desc": "Street Fighter bracket play and fighting-game showdowns all week." }
   ]
 }
