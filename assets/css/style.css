@@ -391,13 +391,17 @@ body.home-page { background: transparent; }
 @keyframes hero-rise { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .hero-in { animation: none; opacity: 1; transform: none; } }
 
-/* ---- homepage hero: always-on background runner game, fixed beneath the
-   "Plan your visit" button. Hidden/paused (not destroyed) whenever the hero
-   scrolls out of view, so it picks back up mid-run when scrolled back. See
-   assets/js/hero-runner.js for the game loop itself. */
-.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 460px; margin: 1.4rem auto 0; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+/* ---- homepage hero: always-on runner game. The character, its shadow, and
+   the red hazard shapes are all drawn directly into the same full-page
+   #techno-canvas tunnel (see assets/js/techno-hero.js) — not a separate
+   canvas — so the obstacles ARE the background's own morphing shapes,
+   just recolored, rather than a disconnected mini-game bolted on top. This
+   div only reserves screen space (the padding-top is where the character
+   renders) and holds the score readout + the tap-to-jump hit zone. Hidden/
+   paused (not destroyed) whenever the hero scrolls out of view, so it
+   picks back up mid-run when scrolled back. */
+.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 460px; margin: 0 auto; padding-top: 80px; opacity: 0; transition: opacity .6s ease; pointer-events: none; cursor: pointer; }
 .hero-runner.is-active { opacity: 1; pointer-events: auto; }
-.hero-runner-canvas { display: block; width: 100%; height: 84px; cursor: pointer; }
 .hero-runner-scores { display: flex; justify-content: center; gap: 1.4rem; margin-top: .35rem; font-family: var(--head); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
 .hero-runner-scores b { color: var(--ink); font-size: .82rem; margin-left: .35rem; letter-spacing: 0; }
 .hero-runner-hint { text-align: center; margin-top: .3rem; font-size: .68rem; color: var(--ink-dim); opacity: .75; letter-spacing: .04em; }
@@ -716,11 +720,12 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 
 /* ===== v10: Event Update — blurred-bg schedule board ===== */
 /* Type scale: everything below derives from --eu-date-size so the ratios always
-   hold — event title = 70% of date (30% smaller), subtagline = 50% of title —
+   hold — event title now matches the date exactly (same size + weight, so
+   the two columns read as one visual row), subtagline = 50% of title —
    with a hard 14px floor on every text size on this board, per spec. */
 .eu-board{
   --eu-date-size: clamp(1.5rem, 4.6vw, 3.2rem);
-  --eu-name-size: max(14px, calc(var(--eu-date-size) * 0.70));
+  --eu-name-size: var(--eu-date-size);
   --eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.50));
   /* Shared with .eu-row's own padding below, and reused as .eu-top's
      margin-bottom, so the gap above the first event row (divider ->
@@ -788,9 +793,9 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 .eu-major .eu-date{color:var(--cal-major)}
 .eu-major-mark{flex:none;font-size:clamp(18px,3.2vw,30px);line-height:1;color:var(--ne-orange)}
 .eu-info{text-align:right;min-width:0}
-/* event title: only 30% smaller than the date (was much smaller before);
-   same font-weight as the date (800) so the two read as equally bold. */
-.eu-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1.15;color:var(--ink)}
+/* event title: same size, weight, and line-height as the date so the two
+   columns' text tops land on the exact same baseline across the row. */
+.eu-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1;color:var(--ink)}
 /* subtagline: exactly 50% of the event title, floored at 14px */
 .eu-meta{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
 .eu-major .eu-name{color:var(--cal-major)}

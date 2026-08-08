@@ -1,16 +1,26 @@
-/* Homepage-only fixed background: a purely decorative, non-interactive
-   perspective tunnel — the camera flies forever toward a vanishing point
-   while a series of ring outlines travel from far away toward the viewer,
-   same as the site's original grid-tunnel look. The difference: the ring
-   shape itself smoothly morphs through a fixed sequence (square ->
-   triangle -> star -> pentagon -> hexagon -> circle) — holding each shape
-   for a beat, then blending into the next one over a couple of seconds,
-   rather than ever cutting instantly from one shape to another. Every ring,
-   regardless of depth, runs the exact same hold/morph cycle in lockstep
-   (no per-ring offset) — the whole tunnel resolves as one shape at any
-   given moment and the entire tunnel transitions to the next shape
+/* Homepage-only fixed background: a perspective tunnel — the camera flies
+   forever toward a vanishing point while a series of ring outlines travel
+   from far away toward the viewer, same as the site's original grid-tunnel
+   look. The ring shape itself smoothly morphs through a fixed sequence
+   (square -> triangle -> star -> pentagon -> hexagon -> circle) — holding
+   each shape for a beat, then blending into the next one over a couple of
+   seconds, rather than ever cutting instantly from one shape to another.
+   Every ring, regardless of depth, runs the exact same hold/morph cycle in
+   lockstep (no per-ring offset) — the whole tunnel resolves as one shape
+   at any given moment and the entire tunnel transitions to the next shape
    together, a single seamless line-transition rather than a staggered
-   ripple. No score, no input, no game logic — purely decorative. Pure
+   ripple.
+
+   Hero Runner game (index.html only, when the #hero-runner markup is
+   present): a single extra shape ("hazard", drawn in red using the exact
+   same shape/projection code as the decorative tunnel) streams toward the
+   viewer alongside the normal rings. A character sits at a fixed screen
+   position under the hero's "Plan your visit" button and must jump the
+   instant a hazard's outline reaches it — same single-button jump-timing
+   feel as Chrome's dino game, just staged inside this tunnel instead of a
+   separate strip. Missing just resets the current score to zero and the
+   run keeps going; a best score persists via localStorage. Everything
+   pauses (without resetting) whenever the hero scrolls out of view. Pure
    canvas math, no images. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
@@ -127,6 +137,175 @@
   const RESAMPLED = {};
   SHAPES.forEach(t => { RESAMPLED[t] = resamplePerimeter(shapeVertices(t), MORPH_N); });
 
+  // ------------------------------------------------------------------
+  // Hero Runner game state. Only active when this page has the runner
+  // markup (index.html's hero) — everywhere else techno-hero.js behaves
+  // exactly as the plain decorative tunnel described above.
+  // ------------------------------------------------------------------
+  const runnerWrap = document.getElementById('hero-runner');
+  const scoreEl = document.getElementById('hr-score-val');
+  const bestEl = document.getElementById('hr-best-val');
+  const gameOn = !!(runnerWrap && scoreEl && bestEl && !reduceMotion);
+
+  const HS_KEY = 'gzHeroRunnerBest';
+  function loadBest() { try { return parseInt(localStorage.getItem(HS_KEY), 10) || 0; } catch { return 0; } }
+  function saveBest(v) { try { localStorage.setItem(HS_KEY, String(v)); } catch { /* private mode etc — fine to skip */ } }
+
+  let score = 0, best = 0;
+  let gameActive = false; // true only while the hero is on screen
+  let anchorX = 0, anchorY = 0; // fixed screen spot the character stands at
+  let charY = 0, vy = 0, jumping = false, flashT = 0;
+  let hazards = [];
+  let spawnTimer = 1.1;
+  // Jump height is deliberately modest (~50px peak) — the character sits
+  // close under the button, and a big leap would fly up behind it (the
+  // button sits above this canvas layer and would hide the character
+  // mid-jump). Keeping the arc short also keeps the timing snappy.
+  const GRAVITY = 1500, JUMP_V = -390, CHAR_R = 10;
+  const HAZARD_SPEED = 230;
+  const HAZARD_SHAPES = ['square', 'triangle', 'star', 'pentagon', 'hexagon'];
+
+  if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
+
+  function updateAnchor() {
+    const r = runnerWrap.getBoundingClientRect();
+    anchorX = r.left + r.width / 2;
+    anchorY = r.top + 52;
+  }
+
+  function jump() {
+    if (!gameActive || jumping) return;
+    jumping = true; vy = JUMP_V;
+  }
+
+  function onMiss() {
+    score = 0; flashT = 0.3;
+    scoreEl.textContent = '0';
+  }
+  function onClear() {
+    score += 1;
+    best = Math.max(best, score);
+    scoreEl.textContent = String(score);
+    bestEl.textContent = String(best);
+    saveBest(best);
+  }
+
+  function spawnHazard() {
+    const shape = HAZARD_SHAPES[Math.floor(Math.random() * HAZARD_SHAPES.length)];
+    hazards.push({ z: Z_FAR, shape, resolved: false });
+  }
+
+  // The same project() used for every decorative ring point tells us
+  // exactly where a hazard's "straight down from center" edge lands on
+  // screen at its current depth — so the jump-timing trigger fires the
+  // instant the shape visually reaches the character, not at some
+  // unrelated fixed pixel line.
+  function hazardReachY(z, rot) { return project(0, A, z, rot).y; }
+
+  function updateGame(dt, rot) {
+    if (!gameActive) return;
+    updateAnchor();
+
+    if (jumping) {
+      vy += GRAVITY * dt;
+      charY += vy * dt;
+      if (charY >= 0) { charY = 0; vy = 0; jumping = false; }
+    }
+
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) { spawnHazard(); spawnTimer = 1.3 + Math.random() * 0.9; }
+
+    for (const hz of hazards) {
+      hz.z -= HAZARD_SPEED * dt;
+      if (!hz.resolved && hazardReachY(hz.z, rot) >= anchorY) {
+        hz.resolved = true;
+        const airborneEnough = -charY > CHAR_R * 2.6;
+        if (airborneEnough) onClear(); else onMiss();
+      }
+    }
+    hazards = hazards.filter(hz => hz.z > Z_NEAR - 40);
+
+    if (flashT > 0) flashT = Math.max(0, flashT - dt);
+  }
+
+  function drawHazard(hz, rot) {
+    const f = fadeFor(hz.z);
+    if (f <= 0.01) return;
+    const pts = RESAMPLED[hz.shape];
+    const n = pts.length;
+    const proj = new Array(n);
+    for (let i = 0; i < n; i++) proj[i] = project(pts[i][0] * A, pts[i][1] * A, hz.z, rot);
+    ctx.beginPath();
+    let mid = { x: (proj[0].x + proj[1].x) / 2, y: (proj[0].y + proj[1].y) / 2 };
+    ctx.moveTo(mid.x, mid.y);
+    for (let i = 1; i <= n; i++) {
+      const cur = proj[i % n];
+      const next = proj[(i + 1) % n];
+      const nextMid = { x: (cur.x + next.x) / 2, y: (cur.y + next.y) / 2 };
+      ctx.quadraticCurveTo(cur.x, cur.y, nextMid.x, nextMid.y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = `rgba(255,59,59,${0.16 * f})`;
+    ctx.fill();
+    ctx.strokeStyle = `rgba(255,64,64,${0.9 * f})`;
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+  }
+
+  function drawCharacter() {
+    if (!gameActive) return;
+    const bodyY = anchorY + charY; // charY goes negative while airborne
+
+    // Drop shadow: wide and solid when grounded, shrinks and fades as the
+    // character gets higher — the same landing-timing cue Run 3 uses. A
+    // dark fill alone disappears against this background, so it's paired
+    // with a faint light rim to read as a distinct ground-contact ellipse.
+    const liftT = Math.min(1, -charY / 46);
+    const shadowW = CHAR_R * (1.9 - 0.95 * liftT);
+    const shadowAlpha = 1 - 0.75 * liftT;
+    ctx.beginPath();
+    ctx.ellipse(anchorX, anchorY + 5, shadowW, shadowW * 0.34, 0, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(5,6,10,${0.55 * shadowAlpha})`;
+    ctx.fill();
+    ctx.strokeStyle = `rgba(166,174,188,${0.32 * shadowAlpha})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    if (flashT > 0) {
+      ctx.beginPath();
+      ctx.arc(anchorX, bodyY, CHAR_R * 2.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,59,59,${(flashT / 0.3) * 0.3})`;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(anchorX, bodyY, CHAR_R, 0, Math.PI * 2);
+    ctx.fillStyle = '#FA9D28';
+    ctx.fill();
+  }
+
+  function initGame() {
+    if (!gameOn) return;
+    updateAnchor();
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(entries => {
+        gameActive = entries[0].isIntersecting;
+        runnerWrap.classList.toggle('is-active', gameActive);
+        if (gameActive) updateAnchor();
+      }, { threshold: 0.4 });
+      io.observe(runnerWrap);
+    } else {
+      gameActive = true;
+      runnerWrap.classList.add('is-active');
+    }
+    document.addEventListener('keydown', e => {
+      if (!gameActive) return;
+      if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+    });
+    runnerWrap.addEventListener('pointerdown', jump);
+    window.addEventListener('resize', updateAnchor);
+  }
+
   function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
   // Where a ring at time t sits in the hold/morph cycle: which shape it's
@@ -220,6 +399,13 @@
       const pts = morphedPoints(morphStateAt(elapsed));
       drawRing(r, pts, rot, globalFade, (hue + i * 12) % 360);
     }
+
+    if (gameOn) {
+      updateGame(dt, rot);
+      for (const hz of hazards) drawHazard(hz, rot);
+      drawCharacter();
+    }
+
     raf = requestAnimationFrame(frame);
   }
 
@@ -231,6 +417,7 @@
 
   window.addEventListener('resize', size);
   size();
+  initGame();
 
   if (reduceMotion) {
     drawStatic();
