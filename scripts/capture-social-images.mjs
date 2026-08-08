@@ -7,21 +7,23 @@
  * Renders the live home page (index.html) itself with the `board-mode`
  * class applied. Board-mode does isolation ONLY (hides header/footer/hero,
  * lets .eu-board span the full viewport width) — it does not force a
- * height or an aspect ratio, and there is no board-mode-only breakpoint.
- * The board's rendered width:height ratio at any given viewport width is
- * simply whatever the site's ordinary responsive CSS (the 900px/640px/
- * 400px width breakpoints already used for normal browsing) produces —
- * exactly like resizing a real browser window.
+ * height or an aspect ratio.
  *
- * So instead of forcing a square/widescreen viewport, this script scans a
- * range of viewport widths, measures the real rendered .eu-board element
- * at each one, and picks whichever width's natural aspect ratio lands
- * closest to the target (16:9 for desktop, 1:1 for mobile/square). That
- * width's actual rendering — same fonts, same CSS, same layout a visitor
- * would see at that width — is what gets captured. The element screenshot
- * is then fit to the exact target pixel dimensions (social platforms need
- * exact sizes) with a minimal center-crop, since the width search already
- * gets the aspect ratio close before any resizing happens.
+ * FIXED capture widths, not a best-ratio search. An earlier version of
+ * this script scanned a range of viewport widths per week and picked
+ * whichever one's natural aspect ratio landed closest to the target —
+ * which meant every week could render at a different width, and since
+ * the board's type scale is clamp()-based (tied to viewport width), the
+ * fonts/logo/layout proportions visibly shifted from week to week. That
+ * read as "the design changed" even though nothing but the search result
+ * had. Fixed widths trade a little aspect-ratio precision (a small,
+ * consistent edge crop) for the thing that actually matters for a weekly
+ * social series: every post looks like the same template. The two widths
+ * below (FIXED_WIDTH_16X9, FIXED_WIDTH_1X1) were picked by checking that
+ * every real week's content (including the busiest ones with 2-3 Special
+ * Events rows) still fits within .eu-board's min-height at that width
+ * without a title getting clipped — see the git history for the scan
+ * that picked these numbers if content ever grows enough to need revisiting.
  *
  * Also does a quick responsive sanity sweep across a handful of
  * intermediate viewport widths (desktop -> mobile) and reports any
@@ -50,6 +52,11 @@ const MIME = {
   '.svg': 'image/svg+xml', '.gif': 'image/gif', '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
 };
+
+// Fixed capture widths — same every week, on purpose (see header comment).
+const FIXED_WIDTH_16X9 = 1150;
+const FIXED_WIDTH_1X1 = 660;
+const TALL_ENOUGH = 2400; // viewport height, generous so nothing ever clips during capture
 
 function serveStatic(root) {
   return http.createServer((req, res) => {
@@ -87,12 +94,7 @@ function parseArgs(argv) {
   return args;
 }
 
-// Desktop-to-mobile scan range. Wide enough steps to keep the search fast;
-// the site's real breakpoints (900/640/400px) all fall inside this range,
-// so the scan naturally samples both sides of every reflow.
-const SCAN_WIDTHS = [1920, 1680, 1440, 1280, 1150, 1024, 900, 834, 768, 700, 640, 580, 520, 460, 400, 360, 320];
 const SWEEP_WIDTHS = [1920, 1440, 1280, 1024, 834, 768, 430, 375, 320];
-const TALL_ENOUGH = 2400; // viewport height, generous so nothing ever clips during measurement/capture
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -129,98 +131,27 @@ async function main() {
       }, { timeout: 10000 });
     }
 
-    // Measure .eu-board's real rendered box at a given viewport width —
-    // no forced height, no aspect-ratio CSS; whatever the ordinary
-    // responsive rules produce at that width.
-    async function boardBoxAt(width) {
-      await page.setViewportSize({ width, height: TALL_ENOUGH });
-      await waitForLogo();
-      await page.waitForTimeout(150); // let layout/fonts settle post-resize
-      return page.locator('.eu-board').boundingBox();
-    }
-
-    // True if any event title (.eu-name) is wrapping to more than one line
-    // at the current viewport width — e.g. a long title like "XP League
-    // Fortnite Tournament" can wrap right above the 640px mobile-stack
-    // breakpoint, where the row layout still puts date+title side by side
-    // but hasn't got much width to spare. Checked at whatever width is
-    // already set (no extra viewport switch), so it's free to call inside
-    // the same scan loop that measures the board's aspect ratio.
-    async function anyNameWraps() {
-      return page.evaluate(() => {
-        return [...document.querySelectorAll('.eu-name')].some(el => {
-          const cs = getComputedStyle(el);
-          const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.3;
-          return el.getBoundingClientRect().height > lineHeight * 1.4;
-        });
-      });
-    }
-
-    // Scan SCAN_WIDTHS and return the width whose natural aspect ratio
-    // (rendered width / rendered height) is closest to targetRatio. When
-    // avoidWrap is set, widths where any event title wraps to a second
-    // line are skipped in favor of the closest-ratio width that keeps
-    // every title on one line — falling back to the plain closest-ratio
-    // pick only if every candidate wraps (e.g. a pathologically long title).
-    async function findBestWidth(targetRatio, { avoidWrap = false } = {}) {
-      let best = null;
-      let bestNoWrap = null;
-      let bestWraps = false;
-      for (const w of SCAN_WIDTHS) {
-        const box = await boardBoxAt(w);
-        if (!box || !box.height) continue;
-        const ratio = box.width / box.height;
-        const diff = Math.abs(ratio - targetRatio);
-        const wrapped = avoidWrap ? await anyNameWraps() : false;
-        const candidate = { width: w, ratio, diff, box };
-        if (!best || diff < best.diff) { best = candidate; bestWraps = wrapped; }
-        if (avoidWrap && !wrapped && (!bestNoWrap || diff < bestNoWrap.diff)) bestNoWrap = candidate;
-      }
-      if (!avoidWrap || !bestWraps) return best;
-      // The coarse SCAN_WIDTHS list's closest-ratio width wraps a title.
-      // Whether text wraps flips on tiny width deltas (both the name
-      // column's available space and its font size grow together as the
-      // viewport widens, so the two don't cross the "fits on one line"
-      // threshold at a single clean point) — so jumping straight to the
-      // next coarse SCAN_WIDTHS entry can land somewhere with a much
-      // worse aspect ratio than necessary. Do a fine local scan (8px
-      // steps, ±80px around the coarse best) to look for a nearby width
-      // that both avoids the wrap and keeps the ratio close to best's.
-      const lo = Math.max(320, best.width - 80), hi = Math.min(1920, best.width + 80);
-      let bestFine = null;
-      for (let w = lo; w <= hi; w += 8) {
-        const box = await boardBoxAt(w);
-        if (!box || !box.height) continue;
-        const ratio = box.width / box.height;
-        const diff = Math.abs(ratio - targetRatio);
-        if (await anyNameWraps()) continue;
-        if (!bestFine || diff < bestFine.diff) bestFine = { width: w, ratio, diff, box };
-      }
-      if (bestFine && (!bestNoWrap || bestFine.diff <= bestNoWrap.diff)) return bestFine;
-      return bestNoWrap || best;
-    }
-
-    // Capture .eu-board's natural rendering at the given width, then fit
+    // Capture .eu-board's natural rendering at a fixed width, then fit
     // (minimal center-crop) to the exact target pixel dimensions.
     async function captureBoardFit(width, targetW, targetH, outPath) {
       await page.setViewportSize({ width, height: TALL_ENOUGH });
       await waitForLogo();
       await page.waitForTimeout(150);
+      const box = await page.locator('.eu-board').boundingBox();
       const buf = await page.locator('.eu-board').screenshot();
       await sharp(buf)
         .resize(targetW, targetH, { fit: 'cover', position: 'top' })
         .png()
         .toFile(outPath);
+      return { width, naturalRatio: box ? +(box.width / box.height).toFixed(3) : null };
     }
 
     async function captureDesktopAndSquare(outPrefix) {
-      const desktop = await findBestWidth(16 / 9, { avoidWrap: true });
-      await captureBoardFit(desktop.width, 1920, 1080, `${outPrefix}-16x9.png`);
-      const square = await findBestWidth(1, { avoidWrap: true });
-      await captureBoardFit(square.width, 1200, 1200, `${outPrefix}-1x1.png`);
+      const desktop = await captureBoardFit(FIXED_WIDTH_16X9, 1920, 1080, `${outPrefix}-16x9.png`);
+      const square = await captureBoardFit(FIXED_WIDTH_1X1, 1200, 1200, `${outPrefix}-1x1.png`);
       return {
-        sixteenNine: { path: `${outPrefix}-16x9.png`, atWidth: desktop.width, naturalRatio: +desktop.ratio.toFixed(3) },
-        oneToOne: { path: `${outPrefix}-1x1.png`, atWidth: square.width, naturalRatio: +square.ratio.toFixed(3) },
+        sixteenNine: { path: `${outPrefix}-16x9.png`, ...desktop },
+        oneToOne: { path: `${outPrefix}-1x1.png`, ...square },
       };
     }
 

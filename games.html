@@ -37,7 +37,7 @@
 
   <section class="reveal" id="senet-chart-section">
     <h2><i data-ic="chip"></i> Live at the Zone</h2>
-    <p class="dim">Top 10 games by hours played, pulled from SENET check-in activity &mdash; the chart below updates continuously.</p>
+    <p class="dim">Top 10 games by hours played at the Zone &mdash; refreshes daily.</p>
     <div class="chip-row" id="senet-chart-range" style="margin-top:.8rem">
       <span class="chip active" data-range="week">This Week</span>
       <span class="chip" data-range="month">This Month</span>
@@ -45,8 +45,12 @@
     </div>
     <div class="senetdb-chart" style="margin-top:1rem">
       <div class="senetdb-head">
-        <span class="senetdb-live"><span class="live-dot"></span>Live</span>
-        <span class="senetdb-updated" id="senet-updated">Updated just now</span>
+        <span class="senetdb-live">Updates daily</span>
+        <span class="senetdb-updated" id="senet-updated">Updated today</span>
+      </div>
+      <div class="senetdb-hero">
+        <div class="senetdb-hero-total"><span id="senet-hero-value">0</span><small>total hours this range</small></div>
+        <svg class="senetdb-hero-svg" id="senet-hero-svg" viewBox="0 0 600 150" preserveAspectRatio="none" aria-hidden="true"></svg>
       </div>
       <div class="senetdb-rows" id="senet-chart-rows"></div>
     </div>
@@ -76,8 +80,8 @@
   <div class="container footer-top">
     <div class="footer-brand" aria-hidden="true"><img class="ne-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone"></div>
     <div class="links-grid">
-      <div><h4>Visit</h4><a data-cfg-href="googlePageUrl" href="#">Google Page</a><a data-cfg-href="yelpUrl" href="#">Yelp</a><p>Tues&ndash;Sat 10am&ndash;7pm</p></div>
-      <div><h4>Contact Us</h4><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a><p data-cfg="phone"></p><a data-cfg="email" href="#" data-mailto></a><a data-cfg-href="instagramUrl" href="#">Instagram @newegggamerzone</a></div>
+      <div><h4>Visit</h4><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a><a data-cfg-href="googlePageUrl" href="#">Google Page</a><a data-cfg-href="yelpUrl" href="#">Yelp</a><p>Tues&ndash;Sat 10am&ndash;7pm</p></div>
+      <div><h4>Contact Us</h4><p data-cfg="phone"></p><a data-cfg="email" href="#" data-mailto></a><a data-cfg-href="instagramUrl" href="#">Instagram @newegggamerzone</a></div>
       <div><h4>Social</h4><a data-cfg-href="discordUrl" href="#">Discord</a><a data-cfg-href="startggUrl" href="#">Tournaments on Start.GG</a><a data-cfg-href="meetupUrl" href="#">Gamer Zone Meetup</a><a data-cfg-href="eventbriteUrl" href="#">Eventbrite</a></div>
       <div><h4>More</h4><a href="edu.html">Workshops &amp; EDU</a><a data-cfg-href="neweggUrl" href="#">Shop Newegg</a><a data-cfg-href="surveyUrl" href="#">Feedback survey</a></div>
     </div>

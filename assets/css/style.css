@@ -222,18 +222,23 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 @media (max-width: 760px) { .game-list-panel { padding: 1.5rem 1.3rem; } }
 @media (max-width: 460px) { .game-list { column-width: 100%; } }
 
-/* SENET Live Play Chart (games.html) — a SteamDB-style ranked bar chart. */
+/* SENET Live Play Chart (games.html) — Robinhood-style smooth curves for a
+   SteamDB-esque ranked list, refreshed once a day rather than continuously. */
 .senetdb-chart { background: var(--bg-2); border: 1px solid var(--line); padding: 1.1rem 1.3rem; }
 .senetdb-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: .8rem; padding-bottom: .7rem; border-bottom: 1px solid var(--line); }
-.senetdb-live { display: flex; align-items: center; gap: .45rem; font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: #ff5d5d; }
-.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff5d5d; flex: none; animation: live-pulse 1.6s infinite; }
-@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(255,93,93,.55); } 70% { box-shadow: 0 0 0 8px rgba(255,93,93,0); } 100% { box-shadow: 0 0 0 0 rgba(255,93,93,0); } }
+.senetdb-live { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--ne-orange); }
 .senetdb-updated { font-family: var(--eu-body); font-size: .78rem; color: var(--ink-dim); }
-.senetdb-row { display: flex; align-items: center; gap: .7rem; padding: .4rem 0; }
+.senetdb-hero { margin-bottom: 1.1rem; }
+.senetdb-hero-total { font-family: var(--head); margin-bottom: .3rem; }
+.senetdb-hero-total span { font-weight: 800; font-size: 1.5rem; color: #fff; font-variant-numeric: tabular-nums; }
+.senetdb-hero-total small { margin-left: .4rem; font-family: var(--eu-body); font-weight: 500; font-size: .78rem; color: var(--ink-dim); text-transform: none; letter-spacing: 0; }
+.senetdb-hero-svg { display: block; width: 100%; height: 130px; }
+.senetdb-row { display: flex; align-items: center; gap: .7rem; padding: .4rem 0; border-top: 1px solid var(--line); }
+.senetdb-row:first-child { border-top: none; }
 .senetdb-rank { width: 1.4rem; flex: none; text-align: right; font-family: var(--head); font-weight: 800; color: var(--ink-dim); font-size: .85rem; }
 .senetdb-name { width: 190px; flex: none; font-family: var(--eu-body); font-weight: 600; font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.senetdb-bar-wrap { flex: 1; height: 18px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
-.senetdb-bar { display: block; height: 100%; background: linear-gradient(90deg, var(--ne-orange-deep), var(--ne-orange)); transition: width 1.1s ease; }
+.senetdb-spark-wrap { flex: 1; height: 32px; }
+.senetdb-spark { display: block; width: 100%; height: 100%; overflow: visible; }
 .senetdb-hours { width: 64px; flex: none; text-align: right; font-family: var(--head); font-weight: 700; font-size: .85rem; font-variant-numeric: tabular-nums; color: #fff; }
 .senetdb-hours small { font-size: .7em; color: var(--ink-dim); margin-left: 1px; }
 @media (max-width: 560px) { .senetdb-name { width: 96px; font-size: .78rem; } .senetdb-hours { width: 52px; } }
@@ -276,7 +281,9 @@ details.archive-month .grid { margin-top: 1rem; }
 
 .zone-item { background: var(--bg-2); border: 1px solid var(--line); padding: .9rem 1.1rem; margin-bottom: .7rem; transition: border-color .2s, box-shadow .2s, background .2s; }
 .zone-item { border-color: var(--ne-orange); background: var(--bg-3); box-shadow: 0 0 18px rgba(250,157,40,.28), inset 0 0 16px rgba(250,157,40,.08); }
-.zone-item summary { cursor: pointer; font-family: var(--head); font-weight: 700; text-transform: uppercase; font-size: .88rem; letter-spacing: .04em; display: flex; align-items: center; gap: .5rem; }
+.zone-item summary { cursor: default; font-family: var(--head); font-weight: 700; text-transform: uppercase; font-size: .88rem; letter-spacing: .04em; display: flex; align-items: center; gap: .5rem; list-style: none; }
+.zone-item summary::-webkit-details-marker { display: none; }
+.zone-item summary::marker { content: ""; }
 .zone-item summary .ic { color: var(--ne-orange); width: 20px; height: 20px; flex: none; }
 .zone-item .zone-body { margin-top: 1rem; display: grid; grid-template-columns: minmax(180px, 260px) 1fr; gap: 1.1rem; align-items: center; }
 .zone-item .zone-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
@@ -322,7 +329,7 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .site-footer { border-top: 2px solid var(--ne-navy); background: var(--bg-2); margin-top: 3rem; }
 .site-footer .container { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); padding: 2rem var(--safe-x); }
 .site-footer h4 { font-family: var(--head); color: var(--ne-orange); margin-bottom: .5rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
-.site-footer p, .site-footer a { font-size: .9rem; color: var(--ink); display: block; }
+.site-footer p, .site-footer a { font-size: .9rem; color: var(--ink); display: block; overflow-wrap: anywhere; }
 .footer-brand { display: flex; align-items: center; gap: 1rem; justify-content: center; padding: 1.2rem 1rem .4rem; }
 .footer-brand img.ne-logo { width: 230px; height: auto; }
 .footer-brand img.eggbot { width: 44px; height: 44px; }
@@ -333,7 +340,8 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
    rules above so they win regardless of source order. */
 .site-footer .footer-top { display: flex; align-items: flex-start; gap: 2.2rem; flex-wrap: wrap; padding: 2rem var(--safe-x); }
 .site-footer .footer-top .footer-brand { justify-content: flex-start; padding: .3rem 0 0; flex: none; }
-.site-footer .footer-top .links-grid { flex: 1 1 320px; display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); padding: 0; }
+.site-footer .footer-top .links-grid { flex: 1 1 320px; display: grid; gap: 1.2rem 1.1rem; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); padding: 0; }
+@media (max-width: 980px) { .site-footer .footer-top .footer-brand img.ne-logo { width: 160px; } }
 .legal { max-width: 860px; margin: 0 auto; padding: .4rem var(--safe-x) 1rem; text-align: center; color: var(--ink-dim); font-size: .74rem; line-height: 1.55; }
 .footnote { text-align: center; padding: 0 1rem 1.5rem; color: var(--ink-dim); font-size: .78rem; }
 
