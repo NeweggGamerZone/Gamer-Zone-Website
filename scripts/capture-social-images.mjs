@@ -139,18 +139,65 @@ async function main() {
       return page.locator('.eu-board').boundingBox();
     }
 
+    // True if any event title (.eu-name) is wrapping to more than one line
+    // at the current viewport width — e.g. a long title like "XP League
+    // Fortnite Tournament" can wrap right above the 640px mobile-stack
+    // breakpoint, where the row layout still puts date+title side by side
+    // but hasn't got much width to spare. Checked at whatever width is
+    // already set (no extra viewport switch), so it's free to call inside
+    // the same scan loop that measures the board's aspect ratio.
+    async function anyNameWraps() {
+      return page.evaluate(() => {
+        return [...document.querySelectorAll('.eu-name')].some(el => {
+          const cs = getComputedStyle(el);
+          const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.3;
+          return el.getBoundingClientRect().height > lineHeight * 1.4;
+        });
+      });
+    }
+
     // Scan SCAN_WIDTHS and return the width whose natural aspect ratio
-    // (rendered width / rendered height) is closest to targetRatio.
-    async function findBestWidth(targetRatio) {
+    // (rendered width / rendered height) is closest to targetRatio. When
+    // avoidWrap is set, widths where any event title wraps to a second
+    // line are skipped in favor of the closest-ratio width that keeps
+    // every title on one line — falling back to the plain closest-ratio
+    // pick only if every candidate wraps (e.g. a pathologically long title).
+    async function findBestWidth(targetRatio, { avoidWrap = false } = {}) {
       let best = null;
+      let bestNoWrap = null;
+      let bestWraps = false;
       for (const w of SCAN_WIDTHS) {
         const box = await boardBoxAt(w);
         if (!box || !box.height) continue;
         const ratio = box.width / box.height;
         const diff = Math.abs(ratio - targetRatio);
-        if (!best || diff < best.diff) best = { width: w, ratio, diff, box };
+        const wrapped = avoidWrap ? await anyNameWraps() : false;
+        const candidate = { width: w, ratio, diff, box };
+        if (!best || diff < best.diff) { best = candidate; bestWraps = wrapped; }
+        if (avoidWrap && !wrapped && (!bestNoWrap || diff < bestNoWrap.diff)) bestNoWrap = candidate;
       }
-      return best;
+      if (!avoidWrap || !bestWraps) return best;
+      // The coarse SCAN_WIDTHS list's closest-ratio width wraps a title.
+      // Whether text wraps flips on tiny width deltas (both the name
+      // column's available space and its font size grow together as the
+      // viewport widens, so the two don't cross the "fits on one line"
+      // threshold at a single clean point) — so jumping straight to the
+      // next coarse SCAN_WIDTHS entry can land somewhere with a much
+      // worse aspect ratio than necessary. Do a fine local scan (8px
+      // steps, ±80px around the coarse best) to look for a nearby width
+      // that both avoids the wrap and keeps the ratio close to best's.
+      const lo = Math.max(320, best.width - 80), hi = Math.min(1920, best.width + 80);
+      let bestFine = null;
+      for (let w = lo; w <= hi; w += 8) {
+        const box = await boardBoxAt(w);
+        if (!box || !box.height) continue;
+        const ratio = box.width / box.height;
+        const diff = Math.abs(ratio - targetRatio);
+        if (await anyNameWraps()) continue;
+        if (!bestFine || diff < bestFine.diff) bestFine = { width: w, ratio, diff, box };
+      }
+      if (bestFine && (!bestNoWrap || bestFine.diff <= bestNoWrap.diff)) return bestFine;
+      return bestNoWrap || best;
     }
 
     // Capture .eu-board's natural rendering at the given width, then fit
@@ -167,9 +214,9 @@ async function main() {
     }
 
     async function captureDesktopAndSquare(outPrefix) {
-      const desktop = await findBestWidth(16 / 9);
+      const desktop = await findBestWidth(16 / 9, { avoidWrap: true });
       await captureBoardFit(desktop.width, 1920, 1080, `${outPrefix}-16x9.png`);
-      const square = await findBestWidth(1);
+      const square = await findBestWidth(1, { avoidWrap: true });
       await captureBoardFit(square.width, 1200, 1200, `${outPrefix}-1x1.png`);
       return {
         sixteenNine: { path: `${outPrefix}-16x9.png`, atWidth: desktop.width, naturalRatio: +desktop.ratio.toFixed(3) },
