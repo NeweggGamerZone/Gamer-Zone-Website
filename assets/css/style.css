@@ -391,6 +391,18 @@ body.home-page { background: transparent; }
 @keyframes hero-rise { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .hero-in { animation: none; opacity: 1; transform: none; } }
 
+/* ---- homepage hero: always-on background runner game, fixed beneath the
+   "Plan your visit" button. Hidden/paused (not destroyed) whenever the hero
+   scrolls out of view, so it picks back up mid-run when scrolled back. See
+   assets/js/hero-runner.js for the game loop itself. */
+.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 460px; margin: 1.4rem auto 0; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+.hero-runner.is-active { opacity: 1; pointer-events: auto; }
+.hero-runner-canvas { display: block; width: 100%; height: 84px; cursor: pointer; }
+.hero-runner-scores { display: flex; justify-content: center; gap: 1.4rem; margin-top: .35rem; font-family: var(--head); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
+.hero-runner-scores b { color: var(--ink); font-size: .82rem; margin-left: .35rem; letter-spacing: 0; }
+.hero-runner-hint { text-align: center; margin-top: .3rem; font-size: .68rem; color: var(--ink-dim); opacity: .75; letter-spacing: .04em; }
+@media (prefers-reduced-motion: reduce) { .hero-runner { display: none; } }
+
 /* ---- bulletin photo posts (polaroid) ---- */
 .sticky.has-photo { padding-bottom: 1rem; }
 .sticky img { border: 6px solid #fff; box-shadow: 0 3px 10px rgba(0,0,0,.35); transform: rotate(1deg); }
