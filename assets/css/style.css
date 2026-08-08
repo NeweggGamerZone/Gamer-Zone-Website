@@ -782,6 +782,9 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 /* subtagline: exactly 50% of the event title, floored at 14px */
 .eu-meta{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
 .eu-major .eu-name{color:var(--cal-major)}
+/* extra description line for major/featured events only — same family as
+   the subtagline but a touch brighter, since it's called out on purpose. */
+.eu-desc{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink);margin-top:.2rem;letter-spacing:.01em}
 
 /* ---- native responsive breakpoints (normal in-page browsing) ----
    Keyed to real viewport width, same convention as the rest of the site

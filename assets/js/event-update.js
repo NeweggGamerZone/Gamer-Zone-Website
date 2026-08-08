@@ -100,6 +100,7 @@
       <div class="eu-info">
         <div class="eu-name">${closure ? 'Closed — ' : ''}${GZ.esc(ev.title.replace(/^Closed\s*[—-]\s*/, ''))}</div>
         <div class="eu-meta">${ev.time ? GZ.esc(ev.time) : ''}</div>
+        ${isMajor && ev.boardDesc ? `<div class="eu-desc">${GZ.esc(ev.boardDesc)}</div>` : ''}
       </div>
     </div>`;
   }
