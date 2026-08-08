@@ -9,25 +9,6 @@
   if (!list) return;
   const chipsWrap = document.getElementById('games-filters');
   const genreWrap = document.getElementById('games-genre-filters');
-  const top5El = document.getElementById('games-top5');
-
-  // Top 5 most-played games this month, by total hours logged at the Zone.
-  const TOP5 = [
-    { name: 'Valorant', hours: '151h 8m' },
-    { name: 'League of Legends', hours: '96h 14m' },
-    { name: 'Overwatch 2', hours: '78h 17m' },
-    { name: 'Fortnite', hours: '71h 43m' },
-    { name: 'Marvel Rivals', hours: '33h 51m' },
-  ];
-
-  if (top5El) {
-    top5El.innerHTML = `<div class="lbx">${TOP5.map((g, i) => `<div class="lbx-row${i === 0 ? ' top' : ''}">
-      <span class="lbx-rank" aria-label="Rank ${i + 1}">${i + 1}</span>
-      <span class="lbx-user">${GZ.esc(g.name)}</span>
-      <span class="lbx-meta">Total hours played this month</span>
-      <span class="lbx-pts">${GZ.esc(g.hours)}</span>
-    </div>`).join('')}</div>`;
-  }
 
   const PLATFORMS = [
     { key: 'pc', label: 'PC', icon: 'pc' },
@@ -88,6 +69,8 @@
     // Consoles — Nintendo Switch station.
     ['Super Smash Bros.', 'console', 'competitive'], ['Mario Party', 'console', 'coop'],
     ['Super Mario 3D World', 'console', 'coop'], ['Mario Kart', 'console', 'competitive'],
+    ['NBA2K26', 'console', 'competitive'], ['FC26', 'console', 'competitive'],
+    ['Star Fox', 'console', 'single'], ['Xbox Game Pass Basic', 'console'],
 
     // VR headsets.
     ['Dumb Ways to Die VR', 'vr'], ['Kill It With Fire VR', 'vr'], ['Beat Saber', 'vr'],
@@ -101,6 +84,9 @@
     ['MARVEL vs. CAPCOM Fighting Collection: Arcade Classics', 'arcade', 'competitive'],
     ['MARVEL Cosmic Invasion', 'arcade', 'competitive'], ['Tekken 7', 'arcade', 'competitive'],
     ['Tekken 8', 'arcade', 'competitive'], ['SoulCalibur VI', 'arcade', 'competitive'],
+    ['Marvel Tokon: Fighting Souls', 'arcade', 'competitive'],
+    ['Street Fighter DLC (1-4)', 'arcade', 'competitive'],
+    ['Avatar Legends: The Fighting Game', 'arcade', 'competitive'],
   ].map(([name, platform, genre]) => ({ name, platform, genre: genre || null }));
 
   function byName(a, b) { return a.name.localeCompare(b.name); }

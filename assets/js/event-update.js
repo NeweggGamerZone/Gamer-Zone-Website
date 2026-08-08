@@ -111,5 +111,5 @@
 
   list.innerHTML = rows.length
     ? rows.join('')
-    : '<div class="calendar-empty">Just the weekly theme this week — no closures or special events on the books.</div>';
+    : '<div class="calendar-empty">Just the weekly theme this week, no closures or special events on the books.</div>';
 })();

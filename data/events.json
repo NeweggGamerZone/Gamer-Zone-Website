@@ -141,18 +141,6 @@
       "accent": "#FF2E97"
     },
     {
-      "id": "xp-fortnite-training-2026-08-19",
-      "title": "XP League: Fortnite Training",
-      "subtitle": "Train with the Pros from XP League!",
-      "date": "2026-08-19",
-      "time": "4:00 PM – 6:00 PM",
-      "type": "edu",
-      "blurb": "Second training session of the biweekly cadence. Live coaching from XP League pros, all skill levels welcome.",
-      "featured": false,
-      "reservation": false,
-      "accent": "#7ED321"
-    },
-    {
       "id": "gamer-zone-anniversary-2026-08-22",
       "title": "Newegg Gamer Zone Anniversary",
       "subtitle": "Free play and prizes",
@@ -165,6 +153,18 @@
       "accent": "#FFC400"
     },
     {
+      "id": "xp-fortnite-training-2026-08-26",
+      "title": "XP League: Fortnite Training",
+      "subtitle": "Train with the Pros from XP League!",
+      "date": "2026-08-26",
+      "time": "4:00 PM – 6:00 PM",
+      "type": "edu",
+      "blurb": "Second training session of the biweekly cadence. Live coaching from XP League pros, all skill levels welcome.",
+      "featured": false,
+      "reservation": false,
+      "accent": "#7ED321"
+    },
+    {
       "id": "xp-fortnite-tournament-2026-08-28",
       "title": "XP League Fortnite Tournament",
       "subtitle": "Compete, win, and prove your build is better.",
@@ -175,6 +175,16 @@
       "featured": true,
       "reservation": false,
       "accent": "#FF2E97"
+    },
+    {
+      "id": "closed-private-event-2026-08-29",
+      "title": "Closed — Private Event",
+      "date": "2026-08-29",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed to the public for a private event.",
+      "featured": false,
+      "reservation": false
     }
   ],
   "weeklyThemes": [

@@ -95,9 +95,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // reservation page is retired and no longer used.
   const verkada = cfg.verkadaUrl || cfg.reservationUrl;
   document.querySelectorAll('[data-verkada]').forEach(el => { el.href = verkada; el.target = '_blank'; el.rel = 'noopener'; });
-  const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   document.querySelectorAll('[data-verkada-note]').forEach(el => {
-    el.textContent = `It's ${todayName} — preregister below and walk right in, no waiting at check-in.`;
+    el.textContent = 'Preregister below for a faster check-in.';
   });
 
   const page = location.pathname.split('/').pop() || 'index.html';
