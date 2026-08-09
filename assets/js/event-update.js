@@ -17,7 +17,7 @@
     if (weekOfMonth > 4) weekOfMonth = 1; // 5th week: loop back to the week-1 graphic
     // Path is resolved relative to style.css (assets/css/), not this page,
     // since the value is substituted into a CSS custom property.
-    const url = `../calendar/BGAssets/event-update-bg-week${weekOfMonth}.jpg`;
+    const url = `../calendar/BGAssets/event-update-bg-week${weekOfMonth}-blurred.jpg`;
     boards.forEach(b => b.style.setProperty('--eu-bg', `url('${url}')`));
   })();
 

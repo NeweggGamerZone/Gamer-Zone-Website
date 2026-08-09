@@ -228,11 +228,14 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .senetdb-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: .8rem; padding-bottom: .7rem; border-bottom: 1px solid var(--line); }
 .senetdb-live { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--ne-orange); }
 .senetdb-updated { font-family: var(--eu-body); font-size: .78rem; color: var(--ink-dim); }
-.senetdb-hero { margin-bottom: 1.1rem; }
+.senetdb-hero { margin-bottom: 1.1rem; position: relative; }
 .senetdb-hero-total { font-family: var(--head); margin-bottom: .3rem; }
 .senetdb-hero-total span { font-weight: 800; font-size: 1.5rem; color: #fff; font-variant-numeric: tabular-nums; }
 .senetdb-hero-total small { margin-left: .4rem; font-family: var(--eu-body); font-weight: 500; font-size: .78rem; color: var(--ink-dim); text-transform: none; letter-spacing: 0; }
-.senetdb-hero-svg { display: block; width: 100%; height: 130px; }
+.senetdb-hero-svg { display: block; width: 100%; height: 130px; cursor: crosshair; touch-action: pan-y; }
+.senetdb-hero-tip { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; transition: opacity .12s ease; background: var(--bg-3); border: 1px solid var(--line); border-radius: 4px; padding: .35rem .6rem; font-family: var(--eu-body); font-size: .72rem; color: var(--ink-dim); white-space: nowrap; transform: translate(-50%, -100%); z-index: 4; }
+.senetdb-hero-tip.is-visible { opacity: 1; }
+.senetdb-hero-tip b { display: block; font-family: var(--head); font-weight: 800; font-size: .88rem; color: #fff; font-variant-numeric: tabular-nums; }
 .senetdb-row { display: flex; align-items: center; gap: .7rem; padding: .4rem 0; border-top: 1px solid var(--line); }
 .senetdb-row:first-child { border-top: none; }
 .senetdb-rank { width: 1.4rem; flex: none; text-align: right; font-family: var(--head); font-weight: 800; color: var(--ink-dim); font-size: .85rem; }
@@ -453,7 +456,14 @@ body.home-page { background: transparent; }
   --cal-edu:#3FBF6B; --cal-amb:#E85DA0; --cal-major:var(--ne-orange);
 }
 .cal-board{position:relative;padding:clamp(1.4rem,3.6vw,2.2rem);overflow:hidden}
-.cal-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/dailyplay-bg.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.5) saturate(1.05);transform:scale(1.06)}
+/* The blur/darken/desaturate treatment is baked into the -blurred.jpg
+   assets themselves (see assets/calendar/BGAssets) rather than applied
+   live via a CSS filter — a live blur filter on a background-size:cover
+   layer renders blocky/pixelated in some browsers (notably headless
+   Chromium, used for the weekly social captures, without GPU compositing)
+   instead of a smooth Gaussian blur. Pre-rendering it once offline is both
+   more reliable and cheaper at runtime. */
+.cal-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/dailyplay-bg-blurred.jpg'));background-size:cover;background-position:center}
 /* Darkened enough (WCAG-checked against a worst-case bright photo) that
    --ink-dim and the blue accent both still clear 4.5:1 no matter what's
    underneath — see the site-wide contrast rule near the top of this file. */
@@ -497,7 +507,9 @@ body.home-page { background: transparent; }
    is the same height, so hovering to read a day's details never rearranges
    the page. */
 .cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.3rem;height:335px;overflow:hidden;isolation:isolate;display:flex;flex-direction:column}
-.cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
+/* Pre-blurred asset, not a live filter — see the .cal-board::before comment
+   above for why. */
+.cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center}
 .cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96))}
 .cal-detail .tag{margin-bottom:.55rem}
 .cal-detail h3{font-family:var(--head);font-weight:800;font-size:1.46rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
@@ -732,7 +744,9 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      (row -> border-top -> next row) — both resolve to 2x this value. */
   --eu-row-pad: clamp(.7rem, 2vw, 1.15rem);
   position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(2.2rem,6vw,4.5rem) var(--safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
-.eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1.jpg'));background-size:cover;background-position:center;filter:blur(7px) brightness(.55) saturate(1.05);transform:scale(1.06)}
+/* Pre-blurred asset, not a live filter — see the .cal-board::before comment
+   above for why. */
+.eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
 .eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
@@ -745,8 +759,8 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 /* Optional per-week badge art, centered above the address row. Hidden
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
-.eu-board-icon{display:flex;justify-content:center;padding-bottom:clamp(.8rem,2.5vw,1.2rem)}
-.eu-board-icon img{height:clamp(64px,10vw,104px);width:auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.55))}
+.eu-board-icon{display:flex;justify-content:center;padding-bottom:clamp(.3rem,1vw,.5rem)}
+.eu-board-icon img{height:clamp(96px,15vw,160px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this

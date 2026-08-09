@@ -36,7 +36,17 @@ const GZ = {
     }
     return GZ.cfg;
   },
-  todayISO() { return new Date().toISOString().slice(0, 10); },
+  // Local calendar date (matches the visitor's own device clock), not UTC —
+  // toISOString() converts to UTC first, which rolls over to the next (or
+  // previous) day early/late depending on the visitor's timezone offset.
+  // That was flipping the calendar/weekly-lineup "today" to the wrong day
+  // in the evening for anyone west of UTC (all of the US).
+  todayISO() {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  },
   fmtDate(iso) {
     const d = new Date(iso + 'T12:00:00');
     return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });

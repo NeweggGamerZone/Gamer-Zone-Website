@@ -28,15 +28,19 @@
   // Path is resolved relative to style.css (assets/css/), not this page,
   // since the value is substituted into a CSS custom property.
   const BG_DIR = '../calendar/BGAssets/';
+  // The -blurred variants are pre-rendered offline (blur/darken/desaturate
+  // baked into the JPG itself) rather than relying on a live CSS blur
+  // filter, which renders blocky/pixelated in some browsers — see the
+  // .cal-board::before comment in style.css.
   const TYPE_BG = {
-    edu: BG_DIR + 'training-bg.jpg',
-    tournament: BG_DIR + 'tournament-major-bg.jpg',
-    major: BG_DIR + 'majorevent2-bg.jpg',
-    'theme-night': BG_DIR + 'freeplay-bg2.jpg',
-    vendor: BG_DIR + 'freeplay-bg3.jpg',
-    community: BG_DIR + 'freeplay-bg3.jpg',
+    edu: BG_DIR + 'training-bg-blurred.jpg',
+    tournament: BG_DIR + 'tournament-major-bg-blurred.jpg',
+    major: BG_DIR + 'majorevent2-bg-blurred.jpg',
+    'theme-night': BG_DIR + 'freeplay-bg2-blurred.jpg',
+    vendor: BG_DIR + 'freeplay-bg3-blurred.jpg',
+    community: BG_DIR + 'freeplay-bg3-blurred.jpg',
   };
-  const FREE_PLAY_BG = BG_DIR + 'dailyplay-bg.jpg';
+  const FREE_PLAY_BG = BG_DIR + 'dailyplay-bg-blurred.jpg';
   function setCardBg(url) {
     if (url) detail.style.setProperty('--cd-bg', `url('${url}')`);
     else detail.style.removeProperty('--cd-bg');
