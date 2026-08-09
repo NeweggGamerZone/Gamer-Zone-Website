@@ -117,6 +117,14 @@ img { max-width: 100%; display: block; }
 .hazard { height: 8px; background: repeating-linear-gradient(-55deg, var(--ne-orange) 0 14px, transparent 14px 28px); opacity: .85; border: none; margin: 0; }
 
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(6,7,8,.94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+/* backdrop-filter on a sticky, always-repainting header is a known mobile
+   scroll-perf cost (forces the browser to recomposite everything behind it
+   on every scroll frame). The background is already ~94% opaque, so the
+   blur adds little visible difference on small screens — drop it there and
+   bump the opacity slightly to keep the header reading as solid. */
+@media (max-width: 760px) {
+  .site-header { background: rgba(6,7,8,.97); backdrop-filter: none; }
+}
 .nav-wrap { max-width: 1140px; margin: 0 auto; padding: 1.15rem var(--safe-x); display: flex; align-items: center; gap: 1rem; }
 .logo { display: flex; align-items: center; gap: .55rem; font-family: var(--head); font-weight: 800; font-size: 1.05rem; letter-spacing: .06em; color: var(--ink); white-space: nowrap; }
 .logo img.logo-img { height: 76px; width: auto; display: block; }
@@ -760,7 +768,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
 .eu-board-icon{display:flex;justify-content:center;padding-bottom:clamp(.3rem,1vw,.5rem)}
-.eu-board-icon img{height:clamp(96px,15vw,160px);width:auto}
+.eu-board-icon img{height:clamp(192px,30vw,320px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this

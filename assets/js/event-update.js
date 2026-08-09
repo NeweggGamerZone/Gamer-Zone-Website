@@ -109,9 +109,9 @@
     const isMajor = !closure && (ev.type === 'major' || ev.featured);
     // boardTitle is an optional shorter stand-in for this one spot only —
     // the calendar, event detail card, etc. all keep reading ev.title as
-    // usual. Exists because the title column here now matches the date's
-    // (much larger) font size, so a long title needs a tighter variant to
-    // still fit on one line.
+    // usual. Normally unused now that fitBoardTitles() below auto-shrinks
+    // long titles to fit on one line at render time; kept as a manual
+    // escape hatch for the rare title too long to shrink into readability.
     const name = closure ? ev.title : (ev.boardTitle || ev.title);
     return `<div class="eu-row${isMajor ? ' eu-major' : ''}${closure ? ' eu-closure' : ''}">
       <div class="eu-date-wrap">
@@ -133,4 +133,41 @@
   list.innerHTML = rows.length
     ? rows.join('')
     : '<div class="calendar-empty">Just the weekly theme this week, no closures or special events on the books.</div>';
+
+  // The title column matches the date's oversized font, so a long title
+  // (e.g. "Gamer Zone Anniversary") would otherwise wrap to a second line.
+  // Shrink each title just enough to read on one line instead, stopping at
+  // a floor size rather than shrinking into illegibility — if it truly
+  // can't fit even there, it wraps normally rather than clipping.
+  function fitBoardTitles() {
+    document.querySelectorAll('.eu-board .eu-name').forEach(el => {
+      el.style.fontSize = '';
+      const baseSize = parseFloat(getComputedStyle(el).fontSize);
+      if (!baseSize) return;
+      const minSize = baseSize * 0.55;
+      let size = baseSize;
+      // Shrink and check the ELEMENT'S OWN RENDERED HEIGHT against what a
+      // true single line should measure (line-height:1, so one line is
+      // exactly `size` tall) — this is the ground truth for whether text
+      // actually wrapped. An earlier version forced white-space:nowrap to
+      // read scrollWidth as a proxy for "would this fit on one line", but
+      // that measurement doesn't reliably predict how the browser wraps
+      // once white-space reverts to normal (this flex layout's available
+      // width isn't stable across the two states), so it kept reporting a
+      // false "fits" while the title still visibly wrapped to two lines.
+      while (el.getBoundingClientRect().height > size * 1.3 && size > minSize) {
+        size -= 1;
+        el.style.fontSize = size + 'px';
+      }
+      if (el.getBoundingClientRect().height > size * 1.3) el.style.fontSize = '';
+    });
+  }
+  fitBoardTitles();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitBoardTitles);
+  // No debounce here on purpose: the social-capture script resizes the
+  // viewport and screenshots again after its own short fixed wait, so a
+  // debounced recalc here could easily lose that race and get captured
+  // mid-flight. fitBoardTitles() itself is cheap (a handful of elements),
+  // so recalculating on every resize event is fine.
+  window.addEventListener('resize', fitBoardTitles);
 })();

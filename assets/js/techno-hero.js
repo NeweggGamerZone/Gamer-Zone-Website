@@ -12,7 +12,7 @@
    ripple.
 
    Hero Runner game (index.html only, when the #hero-runner markup is
-   present): a single extra shape ("hazard", drawn in red using the exact
+   present): a single extra shape ("hazard", drawn in orange using the exact
    same shape/projection code as the decorative tunnel) streams toward the
    viewer alongside the normal rings, at the exact same speed as those
    rings. A character sits at a fixed screen position under the hero's
@@ -191,7 +191,7 @@
   function updateAnchor() {
     const r = runnerWrap.getBoundingClientRect();
     anchorX = r.left + r.width / 2;
-    anchorY = r.top + 52;
+    anchorY = r.top + 66; // lower in the reserved padding = a larger baseRingRadius = a nearer (smaller-z) baseline, i.e. visually closer to the camera
     // The baseline ring's fixed depth: rotation preserves a point's distance
     // from the vanishing point, so a ring point at local radius A always
     // projects to a screen distance of A*(F/z) from center regardless of the
@@ -224,7 +224,7 @@
   function spawnHazard() {
     // No shape of its own — it's whichever shape the tunnel is currently
     // showing (see drawHazard), so it reads as one of the real background
-    // rings that happens to be red, not a foreign game object.
+    // rings that happens to be orange, not a foreign game object.
     hazards.push({ z: Z_FAR, resolved: false });
   }
 
@@ -262,11 +262,11 @@
   // as every decorative ring, using whatever shape the tunnel currently
   // shows (morphedPoints/morphStateAt — the same call the decorative loop
   // makes) — the only difference is color. That's what makes it read as
-  // "one of the background's own shapes, just red" instead of a separate
+  // "one of the background's own shapes, just orange" instead of a separate
   // game object rendered on top of the scene.
   function drawHazard(hz, rot, globalFade) {
     const pts = morphedPoints(morphStateAt(elapsed));
-    drawRing(hz, pts, rot, globalFade, 0, f => `rgba(255,53,53,${Math.min(1, f * 1.7)})`);
+    drawRing(hz, pts, rot, globalFade, 0, f => `rgba(250,157,40,${Math.min(1, f * 1.7)})`);
   }
 
   // How far a closed unit-space polygon (its perimeter points, in order)
@@ -297,7 +297,7 @@
   // shape as the decorative tunnel (drawn via the shared drawRing()), still
   // rotating right along with everything else, but held at a single fixed
   // depth (baseRingZ) instead of receding — so it never moves and it's
-  // obvious exactly where an approaching red hazard needs to be jumped
+  // obvious exactly where an approaching orange hazard needs to be jumped
   // rather than the player having to guess the timing from the shape's
   // motion alone. A plain fixed-z/fixed-scale ring would only pass exactly
   // through the character while the tunnel happens to show a circle —
@@ -408,17 +408,33 @@
   // fixed angles around a circle instead of the 4 walls of a square, so
   // they still read as "flying through a tunnel" no matter which shape
   // the rings themselves currently are.
-  function strokeSpoke(angle, rot, globalFade, hue) {
-    const dx = Math.cos(angle), dy = Math.sin(angle);
-    const a = project(dx * A, dy * A, Z_FAR, rot);
-    const b = project(dx * A, dy * A, Z_NEAR, rot);
-    const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+  //
+  // Every spoke in a given frame shares the exact same hue/globalFade, and
+  // project() is just a rotation-by-angle around the vanishing point plus a
+  // uniform z-scale — so all 10 spokes are geometrically identical up to
+  // rotation. That means one gradient (defined once in local, unrotated
+  // space) can be reused for every spoke via ctx.rotate(), instead of the
+  // previous approach of calling ctx.createLinearGradient() fresh for each
+  // of the 10 spokes on every single animation frame (a real GC-pressure/
+  // jank source at 60fps). This draws identically to before, just cheaper.
+  function strokeSpokes(rot, globalFade, hue) {
+    const rFar = A * F / Z_FAR, rNear = A * F / Z_NEAR;
+    const grad = ctx.createLinearGradient(rFar, 0, rNear, 0);
     grad.addColorStop(0, `hsla(${hue}, 70%, 55%, 0)`);
     grad.addColorStop(0.35, `hsla(${hue}, 70%, 55%, ${0.26 * globalFade})`);
     grad.addColorStop(1, `hsla(${hue + 30}, 85%, 65%, ${0.5 * globalFade})`);
     ctx.strokeStyle = grad;
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    for (const angle of SPOKES) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle + rot);
+      ctx.beginPath();
+      ctx.moveTo(rFar, 0);
+      ctx.lineTo(rNear, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 
   function drawRing(ring, unitPts, rot, globalFade, hue, colorFn, skipDepthFade) {
@@ -467,7 +483,7 @@
     const speed = gameOn ? currentSpeed() : BASE_SPEED;
 
     ctx.clearRect(0, 0, W, H);
-    for (const a of SPOKES) strokeSpoke(a, rot, globalFade, hue);
+    strokeSpokes(rot, globalFade, hue);
     for (let i = 0; i < rings.length; i++) {
       const r = rings[i];
       r.z -= speed * dt;
@@ -488,7 +504,7 @@
 
   function drawStatic() {
     ctx.clearRect(0, 0, W, H);
-    for (const a of SPOKES) strokeSpoke(a, 0, 0.6, 200);
+    strokeSpokes(0, 0.6, 200);
     rings.forEach((r, i) => drawRing(r, RESAMPLED[SHAPES[0]], 0, 0.6, (200 + i * 12) % 360));
   }
 
@@ -500,5 +516,19 @@
     drawStatic();
   } else {
     raf = requestAnimationFrame(frame);
+    // Pause the rAF loop entirely while the tab/window isn't visible — no
+    // point burning CPU/battery animating a canvas nobody can see, and this
+    // is a much bigger win than any single in-frame optimization since it
+    // drops CPU use to ~zero on a backgrounded tab. Resetting `last` to 0 on
+    // resume avoids a huge one-off `dt` (and the resulting jump in rotation/
+    // fade/ring position) built up from however long the tab was hidden.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (raf) { cancelAnimationFrame(raf); raf = null; }
+      } else if (!raf) {
+        last = 0;
+        raf = requestAnimationFrame(frame);
+      }
+    });
   }
 })();
