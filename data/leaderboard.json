@@ -1,7 +1,7 @@
 {
-  "period": "July 2026",
-  "generated": "2026-07-24",
-  "source": "User activity_Tue, Jul 21, 2026, 10_53_13 PDT.xlsx",
+  "period": "August 2026",
+  "generated": "2026-08-10",
+  "source": "User activity_Wed, Jul 29, 2026, 10_44_30 PDT.xlsx",
   "scoring": {
     "pointsPerHour": 10,
     "pointsPerAvgHour": 10,
@@ -10,19 +10,19 @@
   "players": [
     {
       "username": "Pretzel1",
-      "sessions": 7,
-      "totalHours": 46.2,
-      "avgHours": 6.6,
+      "sessions": 13,
+      "totalHours": 78.0,
+      "avgHours": 6.0,
       "referrals": 2,
-      "zonePoints": 732
+      "zonePoints": 1040
     },
     {
       "username": "scythe1",
-      "sessions": 7,
-      "totalHours": 35.0,
+      "sessions": 12,
+      "totalHours": 60.0,
       "avgHours": 5.0,
       "referrals": 0,
-      "zonePoints": 400
+      "zonePoints": 650
     },
     {
       "username": "lizziedear",
@@ -34,19 +34,19 @@
     },
     {
       "username": "Pgone1823",
-      "sessions": 3,
-      "totalHours": 13.5,
-      "avgHours": 4.5,
+      "sessions": 4,
+      "totalHours": 16.4,
+      "avgHours": 4.1,
       "referrals": 0,
-      "zonePoints": 185
+      "zonePoints": 214
     },
     {
-      "username": "bliskyO",
-      "sessions": 6,
-      "totalHours": 13.2,
-      "avgHours": 2.2,
+      "username": "kwan",
+      "sessions": 3,
+      "totalHours": 12.9,
+      "avgHours": 4.3,
       "referrals": 0,
-      "zonePoints": 162
+      "zonePoints": 179
     }
   ]
 }
