@@ -902,12 +902,19 @@ html.board-mode .eu-board{margin:0;width:100vw;padding:clamp(1.6rem,5vw,4.5rem)}
    down for exports only (never on the live page) recovers that space so
    an icon week's export matches a no-icon week's: full-bleed, no margins,
    address still on-screen. */
-/* +20% from the original board-mode export size (clamp(120px,19vw,200px))
-   per direct request — no other board-mode spacing touched, so a week
-   whose board no longer fits under this bigger icon now falls back to the
-   capture script's letterboxed "contain" export (added earlier) instead
-   of cropping the address off. */
 html.board-mode .eu-board-icon img{height:clamp(144px,22.8vw,240px)}
+/* The icon bump above plus the new per-event boardDesc paragraphs (added
+   for the Anniversary) both add real height, enough on some weeks to push
+   the export past the 1:1/16:9 frame and trigger the capture script's
+   letterboxed "contain" fallback — margins the export needs to be clean
+   and edge-to-edge. Rather than shrink the icon or the description back
+   down, this trims board-mode's own outer whitespace (top/bottom padding,
+   the row-to-row gap, the icon's own bottom padding, the address row's
+   top spacing) to claw that height back — live-page spacing is untouched,
+   since every rule here is scoped to html.board-mode. */
+html.board-mode .eu-board{padding:clamp(1rem,2.4vw,2rem);--eu-row-pad:clamp(.5rem,1.4vw,.9rem)}
+html.board-mode .eu-board-icon{padding-bottom:clamp(.15rem,.5vw,.3rem)}
+html.board-mode .eu-location-row{margin-top:clamp(.5rem,1.5vw,1rem);padding-top:clamp(.4rem,1.2vw,.8rem)}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,
