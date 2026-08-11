@@ -902,7 +902,12 @@ html.board-mode .eu-board{margin:0;width:100vw;padding:clamp(1.6rem,5vw,4.5rem)}
    down for exports only (never on the live page) recovers that space so
    an icon week's export matches a no-icon week's: full-bleed, no margins,
    address still on-screen. */
-html.board-mode .eu-board-icon img{height:clamp(120px,19vw,200px)}
+/* +20% from the original board-mode export size (clamp(120px,19vw,200px))
+   per direct request — no other board-mode spacing touched, so a week
+   whose board no longer fits under this bigger icon now falls back to the
+   capture script's letterboxed "contain" export (added earlier) instead
+   of cropping the address off. */
+html.board-mode .eu-board-icon img{height:clamp(144px,22.8vw,240px)}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,

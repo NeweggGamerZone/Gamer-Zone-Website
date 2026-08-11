@@ -113,6 +113,21 @@
     // long titles to fit on one line at render time; kept as a manual
     // escape hatch for the rare title too long to shrink into readability.
     const name = closure ? ev.title : (ev.boardTitle || ev.title);
+    // boardDesc is an optional extra line (or array of paragraphs) for a
+    // specific major/featured event (e.g. the Anniversary), rendered as
+    // its own full-width block BELOW the date/title row rather than inside
+    // .eu-info — .eu-info is the indented right-hand column, only as wide
+    // as the title itself, so nesting a paragraph there would wrap it
+    // narrow. Rendered as a plain sibling of .eu-row instead (both are
+    // direct children of the flex column #eu-list, which stretches its
+    // children to the full row width by default), it spans edge-to-edge:
+    // from the same left edge as the date above it, to the same right edge
+    // the title/time reach. Existing rows with no boardDesc are untouched
+    // — this only adds extra elements for the rare event that sets one.
+    const descParas = !closure && ev.boardDesc
+      ? (Array.isArray(ev.boardDesc) ? ev.boardDesc : [ev.boardDesc])
+      : [];
+    const descHtml = descParas.map(p => `<p class="eu-desc">${GZ.esc(p)}</p>`).join('');
     return `<div class="eu-row${isMajor ? ' eu-major' : ''}${closure ? ' eu-closure' : ''}">
       <div class="eu-date-wrap">
         <span class="eu-date">${mon.toUpperCase()} ${day}</span>
@@ -122,7 +137,7 @@
         <div class="eu-name">${closure ? 'Closed — ' : ''}${GZ.esc(name.replace(/^Closed\s*[—-]\s*/, ''))}</div>
         <div class="eu-meta">${ev.time ? GZ.esc(ev.time) : ''}</div>
       </div>
-    </div>`;
+    </div>${descHtml}`;
   }
 
   const rows = [

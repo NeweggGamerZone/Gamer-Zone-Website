@@ -148,6 +148,10 @@
       "time": "1:00 PM – 7:00 PM",
       "type": "major",
       "blurb": "Gamer Zone celebrates its one year anniversary of being open! Product prizes and Newegg gift card raffles will happen throughout the day. Extra raffle tickets for new Yelp/Google reviews — already reviewed? Bring a friend for another ticket.",
+      "boardDesc": [
+        "Newegg Gamer Zone turns 1 on August 22nd! We've been hosting vendor and public events since August of last year, going fully open to the public last April, and it has been our pleasure to meet so many visitors over this past year.",
+        "We're giving back by hosting our Gamer Zone Anniversary, featuring free food, Newegg gift cards, and raffle product prizes throughout the day! Join us from 1pm - 7pm for free play, free snacks, and fun!"
+      ],
       "featured": true,
       "reservation": false,
       "accent": "#FFC400"
