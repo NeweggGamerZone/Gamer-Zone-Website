@@ -139,12 +139,21 @@
   // Shrink each title just enough to read on one line instead, stopping at
   // a floor size rather than shrinking into illegibility — if it truly
   // can't fit even there, it wraps normally rather than clipping.
+  //
+  // The floor is deliberately tight (85% of the date's size, not the far
+  // more permissive 55% this used to allow): a title that needs a bigger
+  // cut than that to fit on one line reads as visibly mismatched against
+  // the date next to it (e.g. "XP League Fortnite Tournament" was shrinking
+  // to ~70% to fit, looking like a different type scale entirely). Titles
+  // that only need a small trim still tuck onto one line; anything longer
+  // just wraps to two lines at the date's full size instead of looking
+  // undersized.
   function fitBoardTitles() {
     document.querySelectorAll('.eu-board .eu-name').forEach(el => {
       el.style.fontSize = '';
       const baseSize = parseFloat(getComputedStyle(el).fontSize);
       if (!baseSize) return;
-      const minSize = baseSize * 0.55;
+      const minSize = baseSize * 0.85;
       let size = baseSize;
       // Shrink and check the ELEMENT'S OWN RENDERED HEIGHT against what a
       // true single line should measure (line-height:1, so one line is
@@ -170,4 +179,18 @@
   // mid-flight. fitBoardTitles() itself is cheap (a handful of elements),
   // so recalculating on every resize event is fine.
   window.addEventListener('resize', fitBoardTitles);
+
+  // The Weekly Lineup section is also a `.reveal` block (see main.js): it
+  // sits rotated/translated/hidden (opacity:0) until scrolled into view,
+  // then animates to its resting state over .7s. Both calls above normally
+  // run before that reveal ever happens (data usually loads well before a
+  // visitor scrolls this far down), so they measure titles against that
+  // rotated/hidden geometry — an unreliable basis for "does this wrap?"
+  // that could leave a title stuck at the wrong size once the section
+  // actually becomes visible. Re-measuring once the reveal transition
+  // finishes guarantees at least one correct pass against the section's
+  // true resting layout.
+  document.querySelectorAll('.eu-section.reveal').forEach(sec => {
+    sec.addEventListener('transitionend', fitBoardTitles, { once: true });
+  });
 })();

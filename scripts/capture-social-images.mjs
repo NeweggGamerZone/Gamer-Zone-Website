@@ -122,6 +122,16 @@ async function main() {
         return !!list && list.children.length > 0;
       }, { timeout: 10000 });
       await page.waitForTimeout(300); // let web fonts finish swapping in
+      // event-update.js's title auto-sizing (fitBoardTitles) runs as soon as
+      // the events load, which can be before this board-mode class landed —
+      // it measures against .eu-section's normal pre-reveal geometry
+      // (translateY/rotateX, opacity:0) rather than board-mode's instant
+      // reset (opacity:1, transform:none), and can wrongly leave a title
+      // stuck wrapped even when it would fit at full width. Firing a resize
+      // event forces a fresh measurement against the real, final layout
+      // board-mode just applied, right before we screenshot it.
+      await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+      await page.waitForTimeout(50);
     }
 
     async function waitForLogo() {

@@ -894,7 +894,19 @@ html.board-mode section.eu-section>h2{display:none}
 html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
 html.board-mode .eu-board{margin:0;width:100vw;padding:clamp(1.6rem,5vw,4.5rem)}
-html.board-mode .reveal{opacity:1;transform:none}
+/* transition:none here matters, not just the final values: .reveal normally
+   animates opacity/transform over .7s (see .reveal above), and without this
+   override that animation still plays when board-mode snaps the class on,
+   just toward these values instead of its usual scroll-triggered ones. That
+   .7s window is exactly when event-update.js's fitBoardTitles() runs (it
+   fires as soon as the events list + fonts are ready, which is almost
+   immediately) — measuring a title's rendered height while the section is
+   still mid-transform (translateY + rotateX under a perspective) produced
+   unreliable results, occasionally leaving a title that should fit on one
+   line (e.g. "Gamer Zone Anniversary") stuck wrapped to two. Cutting the
+   transition for board-mode makes the layout settle instantly, before any
+   measurement happens, which was the actual fix — not a fontSize tweak. */
+html.board-mode .reveal{opacity:1;transform:none;transition:none}
 /* Brand mark at the top of the Weekly Lineup board — visible on the live
    page now too (not just the board-mode screenshot export). align-self
    overrides .eu-board's flex-column stretch so the logo keeps its own
