@@ -57,6 +57,7 @@ const MIME = {
 const FIXED_WIDTH_16X9 = 1150;
 const FIXED_WIDTH_1X1 = 660;
 const TALL_ENOUGH = 2400; // viewport height, generous so nothing ever clips during capture
+const BOARD_BG = '#060708'; // matches --bg, so a letterbox margin blends with the board's own dark edges
 
 function serveStatic(root) {
   return http.createServer((req, res) => {
@@ -143,17 +144,32 @@ async function main() {
 
     // Capture .eu-board's natural rendering at a fixed width, then fit
     // (minimal center-crop) to the exact target pixel dimensions.
+    // Some weeks' boards are taller than others (a theme icon adds real
+    // height, a long title wrapping to two lines adds more) — tall enough,
+    // some weeks, that scaling to fill the target via "cover" pushes the
+    // board past the target height and crops the overflow off the bottom,
+    // which is exactly where the address sits. Rather than crop unevenly
+    // week to week, detect that case and fall back to "contain" (scale to
+    // fit entirely within the frame, no cropping) so nothing ever gets cut
+    // off — trading a small, even letterbox margin on the sides for a
+    // guarantee that the address always stays on-screen at the same output
+    // size. Weeks that already fit keep the original edge-to-edge "cover".
     async function captureBoardFit(width, targetW, targetH, outPath) {
       await page.setViewportSize({ width, height: TALL_ENOUGH });
       await waitForLogo();
       await page.waitForTimeout(150);
       const box = await page.locator('.eu-board').boundingBox();
       const buf = await page.locator('.eu-board').screenshot();
+      const scaledHeight = box ? box.height * (targetW / box.width) : 0;
+      const overflowsTarget = scaledHeight > targetH;
+      const resizeOpts = overflowsTarget
+        ? { fit: 'contain', background: BOARD_BG }
+        : { fit: 'cover', position: 'top' };
       await sharp(buf)
-        .resize(targetW, targetH, { fit: 'cover', position: 'top' })
+        .resize(targetW, targetH, resizeOpts)
         .png()
         .toFile(outPath);
-      return { width, naturalRatio: box ? +(box.width / box.height).toFixed(3) : null };
+      return { width, naturalRatio: box ? +(box.width / box.height).toFixed(3) : null, letterboxed: overflowsTarget };
     }
 
     async function captureDesktopAndSquare(outPrefix) {
