@@ -2,14 +2,14 @@
   "siteName": "Newegg Gamer Zone",
   "tagline": "Free to play. Free snacks. Get in the Zone.",
   "announcement": "",
-  "hours": "Tuesday – Saturday · 10:00 AM – 7:00 PM",
-  "hoursNote": "Occasionally closed for private events — check Events before you visit.",
+  "hours": "Tuesday \u2013 Saturday \u00b7 10:00 AM \u2013 7:00 PM",
+  "hoursNote": "Occasionally closed for private events \u2014 check Events before you visit.",
   "address": "21688 Gateway Center Dr, Ste 130, Diamond Bar, CA 91765",
   "phone": "(626) 271-9700 ext. 29900",
   "mapsUrl": "https://www.google.com/maps/place/Newegg+Gamer+Zone/@33.999655,-117.8360825,17z/data=!4m6!3m5!1s0x80c32b304d605d03:0x495c6a3c824488a7!8m2!3d33.999655!4d-117.8335076!16s%2Fg%2F11z0321nsl?entry=ttu&g_ep=EgoyMDI2MDcyNy4wIKXMDSoASAFQAw%3D%3D",
   "googlePageUrl": "https://share.google/lw08XbMhRUIxo9A5z",
   "yelpUrl": "https://www.yelp.com/biz/newegg-gamer-zone-diamond-bar",
-  "verkadaUrl": "https://command.verkada.com/checkin.html?org_id=46d80157-d067-4dce-b253-37455ccfac45&token=d9d40b81-d448-40a6-aaf5-4a3ea9f43b0e&shard=prod1",
+  "verkadaUrl": "https://command.verkada.com/checkin.html?org_id=46d80157-d067-4dce-b253-37455ccfac45&token=98609c5a-d1d6-40dc-8b1c-dcb9b2168c5e&shard=prod1",
   "reservationUrl": "https://www.newegg.com/promotions/gamer-zone/index.html",
   "instagramUrl": "https://www.instagram.com/newegggamerzone/",
   "discordUrl": "https://discord.gg/newegg",
@@ -28,6 +28,6 @@
   "email": "gamerzone@newegg.com",
   "ambassadorEmail": "gamerzone@newegg.com",
   "ambassadorEmailUrl": "mailto:gamerzone@newegg.com?subject=Ambassador%20Program%20Question",
-  "verkadaDailyUrl": "https://command.verkada.com/checkin.html?org_id=46d80157-d067-4dce-b253-37455ccfac45&token=d9d40b81-d448-40a6-aaf5-4a3ea9f43b0e&shard=prod1",
-  "verkadaDailyDate": "2026-08-10"
+  "verkadaDailyUrl": "https://command.verkada.com/checkin.html?org_id=46d80157-d067-4dce-b253-37455ccfac45&token=98609c5a-d1d6-40dc-8b1c-dcb9b2168c5e&shard=prod1",
+  "verkadaDailyDate": "2026-08-11"
 }
