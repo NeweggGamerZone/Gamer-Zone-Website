@@ -108,7 +108,18 @@ async function main() {
 
   const browser = await chromium.launch();
   try {
-    const page = await browser.newPage();
+    // deviceScaleFactor:2 captures at true 2x pixel density (like a retina
+    // screenshot) instead of Playwright's default 1x. Every board capture
+    // below is then sharp-resized DOWN to its target (e.g. a 660 CSS-px-wide
+    // 1:1 shot is 1320 physical px at 2x, resized down to the 1200 target),
+    // rather than up — upscaling a 660->1200 (1.8x) 1x screenshot was the
+    // cause of soft/blurry-looking exports. Downscaling from a sharper,
+    // denser source instead yields a crisp, "HD" result at the same output
+    // dimensions. This doesn't change the CSS viewport width used for
+    // layout (still set via setViewportSize in CSS px), so none of the
+    // clamp()-based type scale or proportions shift — only pixel density.
+    const context = await browser.newContext({ deviceScaleFactor: 2 });
+    const page = await context.newPage();
 
     async function loadBoard() {
       await page.goto(`${base}/index.html`, { waitUntil: 'networkidle' });
