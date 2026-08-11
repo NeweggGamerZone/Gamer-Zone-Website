@@ -894,6 +894,15 @@ html.board-mode section.eu-section>h2{display:none}
 html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
 html.board-mode .eu-board{margin:0;width:100vw;padding:clamp(1.6rem,5vw,4.5rem)}
+/* Board-mode only: the theme icon's normal on-page size (clamp(192px,30vw,
+   320px), sized generously for full-page browsing) is the single biggest
+   source of a with-icon board running taller than the 1:1/16:9 export
+   frames — enough to push the address past the bottom edge and force a
+   letterboxed export instead of the usual edge-to-edge fill. Scaling it
+   down for exports only (never on the live page) recovers that space so
+   an icon week's export matches a no-icon week's: full-bleed, no margins,
+   address still on-screen. */
+html.board-mode .eu-board-icon img{height:clamp(120px,19vw,200px)}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,
