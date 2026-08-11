@@ -768,7 +768,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
 .eu-board-icon{display:flex;justify-content:center;padding-bottom:clamp(.3rem,1vw,.5rem)}
-.eu-board-icon img{height:clamp(192px,30vw,320px);width:auto}
+.eu-board-icon img{height:clamp(240px,37.5vw,400px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
