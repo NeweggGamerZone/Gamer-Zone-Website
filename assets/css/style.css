@@ -902,15 +902,19 @@ html.board-mode .eu-board{margin:0;width:100vw;padding:clamp(1.6rem,5vw,4.5rem)}
    down for exports only (never on the live page) recovers that space so
    an icon week's export matches a no-icon week's: full-bleed, no margins,
    address still on-screen. */
-/* Sized to fit within board-mode's ORIGINAL, unmodified padding/row-gap
-   (restored above — no board-mode whitespace is trimmed) even on the
-   tallest current week (icon + a wrapped title + the Anniversary's
-   2-paragraph boardDesc), so every export stays full-bleed with zero crop
-   and zero letterbox, and no element crowds or overlaps another. Smaller
-   than the live page's icon (by design, see above) and than the last two
-   board-mode sizes tried (200px and 240px caps) — those didn't leave
-   enough room once the original spacing came back. */
-html.board-mode .eu-board-icon img{height:clamp(96px,15.2vw,160px)}
+/* Sized to be as large as possible while still fitting within board-mode's
+   ORIGINAL, unmodified padding/row-gap (restored above — no board-mode
+   whitespace is trimmed), with zero crop and zero letterbox, and no
+   element crowding another. The binding worst case is a full 3-row
+   no-icon-week board (2 closures + a wrapped two-line title) rather than
+   the Anniversary week itself — the Anniversary's boardDesc is now a
+   single shortened paragraph, so that week has headroom to spare.
+   Measured empirically against that worst case with ~5% of vertical
+   headroom left as a safety margin for minor future copy/content
+   changes; a bare-minimum-margin size (~200px cap) measured right at the
+   edge of triggering letterboxing, so 190px was chosen instead of pushing
+   all the way to that limit. */
+html.board-mode .eu-board-icon img{height:clamp(114px,18.1vw,190px)}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,
