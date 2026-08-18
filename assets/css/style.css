@@ -796,7 +796,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    icon wasn't on the user's final "should be larger" list, so its size
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
-.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(1.2rem,3vw,2.2rem);padding-bottom:clamp(.15rem,.5vw,.25rem)}
+.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7vw,1.2rem);padding-bottom:clamp(.08rem,.25vw,.15rem)}
 .eu-board-icon img{height:clamp(276px,43.125vw,460px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
@@ -824,7 +824,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    specific row. Squeezed out the actual empirically-safe maximum instead
    (clamp(1.44rem,3.12vw,2.4rem) -> clamp(1.46rem,3.16vw,2.44rem), ~2%),
    which is still comfortably one line with the tighter gap. */
-.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.46rem,3.16vw,2.44rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.752rem,3.792vw,2.928rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-eyebrow-title::after{content:none}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
 /* Weekly-theme subtitle (e.g. "Helldivers 2, Overcooked!...") and the
@@ -851,7 +851,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-theme-highlight{color:var(--ne-blue-text)}
 /* Week's date range sits on the right side of the masthead row, at the
    same font weight/size as the eyebrow title (not a smaller caption). */
-.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.46rem,3.16vw,2.44rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.752rem,3.792vw,2.928rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
@@ -883,7 +883,10 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    original, unbumped value along with --eu-date-size above), so this
    and .eu-desc below can each be tuned independently. Keeps .eu-meta in
    line with .eu-desc, which got the same two bumps. */
-.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
+/* Left-aligned per request, overriding .eu-info's own text-align:right —
+   the row title above stays right-aligned, only the time line below it
+   shifts to the left edge of the (title-width) .eu-info column. */
+.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em;text-align:left}
 .eu-major .eu-name{color:var(--cal-major)}
 /* extra description line for major/featured events only — same family as
    the subtagline but a touch brighter, since it's called out on purpose.

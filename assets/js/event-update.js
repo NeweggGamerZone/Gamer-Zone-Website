@@ -78,10 +78,13 @@
   // highlighted in blue right in the masthead, and the week's date range
   // sits on the right side of that same masthead row, at the same
   // weight/size as the title (not a smaller caption).
+  // "GAMER ZONE: " prefix dropped per request — the masthead now just reads
+  // the theme name itself (e.g. "CO-OP GAMES WEEK"), with the date range
+  // still sitting to its right on the same row.
   const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
   const eyebrowDescEl = document.getElementById('eu-eyebrow-desc');
   const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
-  if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `GAMER ZONE: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
+  if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `<span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
   if (eyebrowDescEl) eyebrowDescEl.textContent = themeDesc;
   if (eyebrowDatesEl) {
     const s = monthDate(weekStart), e = monthDate(weekEnd);
