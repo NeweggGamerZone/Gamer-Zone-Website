@@ -768,7 +768,11 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
 .eu-board-icon{display:flex;justify-content:center;padding-bottom:clamp(.3rem,1vw,.5rem)}
-.eu-board-icon img{height:clamp(240px,37.5vw,400px);width:auto}
+/* Live-page icon lowered 15% (clamp(240px,37.5vw,400px) ->
+   clamp(204px,31.9vw,340px)) at the user's request, to sit better against
+   the recently-enlarged masthead/subtitle/address text above and below
+   it. Board-mode's own export-only size (below) is unaffected. */
+.eu-board-icon img{height:clamp(204px,31.9vw,340px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
