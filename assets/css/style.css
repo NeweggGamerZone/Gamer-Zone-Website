@@ -767,12 +767,12 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
 /* Optional per-week badge art, centered above the address row. Hidden
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
-.eu-board-icon{display:flex;justify-content:center;padding-bottom:clamp(.3rem,1vw,.5rem)}
-/* Live-page icon lowered 15% (clamp(240px,37.5vw,400px) ->
-   clamp(204px,31.9vw,340px)) at the user's request, to sit better against
-   the recently-enlarged masthead/subtitle/address text above and below
-   it. Board-mode's own export-only size (below) is unaffected. */
-.eu-board-icon img{height:clamp(204px,31.9vw,340px);width:auto}
+/* margin-top added to push the icon lower (its y position), per the
+   user's request, after a same-size-but-smaller-icon attempt turned out
+   to be the wrong read of "lower the icon" — size is back to its
+   original clamp(240px,37.5vw,400px) below. */
+.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(1rem,3vw,2rem);padding-bottom:clamp(.3rem,1vw,.5rem)}
+.eu-board-icon img{height:clamp(240px,37.5vw,400px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
@@ -799,10 +799,14 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
 /* Weekly-theme subtitle (e.g. "Helldivers 2, Overcooked!...") and the
    bottom address line both render as a plain <p> inside .eu-eyebrow (the
-   address row reuses the same .eu-eyebrow class), so this one rule
-   covers both per the user's request. Bumped ~20% (max(15px,1.15rem) ->
-   max(18px,1.38rem)) for consistency with the title/date bump above. */
+   address row reuses the same .eu-eyebrow class), so this base rule
+   covers both. Bumped ~20% (max(15px,1.15rem) -> max(18px,1.38rem)) for
+   consistency with the title/date bump above. */
 .eu-eyebrow p{font-family:var(--eu-body);font-size:max(18px,1.38rem);color:var(--ink-dim);margin-top:.3rem}
+/* Weekly-theme subtitle specifically (not the address, which stays at the
+   base size right above) bumped another 15% on top of that:
+   max(18px,1.38rem) -> max(21px,1.59rem). */
+#eu-eyebrow-desc{font-size:max(21px,1.59rem)}
 .eu-brand{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ne-orange);font-size:max(14px,.95rem);text-align:right;white-space:nowrap;flex:none}
 .eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
 
@@ -844,8 +848,11 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-meta{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
 .eu-major .eu-name{color:var(--cal-major)}
 /* extra description line for major/featured events only — same family as
-   the subtagline but a touch brighter, since it's called out on purpose. */
-.eu-desc{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink);margin-top:.2rem;letter-spacing:.01em}
+   the subtagline but a touch brighter, since it's called out on purpose.
+   Sized 15% above --eu-meta-size directly (rather than bumping that
+   shared variable) so .eu-meta — the per-row time subtagline — doesn't
+   grow along with it. */
+.eu-desc{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.15);color:var(--ink);margin-top:.2rem;letter-spacing:.01em}
 
 /* ---- native responsive breakpoints (normal in-page browsing) ----
    Keyed to real viewport width, same convention as the rest of the site
