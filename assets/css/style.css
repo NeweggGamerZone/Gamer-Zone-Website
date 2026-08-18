@@ -756,7 +756,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      margin-bottom, so the gap above the first event row (divider ->
      "AUG 5") comes out equal to the gap above every later row
      (row -> border-top -> next row) — both resolve to 2x this value. */
-  --eu-row-pad: clamp(.6rem, 1.6vw, .85rem);
+  --eu-row-pad: clamp(.4rem, 1.1vw, .6rem);
   /* Side margins bumped 10% over the site-wide --safe-x, scoped to this
      board only (a dedicated --eu-safe-x rather than editing --safe-x
      itself, which is shared by the nav/footer/every other section). The
@@ -774,7 +774,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      icon's own margins and the weekly-theme subtitle size instead (see
      .eu-board-icon and #eu-eyebrow-desc below), keeping the board at ~1:1
      with nothing cut off top or bottom. */
-  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(1.3rem,2.6vw,1.7rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
+  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(1.1rem,2.3vw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
@@ -796,8 +796,8 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    icon wasn't on the user's final "should be larger" list, so its size
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
-.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(2.2rem,5.5vw,4rem);padding-bottom:clamp(.25rem,.8vw,.4rem)}
-.eu-board-icon img{height:clamp(240px,37.5vw,400px);width:auto}
+.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(1.2rem,3vw,2.2rem);padding-bottom:clamp(.15rem,.5vw,.25rem)}
+.eu-board-icon img{height:clamp(276px,43.125vw,460px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
@@ -994,7 +994,7 @@ html.board-mode .reveal{opacity:1;transform:none;transition:none}
    section's top edge instead of sitting at the padding's full depth.
    Bumped another 25%, then another 10% (clamp(45px,9vw,75px) ->
    clamp(56px,11.25vw,94px) -> clamp(61.6px,12.375vw,103.4px)). */
-.board-logo{display:block;align-self:center;height:clamp(61.6px,12.375vw,103.4px);width:auto;margin:clamp(-.8rem,-1.6vw,-.4rem) 0 clamp(1rem,3vw,1.6rem)}
+.board-logo{display:block;align-self:center;height:clamp(73.92px,14.85vw,124.08px);width:auto;margin:clamp(-.8rem,-1.6vw,-.4rem) 0 clamp(1rem,3vw,1.6rem)}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
    and lets .eu-board span the full viewport width, but every size/spacing
    value inside the board (logo, type scale, row gaps) — and its overall
