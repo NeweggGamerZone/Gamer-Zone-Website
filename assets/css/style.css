@@ -824,7 +824,12 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    specific row. Squeezed out the actual empirically-safe maximum instead
    (clamp(1.44rem,3.12vw,2.4rem) -> clamp(1.46rem,3.16vw,2.44rem), ~2%),
    which is still comfortably one line with the tighter gap. */
-.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.752rem,3.792vw,2.928rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+/* Capped at clamp(...,2.78rem) rather than the prior 2.928rem — adding the
+   "THEME: " prefix back lengthened the masthead text enough that the
+   full +20% size wrapped it to two lines at normal desktop widths.
+   Empirically re-tightened to the actual one-line ceiling for the new,
+   longer text ("THEME: CO-OP GAMES WEEK  AUG 18 – 22"). */
+.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601vw,2.78rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-eyebrow-title::after{content:none}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
 /* Weekly-theme subtitle (e.g. "Helldivers 2, Overcooked!...") and the
@@ -851,7 +856,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-theme-highlight{color:var(--ne-blue-text)}
 /* Week's date range sits on the right side of the masthead row, at the
    same font weight/size as the eyebrow title (not a smaller caption). */
-.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.752rem,3.792vw,2.928rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601vw,2.78rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
@@ -866,7 +871,11 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    doubled-up line stacking against the location row below the list
    (last row) — keeps just one clean rule between adjacent event rows. */
 .eu-list .eu-row:first-child{border-top:none}
-.eu-date-wrap{display:flex;align-items:center;gap:.6rem;min-width:0}
+/* Stacked column now: the date(+star) row on top, the per-row time
+   subtagline directly below it — left-aligned to the date's own left
+   edge per request, instead of living in .eu-info under the title. */
+.eu-date-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;min-width:0}
+.eu-date-top{display:flex;align-items:center;gap:.6rem}
 .eu-date{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:var(--eu-date-size);line-height:1;color:#fff;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
 /* Major/tournament rows use the same orange as the calendar's "Major /
    Tournament" legend swatch (--cal-major), not blue, so a tournament reads
@@ -886,14 +895,14 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 /* Left-aligned per request, overriding .eu-info's own text-align:right —
    the row title above stays right-aligned, only the time line below it
    shifts to the left edge of the (title-width) .eu-info column. */
-.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em;text-align:left}
+.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);letter-spacing:.01em;text-align:left}
 .eu-major .eu-name{color:var(--cal-major)}
 /* extra description line for major/featured events only — same family as
    the subtagline but a touch brighter, since it's called out on purpose.
    Sized above --eu-meta-size directly (rather than bumping that shared
    variable) so .eu-meta — the per-row time subtagline — doesn't grow
    along with it; bumped 15% then 10% (1.265x total), matching .eu-meta. */
-.eu-desc{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink);margin-top:.2rem;letter-spacing:.01em}
+.eu-desc{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink);margin-top:.55rem;letter-spacing:.01em}
 
 /* ---- native responsive breakpoints (normal in-page browsing) ----
    Keyed to real viewport width, same convention as the rest of the site

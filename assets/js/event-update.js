@@ -78,13 +78,14 @@
   // highlighted in blue right in the masthead, and the week's date range
   // sits on the right side of that same masthead row, at the same
   // weight/size as the title (not a smaller caption).
-  // "GAMER ZONE: " prefix dropped per request — the masthead now just reads
-  // the theme name itself (e.g. "CO-OP GAMES WEEK"), with the date range
-  // still sitting to its right on the same row.
+  // "GAMER ZONE: " prefix dropped per an earlier request, then replaced
+  // with a plain "THEME: " label (in the base white text color, not
+  // highlighted) ahead of the theme name itself — the date range still
+  // sits to its right on the same row.
   const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
   const eyebrowDescEl = document.getElementById('eu-eyebrow-desc');
   const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
-  if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `<span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
+  if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `THEME: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
   if (eyebrowDescEl) eyebrowDescEl.textContent = themeDesc;
   if (eyebrowDatesEl) {
     const s = monthDate(weekStart), e = monthDate(weekEnd);
@@ -131,14 +132,22 @@
       ? (Array.isArray(ev.boardDesc) ? ev.boardDesc : [ev.boardDesc])
       : [];
     const descHtml = descParas.map(p => `<p class="eu-desc">${GZ.esc(p)}</p>`).join('');
+    // Time subtagline moved out of .eu-info (the right-hand title column)
+    // and into .eu-date-wrap, stacked under the date itself — per request,
+    // it now left-aligns flush with the date's own left edge instead of
+    // sitting under (and aligned to) the title on the right. Only rendered
+    // when there's a time to show, so date-only rows don't pick up an
+    // empty blank line underneath.
     return `<div class="eu-row${isMajor ? ' eu-major' : ''}${closure ? ' eu-closure' : ''}">
       <div class="eu-date-wrap">
-        <span class="eu-date">${mon.toUpperCase()} ${day}</span>
-        ${isMajor ? '<span class="eu-major-mark" aria-hidden="true">&#9733;</span>' : ''}
+        <div class="eu-date-top">
+          <span class="eu-date">${mon.toUpperCase()} ${day}</span>
+          ${isMajor ? '<span class="eu-major-mark" aria-hidden="true">&#9733;</span>' : ''}
+        </div>
+        ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
       </div>
       <div class="eu-info">
         <div class="eu-name">${closure ? 'Closed — ' : ''}${GZ.esc(name.replace(/^Closed\s*[—-]\s*/, ''))}</div>
-        <div class="eu-meta">${ev.time ? GZ.esc(ev.time) : ''}</div>
       </div>
     </div>${descHtml}`;
   }
