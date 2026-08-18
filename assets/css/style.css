@@ -750,29 +750,37 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      margin-bottom, so the gap above the first event row (divider ->
      "AUG 5") comes out equal to the gap above every later row
      (row -> border-top -> next row) — both resolve to 2x this value. */
-  --eu-row-pad: clamp(.7rem, 2vw, 1.15rem);
-  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(2.2rem,6vw,4.5rem) var(--safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
+  --eu-row-pad: clamp(.5rem, 1.4vw, .8rem);
+  /* Side margins bumped 10% over the site-wide --safe-x, scoped to this
+     board only (a dedicated --eu-safe-x rather than editing --safe-x
+     itself, which is shared by the nav/footer/every other section). The
+     negative margin still cancels exactly the .container's own
+     var(--safe-x) padding; only this board's own inner padding uses the
+     bumped value, so the net effect is the board sitting 10% further in
+     from the edge than the rest of the page. */
+  --eu-safe-x: calc(var(--safe-x) * 1.1);
+  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(1rem,2.3vw,1.2rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
-.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(1rem,3vw,1.8rem);border-bottom:3px solid var(--ne-orange)}
+.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.7rem,2vw,1.2rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
 /* Masthead icon+textcol block grows to fill the full width of .eu-top
    (its only child otherwise sits at natural content width), so the
    title row's space-between inside it reaches the section's true right
    edge — not the location row, which stays at its own natural size. */
 .eu-top>.eu-eyebrow{flex:1}
-.eu-location-row{margin-top:clamp(1rem,3vw,1.6rem);padding-top:clamp(.8rem,2.5vw,1.2rem)}
+.eu-location-row{margin-top:clamp(.5rem,1.4vw,.75rem);padding-top:clamp(.4rem,1.1vw,.6rem)}
 /* Optional per-week badge art, centered above the address row. Hidden
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
-/* margin-top added to push the icon lower (its y position), per the
-   user's request, after a same-size-but-smaller-icon attempt turned out
-   to be the wrong read of "lower the icon" — size is back to its
-   original clamp(240px,37.5vw,400px) below. */
-.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(1rem,3vw,2rem);padding-bottom:clamp(.3rem,1vw,.5rem)}
-.eu-board-icon img{height:clamp(240px,37.5vw,400px);width:auto}
+/* margin-top pushes the icon lower (its y position); bumped again
+   (clamp(1rem,3vw,2rem) -> clamp(2rem,5vw,3.5rem)) per "lower it a bit
+   more". Icon size itself bumped another 10% on top of its original
+   clamp(240px,37.5vw,400px): clamp(264px,41.25vw,440px). */
+.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(1.6rem,4vw,2.8rem);padding-bottom:clamp(.3rem,1vw,.5rem)}
+.eu-board-icon img{height:clamp(264px,41.25vw,440px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
@@ -800,9 +808,11 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 /* Weekly-theme subtitle (e.g. "Helldivers 2, Overcooked!...") and the
    bottom address line both render as a plain <p> inside .eu-eyebrow (the
    address row reuses the same .eu-eyebrow class), so this base rule
-   covers both. Bumped ~20% (max(15px,1.15rem) -> max(18px,1.38rem)) for
-   consistency with the title/date bump above. */
-.eu-eyebrow p{font-family:var(--eu-body);font-size:max(18px,1.38rem);color:var(--ink-dim);margin-top:.3rem}
+   covers both by default — though the subtitle now gets its own more
+   specific override just below, so in practice this rule only sizes the
+   address. Bumped ~20% then another 10% (max(15px,1.15rem) ->
+   max(18px,1.38rem) -> max(19.8px,1.518rem)) at the user's request. */
+.eu-eyebrow p{font-family:var(--eu-body);font-size:max(19.8px,1.518rem);color:var(--ink-dim);margin-top:.3rem}
 /* Weekly-theme subtitle specifically (not the address, which stays at the
    base size right above) bumped another 15% on top of that:
    max(18px,1.38rem) -> max(21px,1.59rem). */
@@ -844,8 +854,12 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 /* event title: same size, weight, and line-height as the date so the two
    columns' text tops land on the exact same baseline across the row. */
 .eu-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1;color:var(--ink)}
-/* subtagline: exactly 50% of the event title, floored at 14px */
-.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:var(--eu-meta-size);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
+/* subtagline: exactly 50% of the event title, floored at 14px. Bumped
+   15% (per "the time, 1-7pm" / "the special event subtitle" request) via
+   its own calc rather than raising --eu-meta-size itself, so this and
+   .eu-desc below can each be tuned independently. This also brings
+   .eu-meta back in line with .eu-desc, which got the same +15% earlier. */
+.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.15);color:var(--ink-dim);margin-top:.25rem;letter-spacing:.01em}
 .eu-major .eu-name{color:var(--cal-major)}
 /* extra description line for major/featured events only — same family as
    the subtagline but a touch brighter, since it's called out on purpose.
