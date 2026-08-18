@@ -756,7 +756,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      margin-bottom, so the gap above the first event row (divider ->
      "AUG 5") comes out equal to the gap above every later row
      (row -> border-top -> next row) — both resolve to 2x this value. */
-  --eu-row-pad: clamp(.25rem, .7vw, .4rem);
+  --eu-row-pad: clamp(.6rem, 1.6vw, .85rem);
   /* Side margins bumped 10% over the site-wide --safe-x, scoped to this
      board only (a dedicated --eu-safe-x rather than editing --safe-x
      itself, which is shared by the nav/footer/every other section). The
@@ -765,19 +765,28 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      bumped value, so the net effect is the board sitting 10% further in
      from the edge than the rest of the page. */
   --eu-safe-x: calc(var(--safe-x) * 1.1);
-  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(.5rem,1.2vw,.6rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
+  /* Vertical padding: the previous clamp(.5rem,1.2vw,.6rem) was trimmed too
+     far chasing the 1:1 ratio during the last round — combined with
+     .board-logo's negative top margin (below), it let the logo's top edge
+     poke above this box's own border edge, which this element's
+     overflow:hidden then clipped outright. Restored to a real top/bottom
+     margin; the extra height this costs is recovered by tightening the
+     icon's own margins and the weekly-theme subtitle size instead (see
+     .eu-board-icon and #eu-eyebrow-desc below), keeping the board at ~1:1
+     with nothing cut off top or bottom. */
+  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(1.3rem,2.6vw,1.7rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
-.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.4rem,1vw,.6rem);border-bottom:3px solid var(--ne-orange)}
+.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.5rem,1.3vw,.75rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
 /* Masthead icon+textcol block grows to fill the full width of .eu-top
    (its only child otherwise sits at natural content width), so the
    title row's space-between inside it reaches the section's true right
    edge — not the location row, which stays at its own natural size. */
 .eu-top>.eu-eyebrow{flex:1}
-.eu-location-row{margin-top:clamp(.25rem,.7vw,.35rem);padding-top:clamp(.2rem,.5vw,.3rem)}
+.eu-location-row{margin-top:clamp(.4rem,1vw,.55rem);padding-top:clamp(.3rem,.8vw,.45rem)}
 /* Optional per-week badge art, centered above the address row. Hidden
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
@@ -787,7 +796,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    icon wasn't on the user's final "should be larger" list, so its size
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
-.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(2.4rem,6vw,4.5rem);padding-bottom:clamp(.3rem,1vw,.5rem)}
+.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(2.2rem,5.5vw,4rem);padding-bottom:clamp(.25rem,.8vw,.4rem)}
 .eu-board-icon img{height:clamp(240px,37.5vw,400px);width:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
@@ -830,7 +839,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 /* Weekly-theme subtitle specifically (not the address, which stays at the
    base size right above) bumped another 15%, then another 10% on top of
    that: max(18px,1.38rem) -> max(21px,1.59rem) -> max(23.1px,1.749rem). */
-#eu-eyebrow-desc{font-size:max(23.1px,1.749rem)}
+#eu-eyebrow-desc{font-size:max(21px,1.59rem)}
 .eu-brand{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ne-orange);font-size:max(14px,.95rem);text-align:right;white-space:nowrap;flex:none}
 .eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
 
@@ -985,7 +994,7 @@ html.board-mode .reveal{opacity:1;transform:none;transition:none}
    section's top edge instead of sitting at the padding's full depth.
    Bumped another 25%, then another 10% (clamp(45px,9vw,75px) ->
    clamp(56px,11.25vw,94px) -> clamp(61.6px,12.375vw,103.4px)). */
-.board-logo{display:block;align-self:center;height:clamp(61.6px,12.375vw,103.4px);width:auto;margin:clamp(-1.6rem,-3.2vw,-.9rem) 0 clamp(1rem,3vw,1.6rem)}
+.board-logo{display:block;align-self:center;height:clamp(61.6px,12.375vw,103.4px);width:auto;margin:clamp(-.8rem,-1.6vw,-.4rem) 0 clamp(1rem,3vw,1.6rem)}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
    and lets .eu-board span the full viewport width, but every size/spacing
    value inside the board (logo, type scale, row gaps) — and its overall
