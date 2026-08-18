@@ -787,10 +787,18 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    description line below varies in length. */
 .eu-eyebrow-titlerow{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 /* masthead: the instantly-recognizable ID of this board */
-.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+/* Title + date-range font-size bumped 20% (clamp(1.2rem,2.6vw,2rem) ->
+   clamp(1.44rem,3.12vw,2.4rem)) at the user's request — verified still
+   fits on one line at normal in-page desktop widths. */
+.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.44rem,3.12vw,2.4rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-eyebrow-title::after{content:none}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
-.eu-eyebrow p{font-family:var(--eu-body);font-size:max(15px,1.15rem);color:var(--ink-dim);margin-top:.3rem}
+/* Weekly-theme subtitle (e.g. "Helldivers 2, Overcooked!...") and the
+   bottom address line both render as a plain <p> inside .eu-eyebrow (the
+   address row reuses the same .eu-eyebrow class), so this one rule
+   covers both per the user's request. Bumped ~20% (max(15px,1.15rem) ->
+   max(18px,1.38rem)) for consistency with the title/date bump above. */
+.eu-eyebrow p{font-family:var(--eu-body);font-size:max(18px,1.38rem);color:var(--ink-dim);margin-top:.3rem}
 .eu-brand{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ne-orange);font-size:max(14px,.95rem);text-align:right;white-space:nowrap;flex:none}
 .eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
 
@@ -802,7 +810,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-theme-highlight{color:var(--ne-blue-text)}
 /* Week's date range sits on the right side of the masthead row, at the
    same font weight/size as the eyebrow title (not a smaller caption). */
-.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.44rem,3.12vw,2.4rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
@@ -934,8 +942,10 @@ html.board-mode .reveal{opacity:1;transform:none;transition:none}
    aspect ratio (height set, width:auto) instead of stretching full-width.
    Sized 50% larger than the original mark, with a negative top margin
    that pulls it up into .eu-board's own top padding — closer to the
-   section's top edge instead of sitting at the padding's full depth. */
-.board-logo{display:block;align-self:center;height:clamp(45px,9vw,75px);width:auto;margin:clamp(-1.6rem,-3.2vw,-.9rem) 0 clamp(1rem,3vw,1.6rem)}
+   section's top edge instead of sitting at the padding's full depth.
+   Bumped another 25% at the user's request (clamp(45px,9vw,75px) ->
+   clamp(56px,11.25vw,94px)). */
+.board-logo{display:block;align-self:center;height:clamp(56px,11.25vw,94px);width:auto;margin:clamp(-1.6rem,-3.2vw,-.9rem) 0 clamp(1rem,3vw,1.6rem)}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
    and lets .eu-board span the full viewport width, but every size/spacing
    value inside the board (logo, type scale, row gaps) — and its overall
