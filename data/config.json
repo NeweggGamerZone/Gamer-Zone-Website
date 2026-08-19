@@ -2,8 +2,8 @@
   "siteName": "Newegg Gamer Zone",
   "tagline": "Free to play. Free snacks. Get in the Zone.",
   "announcement": "",
-  "hours": "Tuesday – Saturday · 10:00 AM – 7:00 PM",
-  "hoursNote": "Occasionally closed for private events — check Events before you visit.",
+  "hours": "Tuesday \u2013 Saturday \u00b7 10:00 AM \u2013 7:00 PM",
+  "hoursNote": "Occasionally closed for private events \u2014 check Events before you visit.",
   "address": "21688 Gateway Center Dr, Ste 130, Diamond Bar, CA 91765",
   "phone": "(626) 271-9700 ext. 29900",
   "mapsUrl": "https://www.google.com/maps/place/Newegg+Gamer+Zone/@33.999655,-117.8360825,17z/data=!4m6!3m5!1s0x80c32b304d605d03:0x495c6a3c824488a7!8m2!3d33.999655!4d-117.8335076!16s%2Fg%2F11z0321nsl?entry=ttu&g_ep=EgoyMDI2MDcyNy4wIKXMDSoASAFQAw%3D%3D",
@@ -28,6 +28,6 @@
   "email": "gamerzone@newegg.com",
   "ambassadorEmail": "gamerzone@newegg.com",
   "ambassadorEmailUrl": "mailto:gamerzone@newegg.com?subject=Ambassador%20Program%20Question",
-  "verkadaDailyUrl": "https://command.verkada.com/checkin.html?org_id=46d80157-d067-4dce-b253-37455ccfac45&token=bd4edfb7-8e54-42c9-aaa1-dfc5b7e29da6&shard=prod1",
-  "verkadaDailyDate": "2026-08-18"
+  "verkadaDailyUrl": "https://command.verkada.com/checkin.html?org_id=46d80157-d067-4dce-b253-37455ccfac45&token=d5ad7589-4e03-4da6-81f7-4ad7472f126f&shard=prod1",
+  "verkadaDailyDate": "2026-08-19"
 }
