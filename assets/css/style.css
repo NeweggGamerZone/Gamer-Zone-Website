@@ -155,7 +155,13 @@ h1 .accent, h2 .accent { color: var(--ne-blue-text); }
 .updated-stamp { font-size: .78rem; color: var(--ink-dim); }
 
 .hero { position: relative; padding: 4rem 0 2.5rem; }
-.hero p.lead { font-size: 1.12rem; color: var(--ink-dim); max-width: 640px; margin: .9rem 0 1.4rem; }
+/* No max-width here: this .lead sits under each sub-page's <h1> and should
+   follow the shared .container/page-width, same as the rest of the page's
+   content — a fixed 640px cap made it visibly narrower than everything else
+   on games/events/ambassador/edu. (The homepage's distinct centered
+   .hero-stage .lead below is a different, intentionally narrower design and
+   is untouched.) */
+.hero p.lead { font-size: 1.12rem; color: var(--ink-dim); margin: .9rem 0 1.4rem; }
 .hero-decor { position: absolute; inset: 0; pointer-events: none; z-index: -1; }
 body.home-page .hero-decor { display: none; } /* homepage gets the full techno-city hero instead */
 .hero-decor .stripe { position: absolute; height: 12px; width: 42%; background: repeating-linear-gradient(-55deg, var(--ne-orange) 0 16px, transparent 16px 32px); opacity: .28; will-change: transform; }
@@ -196,6 +202,10 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 
 /* disabled/closed buttons: no shine, no hover, not clickable */
 .btn.is-disabled { background: var(--bg-3); color: var(--ink-dim); box-shadow: none; cursor: not-allowed; pointer-events: none; }
+/* Opt a specific button out of the periodic shine (e.g. the preregister-your-
+   visit CTA, which already sits in its own highlighted callout and doesn't
+   need the extra flashing motion competing with it). */
+.btn.no-shine::after { display: none; }
 .btn.is-disabled::after { display: none; }
 .btn.is-disabled:hover { background: var(--bg-3); }
 
@@ -204,6 +214,25 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
 .card { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: 1.3rem; }
 .card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; }
+.review-card { display: flex; flex-direction: column; gap: .5rem; }
+.review-stars { color: var(--ne-orange); font-size: 1rem; letter-spacing: .1em; }
+.review-quote { font-style: italic; color: var(--ink); flex: 1; }
+.review-source { font-size: .8rem; margin-top: .2rem; }
+/* Registration steps: the step number is the most emphasized element (big,
+   orange, bold) — matching the reference "AI mode" step pattern — while the
+   step's icon becomes a small, white, secondary accent instead of the large
+   colored glyph it used to be. */
+.reg-step { text-align: center; }
+.reg-step-top { display: flex; flex-direction: column; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+.reg-step-num { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, var(--ne-orange), #c96f10); color: #fff; font-family: var(--head); font-weight: 800; font-size: 1.55rem; box-shadow: 0 0 0 4px rgba(250,157,40,.18), 0 6px 18px rgba(0,0,0,.4); }
+.reg-step-icon .ic { width: 20px; height: 20px; fill: #fff; opacity: .8; }
+.reg-step h3 { text-align: center; }
+.reg-step p.dim { text-align: left; }
+/* Verkada callout: highlighted box calling out the Verkada guest pass as the
+   fastest way to check in, sitting right next to the preregister CTA. */
+.verkada-callout { display: flex; align-items: flex-start; gap: .8rem; background: rgba(250,157,40,.08); border-left: 4px solid var(--ne-orange); padding: .9rem 1.1rem; max-width: 720px; margin: 1.3rem 0 .8rem; }
+.verkada-callout .ic { flex: none; width: 26px; height: 26px; fill: var(--ne-orange); margin-top: .1rem; }
+.verkada-callout strong { color: var(--ne-orange); }
 .event-card { border-left: 4px solid var(--ne-orange); }
 .event-card .meta { font-size: .85rem; color: var(--ink-dim); }
 .tag { display: inline-block; font-family: var(--head); font-size: .68rem; font-weight: 800; padding: .18rem .6rem; background: var(--ne-navy); color: #cfe0ff; text-transform: uppercase; letter-spacing: .08em; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
@@ -340,18 +369,29 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .site-footer .container { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); padding: 2rem var(--safe-x); }
 .site-footer h4 { font-family: var(--head); color: var(--ne-orange); margin-bottom: .5rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
 .site-footer p, .site-footer a { font-size: .9rem; color: var(--ink); display: block; overflow-wrap: anywhere; }
-.footer-brand { display: flex; align-items: center; gap: 1rem; justify-content: center; padding: 1.2rem 1rem .4rem; }
-.footer-brand img.ne-logo { width: 230px; height: auto; }
+/* Logo + permanent address/hours stack vertically underneath it (not just a
+   bare centered image) so visitors can see where/when to visit without
+   clicking anything. Sits leftmost, next to the link columns — the footer is
+   tall enough that a centered logo under everything reads as a lot of empty
+   space. .footer-top wraps the two side-by-side; both selectors below
+   out-specify the general .container/.footer-brand rules above so they win
+   regardless of source order. */
+.footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; padding: 1.2rem 1rem .4rem; }
+.footer-brand img.ne-logo { width: 230px; height: auto; margin-bottom: .3rem; }
 .footer-brand img.eggbot { width: 44px; height: 44px; }
-/* Footer logo sits leftmost, next to the link columns (not centered below
-   them) — the footer is tall enough that a centered logo under everything
-   reads as a lot of empty space. .footer-top wraps the two side-by-side;
-   both selectors below out-specify the general .container/.footer-brand
-   rules above so they win regardless of source order. */
+.footer-brand .footer-static { color: var(--ink-dim); font-size: .82rem; line-height: 1.4; margin: 0; }
 .site-footer .footer-top { display: flex; align-items: flex-start; gap: 2.2rem; flex-wrap: wrap; padding: 2rem var(--safe-x); }
-.site-footer .footer-top .footer-brand { justify-content: flex-start; padding: .3rem 0 0; flex: none; }
-.site-footer .footer-top .links-grid { flex: 1 1 320px; display: grid; gap: 1.2rem 1.1rem; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); padding: 0; }
+.site-footer .footer-top .footer-brand { padding: .3rem 0 0; flex: none; }
+.site-footer .footer-top .links-grid { flex: 1 1 320px; display: grid; gap: 1.2rem 1.1rem; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); padding: 0; }
 @media (max-width: 980px) { .site-footer .footer-top .footer-brand img.ne-logo { width: 160px; } }
+/* Every footer link gets its own icon (set via inline <i data-ic>) plus a
+   consistent hover effect — text shifts to orange, icon scales up slightly —
+   so the whole footer reads as a clear, scannable list of distinct actions
+   rather than plain text links. */
+.ftr-link { display: flex; align-items: center; gap: .55rem; padding: .18rem 0; color: var(--ink); transition: color .15s ease; }
+.ftr-link .ic { width: 18px; height: 18px; flex: none; fill: currentColor; transition: transform .15s ease; }
+.ftr-link:hover, .ftr-link:focus-visible { color: var(--ne-orange); }
+.ftr-link:hover .ic, .ftr-link:focus-visible .ic { transform: scale(1.18); }
 .legal { max-width: 860px; margin: 0 auto; padding: .4rem var(--safe-x) 1rem; text-align: center; color: var(--ink-dim); font-size: .74rem; line-height: 1.55; }
 .footnote { text-align: center; padding: 0 1rem 1.5rem; color: var(--ink-dim); font-size: .78rem; }
 
@@ -374,8 +414,15 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .hero-stage { min-height: 76vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; padding: 3rem 0 2rem; overflow: hidden; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
 .hero-stack { position: relative; line-height: .92; margin: .8rem 0 1rem; z-index: 1; }
 .hs-line { display: block; font-family: var(--head); font-weight: 800; font-size: clamp(2.9rem, 11vw, 7.4rem); text-transform: uppercase; letter-spacing: .01em; }
-.hs-line.solid { color: #fff; position: relative; z-index: 0; text-shadow: 0 3px 30px rgba(0,0,0,.95), 0 1px 3px rgba(0,0,0,.9); }
-.hs-line.outline { color: var(--ne-blue-text); position: relative; z-index: 2; }
+/* "Damage"-style outline around the headline: a thick multi-directional
+   white stroke (via layered text-shadows, since -webkit-text-stroke clips
+   unevenly on some browsers) plus a soft glow, sized to read clearly from a
+   distance rather than the small/tight edge it had before. */
+.hs-line.solid { color: #fff; position: relative; z-index: 0; text-shadow: 0 3px 30px rgba(0,0,0,.95), 0 1px 3px rgba(0,0,0,.9), 0 0 22px rgba(255,255,255,.55), 0 0 42px rgba(255,255,255,.3); }
+.hs-line.outline { color: var(--ne-blue-text); position: relative; z-index: 2; text-shadow:
+    -6px -6px 0 #fff, 6px -6px 0 #fff, -6px 6px 0 #fff, 6px 6px 0 #fff,
+    -6px 0 0 #fff, 6px 0 0 #fff, 0 -6px 0 #fff, 0 6px 0 #fff,
+    0 0 30px rgba(255,255,255,.65); }
 .hs-bot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%); width: clamp(110px, 15vw, 180px); z-index: 1; filter: drop-shadow(0 0 34px rgba(10,77,166,.85)); pointer-events: none; }
 .hero-stage .lead { position: relative; z-index: 1; font-size: clamp(1rem, 2.4vw, 1.25rem); max-width: 640px; margin: 0 auto 1.4rem; text-shadow: 0 1px 12px rgba(0,0,0,.9); }
 .hero-stage .btn-row { position: relative; z-index: 1; justify-content: center; }
@@ -391,6 +438,12 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
    perspective-projection math (no external images/image-gen). ---- */
 html { background: var(--bg); }
 body.home-page { background: transparent; }
+/* Opacity is driven by main.js's scroll listener (fades this fixed layer
+   down, not off, once you've scrolled past the hero) rather than any invert
+   filter — .tech-bg/.tech-canvas/.tech-scan sit fixed behind every section,
+   so without this they'd stay at full strength no matter how far down the
+   page you are, competing with the content below the hero. */
+.tech-bg, .tech-canvas, .tech-scan { transition: opacity .25s linear; }
 .tech-bg { position: fixed; inset: 0; z-index: -3; pointer-events: none;
   background: radial-gradient(circle at 50% 46%, #060d1a 0%, #030509 72%); }
 .tech-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; }
@@ -488,12 +541,19 @@ body.home-page { background: transparent; }
 .cal-cell{position:relative;aspect-ratio:1;border:1px solid rgba(242,244,248,.14);background:rgba(22,24,29,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
 .cal-cell.cal-closed{background:rgba(124,131,143,.32);border-color:var(--cal-closed);color:var(--ink-dim);cursor:default}
+/* X-mark overlay for closed days, sat behind the day number (z-index:1 on
+   .dn keeps it readable) so a closed date reads as clearly crossed out. */
+.cal-cell.cal-closed::before{content:"";position:absolute;inset:20% 12%;pointer-events:none;
+  background:
+    linear-gradient(45deg, transparent calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    linear-gradient(-45deg, transparent calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+}
 .cal-cell.cal-free{background:rgba(61,139,255,.24);border-color:var(--cal-free)}
 .cal-cell.cal-theme{background:rgba(95,211,232,.26);border-color:var(--cal-theme)}
 .cal-cell.cal-edu{background:rgba(63,191,107,.26);border-color:var(--cal-edu)}
 .cal-cell.cal-amb{background:rgba(232,93,160,.26);border-color:var(--cal-amb)}
 .cal-cell.cal-major{background:rgba(250,157,40,.3);border-color:var(--cal-major)}
-.cal-cell:not(.empty):hover{filter:brightness(1.25)}
+.cal-cell:not(.empty):not(.cal-closed):hover{filter:brightness(1.25)}
 .cal-cell.today{box-shadow:inset 0 0 0 2px #fff}
 .cal-cell.today::after{content:"";position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;animation:cal-today-flash 15s ease-in-out infinite}
 @keyframes cal-today-flash{0%,4%,100%{opacity:0}1.6%,2.4%{opacity:.55}}
@@ -519,7 +579,7 @@ body.home-page { background: transparent; }
    above for why. */
 .cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center}
 .cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96))}
-.cal-detail .tag{margin-bottom:.55rem}
+.cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
 .cal-detail h3{font-family:var(--head);font-weight:800;font-size:1.46rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .cal-detail .cd-sub{font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--ne-blue-text);margin:0 0 .6rem;text-shadow:0 1px 10px rgba(0,0,0,.7);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
 .cal-detail>p.dim{font-family:var(--eu-body);color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
@@ -721,13 +781,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 
 /* ===== v9: home leaderboard + refined dark polish ===== */
 .lbx{display:flex;flex-direction:column;gap:8px;max-width:620px}
-.lbx-row{display:grid;grid-template-columns:34px 1fr auto;grid-template-rows:auto auto;grid-template-areas:"rank user pts" "rank meta pts";align-items:center;column-gap:.7rem;background:var(--bg-2);border:1px solid var(--line);padding:.7rem .9rem;transition:border-color .18s,transform .18s}
+.lbx-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;column-gap:.7rem;background:var(--bg-2);border:1px solid var(--line);padding:.7rem .9rem;transition:border-color .18s,transform .18s}
 .lbx-row.top{border-color:var(--ne-blue-text);background:linear-gradient(90deg,rgba(125,178,255,.12),transparent 60%)}
-.lbx-rank{grid-area:rank;font-size:1.5rem;line-height:1;text-align:center}
-.lbx-user{grid-area:user;font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em;align-self:end}
-.lbx-meta{grid-area:meta;font-size:.74rem;color:var(--ink-dim);align-self:start}
-.lbx-pts{grid-area:pts;font-family:var(--head);font-weight:800;color:var(--ne-blue-text);font-size:1.1rem;text-align:right;align-self:center}
-.lbx-pts small{font-size:.6rem;color:var(--ink-dim);font-weight:700;margin-left:.2rem}
+.lbx-rank{font-size:1.5rem;line-height:1;text-align:center}
+.lbx-user{font-family:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.lbx-stats{display:flex;gap:1.4rem;justify-self:end}
+.lbx-stat{text-align:center;line-height:1.15}
+.lbx-stat strong{display:block;font-family:var(--head);font-weight:800;color:var(--ne-blue-text);font-size:1.1rem}
+.lbx-stat small{display:block;font-size:.6rem;color:var(--ink-dim);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 
 /* --- refined dark polish (learn.newegg vibe: soft shadows, calmer surfaces) --- */
 .site-header{box-shadow:0 1px 0 rgba(255,255,255,.03)}
@@ -870,7 +931,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    "Special Events" under a "theme weeks" list) — same divider language
    as the row border-tops, orange/uppercase like other eyebrow text. */
 .eu-sublist-head{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1rem,2vw,1.35rem);color:var(--ne-orange);margin:clamp(1.3rem,3vw,2.1rem) 0 .5rem;padding-top:clamp(1rem,2.5vw,1.6rem);border-top:1px solid rgba(242,244,248,.22)}
-.eu-list{display:flex;flex-direction:column}
+.eu-list{display:flex;flex-direction:column;margin-top:.65rem}
 .eu-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.2rem;padding:var(--eu-row-pad) 0;border-top:1px solid rgba(242,244,248,.22)}
 /* No border directly under the thick orange divider (first row) and no
    doubled-up line stacking against the location row below the list

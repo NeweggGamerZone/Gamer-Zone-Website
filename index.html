@@ -60,7 +60,6 @@
       <img class="board-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone">
       <div class="eu-top">
         <div class="eu-eyebrow">
-          <i data-ic="cal" data-lg></i>
           <div class="eu-eyebrow-textcol">
             <div class="eu-eyebrow-titlerow">
               <h3 class="eu-eyebrow-title" id="eu-eyebrow-title">Gamer Zone <span class="eu-theme-highlight">Weekly Lineup</span></h3>
@@ -124,10 +123,35 @@
   </section>
 
   <section class="reveal">
-    <h2>Top visitors this month</h2>
-    <p class="dim">Our most dedicated regulars. Rack up hours at the Zone and climb the board.</p>
-    <p class="dim" style="margin-top:.3rem">Zone Points = (hours played &times; 10) + (avg. hours per session &times; 10).</p>
+    <h2>Most Dedicated Gamers</h2>
+    <p class="dim">Our most dedicated regulars. Rack up sessions and hours at the Zone and climb the board.</p>
     <div id="home-leaderboard" style="margin-top:1rem"></div>
+  </section>
+
+  <section id="reviews" class="reveal">
+    <h2>What gamers are saying</h2>
+    <p class="lead">Real reviews from Newegg Gamer Zone visitors on Google and Yelp.</p>
+    <div class="grid cols-3">
+      <div class="card review-card">
+        <div class="review-stars" aria-hidden="true">★★★★★</div>
+        <p class="review-quote">Reviews are on their way here &mdash; in the meantime, read the real ones on Google and Yelp below.</p>
+        <p class="review-source dim">&mdash; Google Review</p>
+      </div>
+      <div class="card review-card">
+        <div class="review-stars" aria-hidden="true">★★★★★</div>
+        <p class="review-quote">We're adding our best guest reviews to this section soon.</p>
+        <p class="review-source dim">&mdash; Yelp Review</p>
+      </div>
+      <div class="card review-card">
+        <div class="review-stars" aria-hidden="true">★★★★★</div>
+        <p class="review-quote">Check back for real visitor stories, or leave your own below!</p>
+        <p class="review-source dim">&mdash; Google Review</p>
+      </div>
+    </div>
+    <p style="margin-top:1.2rem;text-align:center">
+      <a class="btn" data-cfg-href="googlePageUrl" href="#">Read our Google reviews</a>
+      <a class="btn" style="margin-left:.6rem" data-cfg-href="yelpUrl" href="#">Read our Yelp reviews</a>
+    </p>
   </section>
 
   <section id="visit" class="reveal">
@@ -137,17 +161,14 @@
         <i data-ic="run" data-lg></i><h3>Preregister Now</h3>
         <p class="dim" data-verkada-note>Preregister below for a faster check-in.</p>
         <p style="margin-top:.7rem"><a class="btn" data-verkada href="#">Preregister</a></p>
-        <p class="visit-cta-note">Walk-ins always welcome. Reservation also available in the footer.</p>
+        <p class="visit-cta-note">Walk-ins always welcome.</p>
       </div>
       <div class="card tilt">
         <i data-ic="clock" data-lg></i><h3>Visit Us</h3>
         <p data-cfg="hours"></p>
         <p style="margin-top:.4rem"><a data-cfg="phone" data-cfg-href-tel href="#"></a></p>
         <p style="margin-top:.2rem"><a data-cfg-href="gamerZoneUrl" href="#">Newegg Gamer Zone</a></p>
-      </div>
-      <div class="card tilt">
-        <i data-ic="pin" data-lg></i><h3>Location</h3>
-        <p><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a></p>
+        <p style="margin-top:.6rem"><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a></p>
         <p class="dim">Inside Newegg HQ. Free parking. Tap the address for directions.</p>
         <p style="margin-top:.5rem"><a data-cfg-href="googlePageUrl" href="#">Our Google page</a> &middot; <a data-cfg-href="yelpUrl" href="#">Reviews on Yelp</a></p>
       </div>
@@ -203,12 +224,37 @@
 </script>
 <footer class="site-footer">
   <div class="container footer-top">
-    <div class="footer-brand" aria-hidden="true"><img class="ne-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone"></div>
+    <div class="footer-brand">
+      <img class="ne-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone">
+      <p class="footer-static" data-cfg="address"></p>
+      <p class="footer-static" data-cfg="hours"></p>
+    </div>
     <div class="links-grid">
-      <div><h4>Visit</h4><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a><a data-cfg-href="googlePageUrl" href="#">Google Page</a><a data-cfg-href="yelpUrl" href="#">Yelp</a><p>Tues&ndash;Sat 10am&ndash;7pm</p></div>
-      <div><h4>Contact Us</h4><p data-cfg="phone"></p><a data-cfg="email" href="#" data-mailto></a><a data-cfg-href="instagramUrl" href="#">Instagram @newegggamerzone</a></div>
-      <div><h4>Social</h4><a data-cfg-href="discordUrl" href="#">Discord</a><a data-cfg-href="startggUrl" href="#">Tournaments on Start.GG</a><a data-cfg-href="meetupUrl" href="#">Gamer Zone Meetup</a><a data-cfg-href="eventbriteUrl" href="#">Eventbrite</a></div>
-      <div><h4>More</h4><a href="edu.html">Workshops &amp; EDU</a><a data-cfg-href="neweggUrl" href="#">Shop Newegg</a><a data-cfg-href="surveyUrl" href="#">Feedback survey</a></div>
+      <div>
+        <h4>Visit Us</h4>
+        <a class="ftr-link" data-cfg-href="mapsUrl" href="#"><i data-ic="pin"></i><span>Directions</span></a>
+        <a class="ftr-link" href="#" data-cfg-href-tel><i data-ic="phone"></i><span data-cfg="phone"></span></a>
+      </div>
+      <div>
+        <h4>Reviews</h4>
+        <a class="ftr-link" data-cfg-href="googlePageUrl" href="#"><i data-ic="google"></i><span>Review Us on Google</span></a>
+        <a class="ftr-link" data-cfg-href="yelpUrl" href="#"><i data-ic="yelp"></i><span>Review Us on Yelp</span></a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a class="ftr-link" data-cfg-href="instagramUrl" href="#"><i data-ic="instagram"></i><span>Instagram</span></a>
+        <a class="ftr-link" data-cfg-href="discordUrl" href="#"><i data-ic="gamepad"></i><span>Discord</span></a>
+        <a class="ftr-link" href="#" data-mailto><i data-ic="mail"></i><span data-cfg="email"></span></a>
+      </div>
+      <div>
+        <h4>Discover</h4>
+        <a class="ftr-link" href="edu.html"><i data-ic="grad"></i><span>Workshops &amp; EDU</span></a>
+        <a class="ftr-link" data-cfg-href="startggUrl" href="#"><i data-ic="trophy"></i><span>Tournaments on Start.GG</span></a>
+        <a class="ftr-link" data-cfg-href="meetupUrl" href="#"><i data-ic="users"></i><span>Gamer Zone Meetup</span></a>
+        <a class="ftr-link" data-cfg-href="eventbriteUrl" href="#"><i data-ic="ticket"></i><span>Eventbrite</span></a>
+        <a class="ftr-link" data-cfg-href="neweggUrl" href="#"><i data-ic="globe"></i><span>Shop Newegg</span></a>
+        <a class="ftr-link" data-cfg-href="surveyUrl" href="#"><i data-ic="note"></i><span>Feedback survey</span></a>
+      </div>
     </div>
   </div>
   <p class="legal">Minors under 18 must be accompanied by an adult (18+) at all times &middot; ID may be required &middot; Free play subject to availability; hours may change for private events &middot; &copy; 2026 Newegg Commerce, Inc.</p>

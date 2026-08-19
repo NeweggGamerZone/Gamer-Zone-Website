@@ -25,7 +25,12 @@ const GZ_ICONS = {
   coin: '<path fill-rule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2a8 8 0 110 16 8 8 0 010-16zm0 2.5a1 1 0 011 1v.6c1.5.3 2.6 1.3 2.6 2.6h-2c0-.5-.6-1-1.6-1s-1.6.4-1.6 1c0 .5.5.8 1.8 1.1 1.9.5 3.3 1.2 3.3 3 0 1.4-1.1 2.4-2.6 2.7v.6a1 1 0 01-2 0v-.6c-1.5-.3-2.6-1.3-2.6-2.7h2c0 .6.6 1.1 1.6 1.1s1.6-.4 1.6-1.1c0-.6-.6-.9-1.9-1.2-1.8-.5-3.2-1.2-3.2-2.9 0-1.4 1.1-2.3 2.6-2.6v-.6a1 1 0 011-1z"/>',
   run: '<path d="M13.49 5.48a2 2 0 100-4 2 2 0 000 4zM9.89 19.38l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>',
   twitch: '<path d="M5 2h16v11.5L17.5 17H14l-3 3H8v-3H4V6zm2 2v10h3v3l3-3h4l2.5-2.5V4zm9.5 3h2v5h-2zm-5 0h2v5h-2z"/>',
-  youtube: '<path d="M21.6 7.2s-.2-1.5-.8-2.1c-.8-.8-1.7-.8-2.1-.9C15.9 4 12 4 12 4s-3.9 0-6.7.2c-.4.1-1.3.1-2.1.9-.6.6-.8 2.1-.8 2.1S2.2 9 2.2 10.7v1.6c0 1.7.2 3.5.2 3.5s.2 1.5.8 2.1c.8.8 1.8.8 2.3.9 1.7.2 6.5.2 6.5.2s3.9 0 6.7-.2c.4-.1 1.3-.1 2.1-.9.6-.6.8-2.1.8-2.1s.2-1.8.2-3.5v-1.6c0-1.7-.2-3.5-.2-3.5zM9.8 14.5v-6l5.5 3z"/>'
+  youtube: '<path d="M21.6 7.2s-.2-1.5-.8-2.1c-.8-.8-1.7-.8-2.1-.9C15.9 4 12 4 12 4s-3.9 0-6.7.2c-.4.1-1.3.1-2.1.9-.6.6-.8 2.1-.8 2.1S2.2 9 2.2 10.7v1.6c0 1.7.2 3.5.2 3.5s.2 1.5.8 2.1c.8.8 1.8.8 2.3.9 1.7.2 6.5.2 6.5.2s3.9 0 6.7-.2c.4-.1 1.3-.1 2.1-.9.6-.6.8-2.1.8-2.1s.2-1.8.2-3.5v-1.6c0-1.7-.2-3.5-.2-3.5zM9.8 14.5v-6l5.5 3z"/>',
+  mail: '<path d="M3 5h18a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zm.8 2L12 12.4 19.2 7H3.8zM4 8.9V17h16V8.9l-7.4 5.1a1 1 0 01-1.2 0L4 8.9z"/>',
+  phone: '<path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2a1 1 0 011-.3c1.2.4 2.5.6 3.8.6a1 1 0 011 1V20a1 1 0 01-1 1C10.6 21 3 13.4 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.3.2 2.6.6 3.8a1 1 0 01-.3 1l-2.2 2.2z"/>',
+  instagram: '<path fill-rule="evenodd" d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm0 2a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H7zm5 3.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11zm0 2a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM17.8 5.7a1.3 1.3 0 110 2.6 1.3 1.3 0 010-2.6z"/>',
+  google: '<path fill-rule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2a8 8 0 110 16 8 8 0 010-16zm-.2 3.4c1.6 0 2.8.6 3.7 1.5l-1.5 1.5c-.5-.5-1.3-1-2.2-1-1.9 0-3.4 1.6-3.4 3.6s1.5 3.6 3.4 3.6c1.9 0 2.9-1.2 3.1-2.4h-3.1v-2h5.1c.1.4.1.7.1 1.2 0 3.1-2.1 5.3-5.2 5.3-3.1 0-5.6-2.5-5.6-5.7s2.5-5.6 5.6-5.6z"/>',
+  yelp: '<path d="M12 2l2.9 6.3 6.9.8-5.2 4.6 1.5 6.8L12 17l-6.1 3.5 1.5-6.8-5.2-4.6 6.9-.8z"/>'
 };
 const GZ = {
   cfg: null,
@@ -127,6 +132,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       decor.querySelectorAll('.stripe.s2').forEach(el => el.style.transform = `translateY(${y * .45}px)`);
       decor.querySelectorAll('.glow').forEach(el => el.style.transform = `translateY(${y * .15}px)`);
     }, { passive: true });
+  }
+
+  // Homepage tech-tunnel background (.tech-bg/#techno-canvas/.tech-scan) is
+  // fixed behind the whole page, not just the hero — left alone it stays at
+  // full strength no matter how far you scroll, competing with the sections
+  // below. Fade it down (never fully out, so it still reads as the site's
+  // theme) once you've scrolled a bit past the hero instead.
+  const techLayers = ['.tech-bg', '#techno-canvas', '.tech-scan']
+    .map(sel => document.querySelector(sel)).filter(Boolean);
+  const heroStage = document.querySelector('.hero-stage');
+  if (techLayers.length && heroStage) {
+    const MIN_OPACITY = 0.22;
+    const applyTechFade = () => {
+      const heroBottom = heroStage.offsetTop + heroStage.offsetHeight;
+      const fadeStart = Math.max(0, heroBottom - window.innerHeight * 0.35);
+      const fadeRange = window.innerHeight * 0.9;
+      const progress = Math.min(1, Math.max(0, (window.scrollY - fadeStart) / fadeRange));
+      const opacity = 1 - progress * (1 - MIN_OPACITY);
+      techLayers.forEach(el => { el.style.opacity = opacity; });
+    };
+    window.addEventListener('scroll', applyTechFade, { passive: true });
+    window.addEventListener('resize', applyTechFade);
+    applyTechFade();
   }
 
   // About Gamer Zone zone list: every zone shows its image and description

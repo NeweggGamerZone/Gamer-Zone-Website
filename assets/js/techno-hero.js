@@ -261,12 +261,19 @@
   // A hazard is drawn with the exact same drawRing() geometry/curve-smoothing
   // as every decorative ring, using whatever shape the tunnel currently
   // shows (morphedPoints/morphStateAt — the same call the decorative loop
-  // makes) — the only difference is color. That's what makes it read as
-  // "one of the background's own shapes, just orange" instead of a separate
+  // makes), and now the same live hue too (see drawHazard below) — the only
+  // difference is a saturation/opacity boost. That's what makes it read as
+  // one of the background's own shapes, just hotter, instead of a separate
   // game object rendered on top of the scene.
-  function drawHazard(hz, rot, globalFade) {
+  function drawHazard(hz, rot, globalFade, hue) {
     const pts = morphedPoints(morphStateAt(elapsed));
-    drawRing(hz, pts, rot, globalFade, 0, f => `rgba(250,157,40,${Math.min(1, f * 1.7)})`);
+    // Hue-linked rather than a fixed static color — a hazard drawn in one
+    // unchanging color would visibly fall out of sync with the rest of the
+    // tunnel as its hue keeps drifting through the spectrum, reading as a
+    // "stuck"/stagnant shape after a while. Tying it to the same live hue
+    // (boosted saturation/opacity so it still stands out as the thing to
+    // dodge) keeps it feeling like one of the background's own lines.
+    drawRing(hz, pts, rot, globalFade, 0, f => `hsla(${hue}, 88%, 58%, ${Math.min(1, f * 1.7)})`);
   }
 
   // How far a closed unit-space polygon (its perimeter points, in order)
@@ -494,7 +501,7 @@
 
     if (gameOn) {
       updateGame(dt, rot, speed);
-      for (const hz of hazards) drawHazard(hz, rot, globalFade);
+      for (const hz of hazards) drawHazard(hz, rot, globalFade, hue);
       drawBaseRing(rot, globalFade);
       drawCharacter();
     }
