@@ -797,7 +797,12 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
 .eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7vw,1.2rem);padding-bottom:clamp(.08rem,.25vw,.15rem)}
-.eu-board-icon img{height:clamp(276px,43.125vw,460px);width:auto}
+/* Sized by width, not height, now that this slot holds a wide/short
+   landscape graphic (GZTest2, ~2:1) instead of the previous tall/narrow
+   controller art (~1:1) — a height-based clamp would have rendered it
+   almost twice the board's own width. Margins around it are intentionally
+   not preserved per request; sized to fill most of the board's width. */
+.eu-board-icon img{width:min(92%,1000px);height:auto}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
@@ -983,7 +988,13 @@ html.board-mode .eu-board{margin:0;width:100vw;padding:clamp(1.6rem,5vw,4.5rem)}
    changes; a bare-minimum-margin size (~200px cap) measured right at the
    edge of triggering letterboxing, so 190px was chosen instead of pushing
    all the way to that limit. */
-html.board-mode .eu-board-icon img{height:clamp(114px,18.1vw,190px)}
+/* Re-based to width, matching the live-page rule's switch to width-based
+   sizing for the new wide/short GZTest2 art — overriding only height (as
+   this used to) while the base rule's width:min(92%,1000px) still applied
+   would have stretched the image off its own aspect ratio. Kept
+   proportionally smaller than the live-page cap for the same reason as
+   before: export-only headroom against a full 3-row no-icon-week board. */
+html.board-mode .eu-board-icon img{width:min(46%,480px)}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,
