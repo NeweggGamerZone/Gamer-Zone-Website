@@ -30,7 +30,10 @@ const GZ_ICONS = {
   phone: '<path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2a1 1 0 011-.3c1.2.4 2.5.6 3.8.6a1 1 0 011 1V20a1 1 0 01-1 1C10.6 21 3 13.4 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.3.2 2.6.6 3.8a1 1 0 01-.3 1l-2.2 2.2z"/>',
   instagram: '<path fill-rule="evenodd" d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm0 2a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H7zm5 3.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11zm0 2a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM17.8 5.7a1.3 1.3 0 110 2.6 1.3 1.3 0 010-2.6z"/>',
   google: '<path fill-rule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2a8 8 0 110 16 8 8 0 010-16zm-.2 3.4c1.6 0 2.8.6 3.7 1.5l-1.5 1.5c-.5-.5-1.3-1-2.2-1-1.9 0-3.4 1.6-3.4 3.6s1.5 3.6 3.4 3.6c1.9 0 2.9-1.2 3.1-2.4h-3.1v-2h5.1c.1.4.1.7.1 1.2 0 3.1-2.1 5.3-5.2 5.3-3.1 0-5.6-2.5-5.6-5.7s2.5-5.6 5.6-5.6z"/>',
-  yelp: '<path d="M12 2l2.9 6.3 6.9.8-5.2 4.6 1.5 6.8L12 17l-6.1 3.5 1.5-6.8-5.2-4.6 6.9-.8z"/>'
+  yelp: '<path d="M12 2l2.9 6.3 6.9.8-5.2 4.6 1.5 6.8L12 17l-6.1 3.5 1.5-6.8-5.2-4.6 6.9-.8z"/>',
+  shield: '<path d="M12 2l8 3v6c0 5.25-3.5 9-8 11-4.5-2-8-5.75-8-11V5l8-3z"/>',
+  sword: '<path d="M12 1l2.5 14h-5zM7 15h10v2H7zm4 2h2v5h-2zm-1 5h4v1.5h-4z"/>',
+  bow: '<path d="M9 2c-4 4-4 16 0 20-2-4-2-16 0-20z"/><path d="M8.3 2h1.1v20h-1.1z"/><path d="M4.5 11h10l-2.8-2.8 1.4-1.4L18.5 12l-5.4 5.2-1.4-1.4L14.5 13h-10z"/>'
 };
 const GZ = {
   cfg: null,
@@ -157,13 +160,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyTechFade();
   }
 
-  // About Gamer Zone zone list: every zone shows its image and description
-  // up front now — no hover/click toggle needed. Force each <details> open
-  // and block toggling it closed either way.
-  document.querySelectorAll('.zone-item').forEach(item => {
-    item.open = true;
-    item.addEventListener('toggle', () => { if (!item.open) item.open = true; });
-  });
+  // About Gamer Zone: gamefied trading-card stack (see assets/js/zone-stack.js
+  // for the cycling/nav logic) replaced the old always-open accordion above.
 
   const lb = document.createElement('div');
   lb.className = 'lightbox';

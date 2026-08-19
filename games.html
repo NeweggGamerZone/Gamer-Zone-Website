@@ -21,7 +21,7 @@
       <a href="index.html">Home</a>
       <a href="events.html">Events</a>
       <a href="games.html">Games</a>
-      <a href="edu.html">EDU</a>
+      <a href="edu.html">Academy</a>
       <a href="ambassador.html">Ambassador</a>
     </nav>
   </div>
@@ -37,7 +37,7 @@
 
   <section id="senet-chart-section">
     <h2><i data-ic="chip"></i> Live at the Zone</h2>
-    <p class="dim">Top 5 games by hours played at the Zone &mdash; refreshes daily.</p>
+    <p class="dim">Hours played distribution across the top games at the Zone &mdash; hover a slice for a breakdown. Refreshes daily.</p>
     <div class="chip-row" id="senet-chart-range" style="margin-top:.8rem">
       <span class="chip active" data-range="week">This Week</span>
       <span class="chip" data-range="month">This Month</span>
@@ -48,12 +48,14 @@
         <span class="senetdb-live">Updates daily</span>
         <span class="senetdb-updated" id="senet-updated">Updated today</span>
       </div>
-      <div class="senetdb-hero">
-        <div class="senetdb-hero-total"><span id="senet-hero-value">0</span><small>total hours this range</small></div>
-        <svg class="senetdb-hero-svg" id="senet-hero-svg" viewBox="0 0 600 150" preserveAspectRatio="none" aria-hidden="true"></svg>
-        <div class="senetdb-hero-tip" id="senet-hero-tip"><b id="senet-hero-tip-val"></b><span id="senet-hero-tip-label"></span></div>
+      <div class="senetdb-pie-row">
+        <div class="senetdb-pie-holder">
+          <svg class="senetdb-pie" id="senet-pie-svg" viewBox="0 0 200 200" aria-hidden="true"></svg>
+          <div class="senetdb-pie-center"><span id="senet-hero-value">0</span><small>total hours this range</small></div>
+          <div class="senetdb-pie-tip" id="senet-pie-tip"><b id="senet-pie-tip-val"></b><span id="senet-pie-tip-label"></span></div>
+        </div>
+        <div class="senetdb-rows" id="senet-chart-rows"></div>
       </div>
-      <div class="senetdb-rows" id="senet-chart-rows"></div>
     </div>
   </section>
 
@@ -66,12 +68,6 @@
       <span class="chip" data-platform="vr"><i data-ic="vr"></i> VR</span>
       <span class="chip" data-platform="racing-sim"><i data-ic="wheel"></i> Racing Simulators</span>
       <span class="chip" data-platform="arcade"><i data-ic="zero"></i> Arcade</span>
-    </div>
-    <p class="dim" style="margin-top:.7rem">Or browse by genre:</p>
-    <div class="chip-row" id="games-genre-filters" style="margin-top:.4rem">
-      <span class="chip" data-genre="coop">Co-op</span>
-      <span class="chip" data-genre="single">Single Player</span>
-      <span class="chip" data-genre="competitive">Competitive</span>
     </div>
     <div id="games-list" style="margin-top:1rem"></div>
     <p class="dim" style="margin-top:1rem">Don't see your favorite? <a data-cfg-href="discordUrl" href="#">Let us know on Discord</a> &mdash; we're always adding to the library.</p>
@@ -103,7 +99,7 @@
       </div>
       <div>
         <h4>Discover</h4>
-        <a class="ftr-link" href="edu.html"><i data-ic="grad"></i><span>Workshops &amp; EDU</span></a>
+        <a class="ftr-link" href="edu.html"><i data-ic="grad"></i><span>Academy &amp; Workshops</span></a>
         <a class="ftr-link" data-cfg-href="startggUrl" href="#"><i data-ic="trophy"></i><span>Tournaments on Start.GG</span></a>
         <a class="ftr-link" data-cfg-href="meetupUrl" href="#"><i data-ic="users"></i><span>Gamer Zone Meetup</span></a>
         <a class="ftr-link" data-cfg-href="eventbriteUrl" href="#"><i data-ic="ticket"></i><span>Eventbrite</span></a>
