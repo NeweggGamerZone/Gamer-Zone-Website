@@ -44,7 +44,7 @@
   const BASE_SPEED = 92; // same travel pace the site's tunnel/cube previously settled on
   const MAX_SPEED = 230; // top pace once fully ramped — matches the old dedicated hazard speed
   const RAMP_SECONDS = 45; // seconds of unbroken survival to reach max speed (the "1000m" ramp)
-  const ROT_SPEED = 0.045;
+  const ROT_SPEED = 0;
 
   // Fixed progression every ring works through, one step at a time.
   const SHAPES = ['square', 'triangle', 'star', 'pentagon', 'hexagon', 'circle'];

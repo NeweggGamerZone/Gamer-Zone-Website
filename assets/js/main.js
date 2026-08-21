@@ -66,7 +66,19 @@ const GZ = {
 function injectIcons(root = document) {
   root.querySelectorAll('i[data-ic]').forEach(el => {
     const cls = el.dataset.lg !== undefined ? 'ic ic-lg' : 'ic';
-    el.outerHTML = GZ.icon(el.dataset.ic, cls);
+    const wrap = document.createElement('div');
+    wrap.innerHTML = GZ.icon(el.dataset.ic, cls);
+    const svg = wrap.firstElementChild;
+    // Carry over every attribute from the placeholder <i data-ic> element
+    // (not just data-ic/data-lg) onto the resulting <svg> — otherwise
+    // inline `style` flips (like the zone-stack prev arrow's scaleX(-1))
+    // get silently dropped. `class` is skipped since GZ.icon already
+    // computed the right one from data-lg.
+    for (const attr of el.attributes) {
+      if (attr.name === 'class') continue;
+      svg.setAttribute(attr.name, attr.value);
+    }
+    el.replaceWith(svg);
   });
 }
 

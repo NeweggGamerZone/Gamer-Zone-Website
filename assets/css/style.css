@@ -327,8 +327,11 @@ details.archive-month .grid { margin-top: 1rem; }
    box), with a couple of the next cards peeking out from behind to read as
    an actual stack you're cycling through (see assets/js/zone-stack.js). */
 .zone-stack-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
-.zone-stack { position: relative; width: min(460px, 100%); height: 560px; }
-.zone-card { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease; }
+/* Real left/right carousel: .zone-stack is wider than a single .zone-card
+   so the prev/next cards have room to peek at the edges, and overflow:hidden
+   clips them cleanly instead of letting them spill into the page. */
+.zone-stack { position: relative; width: min(620px, 100%); height: 560px; overflow: hidden; }
+.zone-card { position: absolute; top: 0; left: 50%; width: min(340px, 78%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease; }
 .zone-card-code { position: absolute; top: .6rem; right: .8rem; z-index: 2; font-family: var(--head); font-weight: 800; font-size: .62rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
 .zone-card-art { position: relative; height: 56%; flex: none; background: #000; }
 .zone-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -336,13 +339,15 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-card-body { flex: 1; padding: .3rem 1.2rem 1.2rem; display: flex; flex-direction: column; }
 .zone-card-body h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: 1.15rem; margin: 0 0 .5rem; color: var(--ne-orange); text-align: center; }
 .zone-card-body p { font-size: .88rem; line-height: 1.5; }
-/* Stack depth: JS sets data-pos (0 = active/front) on every .zone-card;
-   only the front three are visible, cascading back-right like a hand of
-   cards, everything else parked off-screen. */
-.zone-card[data-pos="0"] { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; z-index: 5; }
-.zone-card[data-pos="1"] { transform: translate(16px,14px) scale(.96) rotate(2deg); opacity: .55; z-index: 4; pointer-events: none; }
-.zone-card[data-pos="2"] { transform: translate(30px,26px) scale(.92) rotate(3.5deg); opacity: .3; z-index: 3; pointer-events: none; }
-.zone-card[data-pos="hidden"] { transform: translate(60px,50px) scale(.88); opacity: 0; z-index: 1; pointer-events: none; }
+/* Left/right carousel: JS sets data-pos (prev/center/next/hidden) on every
+   .zone-card. The centered card is full size and interactive; prev/next
+   peek in from either edge of .zone-stack (clipped by its overflow:hidden);
+   everything else is parked invisible in the center spot, ready to slide
+   in next. */
+.zone-card[data-pos="center"] { transform: translateX(-50%) scale(1); opacity: 1; z-index: 5; }
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .55; z-index: 4; pointer-events: none; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .55; z-index: 4; pointer-events: none; }
+.zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
 .zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
 .zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
 .zone-stack-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }
@@ -769,7 +774,7 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
   content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
   background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.65) 50%,transparent 60%);
   background-size:300% 100%;background-position:-150% 0;
-  animation:diamond-shine 15s ease-in-out infinite;
+  animation:diamond-shine 60s ease-in-out infinite;
 }
 @keyframes diamond-shine{
   0%{background-position:-150% 0}

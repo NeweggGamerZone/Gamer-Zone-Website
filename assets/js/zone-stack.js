@@ -24,7 +24,14 @@
   function render() {
     cards.forEach((card, i) => {
       const offset = (i - current + N) % N;
-      card.dataset.pos = offset <= 2 ? String(offset) : 'hidden';
+      // Real left/right carousel: one card centered, the immediate
+      // neighbors peeking at the left/right edge of .zone-stack (clipped
+      // by its overflow:hidden), everything else fully hidden — not a
+      // diagonal depth-stack.
+      if (offset === 0) card.dataset.pos = 'center';
+      else if (offset === 1) card.dataset.pos = 'next';
+      else if (offset === N - 1) card.dataset.pos = 'prev';
+      else card.dataset.pos = 'hidden';
     });
     if (dotsWrap) {
       dotsWrap.querySelectorAll('.zone-stack-dot').forEach((d, i) => d.classList.toggle('active', i === current));
@@ -57,7 +64,7 @@
   // Clicking a peeking (non-front) card brings it to the front too.
   stack.addEventListener('click', e => {
     const card = e.target.closest('.zone-card');
-    if (!card || card.dataset.pos === '0') return;
+    if (!card || card.dataset.pos === 'center') return;
     goTo(cards.indexOf(card));
   });
 
