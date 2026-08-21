@@ -218,6 +218,25 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .review-stars { color: var(--ne-orange); font-size: 1rem; letter-spacing: .1em; }
 .review-quote { font-style: italic; color: var(--ink); flex: 1; }
 .review-source { font-size: .8rem; margin-top: .2rem; }
+/* Review waterfall: cards cascade in one after another (rather than popping in
+   together) once the parent #reviews section's existing scroll-reveal fires —
+   hooks onto the .reveal/.in toggle main.js already applies via IntersectionObserver,
+   no JS changes needed. */
+.review-waterfall .review-card { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s cubic-bezier(.2,.7,.3,1); }
+#reviews.reveal.in .review-waterfall .review-card { opacity: 1; transform: none; }
+.review-waterfall .review-card:nth-child(1) { transition-delay: .05s; }
+.review-waterfall .review-card:nth-child(2) { transition-delay: .13s; }
+.review-waterfall .review-card:nth-child(3) { transition-delay: .21s; }
+.review-waterfall .review-card:nth-child(4) { transition-delay: .29s; }
+.review-waterfall .review-card:nth-child(5) { transition-delay: .37s; }
+.review-waterfall .review-card:nth-child(6) { transition-delay: .45s; }
+.review-waterfall .review-card:nth-child(7) { transition-delay: .53s; }
+.review-waterfall .review-card:nth-child(8) { transition-delay: .61s; }
+.review-waterfall .review-card:nth-child(9) { transition-delay: .69s; }
+@media (prefers-reduced-motion: reduce) {
+  .review-waterfall .review-card { opacity: 1; transform: none; transition: none; }
+}
+html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; transition: none; }
 /* Registration steps: the step number is the most emphasized element (big,
    orange, bold) — matching the reference "AI mode" step pattern — while the
    step's icon becomes a small, white, secondary accent instead of the large
