@@ -154,7 +154,11 @@ h1 .accent, h2 .accent { color: var(--ne-blue-text); }
 .dim { color: var(--ink-dim); }
 .updated-stamp { font-size: .78rem; color: var(--ink-dim); }
 
-.hero { position: relative; padding: 4rem 0 2.5rem; }
+/* overflow:hidden clips .hero-decor's stripes, which intentionally bleed a
+   few % past this box's own right edge for a decorative full-bleed look —
+   harmless when there's a wide gutter, but real horizontal overflow once
+   the viewport narrows enough that the gutter shrinks past that bleed. */
+.hero { position: relative; padding: 4rem 0 2.5rem; overflow: hidden; }
 /* No max-width here: this .lead sits under each sub-page's <h1> and should
    follow the shared .container/page-width, same as the rest of the page's
    content — a fixed 640px cap made it visibly narrower than everything else
@@ -212,6 +216,12 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .grid { display: grid; gap: 1rem; }
 .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+/* auto-fit's 290px floor is wider than the content box on the narrowest
+   phones (esp. nested inside another .card, which eats further into the
+   available width with its own padding) — real horizontal overflow, not
+   just a tight fit. Force a single column below that point instead of
+   letting the explicit minmax minimum win. */
+@media (max-width: 360px) { .grid.cols-2 { grid-template-columns: 1fr; } }
 .card { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: 1.3rem; }
 .card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; }
 .review-card { display: flex; flex-direction: column; gap: .5rem; }
@@ -313,7 +323,16 @@ html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; tr
 
 .chip-row { display: flex; flex-wrap: wrap; gap: .5rem; }
 
-.reveal { opacity: 0; transform: translateY(34px) perspective(900px) rotateX(6deg); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
+/* Flat translateY fade only — no perspective()/rotateX() tilt. That 3D tilt
+   used to be part of this recipe, but it distorts without bound as a
+   section's height grows relative to the perspective distance (a tall
+   section, like a long review grid, gets projected toward the vanishing
+   point and its rendered width balloons far past the viewport — body's own
+   overflow-x:hidden doesn't reliably contain a 3D-transformed layer, so
+   this actually showed up as real horizontal scroll). Since any section on
+   this site can grow taller over time as content is added, a fade-up with
+   no 3D tilt is the safe default for every .reveal, not just tall ones. */
+.reveal { opacity: 0; transform: translateY(34px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
 .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 
@@ -434,7 +453,11 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
    space. .footer-top wraps the two side-by-side; both selectors below
    out-specify the general .container/.footer-brand rules above so they win
    regardless of source order. */
-.footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; padding: 1.2rem 1rem .4rem; }
+/* min-width:0 lets this flex item actually shrink to the row's available
+   width instead of hugging its own content's natural (unwrapped) size —
+   without it, the address/hours line under the logo refuses to wrap on
+   narrow screens and pushes past the viewport edge. */
+.footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; padding: 1.2rem 1rem .4rem; min-width: 0; max-width: 100%; }
 .footer-brand img.ne-logo { width: 230px; height: auto; margin-bottom: .3rem; }
 .footer-brand img.eggbot { width: 44px; height: 44px; }
 .footer-brand .footer-static { color: var(--ink-dim); font-size: .82rem; line-height: 1.4; margin: 0; }
@@ -747,7 +770,13 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mile.tier-silver{width:76%}
 .mile.tier-gold{width:84%;margin-left:4%}
 .mile.tier-platinum{width:92%;margin-left:8%}
-.mile.tier-diamond{width:100%;margin-left:12%}
+/* width 88% + margin-left 12% = 100% exactly. This used to be width:100%
+   (on top of the same 12% left margin), which made the bar's own footprint
+   112% of .tl's width — real horizontal overflow, not just a visual bleed,
+   since .tl doesn't reserve extra space for it. Diamond's right edge now
+   lands flush with platinum's (both reach 100%); the indent alone (still
+   the largest of the four) is what reads as "furthest along the ladder." */
+.mile.tier-diamond{width:88%;margin-left:12%}
 /* Shared rank-pill look, reused by both the Ambassador Journey tiles and
    the Featured Ambassador cards — only the position differs per context. */
 .node{position:relative;overflow:hidden;z-index:1;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
@@ -944,7 +973,14 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      icon's own margins and the weekly-theme subtitle size instead (see
      .eu-board-icon and #eu-eyebrow-desc below), keeping the board at ~1:1
      with nothing cut off top or bottom. */
-  position:relative;margin:0 calc(-1 * var(--safe-x));padding:clamp(1.1rem,2.3vw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
+  /* Full-bleed via width:100vw + auto-canceling margins (same technique as
+     .hero-stage below) instead of margin:0 calc(-1*var(--safe-x)) — that
+     negative-margin trick only reaches the true viewport edge if it
+     exactly matches .container's own padding, and any small mismatch
+     leaves this board a few px wider than the viewport (real horizontal
+     overflow, worse at some breakpoints than others). width:100vw doesn't
+     depend on knowing the parent's padding at all, so it can't drift. */
+  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:clamp(1.1rem,2.3vw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
