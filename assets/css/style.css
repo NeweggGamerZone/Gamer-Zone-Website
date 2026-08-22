@@ -218,6 +218,12 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .review-stars { color: var(--ne-orange); font-size: 1rem; letter-spacing: .1em; }
 .review-quote { font-style: italic; color: var(--ink); flex: 1; }
 .review-source { font-size: .8rem; margin-top: .2rem; }
+/* Aggregate rating line above the review grid, and the compact list of
+   reviewers who left 5 stars with no written text — keeps the full
+   review count (86) visible without needing 23 empty-looking cards. */
+.review-stat { font-weight: 700; margin-top: .3rem; }
+.review-stat-stars { color: var(--ne-orange); letter-spacing: .1em; }
+.review-more { font-size: .85rem; margin-top: 1.3rem; line-height: 1.6; }
 /* Review waterfall: cards cascade in one after another (rather than popping in
    together) once the parent #reviews section's existing scroll-reveal fires —
    hooks onto the .reveal/.in toggle main.js already applies via IntersectionObserver,
