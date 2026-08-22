@@ -281,7 +281,11 @@ html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; tr
 /* Every title truncates to one line — same row length no matter how long the
    name is — with the full text available as a hover popup (pure CSS, no JS). */
 .game-list li .gl-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.game-list li[data-full]:hover::after {
+/* :focus (paired with tabindex="-1" in games.js) makes this also work on
+   tap for touch devices, which have no :hover -- otherwise a truncated
+   title was simply unreadable on mobile with no way to reveal it. */
+.game-list li[data-full]:hover::after,
+.game-list li[data-full]:focus::after {
   content: attr(data-full);
   position: absolute; left: 0; top: 100%; margin-top: .35rem; z-index: 30;
   background: var(--bg-3); border: 1px solid var(--line); color: var(--ink);
@@ -289,6 +293,7 @@ html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; tr
   text-transform: none; white-space: normal; max-width: 260px;
   box-shadow: 0 6px 18px rgba(0,0,0,.6);
 }
+.game-list li[data-full]:focus { outline: none; }
 .gl-emoji { flex: 0 0 auto; font-size: .95rem; filter: grayscale(0) saturate(1); }
 .game-list li:last-child { border-bottom: none; }
 @media (max-width: 760px) { .game-list-panel { padding: 1.5rem 1.3rem; } }

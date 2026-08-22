@@ -97,7 +97,11 @@
     // Full name (+ VR system, if any) truncates to one line with an ellipsis so
     // every row is the same length regardless of title length; data-full
     // drives a pure-CSS hover popup showing the untruncated text.
-    return `<li data-full="${GZ.esc(g.name + subText)}"><span class="gl-name">${GZ.esc(g.name)}</span>${sub}</li>`;
+    // tabindex="-1" makes the row focusable on tap/click (so the popup also
+    // works on touch devices, which have no :hover) without adding it to the
+    // Tab key sequence -- keyboard users tabbing through the page don't have
+    // to step through every single game name to get past this list.
+    return `<li tabindex="-1" data-full="${GZ.esc(g.name + subText)}"><span class="gl-name">${GZ.esc(g.name)}</span>${sub}</li>`;
   }
 
   function panel(title, iconName, games, note) {
@@ -158,6 +162,17 @@
       renderGenre(btn.dataset.genre);
     });
   }
+
+  // Tapping/clicking a truncated title should reveal the full name via the
+  // :focus popup (see .game-list li[data-full]:focus in style.css) -- but
+  // tabindex="-1" elements don't reliably receive focus from a plain click
+  // in every browser, so call .focus() explicitly. Delegated on the stable
+  // #games-list container (survives the innerHTML re-renders above) rather
+  // than attached per-row.
+  list.addEventListener('click', e => {
+    const li = e.target.closest('.game-list li[data-full]');
+    if (li) li.focus();
+  });
 
   renderByPlatform();
 })();
