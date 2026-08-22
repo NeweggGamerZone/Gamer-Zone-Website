@@ -364,8 +364,12 @@ details.archive-month .grid { margin-top: 1rem; }
    everything else is parked invisible in the center spot, ready to slide
    in next. */
 .zone-card[data-pos="center"] { transform: translateX(-50%) scale(1); opacity: 1; z-index: 5; }
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .55; z-index: 4; pointer-events: none; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .55; z-index: 4; pointer-events: none; }
+/* Peeking cards were pointer-events:none, so zone-stack.js's "click a
+   peeking card to bring it to front" handler could never actually fire
+   from a direct click on the card — only the prev/next buttons and dot
+   nav worked. Re-enabled here plus a pointer cursor for the affordance. */
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .55; z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .55; z-index: 4; cursor: pointer; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
 .zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
 .zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
