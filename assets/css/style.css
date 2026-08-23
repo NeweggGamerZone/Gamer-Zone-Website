@@ -401,6 +401,15 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .55; z-index: 4; cursor: pointer; }
 .zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .55; z-index: 4; cursor: pointer; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
+/* Only a sliver of a prev/next card is actually visible (mostly hidden by
+   .zone-stack's own overflow:hidden) -- with the paragraph showing through
+   that sliver at full legibility, it read as broken/cut-off content
+   (sentences sliced off mid-word at the card's edge) rather than an
+   intentional preview. Peeking cards now show only the art + title, which
+   is plenty to tell you "there's another zone over here" without any text
+   getting visibly severed. */
+.zone-card[data-pos="prev"] .zone-card-body p,
+.zone-card[data-pos="next"] .zone-card-body p { display: none; }
 .zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
 .zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
 .zone-stack-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }

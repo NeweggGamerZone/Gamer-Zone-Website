@@ -288,6 +288,24 @@
   function radiusAtAngle(pts, theta) {
     const dx = Math.cos(theta), dy = Math.sin(theta);
     const n = pts.length;
+    // Take the NEAREST valid edge crossing along the ray, not the first one
+    // encountered in vertex order. Whenever the anchor's angle lines up
+    // exactly on (or very near) a vertex -- which it does here, since the
+    // character sits almost directly under the vanishing point at ~90°, a
+    // vertex angle shared by the square/hexagon/star outlines -- the ray
+    // grazes the shared corner of two edges. Floating-point rounding can
+    // then push the correct edge's `u` just outside its valid [0,1] range
+    // on a given frame while a third, nearly-ray-parallel edge elsewhere on
+    // the polygon spuriously satisfies the test with a huge `t` (since
+    // "nearly parallel" means the line intersection sits far down the ray).
+    // Returning on first-match let that distant false hit win, snapping the
+    // baseline ring's scale to near-zero and staying there. Scanning every
+    // edge and keeping the smallest valid t always picks the true boundary
+    // point closest to the origin -- exactly what "radius at this angle"
+    // means for a star-shaped-from-center polygon -- and both edges that
+    // meet at a shared vertex agree on that same t there, so this is
+    // continuous even in the exact-vertex case instead of flip-flopping.
+    let best = Infinity;
     for (let i = 0; i < n; i++) {
       const a = pts[i], b = pts[(i + 1) % n];
       const ex = b[0] - a[0], ey = b[1] - a[1];
@@ -295,9 +313,9 @@
       if (Math.abs(denom) < 1e-9) continue;
       const t = (a[0] * ey - a[1] * ex) / denom;
       const u = (a[0] * dy - a[1] * dx) / denom;
-      if (t > 0 && u >= -1e-6 && u <= 1 + 1e-6) return t;
+      if (t > 0 && u >= -1e-6 && u <= 1 + 1e-6 && t < best) best = t;
     }
-    return 1; // shouldn't happen for these star-shaped outlines
+    return best === Infinity ? 1 : best; // shouldn't happen for these star-shaped outlines
   }
 
   // The one stationary ring the character lives on: the exact same morphing
