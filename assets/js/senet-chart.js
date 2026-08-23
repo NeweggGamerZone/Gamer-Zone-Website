@@ -24,7 +24,14 @@
    the site itself can't run on a schedule or hold a login, since it's
    just files served by GitHub Pages with no server of its own. Once that
    small proxy exists, this file's fetch/reseed logic doesn't need to
-   change at all. */
+   change at all.
+
+   UPDATE 2026-08-22 — the "All Time" range is no longer simulated. Eric
+   pulled a real "Total duration" export from the Senet dashboard, so
+   ALLTIME_REAL below is an actual snapshot (hardcoded, since there's still
+   no live feed). Week/month remain simulated via hoursFor()/POOL until we
+   have real numbers for those too — don't assume all three ranges are the
+   same kind of data. */
 (function () {
   const rowsEl = document.getElementById('senet-chart-rows');
   const rangeWrap = document.getElementById('senet-chart-range');
@@ -37,12 +44,29 @@
   if (!rowsEl || !rangeWrap || !pieSvg) return;
 
   // Cross-platform pool of Zone favorites — the chart surfaces whichever N
-  // currently have the most hours logged for the selected range.
+  // currently have the most hours logged for the selected range. (Still
+  // used for week/month, which are simulated -- see ALLTIME_REAL below for
+  // the one range that's now real.)
   const POOL = [
     'Fortnite', 'VALORANT', 'League of Legends', 'Rocket League', 'Counter-Strike 2',
     'Apex Legends', 'Super Smash Bros.', 'Mario Kart', 'Street Fighter 6', 'Tekken 8',
-    'Beat Saber', 'Forza Horizon 6', 'Overwatch', 'Call of Duty: Warzone',
-    'Marvel Rivals', 'Dota 2',
+    'Beat Saber', 'Forza Horizon 6', 'Overwatch 2', 'Call of Duty: Warzone',
+    'Marvel Rivals', 'Dota 2', 'Fall Guys',
+  ];
+
+  // Real "Total duration" (all-time hours played) snapshot from the Senet
+  // dashboard, captured 2026-08-22. Hardcoded because there's still no live
+  // feed (see file header) -- replace wholesale the next time a fresh
+  // export comes in, rather than trying to merge/interpolate old and new.
+  const ALLTIME_REAL = [
+    { name: 'VALORANT', hours: 469 + 14 / 60 },
+    { name: 'League of Legends', hours: 428 + 51 / 60 },
+    { name: 'Fortnite', hours: 194 + 31 / 60 },
+    { name: 'Overwatch 2', hours: 175 + 40 / 60 },
+    { name: 'Marvel Rivals', hours: 141 + 53 / 60 },
+    { name: 'Fall Guys', hours: 131 + 14 / 60 },
+    { name: 'Counter-Strike 2', hours: 75 + 34 / 60 },
+    { name: 'Mecha Chameleon', hours: 52 + 59 / 60 },
   ];
 
   // min/max total hours-played per title for the selected range.
@@ -151,7 +175,10 @@
   }
 
   function render(rangeKey) {
-    const data = POOL.map(name => ({ name, hours: hoursFor(name, rangeKey) }))
+    const data = (rangeKey === 'alltime'
+      ? ALLTIME_REAL.slice()
+      : POOL.map(name => ({ name, hours: hoursFor(name, rangeKey) }))
+    )
       .sort((a, b) => b.hours - a.hours)
       .slice(0, TOP_N);
     const total = data.reduce((a, g) => a + g.hours, 0);
@@ -193,5 +220,7 @@
     render(btn.dataset.range);
   });
 
-  render('week');
+  // Default to the one range that's real now (see ALLTIME_REAL above);
+  // matches the "active" chip already set in games.html.
+  render('alltime');
 })();
