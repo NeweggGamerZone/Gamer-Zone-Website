@@ -679,8 +679,22 @@ body.home-page { background: transparent; }
    with each event's title/blurb length, which pushed every section below
    the calendar up and down as you swept across days. Now every day's card
    is the same height, so hovering to read a day's details never rearranges
-   the page. */
-.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.3rem;height:335px;overflow:hidden;isolation:isolate;display:flex;flex-direction:column}
+   the page.
+   flex-shrink:0 on every direct child is required for that to actually
+   hold: a flex column's items default to flex-shrink:1, so once a long
+   title/blurb combination (e.g. "Gamer Zone Anniversary") needed more than
+   this fixed height, the browser was quietly squeezing EVERY child
+   (title, subtitle, meta row, blurb) shorter than its own already-clamped
+   size to make everything fit -- and since each child also has its own
+   overflow:hidden, that squeeze sliced text off mid-line/mid-glyph instead
+   of the clean whole-line clamping each was set up to do. flex-shrink:0
+   makes each child hold its full clamped height no matter what; the
+   height below is sized (with a small buffer) to the tallest real
+   combination measured (2-line title, wrapped meta row, 3-line blurb,
+   button) so nothing needs to shrink in the first place. */
+.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.3rem;height:390px;overflow:hidden;isolation:isolate;display:flex;flex-direction:column}
+.cal-detail>*{flex-shrink:0}
+@media (max-width: 480px) { .cal-detail { height: 480px; } }
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center}
