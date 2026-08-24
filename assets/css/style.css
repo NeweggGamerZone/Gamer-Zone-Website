@@ -1090,7 +1090,21 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      viewport) plus a matching min-height so the live board itself now
      reads close to square, fitting alongside those other sections instead
      of standing out as one wide banner. */
-  position:relative;max-width:700px;margin-left:auto;margin-right:auto;padding:clamp(1.1rem,2.3cqw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:700px;display:flex;flex-direction:column;justify-content:center}
+  /* Widened from the old 700px cap and left-aligned (was margin:auto,
+     floating centered under a container that's considerably wider) so the
+     board's own left edge lines up with the "Weekly lineup" <h2> above it
+     instead of appearing to float, undersized, in the middle of the
+     section. min-height grown to match, keeping the board just as close
+     to a 1:1 square as before -- just bigger. */
+  position:relative;max-width:920px;margin:0;padding:clamp(1.1rem,2.3cqw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:920px;display:flex;flex-direction:column;
+  /* flex-start, not center: with min-height now taller than most weeks'
+     actual content, centering left the logo/masthead floating partway
+     down the box instead of anchored at the top with everything else
+     stacking below it. Board-mode (the backend export capture) restores
+     its own centered treatment below, since that capture was calibrated
+     around the content sitting centered with the icon/address group
+     pinned to the bottom. */
+  justify-content:flex-start}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
@@ -1291,7 +1305,7 @@ html.board-mode section.eu-section{margin:0}
    and the roomier board-mode-only padding are still real: they remove the
    .container gutters and give the export a bit more breathing room than
    the live in-page look needs. */
-html.board-mode .eu-board{margin:0;padding:clamp(1.6rem,5vw,4.5rem)}
+html.board-mode .eu-board{margin:0;padding:clamp(1.6rem,5vw,4.5rem);justify-content:center}
 /* Board-mode only: shrink the per-week theme icon (crown, etc.) further
    than its normal on-page size. With the weekly-theme subtitle and the
    address row both removed from the board entirely, an icon week has much
