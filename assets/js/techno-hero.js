@@ -12,26 +12,40 @@
    ripple.
 
    Hero Runner game (index.html only, when the #hero-runner markup is
-   present): a single extra shape ("hazard", drawn in orange using the exact
-   same shape/projection code as the decorative tunnel) streams toward the
-   viewer alongside the normal rings, at the exact same speed as those
-   rings. A character sits at a fixed screen position under the hero's
-   "Plan your visit" button, standing on a second ring — the "baseline"
-   ring — that morphs through the same shape sequence as the rest of the
-   tunnel but, unlike every other ring, never recedes: it's held at one
-   fixed depth (baseRingZ, derived once from the character's on-screen
-   distance from the tunnel's vanishing point) so it's always the same
-   size/place, right under the character. Jump timing is exact and simple:
-   the instant a hazard's depth reaches that same fixed depth
-   (hz.z <= baseRingZ), it's resolved as a hit or a miss. Missing resets
+   present): a character stands on a fixed white path under the hero's
+   "Plan your visit" button and can move freely left/right along it at any
+   time (Left/Right arrow keys, or press-and-hold on either half of the
+   runner area on touch) while colored hazard bars — drawn with the same
+   shape/hue treatment as the decorative tunnel, just hotter — stream
+   toward the viewer alongside the normal rings, at the exact same speed.
+   Each hazard only blocks part of the path's width (a lane), not the
+   whole thing: stepping outside a hazard's lane clears it automatically,
+   while standing inside one means an actual jump is required — so moving
+   left/right is a real way to dodge, not just cosmetic, and a jump only
+   "matters" when you're actually in a hazard's way.
+
+   The path itself is deliberately NOT part of the morphing-shape tunnel
+   geometry: earlier versions drew it as a slice of one of the tunnel's own
+   rings (scaled so it always passed under the character), which meant its
+   local curvature subtly shifted with every shape swap AND with scroll
+   (the character's on-screen anchor — and thus the ring's required scale —
+   moves as the page scrolls under this fixed-position canvas). That read
+   as "the ground moving," which undercuts jump timing. The path here is
+   just a flat horizontal line at the character's anchor point, redrawn
+   there every frame — it never changes shape, curvature, or position
+   beyond tracking the anchor itself, regardless of scroll or which shape
+   the background tunnel is currently showing.
+
+   Jump timing is exact and simple: the instant a hazard's depth reaches
+   the character's fixed depth (hz.z <= baseRingZ), it's resolved — a hit
+   if the character is outside the hazard's lane OR airborne, a miss if
+   they're standing in the hazard's lane without jumping. Missing resets
    the current score AND the speed ramp back to base pace; the run keeps
    going and a best score persists via localStorage. The whole tunnel
-   (rings, baseline, hazards alike) starts at a base pace and gradually
-   speeds up the longer the player survives without a miss, capping out
-   after a stretch of unbroken survival — same single-button jump-timing
-   feel as Chrome's dino game, just staged inside this tunnel instead of a
-   separate strip. Everything pauses (without resetting) whenever the hero
-   scrolls out of view. Pure canvas math, no images. */
+   (rings, hazards alike) starts at a base pace and gradually speeds up the
+   longer the player survives without a miss, capping out after a stretch
+   of unbroken survival. Everything pauses (without resetting) whenever the
+   hero scrolls out of view. Pure canvas math, no images. */
 (function () {
   const canvas = document.getElementById('techno-canvas');
   if (!canvas) return;
@@ -165,11 +179,12 @@
 
   let score = 0, best = 0;
   let gameActive = false; // true only while the hero is on screen
-  let anchorX = 0, anchorY = 0; // fixed screen spot the character stands at
-  let baseRingZ = 0; // fixed depth of the stationary baseline ring under the character
-  let anchorAngle = 0; // the anchor's fixed angle from the vanishing point, unrotated
+  let anchorX = 0, anchorY = 0; // fixed screen spot the path/character sit at
+  let baseRingZ = 0; // fixed depth at which a hazard resolves (hit/miss)
   let surviveTime = 0; // seconds survived since the last miss — drives the speed ramp
   let charY = 0, vy = 0, jumping = false, flashT = 0;
+  let charX = 0; // character's offset from anchorX along the path, [-PATH_HALF_W, PATH_HALF_W]
+  let leftHeld = false, rightHeld = false;
   let hazards = [];
   let spawnTimer = 1.1;
   // Jump arc: peak height = JUMP_V^2 / (2*GRAVITY) ≈ 77px, sized to the
@@ -180,6 +195,9 @@
   // ~50px peak in a ~66px pocket, which read as a cramped little hop —
   // both the arc and its headroom were enlarged together here.)
   const GRAVITY = 1500, JUMP_V = -480, CHAR_R = 13;
+  // The fixed path the character moves along: half-width in screen px, and
+  // how fast Left/Right movement covers it.
+  const PATH_HALF_W = 120, MOVE_SPEED = 260;
 
   if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
 
@@ -195,16 +213,16 @@
     const r = runnerWrap.getBoundingClientRect();
     anchorX = r.left + r.width / 2;
     anchorY = r.top + 100; // lower in the reserved padding = a larger baseRingRadius = a nearer (smaller-z) baseline, i.e. visually closer to the camera. Leaves ~100px of headroom above for the jump arc (peak ~77px) and ~50px below before the score/hint text.
-    // The baseline ring's fixed depth: rotation preserves a point's distance
-    // from the vanishing point, so a ring point at local radius A always
-    // projects to a screen distance of A*(F/z) from center regardless of the
-    // tunnel's current rotation. Solving that for z with the character's own
-    // on-screen distance from center gives the one depth at which the ring
-    // sits exactly under the character at every rotation.
+    // baseRingZ is the one fixed depth at which a hazard visually arrives
+    // exactly at the anchor point (see hazardScreenPos below) — solved the
+    // same way the tunnel's own rings scale with depth (A*(F/z)), just
+    // anchored to the character's actual on-screen distance from the
+    // vanishing point instead of the tunnel's nominal radius. This is
+    // still what "reaches the character" means for hit-testing; it no
+    // longer drives any drawn shape's curvature (see drawPath below).
     const dx = anchorX - cx, dy = anchorY - cy;
     const baseRingRadius = Math.hypot(dx, dy) || 1;
     baseRingZ = (A * F) / baseRingRadius;
-    anchorAngle = Math.atan2(dy, dx);
   }
 
   function jump() {
@@ -225,10 +243,17 @@
   }
 
   function spawnHazard() {
-    // No shape of its own — it's whichever shape the tunnel is currently
-    // showing (see drawHazard), so it reads as one of the real background
-    // rings that happens to be orange, not a foreign game object.
-    hazards.push({ z: Z_FAR, resolved: false });
+    // Each hazard blocks one contiguous slice of the path's width, not the
+    // whole thing — a random width between 45%-85% of the full path,
+    // placed at a random position that still fits within it. Lanes are
+    // fractions of PATH_HALF_W (-1..1); see hazardScreenPos below for how
+    // that maps to an actual screen position as the hazard approaches.
+    const w = 0.45 + Math.random() * 0.4;
+    const start = -1 + Math.random() * (2 - w);
+    // No shape of its own — colored/hued the same as the tunnel (see
+    // drawHazard), so it reads as one of the background's own lines that
+    // happens to be hotter, not a foreign game object.
+    hazards.push({ z: Z_FAR, resolved: false, laneStart: start, laneEnd: start + w });
   }
 
   function updateGame(dt, rot, speed) {
@@ -241,19 +266,30 @@
       if (charY >= 0) { charY = 0; vy = 0; jumping = false; }
     }
 
+    // Left/Right movement along the fixed path, at all times (not just
+    // while jumping) — held continuously via keyboard or a touch/pointer
+    // hold on either half of the runner area (see initGame).
+    if (leftHeld) charX -= MOVE_SPEED * dt;
+    if (rightHeld) charX += MOVE_SPEED * dt;
+    charX = Math.max(-PATH_HALF_W + CHAR_R, Math.min(PATH_HALF_W - CHAR_R, charX));
+
     spawnTimer -= dt;
     if (spawnTimer <= 0) { spawnHazard(); spawnTimer = 1.3 + Math.random() * 0.9; }
 
     // Same shared speed the decorative rings moved at this frame, and a
-    // direct depth comparison against the stationary baseline ring's fixed
-    // depth — the jump-timing trigger fires the instant a hazard reaches
-    // that depth, matching exactly what's drawn on screen.
+    // direct depth comparison against the character's fixed resolution
+    // depth — the hit-test trigger fires the instant a hazard reaches that
+    // depth, matching exactly what's drawn on screen (hazardScreenPos's
+    // r(z)=1 case). A hazard only counts as blocking if the character's
+    // current path position falls inside ITS lane; standing outside a
+    // hazard's lane clears it automatically, whether airborne or not.
     for (const hz of hazards) {
       hz.z -= speed * dt;
       if (!hz.resolved && hz.z <= baseRingZ) {
         hz.resolved = true;
+        const inLane = charX >= hz.laneStart * PATH_HALF_W && charX <= hz.laneEnd * PATH_HALF_W;
         const airborneEnough = -charY > CHAR_R * 2.6;
-        if (airborneEnough) onClear(); else onMiss();
+        if (!inLane || airborneEnough) onClear(); else onMiss();
       }
     }
     hazards = hazards.filter(hz => hz.z > Z_NEAR - 40);
@@ -261,96 +297,60 @@
     if (flashT > 0) flashT = Math.max(0, flashT - dt);
   }
 
-  // A hazard is drawn with the exact same drawRing() geometry/curve-smoothing
-  // as every decorative ring, using whatever shape the tunnel currently
-  // shows (morphedPoints/morphStateAt — the same call the decorative loop
-  // makes), and now the same live hue too (see drawHazard below) — the only
-  // difference is a saturation/opacity boost. That's what makes it read as
-  // one of the background's own shapes, just hotter, instead of a separate
-  // game object rendered on top of the scene.
+  // Where a hazard sits on screen at its current depth: it approaches
+  // along the same ray from the vanishing point (cx,cy) through the
+  // character's anchor that every other receding ring in this tunnel
+  // scales along, converging exactly onto the anchor at r=1 (z===baseRingZ)
+  // — so it visually reads as part of the same perspective, but the path
+  // it's measured against (see drawPath) is otherwise a plain fixed line,
+  // not tied to this ray at all.
+  function hazardScreenPos(z) {
+    const dx = anchorX - cx, dy = anchorY - cy;
+    const r = Math.min(1, baseRingZ / z);
+    return { x: cx + dx * r, y: cy + dy * r, r, dx, dy };
+  }
+
+  // Drawn as a straight bar spanning its own lane (see spawnHazard),
+  // hued/colored the same live way the decorative rings are so it reads as
+  // one of the background's own lines, just hotter — but its shape is a
+  // simple lane bar, not the tunnel's currently-morphed polygon, so it
+  // never inherits that shape's curvature.
   function drawHazard(hz, rot, globalFade, hue) {
-    const pts = morphedPoints(morphStateAt(elapsed));
-    // Hue-linked rather than a fixed static color — a hazard drawn in one
-    // unchanging color would visibly fall out of sync with the rest of the
-    // tunnel as its hue keeps drifting through the spectrum, reading as a
-    // "stuck"/stagnant shape after a while. Tying it to the same live hue
-    // (boosted saturation/opacity so it still stands out as the thing to
-    // dodge) keeps it feeling like one of the background's own lines.
-    drawRing(hz, pts, rot, globalFade, 0, f => `hsla(${hue}, 88%, 58%, ${Math.min(1, f * 1.7)})`);
+    const { x, y, r } = hazardScreenPos(hz.z);
+    const halfW = PATH_HALF_W * r;
+    const x1 = x + hz.laneStart * halfW, x2 = x + hz.laneEnd * halfW;
+    const f = fadeFor(hz.z) * globalFade;
+    if (f <= 0.01) return;
+    ctx.strokeStyle = `hsla(${hue}, 88%, 58%, ${Math.min(1, f * 1.7)})`;
+    ctx.lineWidth = 4 * Math.max(0.4, r);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x1, y);
+    ctx.lineTo(x2, y);
+    ctx.stroke();
   }
 
-  // How far a closed unit-space polygon (its perimeter points, in order)
-  // extends from the origin at a given angle — found by ray-casting from
-  // the origin out along that angle and intersecting whichever edge it
-  // crosses. Square/triangle/pentagon/hexagon/star all have vertices at
-  // radius 1 but dip inward between them (down to ~0.45 for the star's
-  // inner points), so this varies by angle even though every shape is
-  // "unit-sized" — exactly what lets the baseline ring below correct for
-  // that and land precisely on the character regardless of which shape or
-  // rotation the tunnel is currently showing.
-  function radiusAtAngle(pts, theta) {
-    const dx = Math.cos(theta), dy = Math.sin(theta);
-    const n = pts.length;
-    // Take the NEAREST valid edge crossing along the ray, not the first one
-    // encountered in vertex order. Whenever the anchor's angle lines up
-    // exactly on (or very near) a vertex -- which it does here, since the
-    // character sits almost directly under the vanishing point at ~90°, a
-    // vertex angle shared by the square/hexagon/star outlines -- the ray
-    // grazes the shared corner of two edges. Floating-point rounding can
-    // then push the correct edge's `u` just outside its valid [0,1] range
-    // on a given frame while a third, nearly-ray-parallel edge elsewhere on
-    // the polygon spuriously satisfies the test with a huge `t` (since
-    // "nearly parallel" means the line intersection sits far down the ray).
-    // Returning on first-match let that distant false hit win, snapping the
-    // baseline ring's scale to near-zero and staying there. Scanning every
-    // edge and keeping the smallest valid t always picks the true boundary
-    // point closest to the origin -- exactly what "radius at this angle"
-    // means for a star-shaped-from-center polygon -- and both edges that
-    // meet at a shared vertex agree on that same t there, so this is
-    // continuous even in the exact-vertex case instead of flip-flopping.
-    let best = Infinity;
-    for (let i = 0; i < n; i++) {
-      const a = pts[i], b = pts[(i + 1) % n];
-      const ex = b[0] - a[0], ey = b[1] - a[1];
-      const denom = dx * ey - dy * ex;
-      if (Math.abs(denom) < 1e-9) continue;
-      const t = (a[0] * ey - a[1] * ex) / denom;
-      const u = (a[0] * dy - a[1] * dx) / denom;
-      if (t > 0 && u >= -1e-6 && u <= 1 + 1e-6 && t < best) best = t;
-    }
-    return best === Infinity ? 1 : best; // shouldn't happen for these star-shaped outlines
-  }
-
-  // The one stationary ring the character lives on: the exact same morphing
-  // shape as the decorative tunnel (drawn via the shared drawRing()), still
-  // rotating right along with everything else, but held at a single fixed
-  // depth (baseRingZ) instead of receding — so it never moves and it's
-  // obvious exactly where an approaching orange hazard needs to be jumped
-  // rather than the player having to guess the timing from the shape's
-  // motion alone. A plain fixed-z/fixed-scale ring would only pass exactly
-  // through the character while the tunnel happens to show a circle —
-  // every other shape's outline sits nearer or farther from center
-  // depending on the angle it's currently rotated to (a square's flat edge
-  // vs. its corner, say). radiusAtAngle() measures that shape's actual
-  // reach at the exact angle the character sits at, and scaling the whole
-  // ring by its inverse keeps that one point locked exactly onto the
-  // character at every rotation and every shape — the ring's overall size
-  // breathes a little as it spins as the trade-off, but the character
-  // always visibly stands right on its line. Drawn at full brightness
-  // regardless of depth fog (skipDepthFade), since unlike a real ring it
-  // isn't traveling through the fade zones.
-  function drawBaseRing(rot, globalFade) {
-    if (!gameActive || !baseRingZ) return;
-    const pts = morphedPoints(morphStateAt(elapsed));
-    const localAngle = anchorAngle - rot;
-    const localR = Math.max(0.05, radiusAtAngle(pts, localAngle));
-    const k = 1 / localR;
-    const scaledPts = pts.map(p => [p[0] * k, p[1] * k]);
-    drawRing({ z: baseRingZ }, scaledPts, rot, globalFade, 0, f => `rgba(255,255,255,${Math.min(1, 0.55 + f * 0.6)})`, true);
+  // The path the character stands on and moves along: a plain straight
+  // horizontal line at the anchor's own screen position, redrawn there
+  // every frame. Deliberately NOT derived from the tunnel's current
+  // shape/rotation/depth math (that was the old drawBaseRing, removed) --
+  // this line's position and length depend only on the anchor (which
+  // itself only moves if the runner's real on-page position moves, e.g.
+  // scroll), never on which shape the background happens to be showing.
+  function drawPath(globalFade) {
+    if (!gameActive) return;
+    ctx.strokeStyle = `rgba(255,255,255,${Math.min(1, 0.55 + globalFade * 0.6)})`;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(anchorX - PATH_HALF_W, anchorY);
+    ctx.lineTo(anchorX + PATH_HALF_W, anchorY);
+    ctx.stroke();
   }
 
   function drawCharacter() {
     if (!gameActive) return;
+    const bodyX = anchorX + charX;
     const bodyY = anchorY + charY; // charY goes negative while airborne
 
     // Drop shadow: wide and solid when grounded, shrinks and fades as the
@@ -361,7 +361,7 @@
     const shadowW = CHAR_R * (1.9 - 0.95 * liftT);
     const shadowAlpha = 1 - 0.75 * liftT;
     ctx.beginPath();
-    ctx.ellipse(anchorX, anchorY + 5, shadowW, shadowW * 0.34, 0, 0, Math.PI * 2);
+    ctx.ellipse(bodyX, anchorY + 5, shadowW, shadowW * 0.34, 0, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(5,6,10,${0.55 * shadowAlpha})`;
     ctx.fill();
     ctx.strokeStyle = `rgba(166,174,188,${0.32 * shadowAlpha})`;
@@ -370,13 +370,13 @@
 
     if (flashT > 0) {
       ctx.beginPath();
-      ctx.arc(anchorX, bodyY, CHAR_R * 2.8, 0, Math.PI * 2);
+      ctx.arc(bodyX, bodyY, CHAR_R * 2.8, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255,59,59,${(flashT / 0.3) * 0.3})`;
       ctx.fill();
     }
 
     ctx.beginPath();
-    ctx.arc(anchorX, bodyY, CHAR_R, 0, Math.PI * 2);
+    ctx.arc(bodyX, bodyY, CHAR_R, 0, Math.PI * 2);
     ctx.fillStyle = '#FA9D28';
     ctx.fill();
   }
@@ -398,8 +398,40 @@
     document.addEventListener('keydown', e => {
       if (!gameActive) return;
       if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+      else if (e.code === 'ArrowLeft') { e.preventDefault(); leftHeld = true; }
+      else if (e.code === 'ArrowRight') { e.preventDefault(); rightHeld = true; }
     });
-    runnerWrap.addEventListener('pointerdown', jump);
+    document.addEventListener('keyup', e => {
+      if (e.code === 'ArrowLeft') leftHeld = false;
+      else if (e.code === 'ArrowRight') rightHeld = false;
+    });
+    // Touch/mouse: a quick tap jumps (matching the original single-tap
+    // behavior); holding down on either half of the runner area instead
+    // moves the character continuously toward that side, so left/right
+    // movement works without a keyboard. HOLD_MS is just long enough that
+    // an ordinary tap-to-jump never accidentally registers as the start of
+    // a hold.
+    const HOLD_MS = 220;
+    let pressT = 0, pressSide = 0, holding = false;
+    runnerWrap.addEventListener('pointerdown', e => {
+      pressT = performance.now();
+      const r = runnerWrap.getBoundingClientRect();
+      pressSide = (e.clientX - r.left) < r.width / 2 ? -1 : 1;
+      holding = false;
+      setTimeout(() => {
+        if (performance.now() - pressT >= HOLD_MS - 5) {
+          holding = true;
+          if (pressSide < 0) leftHeld = true; else rightHeld = true;
+        }
+      }, HOLD_MS);
+    });
+    function releasePointer() {
+      if (!holding) jump();
+      holding = false; leftHeld = false; rightHeld = false;
+    }
+    runnerWrap.addEventListener('pointerup', releasePointer);
+    runnerWrap.addEventListener('pointercancel', releasePointer);
+    runnerWrap.addEventListener('pointerleave', releasePointer);
     window.addEventListener('resize', updateAnchor);
   }
 
@@ -523,7 +555,7 @@
     if (gameOn) {
       updateGame(dt, rot, speed);
       for (const hz of hazards) drawHazard(hz, rot, globalFade, hue);
-      drawBaseRing(rot, globalFade);
+      drawPath(globalFade);
       drawCharacter();
     }
 
