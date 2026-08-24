@@ -250,12 +250,16 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    content, staggered per slot so they cascade rather than flip together;
    this transition is what animates that fade. */
 /* One review at a time now (was a multi-column auto-fit grid showing up to
-   4 at once) -- centered, comfortably narrow for reading, with a fixed
-   height (set in JS, measured against the longest review in the pool) so
-   the box never grows or shrinks as it cycles. position:relative scopes
-   reviews.js's off-screen measuring clone to this box instead of some
-   unrelated positioned ancestor. */
-.review-waterfall { position: relative; max-width: 640px; margin: 0 auto; }
+   4 at once), with a fixed height (set in JS, measured against the
+   longest review in the pool) so the box never grows or shrinks as it
+   cycles. position:relative scopes reviews.js's off-screen measuring
+   clone to this box instead of some unrelated positioned ancestor.
+   No max-width here -- per a site-wide "every section spans its full
+   container width" pass, this now matches every other section instead of
+   floating as a narrower centered column; reviews.js measures against
+   whatever this box's actual (now wider) rendered width is, so the fixed-
+   height math still stays correct. */
+.review-waterfall { position: relative; }
 /* Vertically centers the stars/quote/name block within the fixed-height
    box (see reviews.js) -- without this, a short review sits pinned to the
    top with a slab of empty space below it, reading as broken rather than
@@ -392,7 +396,13 @@ details.archive-month .grid { margin-top: 1rem; }
 /* Real left/right carousel: .zone-stack is wider than a single .zone-card
    so the prev/next cards have room to peek at the edges, and overflow:hidden
    clips them cleanly instead of letting them spill into the page. */
-.zone-stack { position: relative; width: min(620px, 100%); height: 560px; overflow: hidden; }
+/* Full container width (was capped at min(620px,100%), later min(960px,94vw)
+   on wider screens) per a site-wide "every section should span its full
+   container width" pass -- the card itself stays a fixed size (below), so
+   this just gives the peeking prev/next cards more room to clear the
+   center card's edge cleanly (see the comment on [data-pos="prev"] below)
+   and more of the section's own background to show through at the sides. */
+.zone-stack { position: relative; width: 100%; height: 560px; overflow: hidden; }
 /* At the old 620px width, the prev/next cards' own far edge (rounded
    corner + orange border) sat off in the clipped-away zone -- with the
    card fixed at 340px wide and the peek offset a fixed 82% of that (in
@@ -407,9 +417,6 @@ details.archive-month .grid { margin-top: 1rem; }
    (rounded corner, border, shadow) lands inside the visible area instead
    -- so what's cut off is a natural mid-card overlap under the center
    card, and what's left showing is a genuine, fully-bordered card edge. */
-@media (min-width: 900px) {
-  .zone-stack { width: min(960px, 94vw); }
-}
 /* Soft feather at the track's own edges instead of a hard slice -- mostly
    inert now that the peek cards' true borders land inside the visible
    area (see above), but keeps anything still touching the boundary
@@ -1087,26 +1094,19 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      icon's own margins and the weekly-theme subtitle size instead (see
      .eu-board-icon and #eu-eyebrow-desc below), keeping the board at ~1:1
      with nothing cut off top or bottom. */
-  /* Previously full-bleed (width:100vw + auto-canceling margins, same
-     technique as .hero-stage above it) so the board spanned edge-to-edge
-     like a banner. At a typical desktop viewport that came out to roughly
-     a 2.2:1 wide strip -- every ~1:1 comment elsewhere in this block was
-     actually calibrated against the BACKEND EXPORT capture width
-     (scripts/capture-social-images.mjs's 660px 1:1 shot), not this
-     full-bleed live width, so the live page and the export had quietly
-     drifted into two different shapes. Capped to a contained max-width
-     (matching the general scale of this page's other boxed sections --
-     the calendar, the About Gamer Zone cards -- rather than spanning the
-     viewport) plus a matching min-height so the live board itself now
-     reads close to square, fitting alongside those other sections instead
-     of standing out as one wide banner. */
-  /* Widened from the old 700px cap and left-aligned (was margin:auto,
-     floating centered under a container that's considerably wider) so the
-     board's own left edge lines up with the "Weekly lineup" <h2> above it
-     instead of appearing to float, undersized, in the middle of the
-     section. min-height grown to match, keeping the board just as close
-     to a 1:1 square as before -- just bigger. */
-  position:relative;max-width:920px;margin:0;padding:clamp(1.1rem,2.3cqw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:920px;display:flex;flex-direction:column;
+  /* This board went through several width phases: full-bleed 100vw banner,
+     then a contained square (max-width/min-height both fixed at 700px,
+     later 920px) so it read as ~1:1 like a social-post export. Per a later,
+     explicit "every section should span the full container width, no
+     exceptions" request, the square constraint is dropped entirely here --
+     this now just sits inside .container like every other section (no own
+     max-width), with height purely a function of its content. It will no
+     longer be a true square, and any backend screenshot need should
+     capture the live page as it actually renders (see index.html's
+     board-mode comment) rather than the old calibrated-square pipeline in
+     scripts/capture-social-images.mjs, which assumed the previous fixed
+     widths. */
+  position:relative;margin:0;padding:clamp(1.1rem,2.3cqw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;display:flex;flex-direction:column;
   /* flex-start, not center: with min-height now taller than most weeks'
      actual content, centering left the logo/masthead floating partway
      down the box instead of anchored at the top with everything else
@@ -1278,15 +1278,15 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 
 /* ---- board-only render mode: isolates just the calendar block for clean
    social screenshot capture (index.html/events.html only — never seen by
-   real visitors, only toggled by the export script). Board-mode itself
-   only hides the surrounding page chrome; it does NOT force any width or
-   aspect ratio anymore — .eu-board's own max-width:700px/min-height:700px
-   (set above, near the top of this block) is what keeps the board close
-   to square, identically in board-mode and in normal page browsing. The
-   export pipeline is responsible for cropping/fitting that ~square
-   capture into an exact 1200x1200 (always a full-bleed cover-fit crop,
-   never a letterboxed/pillarboxed contain-fit) for the live site's 1:1
-   image, and into a 1920x1080 frame for any separate 16:9 backend export. */
+   real visitors, only toggled by the export script). Board-mode only
+   hides the surrounding page chrome; it does not force any width or
+   aspect ratio. .eu-board no longer has its own max-width (see above) --
+   it now spans the full .container width like every other section, so a
+   capture of it is whatever shape that content naturally comes out to,
+   not a calibrated 1:1 square. scripts/capture-social-images.mjs's fixed
+   700px/1150px capture widths predate this and assumed the old square
+   board; treat that script as stale until it's revisited against the
+   current full-width layout. */
 html.board-mode{overflow:visible}
 html.board-mode .site-header,
 html.board-mode .site-footer,
@@ -1309,23 +1309,15 @@ html.board-mode .tech-scan,
 html.board-mode section.eu-section>h2{display:none}
 html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
-/* width:100vw removed here — .eu-board's own max-width:700px already caps
-   the used width below any wider viewport, so that declaration was dead
-   weight left over from the pre-square, full-bleed-banner design. margin:0
-   and the roomier board-mode-only padding are still real: they remove the
-   .container gutters and give the export a bit more breathing room than
-   the live in-page look needs. */
+/* margin:0 and the roomier board-mode-only padding remove the .container
+   gutters and give a capture a bit more breathing room than the live
+   in-page look needs. justify-content:center restores the old centered
+   composition for this isolated capture view even though the live page
+   itself now anchors content to the top (see the base .eu-board rule). */
 html.board-mode .eu-board{margin:0;padding:clamp(1.6rem,5vw,4.5rem);justify-content:center}
 /* Board-mode only: shrink the per-week theme icon (crown, etc.) further
-   than its normal on-page size. With the weekly-theme subtitle and the
-   address row both removed from the board entirely, an icon week has much
-   less content to fit than before — this is now mostly a safety margin
-   against a busy 3-row week (2 closures + a two-line title) rather than a
-   hard requirement, but keeping the icon on the smaller side here (rather
-   than growing it back to fill the freed-up space) is what keeps every
-   week's export close enough to a true 1:1 shape that the capture step's
-   cover-fit crop never has to cut into the address/list content to fill
-   the frame. */
+   than its normal on-page size, so a busy week (2 closures + a two-line
+   title) still has room to breathe in an isolated capture. */
 html.board-mode .eu-board-icon img{width:min(34%,340px)}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
