@@ -10,9 +10,7 @@
       "blurb": "XP League coaches teach keybinds, builds, and pro strategies. All skill levels welcome.",
       "featured": false,
       "reservation": false,
-      "flyer": "assets/calendar/weekly/2026-07-22-xp-training.png",
-      "accent": "#7ED321",
-      "flyerWeb": "assets/img/flyers/2026-07-22-xp-training.jpg"
+      "accent": "#7ED321"
     },
     {
       "id": "fps-day-2026-07-23",
@@ -24,9 +22,7 @@
       "blurb": "Every shooter on the floor, all day. Bring your squad and settle it in-game.",
       "featured": true,
       "reservation": false,
-      "flyer": "assets/calendar/weekly/2026-07-23-fps-day.png",
-      "accent": "#FA9D28",
-      "flyerWeb": "assets/img/flyers/2026-07-23-fps-day.jpg"
+      "accent": "#FA9D28"
     },
     {
       "id": "xp-fortnite-tournament-2026-07-24",
@@ -38,9 +34,7 @@
       "blurb": "Biweekly Fortnite tournament with XP League. Chase the Victory Royale.",
       "featured": true,
       "reservation": false,
-      "flyer": "assets/calendar/weekly/2026-07-24-xp-tournament.png",
-      "accent": "#FF2E97",
-      "flyerWeb": "assets/img/flyers/2026-07-24-xp-tournament.jpg"
+      "accent": "#FF2E97"
     },
     {
       "id": "xp-fortnite-training-2026-07-29",
@@ -52,9 +46,7 @@
       "blurb": "Build fights, edits, and endgame strategy with XP League coaches.",
       "featured": false,
       "reservation": false,
-      "flyer": "assets/calendar/weekly/2026-07-29-xp-training.png",
-      "accent": "#7ED321",
-      "flyerWeb": "assets/img/flyers/2026-07-29-xp-training.jpg"
+      "accent": "#7ED321"
     },
     {
       "id": "riot-thursday-2026-07-30",
@@ -66,9 +58,7 @@
       "blurb": "League, VALORANT, TFT \u2014 if Riot makes it, we're playing it.",
       "featured": false,
       "reservation": false,
-      "flyer": "assets/calendar/weekly/2026-07-30-riot-thursday.png",
-      "accent": "#FF3B66",
-      "flyerWeb": "assets/img/flyers/2026-07-30-riot-thursday.jpg"
+      "accent": "#FF3B66"
     },
     {
       "id": "xp-fortnite-tournament-2026-07-31",
@@ -80,9 +70,7 @@
       "blurb": "The July finale: all-day party, bracket play, and prizes. Bring the whole squad.",
       "featured": true,
       "reservation": false,
-      "flyer": "assets/calendar/weekly/2026-07-31-xp-tournament-party.png",
-      "accent": "#FFC400",
-      "flyerWeb": "assets/img/flyers/2026-07-31-xp-tournament-party.jpg"
+      "accent": "#FFC400"
     },
     {
       "id": "eastern-harmony-gaming-for-good-2026-08-01",
