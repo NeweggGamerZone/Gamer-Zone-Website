@@ -226,31 +226,26 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; }
 .review-card { display: flex; flex-direction: column; gap: .5rem; }
 .review-stars { color: var(--ne-orange); font-size: 1rem; letter-spacing: .1em; }
-.review-quote { font-style: italic; color: var(--ink); flex: 1; }
+.review-quote { font-style: italic; color: var(--ink); }
 .review-source { font-size: .8rem; margin-top: .2rem; }
-/* Aggregate rating line above the review grid, and the compact list of
-   reviewers who left 5 stars with no written text — keeps the full
-   review count (86) visible without needing 23 empty-looking cards. */
+/* Aggregate rating line above the carousel. The review count (86) still
+   covers the 23 reviewers who left 5 stars with no written text — they're
+   just no longer named individually below (see reviews.js). */
 .review-stat { font-weight: 700; margin-top: .3rem; }
 .review-stat-stars { color: var(--ne-orange); letter-spacing: .1em; }
-.review-more { font-size: .85rem; margin-top: 1.3rem; line-height: 1.6; }
-/* Review waterfall: cards cascade in one after another (rather than popping in
-   together) once the parent #reviews section's existing scroll-reveal fires —
-   hooks onto the .reveal/.in toggle main.js already applies via IntersectionObserver,
-   no JS changes needed. */
-.review-waterfall .review-card { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s cubic-bezier(.2,.7,.3,1); }
-#reviews.reveal.in .review-waterfall .review-card { opacity: 1; transform: none; }
-.review-waterfall .review-card:nth-child(1) { transition-delay: .05s; }
-.review-waterfall .review-card:nth-child(2) { transition-delay: .13s; }
-.review-waterfall .review-card:nth-child(3) { transition-delay: .21s; }
-.review-waterfall .review-card:nth-child(4) { transition-delay: .29s; }
-.review-waterfall .review-card:nth-child(5) { transition-delay: .37s; }
-.review-waterfall .review-card:nth-child(6) { transition-delay: .45s; }
-.review-waterfall .review-card:nth-child(7) { transition-delay: .53s; }
-.review-waterfall .review-card:nth-child(8) { transition-delay: .61s; }
-.review-waterfall .review-card:nth-child(9) { transition-delay: .69s; }
+/* Review waterfall: a small, fixed number of cards (reviews.js renders
+   into these 4 slots) rather than the full 63-review grid this used to
+   be. Each card sizes to its own content -- align-items:start stops the
+   grid from stretching every card in a row to match its tallest sibling,
+   which is what produced the huge blank space under short reviews before.
+   reviews.js toggles .is-fading on a slot right before swapping its
+   content, staggered per slot so they cascade rather than flip together;
+   this transition is what animates that fade. */
+.review-waterfall { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; align-items: start; }
+.review-waterfall .review-card { transition: opacity .42s ease, transform .42s cubic-bezier(.2,.7,.3,1); }
+.review-waterfall .review-card.is-fading { opacity: 0; transform: translateY(10px); }
 @media (prefers-reduced-motion: reduce) {
-  .review-waterfall .review-card { opacity: 1; transform: none; transition: none; }
+  .review-waterfall .review-card { transition: none; }
 }
 html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; transition: none; }
 /* Registration steps: the step number is the most emphasized element (big,
