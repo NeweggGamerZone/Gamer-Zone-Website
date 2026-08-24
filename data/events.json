@@ -178,6 +178,80 @@
       "blurb": "Venue closed to the public for a private event.",
       "featured": false,
       "reservation": false
+    },
+    {
+      "id": "xp-fortnite-training-2026-09-09",
+      "title": "XP League: Fortnite Training",
+      "boardNoShrink": true,
+      "subtitle": "Train with the Pros from XP League!",
+      "date": "2026-09-09",
+      "time": "4:00 PM – 6:00 PM",
+      "type": "edu",
+      "blurb": "Live coaching from XP League pros — skill drills, squad coordination, real-time feedback. All skill levels welcome.",
+      "featured": false,
+      "reservation": false,
+      "accent": "#7ED321"
+    },
+    {
+      "id": "xp-fortnite-tournament-2026-09-11",
+      "title": "XP League Fortnite Tournament",
+      "subtitle": "Compete, win, and prove your build is better.",
+      "date": "2026-09-11",
+      "time": "4:00 PM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "Bracket play with coached warm-up sets and live commentary. Walk-ins welcome — winner takes a $50 Newegg gift card.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
+    },
+    {
+      "id": "mario-kart-8-deluxe-tournament-2026-09-19",
+      "title": "Mario Kart 8 Deluxe Tournament",
+      "subtitle": "Racing Games Week's closing bracket tournament",
+      "date": "2026-09-19",
+      "time": "11:00 AM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "Mario Kart 8 Deluxe bracket play to close out Racing Games Week — walk-ins welcome, all skill levels.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
+    },
+    {
+      "id": "xp-fortnite-training-2026-09-23",
+      "title": "XP League: Fortnite Training",
+      "boardNoShrink": true,
+      "subtitle": "Train with the Pros from XP League!",
+      "date": "2026-09-23",
+      "time": "4:00 PM – 6:00 PM",
+      "type": "edu",
+      "blurb": "Live coaching from XP League pros — skill drills, squad coordination, real-time feedback. All skill levels welcome.",
+      "featured": false,
+      "reservation": false,
+      "accent": "#7ED321"
+    },
+    {
+      "id": "xp-fortnite-tournament-2026-09-25",
+      "title": "XP League Fortnite Tournament",
+      "subtitle": "Compete, win, and prove your build is better.",
+      "date": "2026-09-25",
+      "time": "4:00 PM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "Second tournament of the cadence — bracket play, coached warm-up sets. Winner takes a $50 Newegg gift card.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
+    },
+    {
+      "id": "street-fighter-saturday-slam-2026-09-26",
+      "title": "Street Fighter Saturday Slam",
+      "subtitle": "SF6 local throwdown — enter the bracket, claim the crown.",
+      "date": "2026-09-26",
+      "time": "11:00 AM – 7:00 PM",
+      "type": "tournament",
+      "blurb": "Southern California's best fighters battle it out in SF6 bracket play — free play and raffle prizes all day. Walk-ins welcome.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
     }
   ],
   "weeklyThemes": [
@@ -185,6 +259,10 @@
     { "start": "2026-08-04", "end": "2026-08-08", "theme": "Marvel Week", "desc": "Marvel Rivals, Marvel Vs Capcom, and Marvel Tokon — Always Free to Play in the Gamer Zone." },
     { "start": "2026-08-11", "end": "2026-08-15", "theme": "Riot Games Week", "desc": "Bring friends to play League of Legends, Valorant, and TFT.", "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png" },
     { "start": "2026-08-18", "end": "2026-08-22", "theme": "Co-op Games Week", "desc": "Helldivers 2, Overcooked!, Jackbox Party, RV There Yet, Mecha Chameleon, and more!", "icon": "assets/calendar/LineupAssets/GZTest2.png" },
-    { "start": "2026-08-25", "end": "2026-08-29", "theme": "Fortnite Week", "desc": "XP League Fortnite training and tournament play all week.", "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png" }
+    { "start": "2026-08-25", "end": "2026-08-29", "theme": "Fortnite Week", "desc": "XP League Fortnite training and tournament play all week.", "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png" },
+    { "start": "2026-09-01", "end": "2026-09-05", "theme": "Riot Games Week", "desc": "League of Legends, TFT, and Valorant running throughout the week." },
+    { "start": "2026-09-08", "end": "2026-09-12", "theme": "Party Games Week", "desc": "Jackbox Party, Overcooked!, Mario Party, and other couch-co-op favorites all week.", "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png" },
+    { "start": "2026-09-15", "end": "2026-09-19", "theme": "Racing Games Week", "desc": "Racing sims, Mario Kart, and other racing games on rotation all week." },
+    { "start": "2026-09-22", "end": "2026-09-26", "theme": "Fighting Games Week", "desc": "Street Fighter bracket play and fighting-game showdowns all week.", "icon": "assets/calendar/LineupAssets/FightingGamesAsset.png" }
   ]
 }
