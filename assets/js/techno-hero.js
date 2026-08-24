@@ -172,11 +172,14 @@
   let charY = 0, vy = 0, jumping = false, flashT = 0;
   let hazards = [];
   let spawnTimer = 1.1;
-  // Jump height is deliberately modest (~50px peak) — the character sits
-  // close under the button, and a big leap would fly up behind it (the
-  // button sits above this canvas layer and would hide the character
-  // mid-jump). Keeping the arc short also keeps the timing snappy.
-  const GRAVITY = 1500, JUMP_V = -390, CHAR_R = 10;
+  // Jump arc: peak height = JUMP_V^2 / (2*GRAVITY) ≈ 77px, sized to the
+  // ~150px of headroom .hero-runner's CSS padding-top now reserves above
+  // the character (see updateAnchor below) — enough clearance to read as
+  // a real jump without flying up behind the "Plan your visit" button
+  // that sits just above this canvas layer. (Previously a much smaller
+  // ~50px peak in a ~66px pocket, which read as a cramped little hop —
+  // both the arc and its headroom were enlarged together here.)
+  const GRAVITY = 1500, JUMP_V = -480, CHAR_R = 13;
 
   if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
 
@@ -191,7 +194,7 @@
   function updateAnchor() {
     const r = runnerWrap.getBoundingClientRect();
     anchorX = r.left + r.width / 2;
-    anchorY = r.top + 66; // lower in the reserved padding = a larger baseRingRadius = a nearer (smaller-z) baseline, i.e. visually closer to the camera
+    anchorY = r.top + 100; // lower in the reserved padding = a larger baseRingRadius = a nearer (smaller-z) baseline, i.e. visually closer to the camera. Leaves ~100px of headroom above for the jump arc (peak ~77px) and ~50px below before the score/hint text.
     // The baseline ring's fixed depth: rotation preserves a point's distance
     // from the vanishing point, so a ring point at local radius A always
     // projects to a screen distance of A*(F/z) from center regardless of the
@@ -354,7 +357,7 @@
     // character gets higher — the same landing-timing cue Run 3 uses. A
     // dark fill alone disappears against this background, so it's paired
     // with a faint light rim to read as a distinct ground-contact ellipse.
-    const liftT = Math.min(1, -charY / 46);
+    const liftT = Math.min(1, -charY / 70); // tuned to the ~77px jump peak so the shadow's shrink/fade tracks the whole arc, not just its first two-thirds
     const shadowW = CHAR_R * (1.9 - 0.95 * liftT);
     const shadowAlpha = 1 - 0.75 * liftT;
     ctx.beginPath();
