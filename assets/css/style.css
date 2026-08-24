@@ -942,6 +942,27 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
   .carousel-img{transition:none}
 }
 
+/* ===== Past Events photo waterfall ===== */
+/* Pinterest-style masonry collage — every photo keeps its own natural
+   aspect ratio and CSS multi-column flow packs each one into whichever
+   column is currently shortest, so the grid staggers itself the same way
+   the reviews-waterfall cards do, just via columns instead of rows. No JS
+   needed: this fully replaces the old single-photo prev/active/next
+   carousel (.photo-carousel above), which only ever showed one photo at
+   a time behind paging arrows. */
+.photo-waterfall{column-count:3;column-gap:.9rem}
+.photo-waterfall img{
+  width:100%;display:block;margin:0 0 .9rem;border-radius:2px;
+  border:1px solid var(--line);break-inside:avoid;
+  transition:transform .3s ease, filter .3s ease, box-shadow .3s ease;
+}
+.photo-waterfall img:hover{transform:scale(1.015);filter:brightness(1.06);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+@media (max-width:900px){.photo-waterfall{column-count:2}}
+@media (max-width:560px){.photo-waterfall{column-count:1;column-gap:0}}
+@media (prefers-reduced-motion: reduce){
+  .photo-waterfall img{transition:none}
+}
+
 /* ===== Ambassador Featured Hosts placeholder cards ===== */
 /* Every card sizes to its own content (no fixed height/clipping) — CSS
    Grid's default row-stretch then auto-equalizes every card in the same
