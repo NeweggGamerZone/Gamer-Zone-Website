@@ -1,30 +1,5 @@
 {
-  "generated": "2026-08-19",
+  "generated": "2026-08-24",
   "monthly": [],
-  "weekly": [
-    {
-      "file": "2026-07-22-xp-training.png",
-      "date": "2026-07-22"
-    },
-    {
-      "file": "2026-07-23-fps-day.png",
-      "date": "2026-07-23"
-    },
-    {
-      "file": "2026-07-24-xp-tournament.png",
-      "date": "2026-07-24"
-    },
-    {
-      "file": "2026-07-29-xp-training.png",
-      "date": "2026-07-29"
-    },
-    {
-      "file": "2026-07-30-riot-thursday.png",
-      "date": "2026-07-30"
-    },
-    {
-      "file": "2026-07-31-xp-tournament-party.png",
-      "date": "2026-07-31"
-    }
-  ]
+  "weekly": []
 }
