@@ -526,19 +526,13 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .hero-stage { min-height: 76vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; padding: 3rem 0 2rem; overflow: hidden; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
 .hero-stack { position: relative; line-height: .92; margin: .8rem 0 1rem; z-index: 1; }
 .hs-line { display: block; font-family: var(--head); font-weight: 800; font-size: clamp(2.9rem, 11vw, 7.4rem); text-transform: uppercase; letter-spacing: .01em; }
-/* "Damage"-style outline around the headline: a thin multi-directional
-   white stroke (via layered text-shadows, since -webkit-text-stroke clips
-   unevenly on some browsers) for legibility against the dark background,
-   with only a light glow -- a thick 6px stroke plus a strong 30%-alpha
-   30px glow read as "too much white" swallowing the blue underneath, so
-   both the stroke width and the glow were dialed back here. The white
-   "Get In" line above it keeps a modest glow of its own (still toned
-   down slightly) so the two lines read as a matched pair. */
 .hs-line.solid { color: #fff; position: relative; z-index: 0; text-shadow: 0 3px 30px rgba(0,0,0,.95), 0 1px 3px rgba(0,0,0,.9), 0 0 14px rgba(255,255,255,.4), 0 0 26px rgba(255,255,255,.2); }
-.hs-line.outline { color: var(--ne-blue-text); position: relative; z-index: 2; text-shadow:
-    -3px -3px 0 #fff, 3px -3px 0 #fff, -3px 3px 0 #fff, 3px 3px 0 #fff,
-    -3px 0 0 #fff, 3px 0 0 #fff, 0 -3px 0 #fff, 0 3px 0 #fff,
-    0 0 14px rgba(255,255,255,.3); }
+/* "THE ZONE": plain solid blue, no white outline/stroke and no glow --
+   a prior pass had already thinned a heavier white stroke+glow combo
+   down once, but any white halo around the blue text still read as
+   glow. Just a dark drop-shadow for contrast against the busy tunnel
+   background, same idea as .lead below it, not a colored/white bloom. */
+.hs-line.outline { color: var(--ne-blue-text); position: relative; z-index: 2; text-shadow: 0 2px 10px rgba(0,0,0,.85), 0 1px 3px rgba(0,0,0,.9); }
 .hs-bot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%); width: clamp(110px, 15vw, 180px); z-index: 1; filter: drop-shadow(0 0 34px rgba(10,77,166,.85)); pointer-events: none; }
 .hero-stage .lead { position: relative; z-index: 1; font-size: clamp(1rem, 2.4vw, 1.25rem); max-width: 640px; margin: 0 auto 1.4rem; text-shadow: 0 1px 12px rgba(0,0,0,.9); }
 .hero-stage .btn-row { position: relative; z-index: 1; justify-content: center; }
@@ -996,20 +990,33 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    the two columns read as one visual row), subtagline = 50% of title —
    with a hard 14px floor on every text size on this board, per spec. */
 .eu-board{
+  /* Now a fixed max-width (see below) instead of full-bleed, so this
+     board's own type scale needs to respond to ITS width, not the
+     viewport's -- a `vw` unit always measures the viewport regardless of
+     how narrow this box itself is, which is exactly what caused a wall
+     of desktop-viewport-sized text to overflow/wrap violently inside the
+     new, much narrower box. container-type here turns .eu-board into a
+     query container so every `cqw` below (swapped in place of the `vw`
+     this block used to use) measures against the BOARD's own width
+     instead. Only the base (non-media-query) declarations in this block
+     were converted -- the @media (max-width:820px/480px) overrides further
+     down stay keyed to the real viewport on purpose, since a phone's
+     viewport genuinely is that narrow too and those already work. */
+  container-type: inline-size;
   /* A +15% pass here (driving both the big date number and each event's
      row title) was reverted: the per-row date/title wasn't on the user's
      explicit "should be larger" list (weekly theme, logo, address,
      AUG 18-22, time, special event description), and it was the single
      biggest contributor to blowing the board past a 1:1 ratio. Back to
      the original clamp(1.5rem,4.6vw,3.2rem). */
-  --eu-date-size: clamp(1.5rem, 4.6vw, 3.2rem);
+  --eu-date-size: clamp(1.5rem, 4.6cqw, 3.2rem);
   --eu-name-size: var(--eu-date-size);
   --eu-meta-size: max(14px, calc(var(--eu-name-size) * 0.50));
   /* Shared with .eu-row's own padding below, and reused as .eu-top's
      margin-bottom, so the gap above the first event row (divider ->
      "AUG 5") comes out equal to the gap above every later row
      (row -> border-top -> next row) — both resolve to 2x this value. */
-  --eu-row-pad: clamp(.4rem, 1.1vw, .6rem);
+  --eu-row-pad: clamp(.4rem, 1.1cqw, .6rem);
   /* Side margins bumped 10% over the site-wide --safe-x, scoped to this
      board only (a dedicated --eu-safe-x rather than editing --safe-x
      itself, which is shared by the nav/footer/every other section). The
@@ -1027,26 +1034,32 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      icon's own margins and the weekly-theme subtitle size instead (see
      .eu-board-icon and #eu-eyebrow-desc below), keeping the board at ~1:1
      with nothing cut off top or bottom. */
-  /* Full-bleed via width:100vw + auto-canceling margins (same technique as
-     .hero-stage below) instead of margin:0 calc(-1*var(--safe-x)) — that
-     negative-margin trick only reaches the true viewport edge if it
-     exactly matches .container's own padding, and any small mismatch
-     leaves this board a few px wider than the viewport (real horizontal
-     overflow, worse at some breakpoints than others). width:100vw doesn't
-     depend on knowing the parent's padding at all, so it can't drift. */
-  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:clamp(1.1rem,2.3vw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:640px;display:flex;flex-direction:column;justify-content:center}
+  /* Previously full-bleed (width:100vw + auto-canceling margins, same
+     technique as .hero-stage above it) so the board spanned edge-to-edge
+     like a banner. At a typical desktop viewport that came out to roughly
+     a 2.2:1 wide strip -- every ~1:1 comment elsewhere in this block was
+     actually calibrated against the BACKEND EXPORT capture width
+     (scripts/capture-social-images.mjs's 660px 1:1 shot), not this
+     full-bleed live width, so the live page and the export had quietly
+     drifted into two different shapes. Capped to a contained max-width
+     (matching the general scale of this page's other boxed sections --
+     the calendar, the About Gamer Zone cards -- rather than spanning the
+     viewport) plus a matching min-height so the live board itself now
+     reads close to square, fitting alongside those other sections instead
+     of standing out as one wide banner. */
+  position:relative;max-width:700px;margin-left:auto;margin-right:auto;padding:clamp(1.1rem,2.3cqw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;min-height:700px;display:flex;flex-direction:column;justify-content:center}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
-.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.5rem,1.3vw,.75rem);border-bottom:3px solid var(--ne-orange)}
+.eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.5rem,1.3cqw,.75rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
 /* Masthead icon+textcol block grows to fill the full width of .eu-top
    (its only child otherwise sits at natural content width), so the
    title row's space-between inside it reaches the section's true right
    edge — not the location row, which stays at its own natural size. */
 .eu-top>.eu-eyebrow{flex:1}
-.eu-location-row{margin-top:clamp(.4rem,1vw,.55rem);padding-top:clamp(.3rem,.8vw,.45rem)}
+.eu-location-row{margin-top:clamp(.4rem,1cqw,.55rem);padding-top:clamp(.3rem,.8cqw,.45rem)}
 /* Optional per-week badge art, centered above the address row. Hidden
    (via the [hidden] attribute, set in event-update.js) on weeks with no
    icon field, so the address alone sits in its spot with no empty gap. */
@@ -1056,7 +1069,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    icon wasn't on the user's final "should be larger" list, so its size
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
-.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7vw,1.2rem);padding-bottom:clamp(.08rem,.25vw,.15rem)}
+.eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7cqw,1.2rem);padding-bottom:clamp(.08rem,.25cqw,.15rem)}
 /* Sized by width, not height, now that this slot holds a wide/short
    landscape graphic (GZTest2, ~2:1) instead of the previous tall/narrow
    controller art (~1:1) — a height-based clamp would have rendered it
@@ -1069,7 +1082,7 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    group. Scoped to board-mode so normal in-page browsing keeps the
    existing centered look. */
 html.board-mode .eu-bottom-group{margin-top:auto}
-.eu-eyebrow .ic{width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);color:var(--ne-orange);flex:none}
+.eu-eyebrow .ic{width:clamp(34px,5cqw,54px);height:clamp(34px,5cqw,54px);color:var(--ne-orange);flex:none}
 /* flex:1 so the title row spans all space after the icon — the date
    range (inside eu-eyebrow-titlerow) then sits flush against the true
    right edge of the masthead, decoupled from the desc line below and
@@ -1094,7 +1107,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    full +20% size wrapped it to two lines at normal desktop widths.
    Empirically re-tightened to the actual one-line ceiling for the new,
    longer text ("THEME: CO-OP GAMES WEEK  AUG 18 – 22"). */
-.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601vw,2.78rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601cqw,2.78rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-eyebrow-title::after{content:none}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
 /* Weekly-theme subtitle (e.g. "Helldivers 2, Overcooked!...") and the
@@ -1113,7 +1126,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-brand{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ne-orange);font-size:max(14px,.95rem);text-align:right;white-space:nowrap;flex:none}
 .eu-brand small{display:block;font-family:var(--eu-body);color:var(--ink-dim);font-weight:600;letter-spacing:.02em;font-size:max(14px,.8rem);margin-top:.15rem}
 
-.eu-theme-row{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-bottom:clamp(1rem,3vw,1.6rem);margin-bottom:clamp(.6rem,2vw,1rem);border-bottom:1px solid rgba(242,244,248,.22)}
+.eu-theme-row{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-bottom:clamp(1rem,3cqw,1.6rem);margin-bottom:clamp(.6rem,2cqw,1rem);border-bottom:1px solid rgba(242,244,248,.22)}
 /* Theme name highlighted right in the eyebrow masthead itself (e.g.
    "GAMER ZONE: MARVEL WEEK") — blue, same treatment the old separate
    "Weekly Theme: ..." row used to give it before that row was folded into
@@ -1121,7 +1134,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 .eu-theme-highlight{color:var(--ne-blue-text)}
 /* Week's date range sits on the right side of the masthead row, at the
    same font weight/size as the eyebrow title (not a smaller caption). */
-.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601vw,2.78rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601cqw,2.78rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
@@ -1129,7 +1142,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 /* Sub-section label between two .eu-list blocks on the same board (e.g.
    "Special Events" under a "theme weeks" list) — same divider language
    as the row border-tops, orange/uppercase like other eyebrow text. */
-.eu-sublist-head{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1rem,2vw,1.35rem);color:var(--ne-orange);margin:clamp(1.3rem,3vw,2.1rem) 0 .5rem;padding-top:clamp(1rem,2.5vw,1.6rem);border-top:1px solid rgba(242,244,248,.22)}
+.eu-sublist-head{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1rem,2cqw,1.35rem);color:var(--ne-orange);margin:clamp(1.3rem,3cqw,2.1rem) 0 .5rem;padding-top:clamp(1rem,2.5cqw,1.6rem);border-top:1px solid rgba(242,244,248,.22)}
 .eu-list{display:flex;flex-direction:column;margin-top:.65rem}
 .eu-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.2rem;padding:var(--eu-row-pad) 0;border-top:1px solid rgba(242,244,248,.22)}
 /* No border directly under the thick orange divider (first row) and no
@@ -1146,7 +1159,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    Tournament" legend swatch (--cal-major), not blue, so a tournament reads
    the same color everywhere on the site. */
 .eu-major .eu-date{color:var(--cal-major)}
-.eu-major-mark{flex:none;font-size:clamp(18px,3.2vw,30px);line-height:1;color:var(--ne-orange)}
+.eu-major-mark{flex:none;font-size:clamp(18px,3.2cqw,30px);line-height:1;color:var(--ne-orange)}
 .eu-info{text-align:right;min-width:0}
 /* event title: same size, weight, and line-height as the date so the two
    columns' text tops land on the exact same baseline across the row. */
