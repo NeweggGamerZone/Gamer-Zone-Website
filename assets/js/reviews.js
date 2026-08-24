@@ -1,17 +1,21 @@
-/* Rotating "waterfall" reviews carousel.
+/* Rotating reviews spotlight.
    Previously this section rendered all 63 written Google reviews as a
    static grid (plus a line naming the 23 reviewers who rated 5 stars with
    no written text) -- every card stretched to match the tallest card in
    its row, which produced huge blank space under short reviews, and the
-   named-reviewers line read as an odd wall of names. Per request: drop
-   that line entirely, and show only a handful of cards at once, each
-   sized to its own content, cycling through the full pool.
-
-   Only SLOT_COUNT cards are ever in the DOM at once. Each slot runs its
-   own recurring timer, staggered so slots don't all flip in lockstep --
-   one fades out/in, then a bit later the next one does, then the next,
-   reading as a continuous cascade ("waterfall") rather than a single
-   synchronized swap.
+   named-reviewers line read as an odd wall of names. A later "waterfall"
+   version showed 4 cards at once, each on its own staggered timer, cycling
+   through the full pool -- but with review lengths ranging from a 3-word
+   quip to a 400+ word paragraph, whichever slot happened to swap in a much
+   longer or shorter review made the whole grid row (and the section under
+   it) visibly grow or shrink every few seconds, and a shared 7s timer for
+   every slot meant a long review got yanked away long before it could be
+   read. Per request: show exactly one review at a time, in a box
+   pre-sized to fit the single longest review in the pool (measured once,
+   off-screen, against the real card markup/width) so the section's height
+   never moves no matter which review is showing, and give each review a
+   dwell time proportional to its own length instead of one fixed interval
+   for all of them.
 
    The review pool is baked in directly below rather than fetched from a
    data/*.json file: unlike events.json (edited often, shared across
@@ -95,9 +99,14 @@
     { q: "went with my boyfriend, had a little trouble finding the entrance but once you get in the building there are arrows pointing to the room. the nice ladies at the counter were helpful with setting up an account for our first time. they have different gaming devices, some still being set up and free snacks as well. liked the cleanliness & service, would take more people back!", n: "jas" },
   ];
 
-  const SLOT_COUNT = 4;
-  const ROTATE_MS = 7000; // how often any one slot flips to its next review
   const FADE_MS = 420;
+  // Dwell time scales with how much there is to read: a 3-word quip and a
+  // 400-word paragraph shouldn't both get exactly the same amount of time
+  // on screen. ~200wpm reading speed is roughly 17 characters/sec including
+  // spaces; MIN/MAX keep even the shortest and longest reviews from ever
+  // flashing by too fast or overstaying past a minute.
+  const MIN_MS = 6000, MAX_MS = 16000;
+  function dwellFor(r) { return Math.max(MIN_MS, Math.min(MAX_MS, r.q.length * 60)); }
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -115,8 +124,8 @@
   }
 
   const pool = shuffle(REVIEWS);
-  const slots = Array.from(wrap.querySelectorAll('.review-card'));
-  const n = Math.min(SLOT_COUNT, slots.length, pool.length);
+  const slot = wrap.querySelector('.review-card');
+  if (!slot) return;
   let cursor = 0;
   function next() {
     const r = pool[cursor % pool.length];
@@ -124,24 +133,47 @@
     return r;
   }
 
-  // Seed every visible slot with a distinct starting review.
-  slots.forEach(slot => { slot.innerHTML = cardHTML(next()); });
-
-  if (reduceMotion || pool.length <= n) return; // nothing left to rotate into
-
-  slots.forEach((slot, i) => {
-    function tick() {
-      slot.classList.add('is-fading');
-      setTimeout(() => {
-        slot.innerHTML = cardHTML(next());
-        slot.classList.remove('is-fading');
-      }, FADE_MS);
+  // Pre-measure the single tallest review against the card's real markup
+  // and current width, then lock the slot to that height -- so cycling
+  // through reviews of wildly different lengths never grows or shrinks the
+  // box (or the page around it). Re-measured on resize (debounced) since
+  // a narrower box wraps the same text into more lines.
+  const measurer = slot.cloneNode(false);
+  measurer.style.position = 'absolute';
+  measurer.style.visibility = 'hidden';
+  measurer.style.pointerEvents = 'none';
+  measurer.style.height = 'auto';
+  measurer.setAttribute('aria-hidden', 'true');
+  wrap.appendChild(measurer);
+  function remeasure() {
+    measurer.style.width = slot.getBoundingClientRect().width + 'px';
+    let max = 0;
+    for (const r of REVIEWS) {
+      measurer.innerHTML = cardHTML(r);
+      max = Math.max(max, measurer.scrollHeight);
     }
-    // Stagger each slot's own recurring interval so they cascade one after
-    // another instead of all flipping at once.
-    setTimeout(() => {
-      tick();
-      setInterval(tick, ROTATE_MS);
-    }, i * (ROTATE_MS / n));
+    slot.style.minHeight = max + 'px';
+  }
+  remeasure();
+  let resizeT;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(remeasure, 200);
   });
+
+  // Seed the one visible slot with a starting review.
+  slot.innerHTML = cardHTML(next());
+
+  if (reduceMotion || pool.length <= 1) return; // nothing left to rotate into
+
+  function tick() {
+    slot.classList.add('is-fading');
+    setTimeout(() => {
+      const r = next();
+      slot.innerHTML = cardHTML(r);
+      slot.classList.remove('is-fading');
+      setTimeout(tick, dwellFor(r));
+    }, FADE_MS);
+  }
+  setTimeout(tick, dwellFor(pool[0]));
 })();

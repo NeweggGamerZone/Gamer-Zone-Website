@@ -249,8 +249,18 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    reviews.js toggles .is-fading on a slot right before swapping its
    content, staggered per slot so they cascade rather than flip together;
    this transition is what animates that fade. */
-.review-waterfall { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; align-items: start; }
-.review-waterfall .review-card { transition: opacity .42s ease, transform .42s cubic-bezier(.2,.7,.3,1); }
+/* One review at a time now (was a multi-column auto-fit grid showing up to
+   4 at once) -- centered, comfortably narrow for reading, with a fixed
+   height (set in JS, measured against the longest review in the pool) so
+   the box never grows or shrinks as it cycles. position:relative scopes
+   reviews.js's off-screen measuring clone to this box instead of some
+   unrelated positioned ancestor. */
+.review-waterfall { position: relative; max-width: 640px; margin: 0 auto; }
+/* Vertically centers the stars/quote/name block within the fixed-height
+   box (see reviews.js) -- without this, a short review sits pinned to the
+   top with a slab of empty space below it, reading as broken rather than
+   just short. */
+.review-waterfall .review-card { justify-content: center; transition: opacity .42s ease, transform .42s cubic-bezier(.2,.7,.3,1); }
 .review-waterfall .review-card.is-fading { opacity: 0; transform: translateY(10px); }
 @media (prefers-reduced-motion: reduce) {
   .review-waterfall .review-card { transition: none; }
