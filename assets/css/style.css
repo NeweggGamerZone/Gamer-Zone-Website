@@ -1167,7 +1167,15 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 /* Stacked column now: the date(+star) row on top, the per-row time
    subtagline directly below it — left-aligned to the date's own left
    edge per request, instead of living in .eu-info under the title. */
-.eu-date-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;min-width:0}
+/* flex:none (not the default shrink:1) — this column's content (date,
+   star, time range) is short and fixed, so it should never be the one
+   that gives up width under pressure from a long event title next to it.
+   Without this, .eu-date-wrap and .eu-info shrunk proportionally by
+   default, which could squeeze this column narrower than its own time
+   text (e.g. "4:00 PM – 7:00 PM") and wrap it to two lines — .eu-info's
+   title already has its own graceful wrap/shrink handling for exactly
+   this squeeze, so it should absorb all of it instead. */
+.eu-date-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;min-width:0;flex:none}
 .eu-date-top{display:flex;align-items:center;gap:.6rem}
 .eu-date{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:var(--eu-date-size);line-height:1;color:#fff;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
 /* Major/tournament rows use the same orange as the calendar's "Major /
@@ -1188,7 +1196,7 @@ html.board-mode .eu-bottom-group{margin-top:auto}
 /* Left-aligned per request, overriding .eu-info's own text-align:right —
    the row title above stays right-aligned, only the time line below it
    shifts to the left edge of the (title-width) .eu-info column. */
-.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);letter-spacing:.01em;text-align:left}
+.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);letter-spacing:.01em;text-align:left;white-space:nowrap}
 .eu-major .eu-name{color:var(--cal-major)}
 /* extra description line for major/featured events only — same family as
    the subtagline but a touch brighter, since it's called out on purpose.
