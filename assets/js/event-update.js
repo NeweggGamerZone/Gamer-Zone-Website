@@ -63,8 +63,6 @@
   // events (tournaments, majors, community, EDU, vendor) still on the books.
   const weekAll = (data.events || []).filter(e => e.date >= weekStart && e.date <= weekEnd);
   const remaining = weekAll.filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
-  const closures = remaining.filter(e => e.type === 'closed');
-  const specials = remaining.filter(e => e.type !== 'closed');
 
   const monthDate = iso => {
     const d = new Date(iso + 'T12:00:00');
@@ -83,10 +81,13 @@
   // highlighted) ahead of the theme name itself — the date range still
   // sits to its right on the same row.
   const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
-  const eyebrowDescEl = document.getElementById('eu-eyebrow-desc');
   const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
   if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `THEME: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
-  if (eyebrowDescEl) eyebrowDescEl.textContent = themeDesc;
+  // Weekly-theme subtitle line (the old #eu-eyebrow-desc paragraph, e.g.
+  // "XP League Fortnite training and tournament play all week.") was
+  // removed from the board entirely per request — themeDesc is still read
+  // above (data/events.json still carries a desc field per theme, used
+  // elsewhere), it's just never rendered on this board anymore.
   if (eyebrowDatesEl) {
     const s = monthDate(weekStart), e = monthDate(weekEnd);
     const dateRange = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
@@ -94,8 +95,8 @@
   }
 
   // Optional per-week badge art (data.weeklyThemes[].icon) shown bottom-
-  // center of the board, above the address — e.g. a crown for a tournament
-  // week. Weeks without an icon field just show the address alone.
+  // center of the board — e.g. a crown for a tournament week. Weeks
+  // without an icon field just leave that slot empty.
   const boardIconEl = document.getElementById('eu-board-icon');
   const boardIconImg = document.getElementById('eu-board-icon-img');
   if (boardIconEl && boardIconImg) {
@@ -117,21 +118,11 @@
     // long titles to fit on one line at render time; kept as a manual
     // escape hatch for the rare title too long to shrink into readability.
     const name = closure ? ev.title : (ev.boardTitle || ev.title);
-    // boardDesc is an optional extra line (or array of paragraphs) for a
-    // specific major/featured event (e.g. the Anniversary), rendered as
-    // its own full-width block BELOW the date/title row rather than inside
-    // .eu-info — .eu-info is the indented right-hand column, only as wide
-    // as the title itself, so nesting a paragraph there would wrap it
-    // narrow. Rendered as a plain sibling of .eu-row instead (both are
-    // direct children of the flex column #eu-list, which stretches its
-    // children to the full row width by default), it spans edge-to-edge:
-    // from the same left edge as the date above it, to the same right edge
-    // the title/time reach. Existing rows with no boardDesc are untouched
-    // — this only adds extra elements for the rare event that sets one.
-    const descParas = !closure && ev.boardDesc
-      ? (Array.isArray(ev.boardDesc) ? ev.boardDesc : [ev.boardDesc])
-      : [];
-    const descHtml = descParas.map(p => `<p class="eu-desc">${GZ.esc(p)}</p>`).join('');
+    // Per-event boardDesc line (e.g. the Anniversary's extra paragraph) is
+    // no longer rendered on this board at all, per request — data/events.json
+    // may still carry a boardDesc field on some events, but it's simply
+    // ignored here now rather than read into its own block.
+    const descHtml = '';
     // Time subtagline moved out of .eu-info (the right-hand title column)
     // and into .eu-date-wrap, stacked under the date itself — per request,
     // it now left-aligns flush with the date's own left edge instead of
@@ -152,10 +143,12 @@
     </div>${descHtml}`;
   }
 
-  const rows = [
-    ...closures.map(e => row(e, { closure: true })),
-    ...specials.map(e => row(e)),
-  ];
+  // Chronological order, closures included in their real date slot rather
+  // than grouped and listed first — `remaining` is already date-sorted
+  // above, so rendering it directly (instead of splitting into a closures
+  // list and a specials list and concatenating) is what keeps e.g. an
+  // Aug 29 closure listed AFTER an Aug 28 tournament instead of before it.
+  const rows = remaining.map(e => row(e, { closure: e.type === 'closed' }));
 
   list.innerHTML = rows.length
     ? rows.join('')
