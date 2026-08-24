@@ -138,7 +138,7 @@
         ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
       </div>
       <div class="eu-info">
-        <div class="eu-name">${closure ? 'Closed — ' : ''}${GZ.esc(name.replace(/^Closed\s*[—-]\s*/, ''))}</div>
+        <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${closure ? 'Closed — ' : ''}${GZ.esc(name.replace(/^Closed\s*[—-]\s*/, ''))}</div>
       </div>
     </div>${descHtml}`;
   }
@@ -171,6 +171,16 @@
   function fitBoardTitles() {
     document.querySelectorAll('.eu-board .eu-name').forEach(el => {
       el.style.fontSize = '';
+      // data-noshrink (set via ev.boardNoShrink) opts a title out of the
+      // auto-fit-to-one-line behavior entirely — e.g. "XP League: Fortnite
+      // Training" easily shrinks into one line on its own, but sits right
+      // next to "XP League Fortnite Tournament" most weeks, which is too
+      // long to shrink into one line and therefore always wraps to two —
+      // left alone, the pair renders at two different sizes/line-counts
+      // despite being a matched series. Skipping the shrink for Training
+      // lets it wrap to two lines at full size too, matching Tournament's
+      // fallback look exactly.
+      if (el.dataset.noshrink) return;
       const baseSize = parseFloat(getComputedStyle(el).fontSize);
       if (!baseSize) return;
       const minSize = baseSize * 0.85;
