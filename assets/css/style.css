@@ -216,6 +216,14 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .grid { display: grid; gap: 1rem; }
 .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+/* Homepage "Plan your next visit" cards: Preregister Now has 4 short
+   lines, Visit Us has 7+ (hours, phone, links, address, note) -- grid's
+   default align-items:stretch was forcing the shorter card open to match
+   the taller one, leaving a large empty gap under "Walk-ins always
+   welcome." Scoped to just this section rather than every .grid.cols-2
+   (e.g. Ambassador's tier cards elsewhere rely on the stretch-to-match
+   behavior on purpose). */
+#visit .grid { align-items: start; }
 /* auto-fit's 290px floor is wider than the content box on the narrowest
    phones (esp. nested inside another .card, which eats further into the
    available width with its own padding) — real horizontal overflow, not
