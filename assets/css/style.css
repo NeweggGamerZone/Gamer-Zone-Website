@@ -1193,9 +1193,15 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    "Weekly Theme: ..." row used to give it before that row was folded into
    this one. */
 .eu-theme-highlight{color:var(--ne-blue-text)}
-/* Week's date range sits on the right side of the masthead row, at the
-   same font weight/size as the eyebrow title (not a smaller caption). */
-.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601cqw,2.78rem);letter-spacing:.005em;line-height:1.1;color:#fff;white-space:nowrap;flex:none;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+/* Date range + theme name sit together on the right side of the masthead
+   row, at the same font weight/size as the plain "Weekly Theme" label on
+   the left (not a smaller caption) -- grouped as one right-aligned unit
+   per request, rather than the date alone on the right with the theme
+   name on the left. white-space:nowrap dropped (was fine for a short date
+   alone, but this can now run long with a longer theme name) in favor of
+   text-align:right, so it wraps onto its own additional line rather than
+   overflowing when the combined text doesn't fit the row. */
+.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601cqw,2.78rem);letter-spacing:.005em;line-height:1.25;color:#fff;text-align:right;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}

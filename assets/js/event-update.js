@@ -69,20 +69,17 @@
     return { mon: d.toLocaleDateString('en-US', { month: 'short' }), day: d.getDate() };
   };
 
-  // Eyebrow title now leads with the theme itself (was static "Gamer Zone
-  // Weekly Lineup" text, never actually tied to the week) and the subtitle
-  // underneath becomes a short line on what's being played, replacing the
-  // static "Diamond Bar, CA · Free to play". The theme name itself is
-  // highlighted in blue right in the masthead, and the week's date range
-  // sits on the right side of that same masthead row, at the same
-  // weight/size as the title (not a smaller caption).
-  // "GAMER ZONE: " prefix dropped per an earlier request, then replaced
-  // with a plain "THEME: " label (in the base white text color, not
-  // highlighted) ahead of the theme name itself — the date range still
-  // sits to its right on the same row.
+  // Masthead layout: a plain static label on the left ("WEEKLY THEME"),
+  // with the week's date range AND the theme name itself grouped together
+  // on the far right of that same row — matching how a Special Events row
+  // reads (date, then the descriptive title) rather than the theme name
+  // sitting on the left with only the date pushed right. Previous versions
+  // put "THEME: <theme name>" on the left and just the date on the right;
+  // per request, both the date and the theme name now live in the
+  // right-hand slot as one group, right-aligned.
   const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
   const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
-  if (eyebrowTitleEl) eyebrowTitleEl.innerHTML = `THEME: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
+  if (eyebrowTitleEl) eyebrowTitleEl.textContent = 'Weekly Theme';
   // Weekly-theme subtitle line (the old #eu-eyebrow-desc paragraph, e.g.
   // "XP League Fortnite training and tournament play all week.") was
   // removed from the board entirely per request — themeDesc is still read
@@ -91,7 +88,7 @@
   if (eyebrowDatesEl) {
     const s = monthDate(weekStart), e = monthDate(weekEnd);
     const dateRange = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
-    eyebrowDatesEl.textContent = dateRange.toUpperCase();
+    eyebrowDatesEl.innerHTML = `${GZ.esc(dateRange.toUpperCase())} <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
   }
 
   // Optional per-week badge art (data.weeklyThemes[].icon) shown bottom-
