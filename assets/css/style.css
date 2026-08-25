@@ -1079,8 +1079,14 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
   /* Shared with .eu-row's own padding below, and reused as .eu-top's
      margin-bottom, so the gap above the first event row (divider ->
      "AUG 5") comes out equal to the gap above every later row
-     (row -> border-top -> next row) — both resolve to 2x this value. */
-  --eu-row-pad: clamp(.4rem, 1.1cqw, .6rem);
+     (row -> border-top -> next row) — both resolve to 2x this value.
+     Max raised from .6rem to .95rem: on a wide board (the 1200-1920px-wide
+     social exports especially) the old cap meant every row-to-row gap
+     topped out at a fixed ~9.6px no matter how large the text got, so the
+     thin 1px divider line read as sitting almost flush against the row
+     text above and below it. The min/mid (cqw-scaled) behavior for
+     narrower/live-page widths is unchanged. */
+  --eu-row-pad: clamp(.4rem, 1.1cqw, .95rem);
   /* Side margins bumped 10% over the site-wide --safe-x, scoped to this
      board only (a dedicated --eu-safe-x rather than editing --safe-x
      itself, which is shared by the nav/footer/every other section). The
@@ -1141,6 +1147,14 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
 .eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7cqw,1.2rem);padding-bottom:clamp(.08rem,.25cqw,.15rem)}
+/* Square export only (see .board-square, set only by the 1200-wide social
+   capture — not the 16:9 one, and not the live page): pull the crown
+   further down than .eu-bottom-group's margin-top:auto already places it,
+   so it slightly overlaps/bleeds under the board's own bottom edge
+   (.eu-board has overflow:hidden, so this just crops it a little) instead
+   of sitting fully inside with a clean gap all the way around — reads as
+   more full-bleed/dynamic on the square crop specifically. */
+html.board-mode.board-square .eu-board-icon{margin-bottom:clamp(-170px,-13cqw,-90px)}
 /* Sized by width, not height, now that this slot holds a wide/short
    landscape graphic (GZTest2, ~2:1) instead of the previous tall/narrow
    controller art (~1:1) — a height-based clamp would have rendered it
