@@ -1130,17 +1130,21 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      with nothing cut off top or bottom. */
   /* This board went through several width phases: full-bleed 100vw banner,
      then a contained square (max-width/min-height both fixed at 700px,
-     later 920px) so it read as ~1:1 like a social-post export. Per a later,
+     later 920px) so it read as ~1:1 like a social-post export. A later,
      explicit "every section should span the full container width, no
-     exceptions" request, the square constraint is dropped entirely here --
-     this now just sits inside .container like every other section (no own
-     max-width), with height purely a function of its content. It will no
-     longer be a true square, and any backend screenshot need should
-     capture the live page as it actually renders (see index.html's
-     board-mode comment) rather than the old calibrated-square pipeline in
-     scripts/capture-social-images.mjs, which assumed the previous fixed
-     widths. */
-  position:relative;margin:0;padding:clamp(1.1rem,2.3cqw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;display:flex;flex-direction:column;
+     exceptions" request dropped the square constraint entirely, letting
+     this stretch into a wide banner on desktop -- but that read as
+     stretched/off-brand next to the actual 1:1 social exports of the same
+     board, so the max-width is restored here (920px, the last value used
+     before it was dropped). Unlike the old version this doesn't also fix
+     min-height/force a true square -- height still comes purely from
+     content, since a live page can't pre-know how many event rows a given
+     week has the way a one-off export capture can -- it just keeps the
+     box from stretching past roughly a card/square footprint on wide
+     viewports. Board-mode (the backend export capture) overrides this
+     back to full-bleed below, since that pipeline already forces an exact
+     square itself via weekcapture.js. */
+  position:relative;margin:0 auto;max-width:min(100%, 920px);padding:clamp(1.1rem,2.3cqw,1.5rem) var(--eu-safe-x);overflow:hidden;isolation:isolate;display:flex;flex-direction:column;
   /* flex-start, not center: with min-height now taller than most weeks'
      actual content, centering left the logo/masthead floating partway
      down the box instead of anchored at the top with everything else
@@ -1348,15 +1352,14 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
 
 /* ---- board-only render mode: isolates just the calendar block for clean
    social screenshot capture (index.html/events.html only — never seen by
-   real visitors, only toggled by the export script). Board-mode only
-   hides the surrounding page chrome; it does not force any width or
-   aspect ratio. .eu-board no longer has its own max-width (see above) --
-   it now spans the full .container width like every other section, so a
-   capture of it is whatever shape that content naturally comes out to,
-   not a calibrated 1:1 square. scripts/capture-social-images.mjs's fixed
-   700px/1150px capture widths predate this and assumed the old square
-   board; treat that script as stale until it's revisited against the
-   current full-width layout. */
+   real visitors, only toggled by the export script). Board-mode
+   overrides .eu-board's live-page max-width back to full-bleed (see
+   below) since the export pipeline (weekcapture.js) measures the box and
+   force-sets an exact square height itself, on whatever width the
+   capture viewport actually is -- it doesn't need or want the live
+   page's ~920px card cap. scripts/capture-social-images.mjs's fixed
+   700px/1150px capture widths predate both of these and assumed a
+   different, now-removed pipeline; treat that script as stale. */
 html.board-mode{overflow:visible}
 html.board-mode .site-header,
 html.board-mode .site-footer,
@@ -1384,7 +1387,7 @@ html.board-mode section.eu-section{margin:0}
    in-page look needs. justify-content:center restores the old centered
    composition for this isolated capture view even though the live page
    itself now anchors content to the top (see the base .eu-board rule). */
-html.board-mode .eu-board{margin:0;padding:clamp(1.6rem,5vw,4.5rem);justify-content:center}
+html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5rem);justify-content:center}
 /* Reverted: an earlier pass enlarged --eu-date-size/--eu-row-pad here to
    fill the square's extra height with bigger text, but that made the row
    text noticeably larger than the 16:9 export/live page for no reason
