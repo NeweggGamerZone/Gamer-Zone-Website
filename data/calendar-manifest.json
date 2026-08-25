@@ -1,10 +1,15 @@
 {
-  "generated": "2026-08-24",
+  "generated": "2026-08-25",
   "monthly": [
     {
       "file": "2026-09.png",
       "date": "2026-09"
     }
   ],
-  "weekly": []
+  "weekly": [
+    {
+      "file": "2026-08-24.png",
+      "date": "2026-08-24"
+    }
+  ]
 }
