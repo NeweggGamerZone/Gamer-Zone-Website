@@ -1147,14 +1147,16 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
 .eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7cqw,1.2rem);padding-bottom:clamp(.08rem,.25cqw,.15rem)}
-/* Square export only (see .board-square, set only by the 1200-wide social
-   capture — not the 16:9 one, and not the live page): pull the crown
-   further down than .eu-bottom-group's margin-top:auto already places it,
-   so it slightly overlaps/bleeds under the board's own bottom edge
-   (.eu-board has overflow:hidden, so this just crops it a little) instead
-   of sitting fully inside with a clean gap all the way around — reads as
-   more full-bleed/dynamic on the square crop specifically. */
-html.board-mode.board-square .eu-board-icon{margin-bottom:clamp(-170px,-13cqw,-90px)}
+/* Reverted: the square export's forced 1:1 height (weekcapture.js pads
+   the box out to match its own width) left a lot of extra vertical space,
+   and pinning the icon flush to the bottom (.eu-bottom-group's
+   margin-top:auto below) PLUS cropping it further with a negative
+   margin-bottom here put the crown far lower than it reads as "in
+   position" — all of that leftover space collapsed into one gap right
+   above it. See the .board-square override on .eu-bottom-group below,
+   which centers the whole masthead+list+icon group in the square instead
+   so the crown sits at a normal, balanced spot rather than jammed/cropped
+   against the bottom edge. */
 /* Sized by width, not height, now that this slot holds a wide/short
    landscape graphic (GZTest2, ~2:1) instead of the previous tall/narrow
    controller art (~1:1) — a height-based clamp would have rendered it
@@ -1167,6 +1169,15 @@ html.board-mode.board-square .eu-board-icon{margin-bottom:clamp(-170px,-13cqw,-9
    group. Scoped to board-mode so normal in-page browsing keeps the
    existing centered look. */
 html.board-mode .eu-bottom-group{margin-top:auto}
+/* Square export only: cancel that bottom-pin. weekcapture.js pads the
+   square export's box height out to match its own width, and that pin
+   was sending 100% of the resulting extra space into the gap right above
+   the icon (pinning it flush to the new, much-lower bottom edge) — which
+   read as the crown sitting oddly far down with a big empty band above
+   it. Falling back to .eu-board's own justify-content:center instead
+   centers the whole masthead+list+icon group in the square, so the
+   crown ends up at a normal, proportionate spot below the rows. */
+html.board-mode.board-square .eu-bottom-group{margin-top:0}
 .eu-eyebrow .ic{width:clamp(34px,5cqw,54px);height:clamp(34px,5cqw,54px);color:var(--ne-orange);flex:none}
 /* flex:1 so the title row spans all space after the icon — the date
    range (inside eu-eyebrow-titlerow) then sits flush against the true
