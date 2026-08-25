@@ -216,14 +216,17 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .grid { display: grid; gap: 1rem; }
 .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
-/* Homepage "Plan your next visit" cards: Preregister Now has 4 short
-   lines, Visit Us has 7+ (hours, phone, links, address, note) -- grid's
-   default align-items:stretch was forcing the shorter card open to match
-   the taller one, leaving a large empty gap under "Walk-ins always
-   welcome." Scoped to just this section rather than every .grid.cols-2
-   (e.g. Ambassador's tier cards elsewhere rely on the stretch-to-match
-   behavior on purpose). */
-#visit .grid { align-items: start; }
+/* Homepage "Plan your next visit" cards: originally 2 cards (Preregister
+   Now, Visit Us) with very lopsided content -- Preregister had 4 short
+   lines, Visit Us had 7+ (hours, phone, links, address, note) -- so
+   grid's default align-items:stretch forced the shorter card open to
+   match the taller one, leaving a large empty gap under "Walk-ins always
+   welcome." That's now moot: the official-page/Google/Yelp links moved
+   out of Visit Us into their own new "About" card (see index.html),
+   splitting the content across 3 cards of much closer length, and the
+   explicit request is for all three to match size/height evenly -- so
+   this override is gone and .grid's default stretch (same behavior
+   Ambassador's tier cards elsewhere already rely on) does that job. */
 /* auto-fit's 290px floor is wider than the content box on the narrowest
    phones (esp. nested inside another .card, which eats further into the
    available width with its own padding) — real horizontal overflow, not
