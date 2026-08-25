@@ -1214,7 +1214,18 @@ html.board-mode .eu-bottom-group{margin-top:auto}
    "Special Events" under a "theme weeks" list) — same divider language
    as the row border-tops, orange/uppercase like other eyebrow text. */
 .eu-sublist-head{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1rem,2cqw,1.35rem);color:var(--ne-orange);margin:clamp(1.3rem,3cqw,2.1rem) 0 .5rem;padding-top:clamp(1rem,2.5cqw,1.6rem);border-top:1px solid rgba(242,244,248,.22)}
-.eu-list{display:flex;flex-direction:column;margin-top:.65rem}
+/* No fixed margin-top here: the gap above the FIRST row in a list needs to
+   match the gap between every other pair of rows exactly. Between two
+   rows, that gap is 2x --eu-row-pad (this row's padding-bottom + the next
+   row's padding-top, straddling the 1px border). Above the first row,
+   .eu-top's own padding-bottom+margin-bottom already contributes one
+   --eu-row-pad, so adding another fixed margin here on top of the first
+   row's own padding-top would make that gap larger than the rest — which
+   is exactly the "Aug 26 gets more breathing room than Aug 28/Aug 29" bug
+   this replaced. Zero margin here means the first row's own padding-top
+   is the only other contribution, matching 2x --eu-row-pad like every
+   other row gap. */
+.eu-list{display:flex;flex-direction:column}
 .eu-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.2rem;padding:var(--eu-row-pad) 0;border-top:1px solid rgba(242,244,248,.22)}
 /* No border directly under the thick orange divider (first row) and no
    doubled-up line stacking against the location row below the list
