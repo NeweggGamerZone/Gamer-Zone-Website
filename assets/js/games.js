@@ -94,14 +94,17 @@
   function itemLine(g) {
     const subText = g.platform === 'vr' && VR_SYSTEM[g.name] ? ` (${VR_SYSTEM[g.name]})` : '';
     const sub = subText ? ` <span class="dim" style="font-size:.82em">${GZ.esc(subText)}</span>` : '';
-    // Full name (+ VR system, if any) truncates to one line with an ellipsis so
-    // every row is the same length regardless of title length; data-full
-    // drives a pure-CSS hover popup showing the untruncated text.
+    // Full name (+ VR system, if any) wraps up to 2 lines inside .gl-name as
+    // one flowing text block (see .game-list li .gl-name in style.css) --
+    // every row reserves the same height regardless of title length, so
+    // nothing looks lopsided next to a short title. data-full still backs a
+    // pure-CSS hover/tap popup as a fallback for the rare title that's still
+    // too long even at 2 lines.
     // tabindex="-1" makes the row focusable on tap/click (so the popup also
     // works on touch devices, which have no :hover) without adding it to the
     // Tab key sequence -- keyboard users tabbing through the page don't have
     // to step through every single game name to get past this list.
-    return `<li tabindex="-1" data-full="${GZ.esc(g.name + subText)}"><span class="gl-name">${GZ.esc(g.name)}</span>${sub}</li>`;
+    return `<li tabindex="-1" data-full="${GZ.esc(g.name + subText)}"><span class="gl-name">${GZ.esc(g.name)}${sub}</span></li>`;
   }
 
   function panel(title, iconName, games, note) {
