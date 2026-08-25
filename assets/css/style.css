@@ -1350,17 +1350,13 @@ html.board-mode section.eu-section{margin:0}
    composition for this isolated capture view even though the live page
    itself now anchors content to the top (see the base .eu-board rule). */
 html.board-mode .eu-board{margin:0;padding:clamp(1.6rem,5vw,4.5rem);justify-content:center}
-/* Square export only: its content (masthead + up to 4 rows) is naturally
-   shorter than it is wide now that the old fixed square/min-height
-   constraint is gone (see weekcapture.js, which pads the box out to an
-   exact 1:1 square as a last resort). Growing the row date/title size and
-   row spacing here fills more of that extra height with real content
-   before the icon's own bottom-overlap treatment (and, if any gap is
-   still left over, the plain background) has to cover the rest — matches
-   the earlier "enlarge to fill the square" passes this board went through
-   rather than leaving a big empty band above the icon. Not applied to the
-   16:9 export or the live page. */
-html.board-mode.board-square .eu-board{--eu-date-size: clamp(1.9rem, 6cqw, 4.1rem);--eu-row-pad: clamp(.6rem, 1.8cqw, 1.3rem)}
+/* Reverted: an earlier pass enlarged --eu-date-size/--eu-row-pad here to
+   fill the square's extra height with bigger text, but that made the row
+   text noticeably larger than the 16:9 export/live page for no reason
+   other than filling space — per feedback, text size should stay the
+   same as everywhere else. The square's leftover vertical space (see
+   weekcapture.js, which pads the box out to an exact 1:1 square) is just
+   left as background + the icon's own bottom-overlap treatment instead. */
 /* Board-mode only: shrink the per-week theme icon (crown, etc.) further
    than its normal on-page size, so a busy week (2 closures + a two-line
    title) still has room to breathe in an isolated capture. */
