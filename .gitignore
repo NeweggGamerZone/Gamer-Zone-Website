@@ -18,3 +18,4 @@ archive/
 # local dev/build artifacts
 node_modules/
 out/
+.worktrees/
