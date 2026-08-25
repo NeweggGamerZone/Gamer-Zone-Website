@@ -580,6 +580,21 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .scroll-cue { margin-top: 2.2rem; color: var(--ink-dim); font-size: .74rem; font-family: var(--head); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; animation: cue 2s ease-in-out infinite; }
 @keyframes cue { 0%,100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(7px); opacity: 1; } }
 
+/* Short-viewport laptops (~820px tall or less — 1366x768 is the common
+   case): even with the runner game itself scaling down on short
+   viewports (see .hero-runner/techno-hero.js sizeGame()), the heading +
+   lead + button footprint above it was measured (via an untouched,
+   naturally-loading screenshot) to still push the game's score/hint text
+   below the fold on a 768px-tall screen. This trims the heading size and
+   the spacing around it — not the game — so the full playable area
+   clears the fold on ordinary short laptop screens too. */
+@media (max-height: 820px) {
+  .hero-stage { padding: 1.2rem 0 1rem; }
+  .hero-stack { margin: .3rem 0 .4rem; }
+  .hs-line { font-size: clamp(2.4rem, 9vw, 5.1rem); }
+  .hero-stage .lead { margin: 0 auto .6rem; }
+}
+
 /* ---- homepage-only: a fixed, full-page background — flying through a grid
    tunnel inside the PC, past glowing component silhouettes (chip, RAM,
    capacitors, fan, heatsink). Fixed position so it stays put as the page
@@ -615,13 +630,22 @@ body.home-page { background: transparent; }
    (not destroyed) whenever the hero scrolls out of view, so it picks back
    up mid-run when scrolled back. */
 /* padding-top reserves the headroom the ground shape and its jump arc need
-   (see techno-hero.js updateAnchor/PATH_RADIUS/JUMP_V): PATH_RADIUS (190)
-   above the anchor for the shape's own top edge, ~95px more on top of that
-   for the jump arc (peak ~77px) and a little buffer, then PATH_RADIUS
-   (190) again below the anchor for the shape's bottom edge, plus a small
-   gap before the score/hint text. max-width widened to match the bigger
-   shape's footprint. */
-.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 560px; margin: 0 auto; padding-top: 490px; opacity: 0; transition: opacity .6s ease; pointer-events: none; cursor: pointer; }
+   (see techno-hero.js sizeGame()/updateAnchor: PATH_RADIUS + JUMP_CLEAR
+   above the anchor, PATH_RADIUS again below it, plus a small gap before
+   the score/hint text). vh-based, matching the JS values (which scale off
+   the actual canvas/viewport height) instead of a fixed 490px.
+   First pass at this (clamp(215px,38vh,475px) + the matching, larger
+   PATH_RADIUS/JUMP_CLEAR ratios) still reserved more headroom than a real
+   ~900px-tall laptop viewport has left after the heading/lead/button —
+   verified via an untouched, naturally-loading screenshot at 1400x900:
+   the ball and top of the shape were visible, but the shape's own bottom
+   half and the score/hint text still fell below the fold. The budget
+   below is sized against that same measurement (button bottom sits ~610px
+   down the viewport on a 900px-tall screen, leaving ~290px including the
+   scoreboard/hint text) so the *entire* game clears the fold on ordinary
+   laptop heights, not just the ball. Tall viewports still get close to
+   the original, larger look via the upper clamp bound. */
+.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 560px; margin: 0 auto; padding-top: clamp(170px, 24.5vh, 365px); opacity: 0; transition: opacity .6s ease; pointer-events: none; cursor: pointer; }
 .hero-runner.is-active { opacity: 1; pointer-events: auto; }
 .hero-runner-scores { display: flex; justify-content: center; gap: 1.4rem; margin-top: .35rem; font-family: var(--head); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
 .hero-runner-scores b { color: var(--ink); font-size: .82rem; margin-left: .35rem; letter-spacing: 0; }

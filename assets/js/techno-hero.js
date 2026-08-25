@@ -84,6 +84,7 @@
     cx = W / 2; cy = H / 2;
     A = Math.max(W, H) * 0.72;
     buildRings();
+    sizeGame();
   }
 
   function buildRings() {
@@ -194,11 +195,30 @@
   // clear a hazard arc's line width, not the whole ground shape, so this
   // stays a quick hop regardless of how big the ground shape itself is.
   const GRAVITY = 1500, JUMP_V = -480, CHAR_R = 13;
-  // The ground shape's fixed on-screen radius (deliberately large — one of
-  // the tunnel's bigger-looking silhouettes, not a cramped little lane) and
-  // how fast Left/Right movement carries the character around its full
-  // perimeter (a fraction of the loop per second).
-  const PATH_RADIUS = 190, ANGLE_SPEED = 0.3;
+  // The ground shape's on-screen radius, and how fast Left/Right movement
+  // carries the character around its full perimeter (a fraction of the
+  // loop per second). PATH_RADIUS/JUMP_CLEAR are recomputed from the
+  // actual viewport height on every resize (see sizeGame() below) instead
+  // of being fixed constants.
+  //
+  // A first attempt scaled these against H*0.15/H*0.08 (matching a
+  // padding-top of clamp(215px,38vh,475px)) but that was measured, via an
+  // untouched real-browser screenshot at a common 1400x900 viewport, to
+  // still reserve more room than a real laptop hero has left after its
+  // heading/lead/button: the ball and the top of the shape were visible,
+  // but its own bottom half plus the score/hint text still fell below the
+  // fold — read as broken rather than just scrolled past. On that same
+  // screenshot the button's bottom edge sat ~610px down a 900px-tall
+  // viewport, leaving ~290px (including the scoreboard/hint text) to fit
+  // the entire game in without any scrolling. These smaller ratios (and
+  // the matching .hero-runner padding-top in style.css) are sized against
+  // that real measurement instead of a round-number guess.
+  let PATH_RADIUS = 150, JUMP_CLEAR = 68;
+  const ANGLE_SPEED = 0.3;
+  function sizeGame() {
+    PATH_RADIUS = Math.max(70, Math.min(150, H * 0.10));
+    JUMP_CLEAR = Math.max(32, Math.min(68, H * 0.045));
+  }
 
   if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
 
@@ -213,12 +233,11 @@
   function updateAnchor() {
     const r = runnerWrap.getBoundingClientRect();
     anchorX = r.left + r.width / 2;
-    // Lower, and with more room around it than the old flat-line path
-    // needed: PATH_RADIUS (190) of clearance above for the ground shape's
-    // own top edge, plus ~95px more on top of that for the jump arc (peak
-    // ~77px) and a little buffer — matched by .hero-runner's CSS
-    // padding-top reserving the same space (see style.css).
-    anchorY = r.top + PATH_RADIUS + 95;
+    // Clearance above the anchor: PATH_RADIUS for the ground shape's own
+    // top edge, plus JUMP_CLEAR for the jump arc (peak ~77px) and a little
+    // buffer — both viewport-height-scaled (see sizeGame above), matched
+    // by .hero-runner's own vh-based padding-top in style.css.
+    anchorY = r.top + PATH_RADIUS + JUMP_CLEAR;
     // baseRingZ is the one fixed depth at which a hazard ring visually
     // arrives exactly at the anchor point (see hazardScreenPos below) —
     // solved the same way the tunnel's own rings scale with depth
@@ -446,7 +465,7 @@
         gameActive = entries[0].isIntersecting;
         runnerWrap.classList.toggle('is-active', gameActive);
         if (gameActive) updateAnchor();
-      }, { threshold: 0.4 });
+      }, { threshold: 0.25 });
       io.observe(runnerWrap);
     } else {
       gameActive = true;
