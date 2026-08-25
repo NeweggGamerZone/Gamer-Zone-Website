@@ -28,11 +28,16 @@
   if (!wrap) return;
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // All 63 written Google reviews (5 stars each) as of the last sync with
-  // Google's listing. The aggregate stat line ("5.0 rating · 86 Google
-  // reviews") includes these plus 23 more reviewers who rated 5 stars with
-  // no written text -- no longer listed by name on-page, but still counted
-  // in that total.
+  // 63 written Google reviews (5 stars each), captured in an earlier sync
+  // with Google's listing. The aggregate stat line in index.html
+  // ("5.0 rating · 109 Google reviews") was refreshed 2026-08-25 against
+  // the live Google Business Profile (still 5.0, now 109 total reviews,
+  // up from 86) -- this written pool wasn't re-scraped for that update
+  // (per request, no pulling exact reviewer names off Google for a
+  // routine count refresh), so the gap between 63 written here and the
+  // real total is now larger (46 unwritten 5-star ratings, up from 23).
+  // Re-sync this pool itself in its own pass if the written reviews ever
+  // need refreshing.
   const REVIEWS = [
     { q: "Awesome space and such a cool community here!", n: "Sirena M." },
     { q: "Had a lot of fun experiencing the very best of gaming with the Gamer Zone’s desktop pcs. Internet cafes aren't super big in America so it’s really cool to have this spot for people to try out gaming at its best picture and performance for free.", n: "Samantha A." },
