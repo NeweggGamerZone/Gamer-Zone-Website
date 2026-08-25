@@ -1371,7 +1371,11 @@ html.board-mode .eu-board{margin:0;padding:clamp(1.6rem,5vw,4.5rem);justify-cont
 /* Board-mode only: shrink the per-week theme icon (crown, etc.) further
    than its normal on-page size, so a busy week (2 closures + a two-line
    title) still has room to breathe in an isolated capture. */
-html.board-mode .eu-board-icon img{width:min(34%,340px)}
+html.board-mode .eu-board-icon img{width:min(37.4%,374px)}
+/* +10% size (above) paired with a bit more top margin here so it sits
+   slightly lower too, per request — scoped to board-mode only, same as
+   the size bump, so the live in-page board is untouched. */
+html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,
