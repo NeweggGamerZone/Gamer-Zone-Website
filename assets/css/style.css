@@ -440,8 +440,8 @@ details.archive-month .grid { margin-top: 1rem; }
    peeking card to bring it to front" handler could never actually fire
    from a direct click on the card — only the prev/next buttons and dot
    nav worked. Re-enabled here plus a pointer cursor for the affordance. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .55; z-index: 4; cursor: pointer; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .55; z-index: 4; cursor: pointer; }
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .3; z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .3; z-index: 4; cursor: pointer; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
 /* Only a sliver of a prev/next card is actually visible (mostly hidden by
    .zone-stack's own overflow:hidden). Both the paragraph AND the centered
