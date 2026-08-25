@@ -90,7 +90,7 @@
     { q: "Newegg Gamer Zone is a fun place to chill out and play some games. I like to come almost every week for the Fortnite coaching sessions and tournaments that are held Wednesdays and Fridays. Good events, good food, and good giveaways", n: "Alijah C." },
     { q: "Got great events, great giveaways and opportunities to use their PC's.", n: "Soki C." },
     { q: "Really nice set ups, great ambiance and vibe. They hold raffles and various events as well!", n: "Ezekiel A." },
-    { q: "I love coming here! It's so close to home and the facility is clean and well-maintained. The best part is that using their PCs and gaming sims is completely free! You just have to register for an account and then you sign in whenever you visit. My friend and I come here every couple of weeks for a chill day of gaming. They have so many games and if there isn't any, you can always ask to see if they can add what you'd like to play. The staff are really nice and friendly — shout-out to Cindy and Eric, who are always so helpful and welcoming. This place is truly a hidden gem.", n: "Stephanie C." },
+    { q: "I love coming here! It's so close to home and the facility is clean and well-maintained. The best part is that using their PCs and gaming sims is completely free! You just have to register for an account and then you sign in whenever you visit. My friend and I come here every couple of weeks for a chill day of gaming. They have so many games and if there isn't any, you can always ask to see if they can add what you'd like to play. The staff are really nice and friendly, shout-out to Cindy and Eric, who are always so helpful and welcoming. This place is truly a hidden gem.", n: "Stephanie C." },
     { q: "A beautiful, well-maintained space that is free and with super friendly and helpful staff! Lovely place to spend an afternoon with friends!", n: "Grace K." },
     { q: "I had the best time here! My friends and I tried out the VR. Everything was completely free and the staff was super friendly and welcoming.", n: "Jenny T." },
     { q: "This place is so amazing. My friends and I booked a session here and they gave us free snacks, set up various games for us, and even equipped us with all of the high tech VR stuff!! It's too good to be true.", n: "Prince H." },
@@ -120,7 +120,7 @@
   function cardHTML(r) {
     return `<div class="review-stars" aria-hidden="true">★★★★★</div>
       <p class="review-quote">${GZ.esc(r.q)}</p>
-      <p class="review-source dim">&mdash; ${GZ.esc(r.n)}, Google Review</p>`;
+      <p class="review-source dim">${GZ.esc(r.n)}, Google Review</p>`;
   }
 
   const pool = shuffle(REVIEWS);

@@ -39,7 +39,7 @@ function flyerHTML(ev, past = false) {
   const fallback = flyerFallback(ev);
   const src = ev.flyerWeb || ev.flyer;
   const img = src
-    ? `<img src="${GZ.esc(src)}" data-full="${GZ.esc(ev.flyer || src)}" alt="${GZ.esc(ev.title)} — ${GZ.esc(GZ.fmtDate(ev.date))} ${GZ.esc(ev.time || '')}" loading="lazy"
+    ? `<img src="${GZ.esc(src)}" data-full="${GZ.esc(ev.flyer || src)}" alt="${GZ.esc(ev.title)}, ${GZ.esc(GZ.fmtDate(ev.date))} ${GZ.esc(ev.time || '')}" loading="lazy"
          onerror="this.closest('.flyer').innerHTML = this.closest('.flyer').dataset.fb">`
     : fallback;
   return `<div class="flyer${past ? ' past' : ''}" data-fb="${GZ.esc(fallback)}">${img}</div>`;
@@ -81,14 +81,14 @@ async function renderAll() {
     let html = '';
     if (thisWeek.length) html += `<p class="kicker">This week</p><div class="flyer-rail">${thisWeek.map(e => flyerHTML(e)).join('')}</div>`;
     if (comingUp.length) html += `<p class="kicker" style="margin-top:1rem">Coming up</p><div class="flyer-rail">${comingUp.map(e => flyerHTML(e)).join('')}</div>`;
-    elWeekly.innerHTML = html || `<div class="calendar-empty">This week's lineup drops soon — free play is always on.</div>`;
+    elWeekly.innerHTML = html || `<div class="calendar-empty">This week's lineup drops soon. Free play is always on.</div>`;
   }
 
   const elHome = document.getElementById('home-weekly');
   if (elHome) {
     elHome.innerHTML = upcoming.length
       ? `<div class="flyer-rail">${upcoming.slice(0, 6).map(e => flyerHTML(e)).join('')}</div>`
-      : `<div class="calendar-empty">This week's lineup drops soon — free play is always on. <a href="events.html">See the calendar</a></div>`;
+      : `<div class="calendar-empty">This week's lineup drops soon. Free play is always on. <a href="events.html">See the calendar</a></div>`;
   }
 
   const monthly = (manifest && manifest.monthly || []);
@@ -98,7 +98,7 @@ async function renderAll() {
   if (elMonthly) {
     elMonthly.innerHTML = monthlyCur.length
       ? monthlyCur.map(x => calImg(x, 'monthly')).join('')
-      : `<div class="calendar-empty">This month's calendar graphic is being cooked up — the event lineup above is live. Follow <a href="https://www.instagram.com/newegggamerzone/" target="_blank" rel="noopener">@newegggamerzone</a> for drops.</div>`;
+      : `<div class="calendar-empty">This month's calendar graphic is being cooked up. The event lineup above is live. Follow <a href="https://www.instagram.com/newegggamerzone/" target="_blank" rel="noopener">@newegggamerzone</a> for drops.</div>`;
   }
 
   const elUp = document.getElementById('events-upcoming');
@@ -107,7 +107,7 @@ async function renderAll() {
   const elFeat = document.getElementById('home-featured-event');
   if (elFeat) {
     const feat = upcoming.find(e => e.featured) || upcoming[0];
-    elFeat.innerHTML = feat ? eventCard(feat) : '<p class="dim">Big things brewing — check <a href="events.html">the calendar</a>.</p>';
+    elFeat.innerHTML = feat ? eventCard(feat) : '<p class="dim">Big things brewing. Check <a href="events.html">the calendar</a>.</p>';
   }
 
   const elArch = document.getElementById('calendar-archive');

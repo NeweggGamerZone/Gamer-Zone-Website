@@ -80,7 +80,7 @@
     const closed = (wd === 0 || wd === 1) || closedByType;
     const isToday = dt === today;
     const preregBlock = isToday
-      ? `<p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}" target="_blank" rel="noopener">Preregister your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Visiting today? Skip the line — reservations are one per visitor.</p>`
+      ? `<p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}" target="_blank" rel="noopener">Preregister your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Visiting today? Skip the line: reservations are one per visitor.</p>`
       : '';
     // Reorganized card layout, same order/spacing for every day type:
     // tag -> title -> subtitle -> date/time meta row (with icons) ->
@@ -99,7 +99,7 @@
         <div class="cd-body">${preregBlock}</div>`;
     } else if (closed) {
       setCardBg(null);
-      const reason = closedByType ? (e.blurb || '') : 'Closed. The Gamer Zone is open Tuesday through Saturday, 10am–7pm. See you then!';
+      const reason = closedByType ? (e.blurb || '') : 'Closed. The Gamer Zone is open Tuesday through Saturday, 10am to 7pm. See you then!';
       detail.innerHTML = `<span class="tag cal-closed">Closed</span>
         <h3>${pretty(dt)}</h3>
         <p class="cd-blurb">${GZ.esc(reason)}</p>`;
@@ -107,8 +107,8 @@
       setCardBg(FREE_PLAY_BG);
       detail.innerHTML = `<span class="tag cal-free">Free Play</span>
         <h3>FREE PLAY: ${pretty(dt)}</h3>
-        <div class="cd-meta"><span class="cd-meta-item"><i data-ic="clock"></i>10am – 7pm</span></div>
-        <p class="cd-blurb">Open 10am–7pm. Try the latest tech for free — walk in, or pre-register to skip the line at check-in.</p>
+        <div class="cd-meta"><span class="cd-meta-item"><i data-ic="clock"></i>10am to 7pm</span></div>
+        <p class="cd-blurb">Open 10am to 7pm. Try the latest tech for free: walk in, or pre-register to skip the line at check-in.</p>
         ${preregBlock}`;
     }
     injectIcons(detail);

@@ -92,7 +92,7 @@
   function byName(a, b) { return a.name.localeCompare(b.name); }
 
   function itemLine(g) {
-    const subText = g.platform === 'vr' && VR_SYSTEM[g.name] ? ` — ${VR_SYSTEM[g.name]}` : '';
+    const subText = g.platform === 'vr' && VR_SYSTEM[g.name] ? ` (${VR_SYSTEM[g.name]})` : '';
     const sub = subText ? ` <span class="dim" style="font-size:.82em">${GZ.esc(subText)}</span>` : '';
     // Full name (+ VR system, if any) truncates to one line with an ellipsis so
     // every row is the same length regardless of title length; data-full
@@ -122,7 +122,7 @@
   }
 
   function renderAZ() {
-    list.innerHTML = panel('A–Z', null, GAMES);
+    list.innerHTML = panel('A-Z', null, GAMES);
   }
 
   function renderPlatform(key) {

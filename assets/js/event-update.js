@@ -56,7 +56,7 @@
     const endD = new Date(today + 'T12:00:00'); endD.setDate(endD.getDate() + 4);
     weekStart = today; weekEnd = endD.toISOString().slice(0, 10);
     themeName = 'Free Play Week';
-    themeDesc = 'Free-to-play PCs, consoles, and VR — all week.';
+    themeDesc = 'Free-to-play PCs, consoles, and VR, all week.';
   }
 
   // This theme week's full slate — used to list closures and any special
@@ -70,7 +70,7 @@
   };
 
   // Masthead layout: the week's date range sits plainly on the LEFT (e.g.
-  // "AUG 25 – 29"), with "WEEKLY THEME: <theme name>" grouped together on
+  // "AUG 25 - 29"), with "WEEKLY THEME: <theme name>" grouped together on
   // the far RIGHT of that same row — date first, then the descriptive
   // label+title, mirroring how a Special Events row reads left-to-right
   // (date, then title) but keeping the theme's own label/name paired as
@@ -82,7 +82,7 @@
   const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
   if (eyebrowTitleEl) {
     const s = monthDate(weekStart), e = monthDate(weekEnd);
-    const dateRange = s.mon === e.mon ? `${s.mon} ${s.day} – ${e.day}` : `${s.mon} ${s.day} – ${e.mon} ${e.day}`;
+    const dateRange = s.mon === e.mon ? `${s.mon} ${s.day} - ${e.day}` : `${s.mon} ${s.day} - ${e.mon} ${e.day}`;
     eyebrowTitleEl.textContent = dateRange.toUpperCase();
   }
   // Weekly-theme subtitle line (the old #eu-eyebrow-desc paragraph, e.g.
@@ -138,7 +138,7 @@
         ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
       </div>
       <div class="eu-info">
-        <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${closure ? 'Closed — ' : ''}${GZ.esc(name.replace(/^Closed\s*[—-]\s*/, ''))}</div>
+        <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${closure ? 'Closed: ' : ''}${GZ.esc(name.replace(/^Closed\s*[:—-]\s*/, ''))}</div>
       </div>
     </div>${descHtml}`;
   }

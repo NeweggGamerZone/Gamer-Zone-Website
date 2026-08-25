@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const g = n => (f.elements[n] ? f.elements[n].value : '' || '').trim();
     const recurMonthly = g('recurMonthly');
     f.elements['_subject'].value = recurMonthly === 'Yes'
-      ? 'Ambassador Application Program — Recurring Monthly Event'
+      ? 'Ambassador Application Program: Recurring Monthly Event'
       : 'Ambassador Application Program';
 
     sentNote.style.display = 'none';
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
       // Fallback: draft a direct email so the application isn't lost.
       const body = [
-        'NEWEGG GAMER ZONE — AMBASSADOR APPLICATION',
+        'NEWEGG GAMER ZONE: AMBASSADOR APPLICATION',
         '',
         `Name: ${g('name')}`,
         `Email: ${g('email')}`,
@@ -60,10 +60,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         'About / why host at the Gamer Zone:',
         g('about'),
         '',
-        '— Sent from the Gamer Zone Ambassador page (fallback: form submission failed)'
+        'Sent from the Gamer Zone Ambassador page (fallback: form submission failed)'
       ].join('\n');
       errorNote.style.display = 'block';
-      errorNote.innerHTML = `Couldn't submit automatically — <a href="mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('Ambassador Application Program')}&body=${encodeURIComponent(body)}">click here to send it as an email instead</a>.`;
+      errorNote.innerHTML = `Couldn't submit automatically. <a href="mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('Ambassador Application Program')}&body=${encodeURIComponent(body)}">click here to send it as an email instead</a>.`;
     } finally {
       submitBtn.disabled = false;
     }
