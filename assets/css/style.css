@@ -694,6 +694,29 @@ body.home-page { background: transparent; }
 
 .visit-cta-note { font-size:.78rem; color:var(--ink-dim); margin-top:.4rem; }
 
+/* Homepage "Become a Gamer Zone Ambassador" teaser: previously a single
+   flat card of paragraph text + a button, which read as an afterthought
+   next to the game's other gamified sections. Echoes the visual language
+   of the full Ambassador Journey tier ladder on ambassador.html (numbered
+   circle badge, card framing) but as a plain 3-step Apply/Host/Unlock
+   walkthrough rather than the actual 4-tier progression -- this is a
+   teaser for that page, not a duplicate of it, so it stays generic and
+   doesn't reuse the tier-specific colors/labels. */
+.amb-teaser-steps { display:flex; align-items:flex-start; gap:0; margin-top:1.3rem; }
+.amb-teaser-step { flex:1; min-width:0; background:var(--bg-2); border:1px solid var(--line); border-top:3px solid var(--ne-orange); padding:1.1rem 1.2rem 1.3rem; }
+.amb-teaser-num { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:var(--bg-3); border:2px solid var(--ne-orange); color:var(--ne-orange); font-family:var(--head); font-weight:800; font-size:1.05rem; }
+.amb-teaser-step h3 { font-family:var(--head); font-weight:800; text-transform:uppercase; letter-spacing:.03em; font-size:1.02rem; margin:.7rem 0 .35rem; }
+.amb-teaser-step p { font-size:.86rem; line-height:1.45; margin:0; }
+/* A short horizontal rule between steps rather than a full connecting
+   line through the badges (like the tier ladder's own connector) --
+   simpler to keep aligned across 3 equal-width steps, and reads as "next
+   step" without implying these 3 are its own separate tier stack. */
+.amb-teaser-connector { flex:none; align-self:center; width:1.6rem; height:2px; background:var(--line); margin-top:19px; }
+@media (max-width: 720px) {
+  .amb-teaser-steps { flex-direction:column; gap:.9rem; }
+  .amb-teaser-connector { display:none; }
+}
+
 /* rolling partner banner (home bottom) */
 .partner-band { position:relative; margin:2.6rem calc(-1 * var(--safe-x)) 0; background:var(--ne-navy); border-block:2px solid var(--ne-navy-glow); overflow:hidden; padding:.85rem 0; }
 .partner-band .pb-inner { max-width:1140px; margin:0 auto; padding:0 var(--safe-x); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
