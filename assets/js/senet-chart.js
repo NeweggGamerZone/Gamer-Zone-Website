@@ -55,18 +55,20 @@
   ];
 
   // Real "Total duration" (all-time hours played) snapshot from the Senet
-  // dashboard, captured 2026-08-22. Hardcoded because there's still no live
-  // feed (see file header) -- replace wholesale the next time a fresh
-  // export comes in, rather than trying to merge/interpolate old and new.
+  // dashboard, captured 2026-08-25 (replaces the 2026-08-22 export -- every
+  // title logged more hours in between, confirming this is a fresh pull,
+  // not a stale repeat). Hardcoded because there's still no live feed (see
+  // file header) -- replace wholesale the next time a fresh export comes
+  // in, rather than trying to merge/interpolate old and new.
   const ALLTIME_REAL = [
-    { name: 'VALORANT', hours: 469 + 14 / 60 },
-    { name: 'League of Legends', hours: 428 + 51 / 60 },
+    { name: 'VALORANT', hours: 484 + 50 / 60 },
+    { name: 'League of Legends', hours: 432 + 50 / 60 },
     { name: 'Fortnite', hours: 194 + 31 / 60 },
     { name: 'Overwatch 2', hours: 175 + 40 / 60 },
-    { name: 'Marvel Rivals', hours: 141 + 53 / 60 },
+    { name: 'Marvel Rivals', hours: 143 + 4 / 60 },
     { name: 'Fall Guys', hours: 131 + 14 / 60 },
     { name: 'Counter-Strike 2', hours: 75 + 34 / 60 },
-    { name: 'Mecha Chameleon', hours: 52 + 59 / 60 },
+    { name: 'Mecha Chameleon', hours: 55 + 8 / 60 },
   ];
 
   // min/max total hours-played per title for the selected range.
