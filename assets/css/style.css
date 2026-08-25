@@ -603,21 +603,25 @@ body.home-page { background: transparent; }
 @keyframes hero-rise { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .hero-in { animation: none; opacity: 1; transform: none; } }
 
-/* ---- homepage hero: always-on runner game. The character, its shadow, and
-   the red hazard shapes are all drawn directly into the same full-page
+/* ---- homepage hero: always-on runner game. The ground shape (one of the
+   tunnel's own morphing silhouettes), the character/shadow, and the
+   orange hazard arcs are all drawn directly into the same full-page
    #techno-canvas tunnel (see assets/js/techno-hero.js) — not a separate
    canvas — so the obstacles ARE the background's own morphing shapes,
    just recolored, rather than a disconnected mini-game bolted on top. This
-   div only reserves screen space (the padding-top is where the character
-   renders) and holds the score readout + the tap-to-jump hit zone. Hidden/
-   paused (not destroyed) whenever the hero scrolls out of view, so it
-   picks back up mid-run when scrolled back. */
-/* padding-top reserves the headroom the character jumps into (see
-   techno-hero.js updateAnchor/JUMP_V) -- bumped from 80px to 150px, and
-   the jump arc itself enlarged to match (see JUMP_V comment), so the game
-   reads as an actual playable space instead of a cramped little hop in
-   place. max-width widened slightly too for a bit more breathing room. */
-.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 520px; margin: 0 auto; padding-top: 150px; opacity: 0; transition: opacity .6s ease; pointer-events: none; cursor: pointer; }
+   div only reserves screen space (the padding-top is where the ground
+   shape + character render, lower and larger than the old flat-line path)
+   and holds the score readout + the tap-to-jump hit zone. Hidden/paused
+   (not destroyed) whenever the hero scrolls out of view, so it picks back
+   up mid-run when scrolled back. */
+/* padding-top reserves the headroom the ground shape and its jump arc need
+   (see techno-hero.js updateAnchor/PATH_RADIUS/JUMP_V): PATH_RADIUS (190)
+   above the anchor for the shape's own top edge, ~95px more on top of that
+   for the jump arc (peak ~77px) and a little buffer, then PATH_RADIUS
+   (190) again below the anchor for the shape's bottom edge, plus a small
+   gap before the score/hint text. max-width widened to match the bigger
+   shape's footprint. */
+.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 560px; margin: 0 auto; padding-top: 490px; opacity: 0; transition: opacity .6s ease; pointer-events: none; cursor: pointer; }
 .hero-runner.is-active { opacity: 1; pointer-events: auto; }
 .hero-runner-scores { display: flex; justify-content: center; gap: 1.4rem; margin-top: .35rem; font-family: var(--head); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
 .hero-runner-scores b { color: var(--ink); font-size: .82rem; margin-left: .35rem; letter-spacing: 0; }
