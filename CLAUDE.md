@@ -13,10 +13,11 @@ This is v1 of this file, consolidated 2026-08-26 from everything established acr
 3. **Every shine/metallic-flash effect reuses the one shared `gz-shine` implementation.** Never write a new bespoke shine. See "Unified shine" below.
 4. **Never fabricate a specific fact** (a date, a stat, a quote, an admin-portal capability) that isn't confirmed real. Offer an honest alternative instead (a waitlist link, "not yet scheduled," a roadmap note). See "No fabrication" below.
 5. **Never call a responsive/sizing change done without rendering it.** Real screenshots at mobile (~390–400px), tablet (~768–820px), and desktop (~1280–1400px+), not a CSS value that "should" work. See "Container & sizing discipline" below.
-6. **Never call an interactive feature (game, widget) done from the absence of console errors alone.** Actually drive it with simulated input over real time. See "Testing interactive features" below.
-7. **Every new interactive element is keyboard-operable**: reachable via Tab, has a visible focus state, and supports the input pattern users expect (Enter/Space to activate, arrow keys for grid/list navigation). See "Keyboard accessibility" below.
-8. **Run the QA checklist at the end of this file before considering any change finished, and again before pushing to `main`.**
+6. **Every section shares one container-width system, not an ad hoc size per component.** No section shrink-wraps tight to its own content while a sibling stretches full-width nearby — width comes from the shared `.container`/`--safe-x` system, content reflows inside it. See "One shared container width" below.
+7. **Never call an interactive feature (game, widget) done from the absence of console errors alone.** Actually drive it with simulated input over real time. See "Testing interactive features" below.
+8. **Every new interactive element is keyboard-operable**: reachable via Tab, has a visible focus state, and supports the input pattern users expect (Enter/Space to activate, arrow keys for grid/list navigation). See "Keyboard accessibility" below.
 9. **Every visitor-facing change should make someone feel more wowed, seen, or accepted — never less.** These are real design goals, not vibes. See "Soft goals" below, and run the gut-check in the QA workflow.
+10. **No feature or change is "done" until it has been explicitly checked against every rule above.** Run the QA checklist at the end of this file before considering any change finished, and again before pushing to `main` — treat this file as an active checklist to execute, not background reading.
 
 ---
 
@@ -49,6 +50,15 @@ Lessons paid for the hard way this project (the Weekly Lineup mobile-clipping bu
 - **When one component's size depends on another's, tie them together with shared math, not two independently hand-tuned numbers.** The hero game's ground shape is deliberately computed from the exact same `A` constant that scales the decorative background rings (`assets/js/techno-hero.js`), so they can't silently drift out of sync the way two separately-guessed pixel values would.
 - **Don't force a layout recalculation every animation frame.** Reading (`getBoundingClientRect()`) every frame is fine; *writing* layout-affecting styles (padding, size) every frame causes real layout thrashing. Do expensive layout writes once, on resize/init (see `sizeGame()` vs the per-frame `updateAnchor()` split in `techno-hero.js`).
 - **A sizing/responsive fix isn't done until it's been screenshotted**, not reasoned about from the CSS alone — see the QA checklist.
+
+### One shared container width, not a per-section patchwork
+
+This site has exactly one horizontal-rhythm system: `.container` (`max-width:1140px`) plus the shared `--safe-x` side-padding variable (`clamp(1rem, 4vw, 2.2rem)`), both defined once near the top of `style.css`. Every normal page section should sit inside that same container and share that same edge padding — not because 1140px is sacred, but because a page where every section independently decided its own width reads as visually unstable: one card grid shrink-wrapped tight around its content, a section next to it stretching edge-to-edge, another sitting at some third random width. That patchwork is the actual failure mode to avoid, not any specific pixel value.
+
+- **New sections/components inherit `.container`/`--safe-x` by default.** Only break out of it with a real, specific reason (a full-bleed background image, a board-mode export capture, a decorative canvas layer) — and when you do, say why in a comment, the way `.eu-board`'s `--eu-safe-x` (a deliberate 10%-wider variant, still derived from the shared `--safe-x`) documents its own reasoning rather than inventing an unrelated number.
+- **Don't let a container's width react to its own content length.** A card grid, board, or panel should hold a stable width (from the shared system above) and let *content* reflow inside it — wrap text, grow height, add rows — rather than the *container* shrinking to fit whatever's in it today and ballooning tomorrow when the copy changes. A component that resizes itself around its content is the same root mistake as the no-ellipsis and `aspect-ratio`-as-forced-height rules above, just at the section level instead of the card level: don't let content length dictate a hard container dimension.
+- **When a new component needs its own internal width/type scale** (the way `.eu-board` scales its own text against its own width via `container-type: inline-size` and `cqw` units instead of the viewport), that's fine — it's still anchored to the shared outer container's width, just adding its own internal responsiveness on top, not replacing the outer system with an unrelated one.
+- **Audit this on every visual pass**, same as readability: does this page, read top to bottom, feel like one consistent column width with consistent breathing room on both sides — or does it feel like sections were each designed in isolation?
 
 ## Unified metallic shine effect ("gz-shine")
 
@@ -115,7 +125,7 @@ Run this before considering **any** visual, layout, or interactive change finish
 
 **2. Readability check.** For anything touching text-over-background, decorative effects, or color: check contrast at rest AND at any animated effect's most intense moment (force the effect to that state and screenshot it — don't eyeball from the CSS values). Target WCAG AA (4.5:1 normal text, 3:1 large text/UI elements).
 
-**3. Container/sizing check.** For anything touching layout, sizing, or responsive behavior: screenshot at mobile (~390–400px), tablet (~768–820px), and desktop (~1280–1400px+). Check for clipping, overflow, and content that's too long/short for the new layout — not just the example content used while building it.
+**3. Container/sizing check.** For anything touching layout, sizing, or responsive behavior: screenshot at mobile (~390–400px), tablet (~768–820px), and desktop (~1280–1400px+). Check for clipping, overflow, and content that's too long/short for the new layout — not just the example content used while building it. Also check it against the page around it: does the new/changed section's width and side padding match the shared `.container`/`--safe-x` system, or did it quietly invent its own — either shrink-wrapped tight to its content or stretched wider than everything else on the page?
 
 **4. Interactive/functional check.** For anything touching a game, form, calendar, or other widget: actually operate it via simulated real input (held keys, sequences over multiple seconds, keyboard-only operation) and confirm the *behavior*, not just the absence of thrown errors. Check the browser console for errors and warnings regardless (excluding known-harmless `file://` CORS noise during local testing).
 
