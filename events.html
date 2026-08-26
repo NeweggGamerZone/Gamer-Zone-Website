@@ -120,15 +120,11 @@
     <div style="margin-top:1rem">
       <details class="archive-month" open><summary>Street Fighter Saturday Slam: 07/25/2026</summary>
         <p class="dim" style="margin-top:.6rem">Thanks for coming to one of our largest Street Fighter tournaments! Featuring some of Southern California's best fighters, folks enjoyed free play, intense matches, and raffle prizes throughout!</p>
-        <!-- Three photos cycle on screen at once (assets/js/photo-waterfall.js),
-             each fading independently into its next photo from the pool
-             below in the <template> -- add/remove <img> entries there to
-             change the pool; the three visible slots above pick it up
-             automatically, no JS edit needed. -->
-        <div class="photo-waterfall" data-cycle style="margin-top:1rem">
-          <div class="pw-slot"><img alt="" loading="lazy"></div>
-          <div class="pw-slot"><img alt="" loading="lazy"></div>
-          <div class="pw-slot"><img alt="" loading="lazy"></div>
+        <!-- All real recap photos scroll through one continuous marquee lane
+             (assets/js/photo-waterfall.js + GZ.marquee in main.js) -- add or
+             remove <img> entries in the <template> below to change the pool,
+             no JS edit needed. -->
+        <div class="photo-waterfall" id="photo-waterfall" data-gallery style="margin-top:1rem">
           <template>
             <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05187.jpg" alt="Street Fighter Saturday Slam group photo, July 25, 2026">
             <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05060.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">

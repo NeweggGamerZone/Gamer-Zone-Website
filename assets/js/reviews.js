@@ -1,21 +1,28 @@
-/* Rotating reviews spotlight.
-   Previously this section rendered all 63 written Google reviews as a
-   static grid (plus a line naming the 23 reviewers who rated 5 stars with
-   no written text) -- every card stretched to match the tallest card in
-   its row, which produced huge blank space under short reviews, and the
-   named-reviewers line read as an odd wall of names. A later "waterfall"
-   version showed 4 cards at once, each on its own staggered timer, cycling
-   through the full pool -- but with review lengths ranging from a 3-word
-   quip to a 400+ word paragraph, whichever slot happened to swap in a much
-   longer or shorter review made the whole grid row (and the section under
-   it) visibly grow or shrink every few seconds, and a shared 7s timer for
-   every slot meant a long review got yanked away long before it could be
-   read. Per request: show exactly one review at a time, in a box
-   pre-sized to fit the single longest review in the pool (measured once,
-   off-screen, against the real card markup/width) so the section's height
-   never moves no matter which review is showing, and give each review a
-   dwell time proportional to its own length instead of one fixed interval
-   for all of them.
+/* Reviews waterfall -- 2026-08-26 "Pinterest / loved-by" redesign.
+   History: this section started as a static grid of all 63 written
+   Google reviews (plus a line naming 23 more 5-star-no-text reviewers) --
+   every card stretched to match its row's tallest sibling, producing huge
+   blank space under short reviews. A later "waterfall" version showed 4
+   cards at once cycling on staggered timers -- but with review lengths
+   from a 3-word quip to a 400+ word paragraph, whichever slot swapped in
+   a much longer/shorter review made the whole grid row (and the section
+   under it) visibly grow or shrink every few seconds, so it was pulled
+   back to one review at a time in a fixed-height box.
+
+   This version: two GZ.marquee lanes (see main.js), scrolling opposite
+   directions, each card capped to a fixed width with its quote clamped to
+   5 lines (see .review-waterfall .review-quote in style.css). This
+   sidesteps BOTH earlier failure modes at once -- line-clamp means no
+   card's real height ever depends on how long its review is (fixing the
+   stretch/blank-space problem from the original grid), and a horizontal
+   marquee lane's own height never changes over time regardless of which
+   reviews are currently scrolling through it (fixing the grow/shrink jank
+   that killed the second version). A card whose quote gets clamped still
+   has its full text reachable via the same hover/tap data-full popup
+   `.game-list li` already uses (see style.css) -- nothing is ever fully
+   unreadable, just collapsed by default the way a long dense list is
+   elsewhere on this site (CLAUDE.md core rule 1's own carve-out for this
+   shape of content).
 
    The review pool is baked in directly below rather than fetched from a
    data/*.json file: unlike events.json (edited often, shared across
@@ -26,7 +33,6 @@
 (function () {
   const wrap = document.getElementById('review-waterfall');
   if (!wrap) return;
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // 63 written Google reviews (5 stars each), captured in an earlier sync
   // with Google's listing. The aggregate stat line in index.html
@@ -104,15 +110,6 @@
     { q: "went with my boyfriend, had a little trouble finding the entrance but once you get in the building there are arrows pointing to the room. the nice ladies at the counter were helpful with setting up an account for our first time. they have different gaming devices, some still being set up and free snacks as well. liked the cleanliness & service, would take more people back!", n: "jas" },
   ];
 
-  const FADE_MS = 420;
-  // Dwell time scales with how much there is to read: a 3-word quip and a
-  // 400-word paragraph shouldn't both get exactly the same amount of time
-  // on screen. ~200wpm reading speed is roughly 17 characters/sec including
-  // spaces; MIN/MAX keep even the shortest and longest reviews from ever
-  // flashing by too fast or overstaying past a minute.
-  const MIN_MS = 6000, MAX_MS = 16000;
-  function dwellFor(r) { return Math.max(MIN_MS, Math.min(MAX_MS, r.q.length * 60)); }
-
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -122,63 +119,40 @@
     return a;
   }
 
+  // data-full backs the same attr(data-full) hover/tap popup as
+  // .game-list li[data-full] (see style.css) -- a fallback for whichever
+  // reviews get cut off by the 5-line clamp. tabindex="-1" keeps every
+  // card out of the normal Tab sequence (see that rule's own comment for
+  // why) while still letting a click/tap focus it to reveal the popup on
+  // touch devices, which have no :hover.
   function cardHTML(r) {
-    return `<div class="review-stars" aria-hidden="true">★★★★★</div>
+    const full = GZ.esc(`“${r.q}” — ${r.n}`);
+    return `<div class="card review-card" tabindex="-1" data-full="${full}">
+      <div class="review-stars" aria-hidden="true">★★★★★</div>
       <p class="review-quote">${GZ.esc(r.q)}</p>
-      <p class="review-source dim">${GZ.esc(r.n)}, Google Review</p>`;
+      <p class="review-source dim">${GZ.esc(r.n)}, Google Review</p>
+    </div>`;
   }
 
+  // Two lanes, shuffled once per page load (not re-shuffled after -- see
+  // GZ.marquee for why nothing changes post-render) so a repeat visitor
+  // sees a different real mix each time without any runtime jank. 24 of
+  // the 63 written reviews is enough for two dense-feeling lanes without
+  // shipping the entire pool's worth of DOM/text on every homepage load;
+  // "Read our Google reviews" below links out to the rest -- real link,
+  // not a fabricated "see more" that goes nowhere.
   const pool = shuffle(REVIEWS);
-  const slot = wrap.querySelector('.review-card');
-  if (!slot) return;
-  let cursor = 0;
-  function next() {
-    const r = pool[cursor % pool.length];
-    cursor++;
-    return r;
-  }
+  const COUNT = Math.min(24, pool.length);
+  const picked = pool.slice(0, COUNT);
+  const mid = Math.ceil(picked.length / 2);
+  const row1 = document.createElement('div');
+  const row2 = document.createElement('div');
+  wrap.append(row1, row2);
+  GZ.marquee(row1, picked.slice(0, mid).map(cardHTML), { speed: 26 });
+  GZ.marquee(row2, picked.slice(mid).map(cardHTML), { speed: 26, reverse: true });
 
-  // Pre-measure the single tallest review against the card's real markup
-  // and current width, then lock the slot to that height -- so cycling
-  // through reviews of wildly different lengths never grows or shrinks the
-  // box (or the page around it). Re-measured on resize (debounced) since
-  // a narrower box wraps the same text into more lines.
-  const measurer = slot.cloneNode(false);
-  measurer.style.position = 'absolute';
-  measurer.style.visibility = 'hidden';
-  measurer.style.pointerEvents = 'none';
-  measurer.style.height = 'auto';
-  measurer.setAttribute('aria-hidden', 'true');
-  wrap.appendChild(measurer);
-  function remeasure() {
-    measurer.style.width = slot.getBoundingClientRect().width + 'px';
-    let max = 0;
-    for (const r of REVIEWS) {
-      measurer.innerHTML = cardHTML(r);
-      max = Math.max(max, measurer.scrollHeight);
-    }
-    slot.style.minHeight = max + 'px';
-  }
-  remeasure();
-  let resizeT;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeT);
-    resizeT = setTimeout(remeasure, 200);
+  wrap.addEventListener('click', e => {
+    const card = e.target.closest('.review-card[data-full]');
+    if (card) card.focus();
   });
-
-  // Seed the one visible slot with a starting review.
-  slot.innerHTML = cardHTML(next());
-
-  if (reduceMotion || pool.length <= 1) return; // nothing left to rotate into
-
-  function tick() {
-    slot.classList.add('is-fading');
-    setTimeout(() => {
-      const r = next();
-      slot.innerHTML = cardHTML(r);
-      slot.classList.remove('is-fading');
-      setTimeout(tick, dwellFor(r));
-    }, FADE_MS);
-  }
-  setTimeout(tick, dwellFor(pool[0]));
 })();

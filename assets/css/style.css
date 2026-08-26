@@ -267,35 +267,44 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    just no longer named individually below (see reviews.js). */
 .review-stat { font-weight: 700; margin-top: .3rem; }
 .review-stat-stars { color: var(--ne-orange); letter-spacing: .1em; }
-/* Review waterfall: a small, fixed number of cards (reviews.js renders
-   into these 4 slots) rather than the full 63-review grid this used to
-   be. Each card sizes to its own content -- align-items:start stops the
-   grid from stretching every card in a row to match its tallest sibling,
-   which is what produced the huge blank space under short reviews before.
-   reviews.js toggles .is-fading on a slot right before swapping its
-   content, staggered per slot so they cascade rather than flip together;
-   this transition is what animates that fade. */
-/* One review at a time now (was a multi-column auto-fit grid showing up to
-   4 at once), with a fixed height (set in JS, measured against the
-   longest review in the pool) so the box never grows or shrinks as it
-   cycles. position:relative scopes reviews.js's off-screen measuring
-   clone to this box instead of some unrelated positioned ancestor.
-   No max-width here -- per a site-wide "every section spans its full
-   container width" pass, this now matches every other section instead of
-   floating as a narrower centered column; reviews.js measures against
-   whatever this box's actual (now wider) rendered width is, so the fixed-
-   height math still stays correct. */
-.review-waterfall { position: relative; }
-/* Vertically centers the stars/quote/name block within the fixed-height
-   box (see reviews.js) -- without this, a short review sits pinned to the
-   top with a slab of empty space below it, reading as broken rather than
-   just short. */
-.review-waterfall .review-card { justify-content: center; transition: opacity .42s ease, transform .42s cubic-bezier(.2,.7,.3,1); }
-.review-waterfall .review-card.is-fading { opacity: 0; transform: translateY(10px); }
-@media (prefers-reduced-motion: reduce) {
-  .review-waterfall .review-card { transition: none; }
+/* Review waterfall, 2026-08-26 "Pinterest / loved-by" redesign: two
+   .gz-marquee lanes (see the shared .gz-marquee block below), each a real
+   infinite horizontal scroll of review cards, scrolling in opposite
+   directions for the classic multi-row "loved by" read. Replaces the
+   earlier single-spotlight-card version -- see reviews.js's own history
+   comment for why that version existed (variable review length making a
+   *vertically stacked* layout visibly grow/shrink over time). A
+   horizontal marquee lane doesn't have that failure mode: every card's
+   height is capped by line-clamp (below) and the lane itself never
+   changes height, no matter which reviews are showing, so real motion and
+   zero layout jank aren't actually in tension here. */
+.review-waterfall { display: flex; flex-direction: column; gap: 1rem; }
+.review-waterfall .review-card { position: relative; flex: 0 0 auto; width: 300px; padding: 1rem 1.1rem; gap: .4rem; }
+/* Quote clamped to 5 lines (same reserved-box-plus-ellipsis-fallback
+   technique as .game-list li .gl-name -- see that rule's own comment for
+   the full reasoning) rather than left to grow unbounded: a marquee card
+   needs a predictable height to read as a clean row, and this project's
+   own "no ellipsis in small card grids" rule (CLAUDE.md core rule 1)
+   explicitly carves out an exception for exactly this shape of content --
+   a long, dense list/pool (63 real reviews, 3 words to 400+) where a
+   hover/tap popup fallback is the accepted tradeoff, not a small
+   fixed-cardinality grid like Featured Ambassadors. */
+.review-waterfall .review-quote { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
+.review-waterfall .review-card:focus { outline: none; }
+/* Same attr(data-full) hover/tap popup as .game-list li[data-full] --
+   tabindex="-1" (set in reviews.js) keeps every card out of the normal
+   Tab sequence (nobody should have to Tab through 20 review cards to get
+   past this section) while still making the popup reachable by click/tap
+   focus on touch devices with no :hover. */
+.review-waterfall .review-card[data-full]:hover::after,
+.review-waterfall .review-card[data-full]:focus::after {
+  content: attr(data-full);
+  position: absolute; left: 0; right: 0; top: 100%; margin-top: .5rem; z-index: 30;
+  background: var(--bg-3); border: 1px solid var(--line); color: var(--ink);
+  padding: .6rem .75rem; font-size: .8rem; font-style: normal; line-height: 1.45;
+  white-space: normal; box-shadow: 0 6px 18px rgba(0,0,0,.6);
 }
-html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; transition: none; }
+@media (max-width: 560px) { .review-waterfall .review-card { width: 250px; } }
 /* Registration steps: the step number is the most emphasized element (big,
    orange, bold) — matching the reference "AI mode" step pattern — while the
    step's icon becomes a small, white, secondary accent instead of the large
@@ -1270,34 +1279,58 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
   .carousel-img{transition:none}
 }
 
-/* ===== Past Events photo waterfall ===== */
-/* 2026-08-26 redesign (per Eric): three photos on screen at once, each in
-   its own fixed slot, cycling independently through the recap's full
-   photo pool with a cross-fade — matching the reviews section's
-   "waterfall" naming and fade treatment (see .review-waterfall above),
-   but keeping all 3 slots at once instead of 1, since fixed-aspect-ratio
-   photo tiles don't have the wildly-varying-height problem that pushed
-   reviews down to a single slot (see reviews.js's own comment for that
-   history) — a plain CSS aspect-ratio here is a safe, standard use (this
-   is fixed media in a known ratio, not unpredictable-length text, so it
-   doesn't run into the "aspect-ratio as forced height" clipping trap the
-   project's container/sizing rules warn about elsewhere). Cycling logic
-   lives in assets/js/photo-waterfall.js; this replaces the previous
-   always-all-visible CSS-columns masonry, which showed all 11 photos at
-   once with no motion. Stays 3 columns at every breakpoint (not
-   collapsing to 1-2 on narrower screens) so it's still genuinely "three
-   photos at a time" on mobile, just smaller tiles, rather than silently
-   changing what the section shows depending on viewport width. */
-.photo-waterfall{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
-.photo-waterfall .pw-slot{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:2px;border:1px solid var(--line);background:var(--bg-3)}
-.photo-waterfall .pw-slot img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .42s ease, transform .3s ease, filter .3s ease;}
-.photo-waterfall .pw-slot.is-fading img{opacity:0}
-.photo-waterfall .pw-slot img:hover{transform:scale(1.03);filter:brightness(1.06)}
-@media (max-width:560px){.photo-waterfall{gap:.4rem}}
+/* ===== Shared infinite marquee ("loved by" / Pinterest-style continuous
+   scroll) ===== */
+/* 2026-08-26 redesign (per Eric, referencing Aceternity's "Infinite Moving
+   Cards" pattern used on their AI SaaS template's testimonial section):
+   one shared implementation, reused by both the Past Events photo
+   waterfall and the Reviews waterfall below (assets/js/main.js's
+   GZ.marquee builds the DOM for both) — same "gz-shine" principle of
+   never writing a second bespoke version of an effect that already
+   exists. The mask-image edge fade keeps cards from looking like they're
+   cutting off hard at the section's edge; animation-play-state:paused on
+   hover/focus-within lets someone actually read a card instead of it
+   sliding away mid-glance. */
+.gz-marquee{position:relative;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
+.gz-marquee-track.rev{animation-direction:reverse}
+.gz-marquee:hover .gz-marquee-track,.gz-marquee:focus-within .gz-marquee-track{animation-play-state:paused}
+@keyframes gz-marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* Reduced motion: GZ.marquee renders only the real (non-duplicated) set of
+   cards in this case, so no animation + wrapping is the correct static
+   fallback, not a frozen mid-loop duplicate. */
 @media (prefers-reduced-motion: reduce){
-  .photo-waterfall .pw-slot img{transition:none}
+  .gz-marquee{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+  .gz-marquee-track{animation:none;flex-wrap:wrap;width:auto}
 }
-html.board-mode .photo-waterfall .pw-slot img{opacity:1;transition:none}
+
+/* ===== Past Events photo waterfall ===== */
+/* 2026-08-26 redesign: all 11 real photos from the recap's pool, in a
+   single continuously-scrolling .gz-marquee lane instead of 3 fixed slots
+   cross-fading on a timer (see assets/js/photo-waterfall.js). Real
+   16:9 aspect-ratio (matches every source photo's actual dimensions --
+   checked, not assumed) rather than force-cropping to a different ratio,
+   so nothing gets cut off that wasn't already cropped by the photographer.
+   aspect-ratio is safe here for the same reason the project's container/
+   sizing rules already carve out for fixed media: this is a known, fixed
+   ratio, not unpredictable-length text, so there's no clipping risk. */
+.photo-waterfall .pw-item{position:relative;flex:0 0 auto;width:300px;aspect-ratio:16/9;overflow:hidden;border-radius:2px;border:1px solid var(--line);background:var(--bg-3)}
+.photo-waterfall .pw-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease, filter .3s ease}
+.photo-waterfall .pw-item:hover img{transform:scale(1.04);filter:brightness(1.06)}
+/* Caption bar: solid (not gradient) rgba(4,5,7,.97) backing -- the same
+   alpha already pixel-verified AAA-safe against a worst-case bright photo
+   in the site-wide color audit (see the contrast-rule comment near the
+   top of this file), reused here rather than re-deriving a new value.
+   z-index set explicitly above the img per the readability rule (never
+   assume default stacking order gets a text-over-photo layer right).
+   Text wraps rather than truncates -- these captions are short real event
+   names/dates, not the kind of long copy the no-ellipsis rule is aimed
+   at, but wrapping costs nothing and avoids the question entirely. */
+.photo-waterfall .pw-item .pw-cap{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:.45rem .6rem .4rem;background:rgba(4,5,7,.97);color:#fff;font-size:.68rem;font-weight:600;letter-spacing:.01em;line-height:1.3}
+@media (max-width:560px){.photo-waterfall .pw-item{width:220px}}
+@media (prefers-reduced-motion: reduce){
+  .photo-waterfall .pw-item img{transition:none}
+}
 
 /* ===== Ambassador Featured Hosts placeholder cards ===== */
 /* Every card sizes to its own content (no fixed height/clipping) — CSS

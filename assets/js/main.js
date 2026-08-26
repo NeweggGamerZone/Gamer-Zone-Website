@@ -62,7 +62,54 @@ const GZ = {
     return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   },
   esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); },
-  icon(name, cls = 'ic') { return `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${GZ_ICONS[name] || GZ_ICONS.gamepad}</svg>`; }
+  icon(name, cls = 'ic') { return `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${GZ_ICONS[name] || GZ_ICONS.gamepad}</svg>`; },
+  // Shared infinite-marquee builder (2026-08-26, Pinterest-style "loved by"
+  // redesign of the Past Events photo waterfall + Reviews waterfall) — one
+  // implementation reused by both, same "gz-shine" philosophy of not
+  // writing a bespoke version of an effect that already exists elsewhere.
+  // `container` becomes the `.gz-marquee` mask/overflow wrapper; `items` is
+  // an array of pre-built HTML strings for each card. Real continuous
+  // horizontal motion in a single FIXED-HEIGHT lane is the deliberate
+  // choice here: it gives the effect real motion (the old always-visible
+  // photo masonry this replaces was retired same-day for having none), but
+  // because a marquee lane never grows/shrinks vertically over time the way
+  // a variable-length review card in a masonry column would, it can't
+  // reintroduce the "whole section visibly grows and shrinks every few
+  // seconds" bug that got the reviews section pulled back to a single
+  // spotlight card in an earlier redesign (see reviews.js's own history
+  // comment for that bug). See .gz-marquee in style.css for the CSS half.
+  marquee(container, items, opts = {}) {
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    container.classList.add('gz-marquee');
+    const track = document.createElement('div');
+    track.className = 'gz-marquee-track' + (opts.reverse ? ' rev' : '');
+    if (reduceMotion) {
+      // No animation at all -- render the single real set once and let it
+      // wrap naturally (see .gz-marquee-track under the reduced-motion
+      // media query in style.css), rather than showing the duplicated
+      // set statically, which would just look like a broken repeat.
+      container.classList.add('static');
+      track.innerHTML = items.join('');
+      container.appendChild(track);
+      return;
+    }
+    // Duplicated once so translateX(-50%) is exactly one full loop of the
+    // real content -- the second copy picks up seamlessly where the first
+    // left off, no visible seam or jump.
+    track.innerHTML = items.join('') + items.join('');
+    container.appendChild(track);
+    // Duration is derived from the track's own real measured width (not a
+    // fixed guess) so the per-card scroll SPEED stays constant regardless
+    // of how many cards are in the pool -- a bigger photo/review pool gets
+    // a proportionally longer loop instead of the same loop just playing
+    // faster. Measured on the next frame so layout has actually happened.
+    requestAnimationFrame(() => {
+      const halfWidth = track.scrollWidth / 2;
+      const speed = opts.speed || 40; // px/second
+      const dur = Math.max(12, halfWidth / speed);
+      track.style.setProperty('--gz-marquee-dur', dur + 's');
+    });
+  }
 };
 
 function injectIcons(root = document) {
