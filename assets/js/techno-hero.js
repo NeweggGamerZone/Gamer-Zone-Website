@@ -15,12 +15,35 @@
    present): the "ground" is not a plain line but the tunnel's own
    currently-morphed shape (square/triangle/star/pentagon/hexagon/circle),
    traced in white at a fixed, generous radius around a fixed anchor point
-   lower in the hero — so it visibly morphs in lockstep with the decorative
-   rings behind it ("the full background shape that is ever changing"). The
-   character is a ball that walks all the way around that shape's own
-   perimeter — Left/Right arrow keys, or press-and-hold on either half of
-   the runner area on touch — rather than sliding along a short straight
-   lane, so the whole loop is playable ground.
+   — so it visibly morphs in lockstep with the decorative rings behind it
+   ("the full background shape that is ever changing"). The character is a
+   ball that walks all the way around that shape's own perimeter —
+   Left/Right arrow keys, or press-and-hold on either half of the hero on
+   touch — rather than sliding along a short straight lane, so the whole
+   loop is playable ground.
+
+   2026-08-26 redesign (per Eric): the anchor is the dead center of
+   .hero-stack — the "GET IN / THE ZONE" heading — not a point lower in
+   the hero, so the heading text visibly sits at the center of the shape
+   the character runs around (the shape is already behind the heading via
+   z-index; only its on-screen position changed). The anchor is
+   recalculated every frame straight from .hero-stack's real
+   getBoundingClientRect(), so it naturally scrolls with the page exactly
+   like the heading does — but PATH_RADIUS (the shape's actual size) is
+   only ever recomputed on resize (see sizeGame()), never from scroll
+   position, so the shape's SCALE stays constant while scrolling; only its
+   screen position tracks the heading. As the hero scrolls out of view, a
+   continuous scroll-driven opacity (computeHeroFade(), 0..1 — not a
+   binary IntersectionObserver on/off) fades the shape, character, and
+   hazards out together, so "the game fades" reads as one smooth hero
+   page rather than a hard cut. Every draw call is gated on that same
+   fade value being above a tiny floor, which is also what fixed a real
+   bug: the old binary approach kept drawing the game's last frozen frame
+   at its last on-screen position even once scrolled well past the hero
+   (stray orange hazard-arc lines appearing over unrelated page content
+   below) — computing position and fade fresh, from real layout, every
+   single frame regardless of visibility, means there's no stale frozen
+   state left over to render.
 
    One of the background tunnel's own rings periodically turns hazardous:
    as it streams toward the viewer alongside the normal rings (same speed,
@@ -175,15 +198,18 @@
   const runnerWrap = document.getElementById('hero-runner');
   const scoreEl = document.getElementById('hr-score-val');
   const bestEl = document.getElementById('hr-best-val');
-  const gameOn = !!(runnerWrap && scoreEl && bestEl && !reduceMotion);
+  const heroStackEl = document.querySelector('.hero-stack');
+  const heroStageEl = document.querySelector('.hero-stage');
+  const gameOn = !!(runnerWrap && scoreEl && bestEl && heroStackEl && !reduceMotion);
 
   const HS_KEY = 'gzHeroRunnerBest';
   function loadBest() { try { return parseInt(localStorage.getItem(HS_KEY), 10) || 0; } catch { return 0; } }
   function saveBest(v) { try { localStorage.setItem(HS_KEY, String(v)); } catch { /* private mode etc — fine to skip */ } }
 
   let score = 0, best = 0;
-  let gameActive = false; // true only while the hero is on screen
-  let anchorX = 0, anchorY = 0; // fixed screen spot the ground shape/character are centered on
+  let gameActive = false; // derived every frame from heroFade — true while the hero is substantially on screen
+  let heroFade = 1; // 0..1, continuous — how visible/active the game should be, driven by scroll position (see computeHeroFade)
+  let anchorX = 0, anchorY = 0; // screen spot the ground shape/character are centered on — the center of .hero-stack, recomputed every frame
   let baseRingZ = 0; // fixed depth at which a hazard resolves (hit/miss)
   let surviveTime = 0; // seconds survived since the last miss — drives the speed ramp
   let charY = 0, vy = 0, jumping = false, flashT = 0;
@@ -199,64 +225,36 @@
   // carries the character around its full perimeter (a fraction of the
   // loop per second). PATH_RADIUS/JUMP_CLEAR are recomputed from the
   // actual viewport height on every resize (see sizeGame() below) instead
-  // of being fixed constants.
+  // of being fixed constants — this is what keeps the shape's SCALE
+  // resize-driven only, never scroll-driven (Eric: "scrolling does not
+  // effect the size and scale of the white shape").
   //
-  // A first attempt scaled these against H*0.15/H*0.08 (matching a
-  // padding-top of clamp(215px,38vh,475px)) but that was measured, via an
-  // untouched real-browser screenshot at a common 1400x900 viewport, to
-  // still reserve more room than a real laptop hero has left after its
-  // heading/lead/button: the ball and the top of the shape were visible,
-  // but its own bottom half plus the score/hint text still fell below the
-  // fold — read as broken rather than just scrolled past. On that same
-  // screenshot the button's bottom edge sat ~610px down a 900px-tall
-  // viewport, leaving ~290px (including the scoreboard/hint text) to fit
-  // the entire game in without any scrolling. These smaller ratios (and
-  // the matching .hero-runner padding-top in style.css) are sized against
-  // that real measurement instead of a round-number guess.
-  // 2026-08-25: bumped larger per Eric's first round of feedback ("the
-  // shape is very small"), then again 2026-08-26 per a second, more
-  // specific round: "it should be a larger size, same size as the
-  // background grid line when they are past the Get in the Zone text" --
-  // i.e. sized like the big decorative tunnel rings visible passing
-  // through the hero text, not a small independent shape. Those rings are
-  // all scaled off `A` (see size() above, A = max(W,H)*0.72) -- a real
-  // 1400x900 screenshot at the moment a ring was passing near the "GET IN
-  // THE ZONE" heading measured that ring at roughly 1000px across (~530px
-  // radius), i.e. on the order of A*0.5 at that instant (every ring's
-  // on-screen size constantly changes as it travels, so there's no single
-  // exact "correct" frame to match -- this ties the ground shape to the
-  // same underlying scale instead of chasing one transient frame). Landing
-  // on PATH_RADIUS = A*0.4 puts the ground shape solidly in that same
-  // visual scale as the prominent background rings, clamped so it can't
+  // Sized (2026-08-26) so the ground shape reads at the same visual scale
+  // as the big decorative tunnel rings passing through the hero text —
+  // both PATH_RADIUS and the rings' own radius A are proportional to the
+  // same underlying `A = max(W,H)*0.72` constant (see size() above), so
+  // they can't drift out of sync with each other, clamped so it can't
   // balloon on an ultra-wide monitor or shrink below playable on a short
-  // mobile viewport. This is meaningfully bigger than the previous H*0.16
-  // formula (which was capped at 210px regardless of how large the
-  // viewport/background rings actually were) -- .hero-runner's padding-top
-  // is now set directly from this same PATH_RADIUS/JUMP_CLEAR math in
-  // updateAnchor() below (see the runnerWrap.style.paddingTop line) instead
-  // of a hand-tuned CSS clamp guess, so the reserved space always exactly
-  // matches the shape's real size at any viewport instead of drifting out
-  // of sync with it. The shape stays a fixed, anchored size/position (see
-  // updateAnchor below) -- it does not recede with the ambient tunnel rings
-  // and does not move once the page has loaded, only its silhouette morphs
-  // in lockstep with the background, per Eric's "hold still" instruction.
+  // mobile viewport. The shape's SIZE never changes with scroll — only its
+  // on-screen POSITION does, tracking .hero-stack's real position every
+  // frame (see updateAnchor below) so the heading stays at its center as
+  // the page scrolls, same as the heading itself would.
   let PATH_RADIUS = 210, JUMP_CLEAR = 90;
   const ANGLE_SPEED = 0.3;
   function sizeGame() {
     PATH_RADIUS = Math.max(150, Math.min(430, A * 0.4));
     JUMP_CLEAR = Math.max(50, Math.min(150, PATH_RADIUS * 0.34));
-    // .hero-runner's padding-top reserves blank space above its own real
-    // content (the Score/Best readout + hint text) for the canvas-drawn
-    // shape+character to visually occupy -- the canvas is a separate
-    // fixed-position overlay, not clipped to this box, so nothing enforces
-    // that automatically. Set once here (sizeGame only runs on resize/
-    // init, unlike updateAnchor which runs every frame) from the exact
-    // same PATH_RADIUS/JUMP_CLEAR math that sizes the shape, so the
-    // reserved space always matches instead of a hand-tuned CSS clamp
-    // that has to be kept in sync by hand. Shape bottom edge sits
-    // PATH_RADIUS below the anchor, the anchor sits JUMP_CLEAR below the
-    // shape's own top edge, and +90 clears the character's jump arc.
-    if (runnerWrap) runnerWrap.style.paddingTop = Math.round(2 * PATH_RADIUS + JUMP_CLEAR + 90) + 'px';
+    // 2026-08-26: this used to also write .hero-runner's padding-top every
+    // resize, reserving blank page space below the button for the shape to
+    // occupy. Now that the shape is anchored to .hero-stack's own center
+    // (see updateAnchor below) instead of living in dedicated space of its
+    // own, nothing needs reserving -- the shape renders on the fixed
+    // background canvas, already behind the heading via z-index. sizeGame()
+    // still only runs on resize/init (never per-frame) since it's the one
+    // place PATH_RADIUS/JUMP_CLEAR themselves get recomputed, which is what
+    // keeps the shape's on-screen SCALE stable across scroll (scroll only
+    // ever moves the anchor point via updateAnchor's per-frame read, it
+    // never touches these).
   }
 
   if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
@@ -270,17 +268,16 @@
   }
 
   function updateAnchor() {
-    // NOTE: this runs every frame (called from updateGame()), so it only
-    // reads layout here, never writes it -- see sizeGame() for where
-    // .hero-runner's padding-top gets set (once, on resize/init) rather
-    // than here, to avoid forcing a layout recalc every single frame.
-    const r = runnerWrap.getBoundingClientRect();
+    // Runs every single frame regardless of visibility -- this is a pure
+    // layout READ (getBoundingClientRect), never a write, so it's cheap
+    // and doesn't cause the layout-thrashing a per-frame style WRITE would
+    // (see sizeGame() above for the one-time-per-resize writes instead).
+    // Reading fresh every frame -- rather than only while some binary
+    // "active" flag was true -- is also what fixes the old stale-artifact
+    // bug: there's never a frozen anchor left over from before a scroll.
+    const r = heroStackEl.getBoundingClientRect();
     anchorX = r.left + r.width / 2;
-    // Clearance above the anchor: PATH_RADIUS for the ground shape's own
-    // top edge, plus JUMP_CLEAR for the jump arc (peak ~77px) and a little
-    // buffer — both viewport-height-scaled (see sizeGame above), matched
-    // by .hero-runner's own vh-based padding-top in style.css.
-    anchorY = r.top + PATH_RADIUS + JUMP_CLEAR;
+    anchorY = r.top + r.height / 2; // dead center of the "GET IN / THE ZONE" heading, per Eric's redesign
     // baseRingZ is the one fixed depth at which a hazard ring visually
     // arrives exactly at the anchor point (see hazardScreenPos below) —
     // solved the same way the tunnel's own rings scale with depth
@@ -292,6 +289,22 @@
     const dx = anchorX - cx, dy = anchorY - cy;
     const baseRingRadius = Math.hypot(dx, dy) || 1;
     baseRingZ = (A * F) / baseRingRadius;
+  }
+
+  // Continuous 0..1 visibility/activity level for the whole hero game,
+  // driven by how far .hero-stage has scrolled past the top of the
+  // viewport -- NOT a binary IntersectionObserver on/off. Fully 1 while
+  // the hero's bottom edge is comfortably below the viewport top; ramps
+  // smoothly to 0 as that bottom edge approaches and then passes above the
+  // viewport top, so the shape/character/hazards all fade out together as
+  // "the game fades" (Eric's spec) rather than snapping off. Read every
+  // frame alongside updateAnchor -- same cheap-read, no-write rule.
+  const FADE_ZONE = 0.4; // fraction of viewport height the fade ramps over
+  function computeHeroFade() {
+    const r = heroStageEl.getBoundingClientRect();
+    const vh = window.innerHeight || 800;
+    const zone = Math.max(1, vh * FADE_ZONE);
+    return Math.max(0, Math.min(1, r.bottom / zone));
   }
 
   // Interpolated position at fraction t (0..1, wraps) around a closed,
@@ -356,9 +369,9 @@
   }
 
   function updateGame(dt, rot, speed) {
-    if (!gameActive) return;
-    updateAnchor();
-
+    // NOTE: anchor + heroFade are computed once per frame in frame() itself
+    // (unconditionally, so they never go stale) and gate whether this
+    // function is even called -- see frame() below.
     if (jumping) {
       vy += GRAVITY * dt;
       charY += vy * dt;
@@ -418,12 +431,15 @@
   // anchor along the same vanishing-point ray every other receding ring
   // uses (hazardScreenPos), scaled down to a point and growing to full
   // PATH_RADIUS size as it arrives.
-  function drawHazard(hz, pts, globalFade) {
+  function drawHazard(hz, pts, globalFade, heroFadeNow) {
+    if (heroFadeNow <= 0.01) return; // nothing to draw once fully scrolled past -- avoids the old stale-artifact bug
     const { x, y, r } = hazardScreenPos(hz.z);
     const f = fadeFor(hz.z) * globalFade;
     if (f <= 0.01) return;
     const R = PATH_RADIUS * Math.max(r, 0.02);
     const arcPts = sampleArc(pts, hz.arcStart, hz.arcWidth);
+    ctx.save();
+    ctx.globalAlpha = heroFadeNow;
     ctx.strokeStyle = `hsla(28, 92%, 58%, ${Math.min(1, f * 1.7)})`;
     ctx.lineWidth = 5 * Math.max(0.4, r);
     ctx.lineCap = 'round';
@@ -434,6 +450,7 @@
       if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
     });
     ctx.stroke();
+    ctx.restore();
   }
 
   // The ground the character walks on: the tunnel's own currently-morphed
@@ -443,8 +460,10 @@
   // depend only on the anchor and PATH_RADIUS — never on scroll or the
   // tunnel's vanishing-point perspective — so the loop itself never drifts
   // or rescales underfoot, only its shape changes.
-  function drawPath(pts, globalFade) {
-    if (!gameActive) return;
+  function drawPath(pts, globalFade, heroFadeNow) {
+    if (heroFadeNow <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = heroFadeNow;
     ctx.strokeStyle = `rgba(255,255,255,${Math.min(1, 0.55 + globalFade * 0.6)})`;
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
@@ -461,10 +480,13 @@
     }
     ctx.closePath();
     ctx.stroke();
+    ctx.restore();
   }
 
-  function drawCharacter(pts) {
-    if (!gameActive) return;
+  function drawCharacter(pts, heroFadeNow) {
+    if (heroFadeNow <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = heroFadeNow;
     const p = pointAtT(pts, charT);
     const groundX = anchorX + p[0] * PATH_RADIUS, groundY = anchorY + p[1] * PATH_RADIUS;
     const bodyX = groundX;
@@ -498,22 +520,17 @@
     ctx.arc(bodyX, bodyY, CHAR_R, 0, Math.PI * 2);
     ctx.fillStyle = '#FA9D28';
     ctx.fill();
+    ctx.restore();
   }
 
   function initGame() {
     if (!gameOn) return;
     updateAnchor();
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(entries => {
-        gameActive = entries[0].isIntersecting;
-        runnerWrap.classList.toggle('is-active', gameActive);
-        if (gameActive) updateAnchor();
-      }, { threshold: 0.25 });
-      io.observe(runnerWrap);
-    } else {
-      gameActive = true;
-      runnerWrap.classList.add('is-active');
-    }
+    // gameActive/heroFade are no longer driven by an IntersectionObserver —
+    // frame() recomputes both, continuously, every animation frame (see
+    // computeHeroFade above). That's what lets the game fade smoothly
+    // instead of snapping on/off, and it's what fixed the stale-artifact
+    // bug (nothing is ever left stale to redraw).
     // WASD and Arrow keys only, both bound to the exact same movement
     // logic (held Left/A or Right/D carries the character around the
     // loop at ANGLE_SPEED, same as before) -- no other keyboard scheme.
@@ -528,16 +545,28 @@
       else if (e.code === 'ArrowRight' || e.code === 'KeyD') rightHeld = false;
     });
     // Touch/mouse: a quick tap jumps (matching the original single-tap
-    // behavior); holding down on either half of the runner area instead
-    // moves the character continuously toward that side, so left/right
-    // movement works without a keyboard. HOLD_MS is just long enough that
-    // an ordinary tap-to-jump never accidentally registers as the start of
-    // a hold.
+    // behavior); holding down on either half of the hero instead moves the
+    // character continuously toward that side, so left/right movement
+    // works without a keyboard. HOLD_MS is just long enough that an
+    // ordinary tap-to-jump never accidentally registers as the start of a
+    // hold.
+    // 2026-08-26: the hit-region moved from the small #hero-runner box
+    // (which used to sit well below the button, where the shape used to
+    // live) to the whole .hero-stage -- the shape/character now render
+    // centered on the heading, near the TOP of the hero, so that's where
+    // players will naturally tap/hold. Clicks on a real link/button inside
+    // the hero (the "Plan your visit" CTA) are explicitly excluded so the
+    // game never hijacks that tap.
     const HOLD_MS = 220;
     let pressT = 0, pressSide = 0, holding = false;
-    runnerWrap.addEventListener('pointerdown', e => {
+    const stage = heroStageEl || runnerWrap;
+    function isInteractiveTarget(e) {
+      return !!(e.target.closest && e.target.closest('a, button'));
+    }
+    stage.addEventListener('pointerdown', e => {
+      if (isInteractiveTarget(e)) return;
       pressT = performance.now();
-      const r = runnerWrap.getBoundingClientRect();
+      const r = stage.getBoundingClientRect();
       pressSide = (e.clientX - r.left) < r.width / 2 ? -1 : 1;
       holding = false;
       setTimeout(() => {
@@ -547,14 +576,15 @@
         }
       }, HOLD_MS);
     });
-    function releasePointer() {
+    function releasePointer(e) {
+      if (isInteractiveTarget(e)) return;
       if (!holding) jump();
       holding = false; leftHeld = false; rightHeld = false;
     }
-    runnerWrap.addEventListener('pointerup', releasePointer);
-    runnerWrap.addEventListener('pointercancel', releasePointer);
-    runnerWrap.addEventListener('pointerleave', releasePointer);
-    window.addEventListener('resize', updateAnchor);
+    // Bound to window (not the stage) for up/cancel so a hold that drags
+    // off the hero before releasing still cleanly stops movement.
+    window.addEventListener('pointerup', releasePointer);
+    window.addEventListener('pointercancel', releasePointer);
   }
 
   function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
@@ -657,7 +687,15 @@
     const globalFade = Math.min(1, elapsed / 3.2) * 0.85;
     const hue = (200 + elapsed * 6) % 360;
 
-    // The ramp only progresses while the game is actually being played, so
+    // Anchor position and hero visibility are recomputed fresh from real
+    // layout every single frame, unconditionally -- never gated behind a
+    // binary "active" flag -- so there's never a stale/frozen position or
+    // fade level left over to draw once the hero has scrolled away. This is
+    // the direct fix for the old bug where hazard-arc lines kept rendering
+    // at a frozen screen position after scrolling well past the hero.
+    if (gameOn) { updateAnchor(); heroFade = computeHeroFade(); gameActive = heroFade > 0.05; }
+
+    // The ramp only progresses while the game is substantially on screen, so
     // the pace freezes (rather than resets) whenever the hero scrolls out
     // of view, and everything — decorative rings and hazards alike — moves
     // at this one shared, ramping speed.
@@ -676,10 +714,17 @@
     }
 
     if (gameOn) {
-      updateGame(dt, rot, speed);
-      for (const hz of hazards) drawHazard(hz, pts, globalFade);
-      drawPath(pts, globalFade);
-      drawCharacter(pts);
+      if (gameActive) updateGame(dt, rot, speed);
+      for (const hz of hazards) drawHazard(hz, pts, globalFade, heroFade);
+      drawPath(pts, globalFade, heroFade);
+      drawCharacter(pts, heroFade);
+      // Score readout under the button fades on the exact same continuous
+      // curve as the canvas-drawn shape/character (no separate CSS
+      // transition to keep hand-tuned in sync with it) -- opacity is a
+      // compositor-only property, so writing it every frame doesn't force
+      // a layout recalc the way a size/position write would.
+      runnerWrap.style.opacity = String(heroFade);
+      runnerWrap.style.pointerEvents = heroFade > 0.5 ? 'auto' : 'none';
     }
 
     raf = requestAnimationFrame(frame);

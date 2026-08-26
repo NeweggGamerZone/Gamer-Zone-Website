@@ -588,13 +588,13 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 @keyframes cue { 0%,100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(7px); opacity: 1; } }
 
 /* Short-viewport laptops (~820px tall or less — 1366x768 is the common
-   case): even with the runner game itself scaling down on short
-   viewports (see .hero-runner/techno-hero.js sizeGame()), the heading +
-   lead + button footprint above it was measured (via an untouched,
-   naturally-loading screenshot) to still push the game's score/hint text
-   below the fold on a 768px-tall screen. This trims the heading size and
-   the spacing around it — not the game — so the full playable area
-   clears the fold on ordinary short laptop screens too. */
+   case): keeps the heading + lead + button footprint tighter so the CTA
+   button and the score/hint readout under it both comfortably clear the
+   fold. The runner game itself no longer reserves any dedicated page
+   space (2026-08-26 redesign — the ground shape/character render behind
+   the heading directly on the fixed background canvas instead of pushing
+   page content down), so this is purely a heading-density trim now, not
+   game-clearance math. */
 @media (max-height: 820px) {
   .hero-stage { padding: 1.2rem 0 1rem; }
   .hero-stack { margin: .3rem 0 .4rem; }
@@ -630,42 +630,26 @@ body.home-page { background: transparent; }
    orange hazard arcs are all drawn directly into the same full-page
    #techno-canvas tunnel (see assets/js/techno-hero.js) — not a separate
    canvas — so the obstacles ARE the background's own morphing shapes,
-   just recolored, rather than a disconnected mini-game bolted on top. This
-   div only reserves screen space (the padding-top is where the ground
-   shape + character render, lower and larger than the old flat-line path)
-   and holds the score readout + the tap-to-jump hit zone. Hidden/paused
-   (not destroyed) whenever the hero scrolls out of view, so it picks back
-   up mid-run when scrolled back. */
-/* padding-top reserves the headroom the ground shape and its jump arc need
-   (see techno-hero.js sizeGame()/updateAnchor: PATH_RADIUS + JUMP_CLEAR
-   above the anchor, PATH_RADIUS again below it, plus a small gap before
-   the score/hint text). vh-based, matching the JS values (which scale off
-   the actual canvas/viewport height) instead of a fixed 490px.
-   First pass at this (clamp(215px,38vh,475px) + the matching, larger
-   PATH_RADIUS/JUMP_CLEAR ratios) still reserved more headroom than a real
-   ~900px-tall laptop viewport has left after the heading/lead/button —
-   verified via an untouched, naturally-loading screenshot at 1400x900:
-   the ball and top of the shape were visible, but the shape's own bottom
-   half and the score/hint text still fell below the fold. The budget
-   below is sized against that same measurement (button bottom sits ~610px
-   down the viewport on a 900px-tall screen, leaving ~290px including the
-   scoreboard/hint text) so the *entire* game clears the fold on ordinary
-   laptop heights, not just the ball. Tall viewports still get close to
-   the original, larger look via the upper clamp bound. */
-/* 2026-08-25: padding-top bumped to match techno-hero.js's larger
-   PATH_RADIUS/JUMP_CLEAR (see its sizeGame() comment) -- required space is
-   2*PATH_RADIUS + JUMP_CLEAR, which is what the 39vh term approximates
-   (2*0.16 + 0.07 = 0.39) so the reserved DOM space always matches where
-   the fixed canvas actually paints the shape, whatever the viewport
-   height. This box is now taller than before, which can mean scrolling a
-   little further to see the whole game on a shorter laptop screen -- that
-   part's fine and expected. What actually has to hold is that this
-   reserved space never falls short of the canvas's real paint position,
-   which would let the shape visually collide with whatever section comes
-   after it in the page flow -- that was the real bug in the old, tighter
-   sizing, not "requires a bit of scrolling" on its own. */
-.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 560px; margin: 0 auto; padding-top: clamp(230px, 39vh, 510px); opacity: 0; transition: opacity .6s ease; pointer-events: none; cursor: pointer; }
-.hero-runner.is-active { opacity: 1; pointer-events: auto; }
+   just recolored, rather than a disconnected mini-game bolted on top.
+   2026-08-26 redesign (per Eric): the ground shape is now anchored to the
+   dead center of .hero-stack itself (the "GET IN / THE ZONE" heading), so
+   the heading visually sits at the center of the loop the character runs
+   around, instead of the shape living in its own reserved space far below
+   the button. Because of that, this div no longer needs to reserve any
+   page space for the shape — it renders on the fixed background canvas,
+   which is already behind the heading (z-index) — so .hero-runner is back
+   to being just a small, normal-flow readout (score/best + the control
+   hint) sitting under the CTA button, plus the pointer/touch hit-region
+   for tap-to-jump / hold-to-move (see initGame() in techno-hero.js — the
+   actual hit-region has since moved up to cover .hero-stage so touches
+   anywhere across the hero control the game, not just this small box).
+   Opacity is written directly, every frame, from JS (a continuous
+   scroll-driven "heroFade" value — see computeHeroFade() in
+   techno-hero.js) rather than toggled via a CSS class/transition, so the
+   score readout's fade-out tracks the exact same smooth curve as the
+   canvas-drawn shape/character fading out as you scroll past the hero —
+   no separate hand-tuned transition duration to keep in sync. */
+.hero-runner { position: relative; z-index: 1; width: 100%; max-width: 560px; margin: 0 auto; opacity: 0; pointer-events: none; cursor: pointer; }
 .hero-runner-scores { display: flex; justify-content: center; gap: 1.4rem; margin-top: .35rem; font-family: var(--head); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
 .hero-runner-scores b { color: var(--ink); font-size: .82rem; margin-left: .35rem; letter-spacing: 0; }
 .hero-runner-hint { text-align: center; margin-top: .3rem; font-size: .68rem; color: var(--ink-dim); opacity: .75; letter-spacing: .04em; }
