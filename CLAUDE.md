@@ -17,7 +17,8 @@ This is v1 of this file, consolidated 2026-08-26 from everything established acr
 7. **Never call an interactive feature (game, widget) done from the absence of console errors alone.** Actually drive it with simulated input over real time. See "Testing interactive features" below.
 8. **Every new interactive element is keyboard-operable**: reachable via Tab, has a visible focus state, and supports the input pattern users expect (Enter/Space to activate, arrow keys for grid/list navigation). See "Keyboard accessibility" below.
 9. **Every visitor-facing change should make someone feel more wowed, seen, or accepted — never less.** These are real design goals, not vibes. See "Soft goals" below, and run the gut-check in the QA workflow.
-10. **No feature or change is "done" until it has been explicitly checked against every rule above.** Run the QA checklist at the end of this file before considering any change finished, and again before pushing to `main` — treat this file as an active checklist to execute, not background reading.
+10. **In any card grid, a title's line count must never shift where the content below it starts.** A one-line title and a two-line title, sitting side by side, must still line up on the row beneath them. See "Card row alignment" below.
+11. **No feature or change is "done" until it has been explicitly checked against every rule above.** Run the QA checklist at the end of this file before considering any change finished, and again before pushing to `main` — treat this file as an active checklist to execute, not background reading.
 
 ---
 
@@ -32,6 +33,16 @@ In a card grid:
 - Prefer shortening the actual copy first if something is unreasonably long (e.g. an example organization name), but the layout itself must never depend on clipping to look tidy — it has to hold up even if the copy can't be shortened.
 
 `.host-card` in `assets/css/style.css` is the reference implementation.
+
+## Card row alignment: reserve the title's max height, don't let it float
+
+A related but distinct problem from the one above: even once a card grid's *row* height is correctly stretching to match its tallest card (rule 1), the *content inside* each card can still misalign — if one card's title wraps to two lines and its neighbor's title fits on one, the neighbor's body copy/email/paragraph starts a full line higher than the wrapped card's does. Every card in that row reads as slightly "off" against its neighbors even though no single card looks broken on its own — this is what Eric flagged 2026-08-26 looking at the registration steps and Featured Ambassador cards.
+
+There isn't one universal industry-standard name for this exact pattern, but it's closest to what CSS's `subgrid` feature was built to solve (aligning a repeated internal row-structure — title row, body row, footer row — across sibling grid items so they share the same row lines, the way a spreadsheet's rows line up across columns). `subgrid` is the "true" fix and has solid modern browser support, but it also means restructuring every affected grid into a two-level `display:grid` (outer grid defines the row template, each card opts into `grid-template-rows:subgrid`) — a bigger, more fragile change than this project's existing patterns call for.
+
+**This project's fix instead: reserve the title's own maximum height as a floor, the same `min-height` philosophy rule 1 and the container/sizing rules already use everywhere else.** `.card h3` in `assets/css/style.css` sets `min-height: 3.2em` — two lines' worth of height at this project's inherited 1.6 line-height — so every card's title *zone* is the same height regardless of whether that specific title actually needs one line or two. A short title just top-aligns within its reserved zone and leaves its own natural blank space below it (exactly the space a real second line would have occupied); a long title fills the zone for real. Either way, whatever comes after the title — an email, a paragraph, a category line — starts at the exact same Y position across every card in that row. Applied once at the shared `.card h3` level (not per-component) so every current and future `.card` grid gets it automatically, the same "one shared implementation" principle as `gz-shine`.
+
+**When this applies:** any grid of sibling cards where a title's real-world length varies card to card (a person's name, an event title, a program name) and something else sits directly below it. **When it doesn't:** a single standalone card with no siblings to align against (nothing to gain from reserving space), or a title that's fixed, short copy unlikely to ever wrap (harmless either way, but not the point of the rule).
 
 ## Readability: WCAG-grade contrast, always, including mid-animation
 

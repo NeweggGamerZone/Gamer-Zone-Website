@@ -222,7 +222,23 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    letting the explicit minmax minimum win. */
 @media (max-width: 360px) { .grid.cols-2 { grid-template-columns: 1fr; } }
 .card { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: 1.3rem; }
-.card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; }
+/* Card row alignment: reserves a fixed 2-line-tall slot for every card
+   title in a grid (min-height, at this element's own inherited 1.6
+   line-height -> 3.2em for 2 lines), so a card whose title happens to fit
+   on one line still starts its body copy at the exact same Y position as
+   a sibling card whose title wrapped to two -- rather than every card's
+   body starting wherever ITS OWN title happened to end. Text top-aligns
+   inside a block box by default, so a one-line title just leaves its own
+   natural blank space below it up to that reserved height, matching
+   where a real second line would have sat. This is the same reserved-
+   height technique .game-list li .gl-name already uses for exactly this
+   reason (see that rule for the sibling explanation) -- applied here at
+   the shared .card level so every card grid gets it automatically
+   (.reg-step, .host-card, and any future .card grid) instead of a
+   per-component fix. Cards with a single, predictably-short title (e.g.
+   a card whose h3 is decorative, not real copy) are unaffected in
+   practice since min-height is a floor, not a clip. */
+.card h3 { font-family: var(--head); font-weight: 700; font-size: 1.02rem; margin: .5rem 0 .35rem; text-transform: uppercase; letter-spacing: .03em; min-height: 3.2em; }
 .review-card { display: flex; flex-direction: column; gap: .5rem; }
 .review-stars { color: var(--ne-orange); font-size: 1rem; letter-spacing: .1em; }
 .review-quote { font-style: italic; color: var(--ink); }
