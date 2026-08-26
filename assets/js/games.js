@@ -140,20 +140,67 @@
     list.innerHTML = panel(g.label, null, games);
   }
 
+  // ---- Live search --------------------------------------------------
+  // GAMES is a small, already-in-memory array (well under 100 rows) built
+  // once at load, so a full Array.filter on every keystroke costs a
+  // fraction of a millisecond — there's no separate cache/index to build
+  // or debounce to add for this to stay fast; the "don't slow the site
+  // down" requirement is satisfied by the data being this small and
+  // static, not by extra machinery on top of it.
+  let activeRenderFn = renderByPlatform; // whichever chip view search should fall back to once cleared
+  function renderSearch(query) {
+    const q = query.trim().toLowerCase();
+    const matches = GAMES.filter(g => g.name.toLowerCase().includes(q));
+    if (!matches.length) {
+      list.innerHTML = `<p class="gz-search-empty">No games matched &ldquo;${GZ.esc(query.trim())}&rdquo;. Try a shorter search, or see the note below to let us know what's missing.</p>`;
+      return;
+    }
+    list.innerHTML = panel(`Search results for “${query.trim()}”`, 'search', matches);
+  }
+
+  function clearSearch({ refocus = false } = {}) {
+    searchInput.value = '';
+    searchWrap.classList.remove('has-value');
+    activeRenderFn();
+    if (refocus) searchInput.focus();
+  }
+
+  const searchWrap = document.getElementById('games-search-wrap');
+  const searchInput = document.getElementById('games-search');
+  const searchClear = document.getElementById('games-search-clear');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value;
+      searchWrap.classList.toggle('has-value', q.trim().length > 0);
+      if (q.trim()) renderSearch(q); else activeRenderFn();
+    });
+    // Esc clears the box (a native <input type="search"> already does
+    // this for the typed text in most browsers; this also resets our own
+    // rendered view to match, and Enter is harmless since there's no form
+    // submit to prevent).
+    searchInput.addEventListener('keydown', e => { if (e.key === 'Escape' && searchInput.value) clearSearch(); });
+  }
+  if (searchClear) searchClear.addEventListener('click', () => clearSearch({ refocus: true }));
+
   function setActive(wrap, btn) {
     wrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
   }
 
+  // Picking a chip always wins over an in-progress search (rather than
+  // silently ignoring one or the other) -- clears the search box back to
+  // its empty state so there's only ever one filter in effect at a time.
   chipsWrap.addEventListener('click', e => {
     const btn = e.target.closest('.chip');
     if (!btn) return;
     setActive(chipsWrap, btn);
     if (genreWrap) genreWrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     const mode = btn.dataset.mode;
-    if (mode === 'platform') renderByPlatform();
-    else if (mode === 'az') renderAZ();
-    else renderPlatform(btn.dataset.platform);
+    if (mode === 'platform') activeRenderFn = renderByPlatform;
+    else if (mode === 'az') activeRenderFn = renderAZ;
+    else activeRenderFn = () => renderPlatform(btn.dataset.platform);
+    if (searchInput && searchInput.value) { searchInput.value = ''; searchWrap.classList.remove('has-value'); }
+    activeRenderFn();
   });
 
   if (genreWrap) {
@@ -162,7 +209,9 @@
       if (!btn) return;
       setActive(genreWrap, btn);
       chipsWrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      renderGenre(btn.dataset.genre);
+      activeRenderFn = () => renderGenre(btn.dataset.genre);
+      if (searchInput && searchInput.value) { searchInput.value = ''; searchWrap.classList.remove('has-value'); }
+      activeRenderFn();
     });
   }
 

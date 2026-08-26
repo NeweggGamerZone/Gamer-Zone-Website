@@ -352,6 +352,31 @@ html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; tr
 
 .chip-row { display: flex; flex-wrap: wrap; gap: .5rem; }
 
+/* Shared live-search box -- one implementation reused everywhere a page
+   needs instant client-side filtering (Games library, Ambassador roster,
+   and any future list), same principle as the site's one shared gz-shine:
+   don't write a second bespoke search UI once this exists. A plain native
+   <input type="search"> + <button> pair, so Tab/Enter/focus-visible all
+   work for free without any custom keyboard-handling code -- see
+   games.js/ambassador.js for the filtering logic itself, which is a plain
+   in-memory Array.filter over data already loaded on the page (well under
+   a couple hundred rows either page), so there's no debounce, request, or
+   caching layer to build: a keystroke-to-render pass here costs a fraction
+   of a millisecond, nowhere near a perceptible slowdown. */
+.gz-search { position: relative; max-width: 380px; margin: 0 0 1rem; }
+.gz-search input[type="search"] { width: 100%; background: var(--bg-3); border: 1px solid var(--line); color: var(--ink); font-size: .92rem; padding: .6rem 2.3rem .6rem 2.5rem; border-radius: 999px; appearance: none; }
+.gz-search input[type="search"]::-webkit-search-cancel-button { display: none; }
+.gz-search input[type="search"]::placeholder { color: var(--ink-dim); }
+.gz-search input[type="search"]:focus-visible { outline: none; border-color: var(--ne-orange); box-shadow: 0 0 0 3px rgba(250,157,40,.3); }
+.gz-search-ic { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); width: 1rem; height: 1rem; color: var(--ink-dim); pointer-events: none; display: block; }
+.gz-search-ic .ic { width: 100%; height: 100%; }
+.gz-search-clear { position: absolute; right: .4rem; top: 50%; transform: translateY(-50%); width: 1.7rem; height: 1.7rem; display: none; align-items: center; justify-content: center; background: none; border: none; color: var(--ink-dim); cursor: pointer; border-radius: 50%; padding: 0; }
+.gz-search-clear .ic { width: .85rem; height: .85rem; }
+.gz-search-clear:hover { color: var(--ink); background: rgba(255,255,255,.08); }
+.gz-search-clear:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 1px; color: var(--ink); }
+.gz-search.has-value .gz-search-clear { display: flex; }
+.gz-search-empty { color: var(--ink-dim); padding: 1.4rem 0; }
+
 /* Flat translateY fade only — no perspective()/rotateX() tilt. That 3D tilt
    used to be part of this recipe, but it distorts without bound as a
    section's height grows relative to the perspective distance (a tall
