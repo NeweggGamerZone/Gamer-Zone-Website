@@ -143,7 +143,13 @@
   <section class="reveal" id="featured-hosts">
     <h2>Featured Ambassadors</h2>
     <p class="dim">Featuring here is the reward for reaching Diamond: every Ambassador below has actually hit that tier.</p>
-    <div class="grid cols-3" style="margin-top:1rem">
+    <div class="gz-search" id="host-search-wrap">
+      <span class="gz-search-ic"><i data-ic="search"></i></span>
+      <input type="search" id="host-search" placeholder="Search by name or tag&hellip;" aria-label="Search Featured Ambassadors by name or tag" autocomplete="off">
+      <button type="button" class="gz-search-clear" id="host-search-clear" aria-label="Clear search"><i data-ic="close"></i></button>
+    </div>
+    <p class="gz-search-empty" id="host-search-empty" hidden>No Ambassadors matched that search.</p>
+    <div class="grid cols-3" id="host-grid" style="margin-top:1rem">
       <div class="card host-card tier-diamond" data-flare="sapphire">
         <span class="node">Diamond</span>
         <span class="host-tag">Content Creator</span>

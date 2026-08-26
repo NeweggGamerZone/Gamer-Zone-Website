@@ -98,3 +98,45 @@ function pickDiamondFlare(stableId, table = DIAMOND_FLARES) {
   }
   return table[0].name;
 }
+
+/* Featured Ambassadors live search -- matches on name (h3) or pillar tag
+   (.host-tag, e.g. "Content Creator", "Organization"). Same approach as
+   the Games page search (assets/js/games.js): the handful of cards are
+   already fully rendered in the page's own HTML (5 today), so filtering
+   is just toggling each card's [hidden] attribute in place -- no data
+   array, no re-render, no fetch/cache layer to build. Reuses the shared
+   .gz-search component (style.css) so both search boxes on the site look
+   and behave identically. */
+(function () {
+  const wrap = document.getElementById('host-search-wrap');
+  const input = document.getElementById('host-search');
+  const clearBtn = document.getElementById('host-search-clear');
+  const grid = document.getElementById('host-grid');
+  const emptyMsg = document.getElementById('host-search-empty');
+  if (!wrap || !input || !grid) return;
+
+  const cards = Array.from(grid.querySelectorAll('.host-card'));
+  const cardIndex = cards.map(card => ({
+    card,
+    text: [
+      card.querySelector('h3'),
+      card.querySelector('.host-tag'),
+    ].filter(Boolean).map(el => el.textContent.toLowerCase()).join(' '),
+  }));
+
+  function apply() {
+    const q = input.value.trim().toLowerCase();
+    wrap.classList.toggle('has-value', q.length > 0);
+    let visible = 0;
+    cardIndex.forEach(({ card, text }) => {
+      const match = !q || text.includes(q);
+      card.hidden = !match;
+      if (match) visible++;
+    });
+    if (emptyMsg) emptyMsg.hidden = visible > 0;
+  }
+
+  input.addEventListener('input', apply);
+  input.addEventListener('keydown', e => { if (e.key === 'Escape' && input.value) { input.value = ''; apply(); } });
+  if (clearBtn) clearBtn.addEventListener('click', () => { input.value = ''; apply(); input.focus(); });
+})();

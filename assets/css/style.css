@@ -1207,6 +1207,13 @@ html.board-mode .photo-waterfall .pw-slot img{opacity:1;transition:none}
    where possible, but the layout must never rely on clipping to look
    tidy. */
 .host-card{position:relative;text-align:center;display:flex;flex-direction:column;height:100%;padding-bottom:1.7rem;overflow:hidden;transition:box-shadow .25s,border-color .25s}
+/* An explicit [hidden] override, not relying on the bare attribute alone:
+   .host-card's own display:flex above is an author-stylesheet rule, which
+   always wins over the browser's default [hidden]{display:none} UA rule
+   regardless of specificity (UA styles are the lowest-priority origin) --
+   so toggling the hidden attribute via ambassador.js's search (see that
+   file) would silently do nothing without this. */
+.host-card[hidden]{display:none}
 /* Inset, not poking above like .mile's — the card clips overflow to keep
    its fixed height, so the rank pill sits inside the top-left corner. */
 .host-card .node{position:absolute;left:.7rem;top:.7rem;z-index:2}
