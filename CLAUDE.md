@@ -16,6 +16,7 @@ This is v1 of this file, consolidated 2026-08-26 from everything established acr
 6. **Never call an interactive feature (game, widget) done from the absence of console errors alone.** Actually drive it with simulated input over real time. See "Testing interactive features" below.
 7. **Every new interactive element is keyboard-operable**: reachable via Tab, has a visible focus state, and supports the input pattern users expect (Enter/Space to activate, arrow keys for grid/list navigation). See "Keyboard accessibility" below.
 8. **Run the QA checklist at the end of this file before considering any change finished, and again before pushing to `main`.**
+9. **Every visitor-facing change should make someone feel more wowed, seen, or accepted — never less.** These are real design goals, not vibes. See "Soft goals" below, and run the gut-check in the QA workflow.
 
 ---
 
@@ -76,6 +77,25 @@ Any custom interactive widget (not a plain link/button, which get this for free)
 
 Never invent a specific date, statistic, quote, or capability that isn't confirmed real, even to fill an awkward content gap. If the real answer is "we don't have that yet" (a next-cohort date, a live data pipeline, admin-portal access), say so honestly and offer a real, working alternative instead — a waitlist/contact link, an honest "not yet scheduled," a roadmap note — rather than a plausible-looking placeholder that could get mistaken for real information later. This applies to marketing copy, example data, and roadmap claims alike.
 
+## Soft goals: wowed, seen, and accepted
+
+The hard rules above (readability, sizing, keyboard access) are the floor — a change can pass every one of them and still feel cold, generic, or unwelcoming. This site's actual job is emotional as much as functional: a visitor should come away feeling **wowed** (this place has real production value and energy), **seen** (this speaks to someone like *me*, specifically), and **accepted** (I'm genuinely invited in, not just tolerated). Treat these as design requirements, not polish — the same way a missing focus ring is a bug, a page that makes a first-timer feel like an outsider is a bug.
+
+**Wowed** — production value and a little delight, without needing to say a word about it:
+- The gamified layer (the tier ladder, the Diamond shine, the hero mini-game, the morphing background) is the site's main "wow" lever — keep it sharp (see "Unified shine" and "Container & sizing" above) rather than letting it decay into something merely functional.
+- Real photography and real specifics beat generic stock-feeling content every time — the Past Events photo waterfall, named ambassadors with real socials/games, and the real (not simulated) SENET All-Time numbers on Games all do this. When adding new content, default to something specific and real over something generic and safe.
+- A flourish only lands if it doesn't fight the content — see the crosshatch texture's whole arc (2026-08-25 → removed 2026-08-26): a "wow" effect that makes people squint is a net loss, not a wash.
+
+**Seen** — different visitors should each find themselves reflected somewhere on the site, not just one generic pitch:
+- The Ambassador pillars (Content Creator / Esports Team / Community Organizer / Organization) and the two distinct org examples exist specifically so a solo streamer, a competitive team, and a club officer each see themselves as the intended audience, not just "influencers." Keep expanding this kind of range rather than defaulting back to one archetype.
+- The simulated personas in `docs/08-USABILITY-AUDIT-AND-ROADMAP.md` Part 3 (Jaden, Priya, Marcus, Devonte, Grace, Alex) are the standing reference for "who might land on this page and what do they need to see" — a new page or section should be able to name which of them it's speaking to, and ideally more than one.
+- Honest, current copy is part of feeling seen too — a stale "Closed" with no next step reads as "we forgot about you," not just "incomplete info." See "No fabrication of facts" above for the honest way to handle a real gap.
+
+**Accepted** — remove friction and doubt about whether someone is genuinely welcome, and make the space feel lived-in and active:
+- Say the welcoming thing explicitly, don't assume it's implied — "Walk-ins always welcome, no purchase or account required," the under-18-with-guardian note, and "always Free to Get in the Zone" are all deliberately spelled out rather than left for a visitor to infer or worry about.
+- Watch for gatekeeping language or visuals — gaming-culture shorthand can unintentionally read as "you already need to be one of us" to a first-timer (Grace's persona) or a parent (Priya's). When gamer jargon is used, make sure the plain-English meaning is never more than a glance away.
+- "Accepted" scales into "this is a living community, not a static brochure" — that's the whole point of the roadmap's "Live at the Zone" hub concept (`docs/08-USABILITY-AUDIT-AND-ROADMAP.md` Part 4 #2): a community leaderboard, a "who's here today" pulse, an async trail mosaic — small, real signals of other people being here, not just copy claiming a community exists. Per `docs/01-PRD.md` §5, deep real-time social interaction is intentionally Discord's job, not the static site's — the site's role is to make that liveness *visible and inviting* enough that someone wants to go be part of it, not to rebuild Discord itself.
+
 ## Long-term direction: keep pushing the roadmap forward
 
 `docs/08-USABILITY-AUDIT-AND-ROADMAP.md`'s Part 4 (Roadmap) is the standing list of where this site is headed next, in priority order — it is not a one-off deliverable, it's meant to be read and advanced in every session that touches related territory. Concretely:
@@ -103,6 +123,8 @@ Run this before considering **any** visual, layout, or interactive change finish
 
 **6. Roadmap alignment check.** Did this session's work touch anything on the Part 4 roadmap? If so, update that entry. Did anything come up that should become a new roadmap item? Write it in, don't leave it only in chat.
 
-**7. Documentation check.** If this session established a new standing rule (not just a one-off fix), add it to this file *in the same session* — a rule that only exists in a chat transcript doesn't survive to the next session.
+**7. Soft-goals gut-check.** Reread the actual change as if you were one or more of the personas in `docs/08-USABILITY-AUDIT-AND-ROADMAP.md` Part 3 — would this specific persona come away feeling more wowed, seen, or accepted, or is it neutral-to-worse for them? For any new visitor-facing page or section, name which persona(s) it's speaking to; if you can't name one, that's a sign the content is too generic. For any new gamified/flourish element, confirm it doesn't come at the cost of clarity for someone unfamiliar with gaming shorthand. This check should point to something concrete and checkable (a specific line added, a specific example diversified) — not just a feeling.
 
-**8. Git hygiene before pushing.** `git status`/`git diff` review of everything staged — confirm nothing unintended is included, commit messages describe the actual change (not just "fixes"), and `git fetch`/rebase against `origin/main` before pushing in case anything else landed there since the session started (an automated `chore:` commit landing mid-session is a real, observed case here). Anything genuinely uncertain gets flagged to Eric rather than pushed silently.
+**8. Documentation check.** If this session established a new standing rule (not just a one-off fix), add it to this file *in the same session* — a rule that only exists in a chat transcript doesn't survive to the next session.
+
+**9. Git hygiene before pushing.** `git status`/`git diff` review of everything staged — confirm nothing unintended is included, commit messages describe the actual change (not just "fixes"), and `git fetch`/rebase against `origin/main` before pushing in case anything else landed there since the session started (an automated `chore:` commit landing mid-session is a real, observed case here). Anything genuinely uncertain gets flagged to Eric rather than pushed silently.
