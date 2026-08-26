@@ -522,6 +522,17 @@ details.archive-month .grid { margin-top: 1rem; }
    nav worked. Re-enabled here plus a pointer cursor for the affordance. */
 .zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .3; z-index: 4; cursor: pointer; }
 .zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .3; z-index: 4; cursor: pointer; }
+/* Second, further-out peek layer -- per Eric's "another layer of cards
+   on the outermost left and right of center" ask for About Gamer Zone.
+   These are real zone cards from the same rotation (not decorative
+   filler), pushed out past the near peek layer and scaled/dimmed down
+   further so the depth reads correctly (furthest = smallest + faintest),
+   which is what lets .zone-stack's full section width actually get used
+   by real content instead of just being a wide empty wrapper around one
+   centered card. Lower z-index than the near peek layer so they sit
+   visually behind it. */
+.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154%)) scale(.8); opacity: .14; z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154%)) scale(.8); opacity: .14; z-index: 3; cursor: pointer; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
 /* Only a sliver of a prev/next card is actually visible (mostly hidden by
    .zone-stack's own overflow:hidden). Both the paragraph AND the centered
@@ -533,8 +544,12 @@ details.archive-month .grid { margin-top: 1rem; }
    over here" without any text getting visibly severed. */
 .zone-card[data-pos="prev"] .zone-card-body p,
 .zone-card[data-pos="next"] .zone-card-body p,
+.zone-card[data-pos="far-prev"] .zone-card-body p,
+.zone-card[data-pos="far-next"] .zone-card-body p,
 .zone-card[data-pos="prev"] .zone-card-body h3,
-.zone-card[data-pos="next"] .zone-card-body h3 { display: none; }
+.zone-card[data-pos="next"] .zone-card-body h3,
+.zone-card[data-pos="far-prev"] .zone-card-body h3,
+.zone-card[data-pos="far-next"] .zone-card-body h3 { display: none; }
 /* The ZONE badge itself was also getting visibly severed on peeking cards:
    it's anchored to the card's own top-RIGHT corner, but a peeking card's
    own left and right edges are each hidden -- one by .zone-stack's
@@ -545,7 +560,9 @@ details.archive-month .grid { margin-top: 1rem; }
    never appeared at all). Re-centering it horizontally puts it inside the
    one part of the card that's reliably visible on both sides. */
 .zone-card[data-pos="prev"] .zone-card-code,
-.zone-card[data-pos="next"] .zone-card-code { left: 50%; right: auto; transform: translateX(-50%); }
+.zone-card[data-pos="next"] .zone-card-code,
+.zone-card[data-pos="far-prev"] .zone-card-code,
+.zone-card[data-pos="far-next"] .zone-card-code { left: 50%; right: auto; transform: translateX(-50%); }
 .zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
 .zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
 .zone-stack-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }

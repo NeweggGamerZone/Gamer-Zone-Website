@@ -24,13 +24,25 @@
   function render() {
     cards.forEach((card, i) => {
       const offset = (i - current + N) % N;
-      // Real left/right carousel: one card centered, the immediate
-      // neighbors peeking at the left/right edge of .zone-stack (clipped
-      // by its overflow:hidden), everything else fully hidden — not a
-      // diagonal depth-stack.
+      // Real left/right carousel: one card centered, near neighbors
+      // peeking at the left/right edge of .zone-stack, and (per Eric's
+      // "another layer of cards on the outermost left and right" ask)
+      // a second, further-out layer beyond that — clipped by
+      // .zone-stack's overflow:hidden, all real zone cards from the
+      // same rotation rather than decorative filler, so the section
+      // actually reads as using its full width instead of just its
+      // wrapper technically being 100% wide. Anything beyond that
+      // second layer (only possible if more zone cards are added
+      // later) stays fully hidden.
+      // Guard against slot collisions if N ever shrinks (e.g. N=4 makes
+      // "2 offsets forward" and "2 offsets back" the same card) by only
+      // using the far-peek slots once they're distinct from every
+      // closer slot already claimed above.
       if (offset === 0) card.dataset.pos = 'center';
       else if (offset === 1) card.dataset.pos = 'next';
       else if (offset === N - 1) card.dataset.pos = 'prev';
+      else if (offset === 2 && offset !== N - 2 && offset !== N - 1) card.dataset.pos = 'far-next';
+      else if (offset === N - 2 && offset !== 1 && offset !== 2) card.dataset.pos = 'far-prev';
       else card.dataset.pos = 'hidden';
     });
     if (dotsWrap) {
