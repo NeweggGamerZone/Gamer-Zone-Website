@@ -213,23 +213,50 @@
   // the entire game in without any scrolling. These smaller ratios (and
   // the matching .hero-runner padding-top in style.css) are sized against
   // that real measurement instead of a round-number guess.
-  // 2026-08-25: bumped meaningfully larger per Eric's real-world testing
-  // feedback ("the shape is very small") -- the previous ratios (H*0.10 /
-  // H*0.08, then H*0.10 / H*0.045) were tuned purely to avoid the overflow
-  // bug from task #169 and erred small. This is a genuine size increase
-  // (~40-60% larger radius depending on viewport height), re-measured the
-  // same way: real-browser screenshots at 1400x900, 1366x768, and 1280x700
-  // confirming the whole runner (shape + score/hint text) still fits above
-  // the fold without scrolling. .hero-runner's padding-top in style.css is
-  // scaled to match. The shape stays a fixed, anchored size/position (see
+  // 2026-08-25: bumped larger per Eric's first round of feedback ("the
+  // shape is very small"), then again 2026-08-26 per a second, more
+  // specific round: "it should be a larger size, same size as the
+  // background grid line when they are past the Get in the Zone text" --
+  // i.e. sized like the big decorative tunnel rings visible passing
+  // through the hero text, not a small independent shape. Those rings are
+  // all scaled off `A` (see size() above, A = max(W,H)*0.72) -- a real
+  // 1400x900 screenshot at the moment a ring was passing near the "GET IN
+  // THE ZONE" heading measured that ring at roughly 1000px across (~530px
+  // radius), i.e. on the order of A*0.5 at that instant (every ring's
+  // on-screen size constantly changes as it travels, so there's no single
+  // exact "correct" frame to match -- this ties the ground shape to the
+  // same underlying scale instead of chasing one transient frame). Landing
+  // on PATH_RADIUS = A*0.4 puts the ground shape solidly in that same
+  // visual scale as the prominent background rings, clamped so it can't
+  // balloon on an ultra-wide monitor or shrink below playable on a short
+  // mobile viewport. This is meaningfully bigger than the previous H*0.16
+  // formula (which was capped at 210px regardless of how large the
+  // viewport/background rings actually were) -- .hero-runner's padding-top
+  // is now set directly from this same PATH_RADIUS/JUMP_CLEAR math in
+  // updateAnchor() below (see the runnerWrap.style.paddingTop line) instead
+  // of a hand-tuned CSS clamp guess, so the reserved space always exactly
+  // matches the shape's real size at any viewport instead of drifting out
+  // of sync with it. The shape stays a fixed, anchored size/position (see
   // updateAnchor below) -- it does not recede with the ambient tunnel rings
   // and does not move once the page has loaded, only its silhouette morphs
   // in lockstep with the background, per Eric's "hold still" instruction.
   let PATH_RADIUS = 210, JUMP_CLEAR = 90;
   const ANGLE_SPEED = 0.3;
   function sizeGame() {
-    PATH_RADIUS = Math.max(95, Math.min(210, H * 0.16));
-    JUMP_CLEAR = Math.max(40, Math.min(90, H * 0.07));
+    PATH_RADIUS = Math.max(150, Math.min(430, A * 0.4));
+    JUMP_CLEAR = Math.max(50, Math.min(150, PATH_RADIUS * 0.34));
+    // .hero-runner's padding-top reserves blank space above its own real
+    // content (the Score/Best readout + hint text) for the canvas-drawn
+    // shape+character to visually occupy -- the canvas is a separate
+    // fixed-position overlay, not clipped to this box, so nothing enforces
+    // that automatically. Set once here (sizeGame only runs on resize/
+    // init, unlike updateAnchor which runs every frame) from the exact
+    // same PATH_RADIUS/JUMP_CLEAR math that sizes the shape, so the
+    // reserved space always matches instead of a hand-tuned CSS clamp
+    // that has to be kept in sync by hand. Shape bottom edge sits
+    // PATH_RADIUS below the anchor, the anchor sits JUMP_CLEAR below the
+    // shape's own top edge, and +90 clears the character's jump arc.
+    if (runnerWrap) runnerWrap.style.paddingTop = Math.round(2 * PATH_RADIUS + JUMP_CLEAR + 90) + 'px';
   }
 
   if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
@@ -243,6 +270,10 @@
   }
 
   function updateAnchor() {
+    // NOTE: this runs every frame (called from updateGame()), so it only
+    // reads layout here, never writes it -- see sizeGame() for where
+    // .hero-runner's padding-top gets set (once, on resize/init) rather
+    // than here, to avoid forcing a layout recalc every single frame.
     const r = runnerWrap.getBoundingClientRect();
     anchorX = r.left + r.width / 2;
     // Clearance above the anchor: PATH_RADIUS for the ground shape's own

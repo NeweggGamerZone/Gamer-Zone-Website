@@ -189,28 +189,16 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .btn.navy { background: var(--ne-navy-glow); color: #fff; }
 .btn-row { display: flex; gap: .8rem; flex-wrap: wrap; }
 
-/* periodic "click me" shine — a diagonal highlight sweeps across every button
-   on a 15s cycle (mostly idle, brief sweep) as a reminder that it's clickable. */
-.btn::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.65) 50%, transparent 60%);
-  transform: translateX(-130%) skewX(-15deg);
-  animation: btn-shine 15s ease-in-out infinite;
-}
-@keyframes btn-shine {
-  0% { transform: translateX(-130%) skewX(-15deg); }
-  8% { transform: translateX(130%) skewX(-15deg); }
-  100% { transform: translateX(130%) skewX(-15deg); }
-}
-@media (prefers-reduced-motion: reduce) { .btn::after { animation: none; display: none; } }
+/* periodic "click me" shine on every button — the .btn::after rule itself
+   now lives in the shared "Unified metallic shine" block below (near the
+   tier system), so every metallic flash on the site — buttons and Diamond
+   tier cards alike — is the exact same effect, not separate lookalikes
+   that can drift out of sync with each other. */
 
-/* disabled/closed buttons: no shine, no hover, not clickable */
+/* disabled/closed buttons: no shine, no hover, not clickable. The
+   ::after opt-out (no-shine/is-disabled) lives with the shared shine rule
+   itself, in the "Unified metallic shine" block below. */
 .btn.is-disabled { background: var(--bg-3); color: var(--ink-dim); box-shadow: none; cursor: not-allowed; pointer-events: none; }
-/* Opt a specific button out of the periodic shine (e.g. the preregister-your-
-   visit CTA, which already sits in its own highlighted callout and doesn't
-   need the extra flashing motion competing with it). */
-.btn.no-shine::after { display: none; }
-.btn.is-disabled::after { display: none; }
 .btn.is-disabled:hover { background: var(--bg-3); }
 
 .grid { display: grid; gap: 1rem; }
@@ -801,6 +789,13 @@ body.home-page { background: transparent; }
 .cal-cell.cal-amb{background:rgba(232,93,160,.26);border-color:var(--cal-amb)}
 .cal-cell.cal-major{background:rgba(250,157,40,.3);border-color:var(--cal-major)}
 .cal-cell:not(.empty):not(.cal-closed):hover{filter:brightness(1.25)}
+/* Keyboard focus ring -- .cal-cell previously had no tabindex or focus
+   style at all (mouse/hover only), so Tab couldn't reach a day and there
+   was nothing to show which one was focused even if it could. Matches
+   .today's own inset-ring treatment so a focused day reads clearly
+   without fighting the per-type background colors. :focus-visible so a
+   mouse click doesn't also show the keyboard ring. */
+.cal-cell:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff,0 0 0 3px rgba(255,255,255,.35)}
 .cal-cell.today{box-shadow:inset 0 0 0 2px #fff}
 .cal-cell.today::after{content:"";position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;animation:cal-today-flash 15s ease-in-out infinite}
 @keyframes cal-today-flash{0%,4%,100%{opacity:0}1.6%,2.4%{opacity:.55}}
@@ -948,7 +943,7 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mile.tier-diamond{width:88%;margin-left:12%}
 /* Shared rank-pill look, reused by both the Ambassador Journey tiles and
    the Featured Ambassador cards — only the position differs per context. */
-.node{position:relative;overflow:hidden;z-index:1;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
+.node{position:relative;overflow:hidden;z-index:2;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 .mile .node{position:absolute;left:1.1rem;top:-14px}
 /* Progression is the headline here: a big event-count badge sits right
    alongside the benefit it unlocks, instead of a small caption above it —
@@ -956,13 +951,13 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    rounded rank-badge icon sits at the far end of the bar, like the node at
    the end of each step in the reference ladder. */
 .mile-head{display:flex;align-items:center;gap:.85rem;margin:.4rem 0 .7rem}
-.mile-count{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;background:var(--bg-3);border:2px solid var(--line)}
+.mile-count{position:relative;z-index:2;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;background:var(--bg-3);border:2px solid var(--line)}
 .mc-num{font-family:var(--head);font-weight:800;font-size:1.5rem;line-height:1}
 .mc-lbl{font-family:var(--head);font-weight:700;font-size:.52rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin-top:.1rem}
-.mile .unlock{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:0;flex:1}
-.rank-badge{flex:none;margin-left:auto;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:2px solid var(--line)}
+.mile .unlock{position:relative;z-index:2;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:0;flex:1}
+.rank-badge{position:relative;z-index:2;flex:none;margin-left:auto;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:2px solid var(--line)}
 .rank-badge .ic{width:22px;height:22px;fill:currentColor}
-.mile ul{color:var(--ink-dim);font-size:.83rem;margin:0;padding-left:1.05rem;display:grid;gap:.3rem}
+.mile ul{position:relative;z-index:2;color:var(--ink-dim);font-size:.83rem;margin:0;padding-left:1.05rem;display:grid;gap:.3rem}
 .mile ul li::marker{color:var(--ne-orange)}
 
 /* Rank-style frames, one per tier. Shared between the Ambassador Journey
@@ -996,15 +991,24 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 
 /* Chromatic texturing — a faceted, low-opacity crosshatch tinted to each
    tier's own --tier-c, sitting behind the card's real content (z-index:0;
-   the content itself is bumped to z-index:2 on .host-card, see its rules
-   above). This is the constant, always-visible "this card has rank"
-   flavor; the rarer Diamond shine below is a separate, occasional accent
-   layered on top of it, not a replacement for it. */
+   the content itself is bumped to z-index:2 on both .host-card and .mile
+   -- every text/badge element in both gets an explicit z-index:2 now; .mile
+   previously had gaps here (its unlock title, bullet list, count badge and
+   rank badge had no z-index at all), which let the old Diamond shine paint
+   ON TOP of that text during its flash instead of behind it. That gap is
+   what was actually driving the "text goes unreadable" complaint, not just
+   the texture itself). 2026-08-25: also cut this texture's own opacity
+   roughly in half (14/9% -> 6/4%) — even correctly layered behind text, a
+   crosshatch this strong reads as a busy grid competing with the copy
+   sitting on top of it rather than a subtle "this card has rank" flavor.
+   Standing rule going forward, also in this repo's CLAUDE.md: no decorative
+   texture/effect ships at a strength that reduces text legibility, on this
+   component or any other -- check this on every visual pass. */
 .mile::before, .host-card::before{
   content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
   background:
-    repeating-linear-gradient(115deg, color-mix(in srgb, var(--tier-c, transparent) 14%, transparent) 0 3px, transparent 3px 22px),
-    repeating-linear-gradient(25deg, color-mix(in srgb, var(--tier-c, transparent) 9%, transparent) 0 3px, transparent 3px 30px);
+    repeating-linear-gradient(115deg, color-mix(in srgb, var(--tier-c, transparent) 6%, transparent) 0 3px, transparent 3px 22px),
+    repeating-linear-gradient(25deg, color-mix(in srgb, var(--tier-c, transparent) 4%, transparent) 0 3px, transparent 3px 30px);
 }
 
 /* Diamond "flare" — a few subtle color-tinge variants layered on top of
@@ -1023,36 +1027,66 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .host-card.tier-diamond[data-flare="crimson"]{--tier-c:#ff6b82;border-color:#ff6b82}
 .host-card.tier-diamond[data-flare="crimson"] .node{background:#ff6b82}
 
-/* Diamond shine — one clean diagonal flash roughly every 60s, on the card
-   face only (no longer duplicated onto the small "Diamond" node tag —
-   that copy was small enough for the diagonal sweep to visibly clip at a
-   corner as it entered/left, reading as a stuck artifact rather than a
-   flash). Each Diamond host-card is staggered onto its own delay so
-   multiple cards on the page don't all flash in the same instant and read
-   as one glitchy multi-flash — every card gets its own single, separate,
-   timed sparkle. overflow:hidden on .host-card (see above) clips the
-   sweep cleanly to the card's own rectangle, so no corner ever pokes out;
-   .mile doesn't get overflow:hidden (it would clip the "Diamond" node,
-   which deliberately pokes above the card's top edge) but the gradient's
-   own inset:0 box already keeps it inside the card's rectangle regardless. */
-.mile.tier-diamond::after, .host-card.tier-diamond::after{
+/* ===== Unified metallic shine ("gz-shine") =====
+   2026-08-25 rebuild, replacing two separate near-duplicate effects (the
+   button's old 15s btn-shine and the Diamond card's old 60s diamond-shine)
+   with ONE shared definition, applied via this exact same rule wherever a
+   metallic flash is needed — currently Diamond-tier cards and every .btn.
+   Reuse this block (don't write a new bespoke shine) the next time
+   somewhere else on the site needs one.
+
+   Spec, per explicit feedback: exactly one flash every 60s, no idle
+   mid-cycle resting or repeat flashes (opacity:0 at rest is an explicit,
+   fully-invisible state — not just the old approach of parking a gradient
+   off-screen, which was harder to reason about and is what let the
+   previous version drift into looking like it fired more than once) — a
+   clean, crisp white sweep with almost no feather (a tight 3.5%-wide hard
+   core, not the old soft 16%-wide blurred band) plus two small four-point
+   sparkle glints (a smoothly-concave 4-point star, matching the reference
+   shape provided) that twinkle on with the same flash rather than
+   sweeping themselves — fixed points, not moving.
+
+   z-index:1 -- BELOW every real content element in .host-card/.mile,
+   which are all explicitly z-index:2 (see the .host-card/.mile rules
+   above) -- so the flash can never wash out text sitting on top of it,
+   which was the root cause of the earlier "unreadable during the flash"
+   complaint on .mile (its content had no z-index at all before this
+   round, see the chromatic-texturing comment above). */
+.mile.tier-diamond::after, .host-card.tier-diamond::after, .btn::after{
   content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
-  background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.7) 50%,transparent 58%);
-  background-size:280% 100%;background-position:-140% 0;
-  animation:diamond-shine 60s ease-in-out infinite;
+  opacity:0;
+  background-image:
+    linear-gradient(115deg,transparent 47%,#fff 49.3%,#fff 50.7%,transparent 53%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='white' d='M50 2C54 40 60 46 98 50C60 54 54 60 50 98C46 60 40 54 2 50C40 46 46 40 50 2Z'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='white' d='M50 2C54 40 60 46 98 50C60 54 54 60 50 98C46 60 40 54 2 50C40 46 46 40 50 2Z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-size:280% 100%, 11% 11%, 7% 7%;
+  /* Sparkle points sit close to the card's own corners (near the padding
+     edge, away from the centered text column) rather than near-center —
+     an earlier pass at 20/24% and 80/72% landed right in the middle of
+     card copy on the narrower .host-card layout, reading as clutter next
+     to/through the text instead of a clean corner glint. */
+  background-position:-160% 0, 10% 12%, 90% 88%;
+  animation:gz-shine 60s ease-in-out infinite;
 }
 .host-card.tier-diamond:nth-child(4n+1)::after{animation-delay:0s}
 .host-card.tier-diamond:nth-child(4n+2)::after{animation-delay:15s}
 .host-card.tier-diamond:nth-child(4n+3)::after{animation-delay:30s}
 .host-card.tier-diamond:nth-child(4n+4)::after{animation-delay:45s}
-@keyframes diamond-shine{
-  0%{background-position:-140% 0}
-  5%{background-position:240% 0}
-  100%{background-position:240% 0}
+@keyframes gz-shine{
+  0%{opacity:0;background-position:-160% 0, 10% 12%, 90% 88%}
+  1%{opacity:1;background-position:40% 0, 10% 12%, 90% 88%}
+  2%{opacity:1;background-position:220% 0, 10% 12%, 90% 88%}
+  2.6%{opacity:0}
+  100%{opacity:0;background-position:220% 0, 10% 12%, 90% 88%}
 }
 @media (prefers-reduced-motion: reduce){
-  .mile.tier-diamond::after, .host-card.tier-diamond::after{animation:none;display:none}
+  .mile.tier-diamond::after, .host-card.tier-diamond::after, .btn::after{animation:none;display:none}
 }
+/* Opt a specific button out of the shine (e.g. the preregister-your-visit
+   CTA, which already sits in its own highlighted callout and doesn't need
+   the extra flashing motion competing with it). */
+.btn.no-shine::after, .btn.is-disabled::after{display:none}
 @media (max-width:820px){
   .tl{gap:2.2rem 0}
   /* The cascading width/indent only reads as a staircase with room to

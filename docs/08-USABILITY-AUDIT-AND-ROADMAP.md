@@ -33,6 +33,15 @@ This is a planning reference, not a bug list — everything flagged below is eit
 - **Hero mini-game:** genuinely enlarged and moved to one of the outermost, fixed-position shapes; added WASD alongside Arrow keys.
 - **Events registration:** added a 4th step, "Preregister your Cafe account," linking SENET.ID.
 
+## Part 2b — What changed 2026-08-26 (same-day follow-up round)
+
+- **Games:** the one remaining long title, "Taiko no Tatsujin: Rhythm Festival," had "The Setlist Edition" trimmed off (it wasn't actually part of the game's real name).
+- **Ambassador card readability fixed at the root, not just patched:** the chromatic tier texture's opacity was cut roughly in half, and every text/badge element on `.mile` (the Journey ladder) got an explicit `z-index` it was missing — that gap is what let the old Diamond shine paint over Journey-card text during its flash. New standing rule in `CLAUDE.md`: no decorative effect ships at a strength that hurts legibility, checked on every pass.
+- **Metallic shine rebuilt as one shared effect** ("gz-shine" in `style.css`) used by both Diamond cards and every `.btn` — exactly one flash per 60s, a crisp low-feather white sweep (no soft blur) plus two small four-point sparkle glints near the card's corners, with a true `opacity:0` rest state instead of the old off-screen-parked gradient. Replaces two separate near-duplicate effects (the old 15s btn-shine and 60s diamond-shine) with one definition to extend next time a metallic flash is needed elsewhere.
+- **Hero mini-game sized to match the background, not just "bigger":** `PATH_RADIUS` now derives from the same `A` constant that scales the decorative tunnel rings, so the ground shape reads as one of the prominent background rings rather than a separate, comparatively small shape — confirmed via an actual real-input playtest (held Left/Right, WASD, jump, and a 20-second unattended run), not just an error-console check.
+- **Calendar is keyboard-operable:** day cells are proper roving-tabindex targets with Arrow-key navigation (including across month boundaries), Enter/Space activation, and a visible focus ring — previously click/hover only.
+- **Persona feedback implemented**, not just tightened — see each persona's *Implemented* note in Part 3 below.
+
 ## On the tracking-system question
 
 Eric asked directly: if the Featured Ambassadors section isn't hitting hard enough, should we build a system to track all ambassadors?
@@ -45,12 +54,12 @@ Short answer: not yet at current scale, but it's the right next investment once 
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.
 
-- **Jaden, 16, drops in most Saturdays.** Make the hero game read as a game before he scrolls past it — he didn't realize the shape was interactive until he'd already scrolled by once.
-- **Priya, parent checking out the PC Building workshop.** Add a next-cohort date or waitlist link when a track shows "Closed" — right now two closed tracks in a row reads as "not really running."
-- **Marcus, part-time streamer considering Ambassador.** Give ambassadors a way to check their own Diamond progress without emailing staff directly.
-- **Devonte, esports club officer.** Show more than one organization example in Featured — one club card told him orgs are welcome, but a second would confirm it's a real category, not a one-off.
-- **Grace, found the Zone via Google, never been.** Add a one-line "no purchase or account needed to walk in and play" note — the three-card layout answered what/where/how, but not "am I allowed to just show up."
-- **Alex, navigates mostly by keyboard.** Improve calendar keyboard operability — the games list and hover/tap popups already work well with Tab, the calendar is the one spot that's merely functional, not smooth.
+- **Jaden, 16, drops in most Saturdays.** Make the hero game read as a game before he scrolls past it — he didn't realize the shape was interactive until he'd already scrolled by once. *Implemented 2026-08-26: the ground shape is now sized off the same background-ring scale (`A*0.4` in `techno-hero.js`) instead of a small independent size, so it's genuinely prominent right below the fold rather than a small shape a fast scroller could miss.*
+- **Priya, parent checking out the PC Building workshop.** Add a next-cohort date or waitlist link when a track shows "Closed" — right now two closed tracks in a row reads as "not really running." *Implemented 2026-08-26: a "join the waitlist" mailto link now sits under each Closed button on `edu.html` (no fabricated date, since none exists yet — a real link to get notified instead).*
+- **Marcus, part-time streamer considering Ambassador.** Give ambassadors a way to check their own Diamond progress without emailing staff directly. *Partially addressed 2026-08-26: the Journey section on `ambassador.html` now at least tells them how to ask (staff or a dedicated email) instead of leaving it unanswered — the real fix is still Roadmap #1's self-serve lookup.*
+- **Devonte, esports club officer.** Show more than one organization example in Featured — one club card told him orgs are welcome, but a second would confirm it's a real category, not a one-off. *Implemented 2026-08-26: added a second, differently-flavored org example ("Example City Youth Esports," a nonprofit youth league) alongside the original collegiate club card.*
+- **Grace, found the Zone via Google, never been.** Add a one-line "no purchase or account needed to walk in and play" note — the three-card layout answered what/where/how, but not "am I allowed to just show up." *Implemented 2026-08-26: the Preregister card's "Walk-ins always welcome" line now spells out free/no purchase/no account.*
+- **Alex, navigates mostly by keyboard.** Improve calendar keyboard operability — the games list and hover/tap popups already work well with Tab, the calendar is the one spot that's merely functional, not smooth. *Implemented 2026-08-26: calendar days are now real keyboard targets (roving `tabindex`, arrow-key navigation between days including across month boundaries, Enter/Space to activate, a visible focus ring) instead of click/hover only.*
 
 ---
 

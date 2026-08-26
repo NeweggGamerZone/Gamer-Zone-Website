@@ -61,7 +61,7 @@
     ['Roblox', 'pc'],
     ['Call of Duty: Warzone', 'pc', 'competitive'], ['Overwatch 2', 'pc', 'competitive'],
     // Party titles — played on the PCs, tagged Co-op.
-    ['Taiko no Tatsujin: Rhythm Festival The Setlist Edition', 'pc', 'coop'],
+    ['Taiko no Tatsujin: Rhythm Festival', 'pc', 'coop'],
     ['Jackbox Party Pack 4', 'pc', 'coop'], ['Jackbox Party Pack 6', 'pc', 'coop'],
     ['Jackbox Party Pack 7', 'pc', 'coop'], ['Drawful 2', 'pc', 'coop'],
     ['Castle Crashers', 'pc', 'coop'],

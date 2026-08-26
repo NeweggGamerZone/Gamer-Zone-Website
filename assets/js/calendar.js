@@ -69,9 +69,21 @@
       else cls.push('cal-free');
       if (dt === today) cls.push('today');
       const title = closed ? ' title="Closed"' : '';
-      html += `<div class="${cls.join(' ')}" data-d="${dt}"${title}><span class="dn">${d}</span></div>`;
+      // tabindex + role=button + aria-label make each day keyboard-
+      // reachable and screen-reader-legible (previously click/hover only,
+      // with no way to even focus a cell via Tab) -- see the grid keydown
+      // handler below for Arrow-key navigation between cells and
+      // Enter/Space activation, matching standard date-grid conventions.
+      const label = closed ? `${pretty(dt)}, Closed` : `${pretty(dt)}${e ? ', ' + (TYPE[e.type] || e.type) : ', Free Play'}`;
+      html += `<div class="${cls.join(' ')}" data-d="${dt}" tabindex="-1" role="button" aria-label="${label}"${title}><span class="dn">${d}</span></div>`;
     }
     grid.innerHTML = html;
+    // Exactly one cell in the grid is a Tab stop at a time (today's, or
+    // whichever was last focused) -- the roving-tabindex pattern, same as
+    // a native date picker -- so Tabbing into the calendar doesn't require
+    // stepping through every single day cell first.
+    const rovingTarget = grid.querySelector(`[data-d="${today}"]`) || grid.querySelector('[data-d]');
+    if (rovingTarget) rovingTarget.tabIndex = 0;
   }
 
   function show(dt) {
@@ -121,6 +133,43 @@
     const c = e.target.closest('.cal-cell[data-d]');
     if (!c) return;
     show(c.dataset.d);
+    grid.querySelectorAll('[data-d]').forEach(cell => { cell.tabIndex = -1; });
+    c.tabIndex = 0;
+  });
+  // Keyboard operation: Enter/Space activates the focused day (same as a
+  // click); Arrow keys move focus cell-to-cell (Left/Right = adjacent day,
+  // Up/Down = same weekday, previous/next week) rather than only being
+  // reachable by Tabbing past every single day. Moving past the start/end
+  // of the currently-rendered month advances the calendar itself (via the
+  // existing prev/next buttons' own click handlers) and lands focus on the
+  // matching day in the newly-rendered month, so Arrow navigation never
+  // just dead-ends at a month boundary.
+  grid.addEventListener('keydown', e => {
+    const c = e.target.closest('.cal-cell[data-d]');
+    if (!c) return;
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      show(c.dataset.d);
+      return;
+    }
+    const deltas = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    const delta = deltas[e.key];
+    if (delta === undefined) return;
+    e.preventDefault();
+    const d = new Date(c.dataset.d + 'T12:00:00');
+    d.setDate(d.getDate() + delta);
+    const sameMonth = d.getMonth() === view.getMonth() && d.getFullYear() === view.getFullYear();
+    if (!sameMonth) {
+      view = new Date(d.getFullYear(), d.getMonth(), 1);
+      render();
+    }
+    const next = grid.querySelector(`[data-d="${iso(d.getFullYear(), d.getMonth(), d.getDate())}"]`);
+    if (next) {
+      grid.querySelectorAll('[data-d]').forEach(cell => { cell.tabIndex = -1; });
+      next.tabIndex = 0;
+      next.focus();
+      show(next.dataset.d);
+    }
   });
   // Preview a day's event just by hovering — no click needed on desktop.
   // Closed days show too (with a "Closed" tag), so hovering always tells
