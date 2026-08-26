@@ -113,18 +113,28 @@
     <div style="margin-top:1rem">
       <details class="archive-month" open><summary>Street Fighter Saturday Slam: 07/25/2026</summary>
         <p class="dim" style="margin-top:.6rem">Thanks for coming to one of our largest Street Fighter tournaments! Featuring some of Southern California's best fighters, folks enjoyed free play, intense matches, and raffle prizes throughout!</p>
-        <div class="photo-waterfall" style="margin-top:1rem">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05187.jpg" alt="Street Fighter Saturday Slam group photo, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05060.jpg" alt="Street Fighter Saturday Slam, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05090.jpg" alt="Street Fighter Saturday Slam, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05108.jpg" alt="Street Fighter Saturday Slam, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05114.jpg" alt="Street Fighter Saturday Slam, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05124.jpg" alt="Street Fighter Saturday Slam, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05131.jpg" alt="Street Fighter Saturday Slam, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05176.jpg" alt="Street Fighter Saturday Slam, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05097.jpg" alt="Street Fighter Saturday Slam prize winner, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05128.jpg" alt="Street Fighter Saturday Slam prize winner, July 25, 2026" loading="lazy">
-          <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05191.jpg" alt="Street Fighter Saturday Slam prize winner, July 25, 2026" loading="lazy">
+        <!-- Three photos cycle on screen at once (assets/js/photo-waterfall.js),
+             each fading independently into its next photo from the pool
+             below in the <template> -- add/remove <img> entries there to
+             change the pool; the three visible slots above pick it up
+             automatically, no JS edit needed. -->
+        <div class="photo-waterfall" data-cycle style="margin-top:1rem">
+          <div class="pw-slot"><img alt="" loading="lazy"></div>
+          <div class="pw-slot"><img alt="" loading="lazy"></div>
+          <div class="pw-slot"><img alt="" loading="lazy"></div>
+          <template>
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05187.jpg" alt="Street Fighter Saturday Slam group photo, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05060.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05090.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05108.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05114.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05124.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05131.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05176.jpg" alt="Street Fighter Saturday Slam, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05097.jpg" alt="Street Fighter Saturday Slam prize winner, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05128.jpg" alt="Street Fighter Saturday Slam prize winner, July 25, 2026">
+            <img src="assets/img/StreetFighterSaturdaySlam-07-25/DSC05191.jpg" alt="Street Fighter Saturday Slam prize winner, July 25, 2026">
+          </template>
         </div>
       </details>
     </div>
@@ -212,5 +222,6 @@
 <script src="assets/js/events.js?v=56" defer></script>
 <script src="assets/js/calendar.js?v=56" defer></script>
 <script src="assets/js/event-update.js?v=56" defer></script>
+<script src="assets/js/photo-waterfall.js?v=56" defer></script>
 </body>
 </html>

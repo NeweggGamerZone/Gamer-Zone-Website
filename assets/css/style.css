@@ -1142,25 +1142,33 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 }
 
 /* ===== Past Events photo waterfall ===== */
-/* Pinterest-style masonry collage — every photo keeps its own natural
-   aspect ratio and CSS multi-column flow packs each one into whichever
-   column is currently shortest, so the grid staggers itself the same way
-   the reviews-waterfall cards do, just via columns instead of rows. No JS
-   needed: this fully replaces the old single-photo prev/active/next
-   carousel (.photo-carousel above), which only ever showed one photo at
-   a time behind paging arrows. */
-.photo-waterfall{column-count:3;column-gap:.9rem}
-.photo-waterfall img{
-  width:100%;display:block;margin:0 0 .9rem;border-radius:2px;
-  border:1px solid var(--line);break-inside:avoid;
-  transition:transform .3s ease, filter .3s ease, box-shadow .3s ease;
-}
-.photo-waterfall img:hover{transform:scale(1.015);filter:brightness(1.06);box-shadow:0 6px 18px rgba(0,0,0,.4)}
-@media (max-width:900px){.photo-waterfall{column-count:2}}
-@media (max-width:560px){.photo-waterfall{column-count:1;column-gap:0}}
+/* 2026-08-26 redesign (per Eric): three photos on screen at once, each in
+   its own fixed slot, cycling independently through the recap's full
+   photo pool with a cross-fade — matching the reviews section's
+   "waterfall" naming and fade treatment (see .review-waterfall above),
+   but keeping all 3 slots at once instead of 1, since fixed-aspect-ratio
+   photo tiles don't have the wildly-varying-height problem that pushed
+   reviews down to a single slot (see reviews.js's own comment for that
+   history) — a plain CSS aspect-ratio here is a safe, standard use (this
+   is fixed media in a known ratio, not unpredictable-length text, so it
+   doesn't run into the "aspect-ratio as forced height" clipping trap the
+   project's container/sizing rules warn about elsewhere). Cycling logic
+   lives in assets/js/photo-waterfall.js; this replaces the previous
+   always-all-visible CSS-columns masonry, which showed all 11 photos at
+   once with no motion. Stays 3 columns at every breakpoint (not
+   collapsing to 1-2 on narrower screens) so it's still genuinely "three
+   photos at a time" on mobile, just smaller tiles, rather than silently
+   changing what the section shows depending on viewport width. */
+.photo-waterfall{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+.photo-waterfall .pw-slot{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:2px;border:1px solid var(--line);background:var(--bg-3)}
+.photo-waterfall .pw-slot img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .42s ease, transform .3s ease, filter .3s ease;}
+.photo-waterfall .pw-slot.is-fading img{opacity:0}
+.photo-waterfall .pw-slot img:hover{transform:scale(1.03);filter:brightness(1.06)}
+@media (max-width:560px){.photo-waterfall{gap:.4rem}}
 @media (prefers-reduced-motion: reduce){
-  .photo-waterfall img{transition:none}
+  .photo-waterfall .pw-slot img{transition:none}
 }
+html.board-mode .photo-waterfall .pw-slot img{opacity:1;transition:none}
 
 /* ===== Ambassador Featured Hosts placeholder cards ===== */
 /* Every card sizes to its own content (no fixed height/clipping) — CSS
