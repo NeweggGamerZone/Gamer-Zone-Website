@@ -268,7 +268,6 @@ html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; tr
 .reg-step { text-align: center; }
 .reg-step-top { display: flex; flex-direction: column; align-items: center; gap: .5rem; margin-bottom: .5rem; }
 .reg-step-num { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, var(--ne-orange), #c96f10); color: #fff; font-family: var(--head); font-weight: 800; font-size: 1.55rem; box-shadow: 0 0 0 4px rgba(250,157,40,.18), 0 6px 18px rgba(0,0,0,.4); }
-.reg-step-icon .ic { width: 20px; height: 20px; fill: #fff; opacity: .8; }
 .reg-step h3 { text-align: center; }
 .reg-step p.dim { text-align: left; }
 /* Verkada callout: highlighted box calling out the Verkada guest pass as the
