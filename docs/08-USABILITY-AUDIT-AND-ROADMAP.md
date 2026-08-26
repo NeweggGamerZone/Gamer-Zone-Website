@@ -63,6 +63,22 @@ Eric asked for a full audit confirming every section across the site actually us
 
 **No other sections needed changes.** Card grids with few items (e.g. Games' VR/Racing Simulators lists) correctly hold the shared container width with the grid reflowing around whatever count of items is actually there, rather than shrinking to fit — the correct behavior per the container-width rule, not a bug to fix.
 
+## Part 2e — WCAG AAA readability upgrade + full color audit (2026-08-26)
+
+Per Eric: raise the site's readability bar from WCAG 2.1 AA to AAA (7:1 contrast for normal text, 4.5:1 for large text — non-text UI/graphical elements have no AAA tier in the spec, so those stay at AA's 3:1 floor) and audit every color on the site against it. `CLAUDE.md`'s "Readability" rule and QA-workflow readability check were both updated to the new bar first.
+
+**Method:** computed WCAG relative-luminance contrast ratios programmatically (not eyeballed) for every text/background color pair actually used in `style.css` — the root palette, every tier/flare/badge/tag color, and the three photo-overlay gradients that sit text over an unpredictable blurred image (tested against a worst-case near-white photo, not just the solid card surfaces). Verified every fix both offline and live in a headless browser (`getComputedStyle` against the actual rendered page), then screenshotted the affected components (Ambassador class cards, tier ladder, attendance bonuses, calendar tags, the navy Discord button) to confirm nothing reads washed out.
+
+**Findings and fixes** (full reasoning recorded in the contrast-rule comment at the top of `style.css`):
+- `--ne-blue-text` (#3D8BFF, the site's link/accent blue) cleared AA's 4.5:1 everywhere but fell as low as 5.06:1 against `--ne-navy` — brightened to #6FA9FF, which clears 7:1 on every dark surface used site-wide.
+- `--ne-navy-glow` darkened (#0F5FD1 -> #0D54B9) so white button text (`.btn.navy`, the "Join the Gamer Zone Discord" button) clears 7:1 instead of 5.87:1.
+- `--cal-closed`, `--cal-free`, and `--cal-amb` (three of the six calendar tag colors) lightened so their black tag text clears 7:1 instead of 5.5/6.34/6.5:1. The other three tag colors already cleared 7:1 and are unchanged.
+- The photo-overlay gradient alpha stops (`.eu-board`/`.cal-board`/`.cal-detail`) bumped from .86/.90/.96 to .93/.95/.97 so text over a worst-case bright photo still clears 7:1, not just AA's 4.5:1.
+- The Diamond "crimson" flare, the sg-bronze attendance-bonus color, and the Ambassador "sword" class color each needed a small brightness bump; the Ambassador "shield" class color now reuses `--ne-blue-text` instead of its own hardcoded (and now-outdated) hex, so it can't drift out of sync with that fix again.
+- Data-visualization colors (the SENET pie chart's slice palette) were deliberately left unchanged — they're graphical, not text, so AAA's text criteria don't apply, and keeping them visually distinct from UI text colors is normal practice for a chart legend.
+
+No layout, copy, or functional changes — this was a color-only pass. Re-run this same computed-contrast method (not a visual eyeball) any time a new color is introduced anywhere on the site.
+
 ## On the tracking-system question
 
 Eric asked directly: if the Featured Ambassadors section isn't hitting hard enough, should we build a system to track all ambassadors?

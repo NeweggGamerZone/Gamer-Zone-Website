@@ -1,37 +1,56 @@
 /* ============ Newegg Gamer Zone — brand styles v2 ============
    Newegg navy #002D6A · Newegg orange #FA9D28 · GZ black
 
-   ---- Contrast rule (WCAG 2.1 AA) — apply to every new color choice ----
-   Any text/background pair must hit at least 4.5:1, or 3:1 for large text
-   (>=24px, or >=18.66px at bold 700+) and for icon-style/decorative marks
-   judged as graphical UI per SC 1.4.11. Full-site audit done 2026-08 —
-   findings and fixes below, re-check anything new against the same bar:
-     - --ink (#fff), --ink-dim (#A6AEBC) and --ne-blue-text (#3D8BFF) all
-       clear 4.5:1 against every solid surface in this file (--bg/--bg-2/
-       --bg-3/--ne-navy) — safe to reuse as-is on those surfaces. --ink-dim
-       was lightened from #98A0AE to #A6AEBC (2026-08) so it also clears
-       4.5:1 against the lighter grey-on-grey .cal-cell.cal-closed swatch
-       (rgba(124,131,143,.32)), not just the near-black card surfaces.
+   ---- Contrast rule (WCAG 2.1 AAA) — apply to every new color choice ----
+   Raised from AA to AAA 2026-08-26 per Eric's call. Any text/background
+   pair must hit at least 7:1, or 4.5:1 for large text (>=24px, or
+   >=18.66px at bold 700+). Non-text UI/graphical marks (icons, borders,
+   focus rings) have no AAA tier in the spec — hold those to AA's 3:1
+   floor, per SC 1.4.11. Full-site AAA re-audit done 2026-08-26 — findings
+   and fixes below, re-check anything new against the same bar:
+     - --ink (#fff) and --ink-dim (#A6AEBC) both clear 7:1 against every
+       solid surface in this file (--bg/--bg-2/--bg-3/--ne-navy) — safe to
+       reuse as-is on those surfaces, no change needed from the AA pass.
+     - --ne-blue-text was brightened from #3D8BFF to #6FA9FF: the AA-era
+       value cleared AA's 4.5:1 everywhere but fell short of AAA's 7:1 on
+       every dark surface (as low as 5.06:1 against --ne-navy). The new
+       value clears 7:1 against bg/bg-2/bg-3/ne-navy with the least margin
+       (7.03:1) on ne-navy, so don't reuse the old hex anywhere new.
      - Colored badges/tags need BLACK text, not white, on brighter/lighter
        swatches (orange, cyan, green, pink, yellow, gray) — but blue
-       (--cal-free) specifically fails with white text at ~3.9:1, so it
-       uses black text instead (see .tag.cal-closed/.cal-free).
+       (--cal-free) specifically fails with white text, so it uses black
+       text instead (see .tag.cal-closed/.cal-free).
+     - --cal-closed, --cal-free, and --cal-amb were each lightened
+       (#7C838F->#9096A0, #3D8BFF->#4D95FF, #E85DA0->#EA68A6) so their tag
+       badges clear 7:1 with black text — the AA pass only needed 4.5:1
+       and left these three short of AAA. --cal-theme/--cal-edu/--cal-major
+       already cleared 7:1 with black text and are unchanged.
      - Any new accent color meant to be used AS text color on a near-black
-       card (e.g. --fc in .flyer-card) needs to independently clear 4.5:1
+       card (e.g. --fc in .flyer-card) needs to independently clear 7:1
        against #0a0b0d — don't assume a brand color is bright enough just
        because it looks vivid; check it (red #E31B54 measured 4.27:1 and
-       was swapped for #FF3B66, which passes both directions).
+       was swapped for #FF3B66, which passes both directions at AA; --fc
+       is only ever used as a border color today, not text, so it wasn't
+       revisited in the AAA pass — recheck it for real if that changes).
      - Photo-backed panels (.eu-board/.cal-board/.cal-detail) sit text over
-       an unpredictable blurred image — the dark ::after gradient overlay is
-       tuned (.86/.90/.96 alpha stops) so --ink-dim and --ne-blue-text both
-       still clear 4.5:1 even in a worst-case bright-photo test. Don't lower
-       those alpha values without re-running that check.
-     - --cal-closed is now a neutral gray (#7C838F, 5.5:1 with black text)
-       instead of red — still needs black text like the other tag colors.
-       --cal-major (the site's orange) used as text on the eu-board photo
+       an unpredictable blurred image — the dark ::after gradient overlay's
+       alpha stops were bumped from .86/.90/.96 to .93/.95/.97 (2026-08-26)
+       so --ink-dim and the new --ne-blue-text both still clear 7:1 even in
+       a worst-case bright (near-white) photo test. Don't lower those alpha
+       values without re-running that check against 7:1, not the old 4.5:1.
+     - --cal-major (the site's orange) used as text on the eu-board photo
        overlay measures 7.6:1 even in the worst-case bright-photo test —
        reuse it (not a fresh color) for anything meant to read as
        "tournament/major" so it's pre-verified safe on that surface.
+     - Tier/flare/class-icon accent colors (silver/gold/platinum/diamond
+       node badges, the three Diamond flares, the three Ambassador class
+       colors, the three attendance-bonus sg-* colors) were re-checked
+       individually against their actual backgrounds — the diamond-crimson
+       flare (#ff6b82->#FF6E85), sg-bronze (#CD7F32->#D69555), the
+       Ambassador "shield" class color (now reuses --ne-blue-text instead
+       of its own hardcoded #3D8BFF), and the "sword" class color
+       (#E85DA0->#ED7FB4) all needed small bumps to clear 7:1 as text;
+       everything else in that set already cleared it.
    ------------------------------------------------------------------------ */
 /* Self-hosted Montserrat/Open Sans — previously loaded from Google Fonts'
    CDN (fonts.googleapis.com / fonts.gstatic.com). That's fine for real
@@ -66,8 +85,8 @@
   --ne-orange: #FA9D28;
   --ne-orange-deep: #E07C00;
   --ne-navy: #031B47; /* matched to Newegg's actual site navy */
-  --ne-navy-glow: #0F5FD1; /* deeper, more saturated accent blue */
-  --ne-blue-text: #3D8BFF; /* brighter/more vivid electric blue — WCAG AA vs dark bg */
+  --ne-navy-glow: #0D54B9; /* deeper, more saturated accent blue -- darkened 2026-08-26 (from #0F5FD1) so white text on it, e.g. .btn.navy, clears WCAG AAA's 7:1 */
+  --ne-blue-text: #6FA9FF; /* brighter/more vivid electric blue — brightened 2026-08-26 (from #3D8BFF) to clear WCAG AAA's 7:1 against every dark surface, not just AA's 4.5:1 */
   --bg: #060708;
   --bg-2: #0E1013;
   --bg-3: #16181D;
@@ -775,8 +794,8 @@ body.home-page { background: transparent; }
 .sg-badge { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; margin-bottom:.5rem; }
 .sg-badge .ic { width:18px; height:18px; fill:currentColor; }
 .sg-unlock { display:block; font-family:var(--head); font-weight:800; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem; }
-.sg-bronze .sg-badge { background:rgba(205,127,50,.18); color:#CD7F32; }
-.sg-bronze .sg-unlock { color:#CD7F32; }
+.sg-bronze .sg-badge { background:rgba(214,149,85,.18); color:#D69555; }
+.sg-bronze .sg-unlock { color:#D69555; }
 .sg-silver .sg-badge { background:rgba(169,188,205,.18); color:#a9bccd; }
 .sg-silver .sg-unlock { color:#a9bccd; }
 .sg-gold .sg-badge { background:rgba(250,157,40,.18); color:var(--ne-orange); }
@@ -822,8 +841,8 @@ body.home-page { background: transparent; }
 /* Color-code legend: Closed=red, Free Play=blue, Theme Day=light blue,
    EDU/Esports=green, Ambassador=pink, Major/Tournament=orange. */
 :root{
-  --cal-closed:#7C838F; --cal-free:#3D8BFF; --cal-theme:#5FD3E8;
-  --cal-edu:#3FBF6B; --cal-amb:#E85DA0; --cal-major:var(--ne-orange);
+  --cal-closed:#9096A0; --cal-free:#4D95FF; --cal-theme:#5FD3E8;
+  --cal-edu:#3FBF6B; --cal-amb:#EA68A6; --cal-major:var(--ne-orange);
 }
 .cal-board{position:relative;padding:clamp(1.4rem,3.6vw,2.2rem);overflow:hidden}
 /* The blur/darken/desaturate treatment is baked into the -blurred.jpg
@@ -837,7 +856,7 @@ body.home-page { background: transparent; }
 /* Darkened enough (WCAG-checked against a worst-case bright photo) that
    --ink-dim and the blue accent both still clear 4.5:1 no matter what's
    underneath — see the site-wide contrast rule near the top of this file. */
-.cal-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
+.cal-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97));}
 .cal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start}
 @media(max-width:820px){.cal-wrap{grid-template-columns:1fr}}
 .cal{background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1rem}
@@ -915,7 +934,7 @@ body.home-page { background: transparent; }
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center}
-.cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96))}
+.cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97))}
 .cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
 .cal-detail h3{font-family:var(--head);font-weight:800;font-size:1.46rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .cal-detail .cd-sub{font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--ne-blue-text);margin:0 0 .6rem;text-shadow:0 1px 10px rgba(0,0,0,.7);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
@@ -961,14 +980,18 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .amb-class-icon .ic{width:30px;height:30px;color:var(--ne-orange)}
 .amb-class-tag{display:inline-block;font-family:var(--head);font-weight:800;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ne-orange);margin-bottom:.35rem}
 .amb-type h3{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:1rem;margin:.1rem 0 .5rem}
-.amb-type.class-shield{border-top-color:#3D8BFF}
-.amb-type.class-shield .amb-class-icon{border-color:#3D8BFF}
-.amb-type.class-shield .amb-class-icon .ic{color:#3D8BFF}
-.amb-type.class-shield .amb-class-tag{color:#3D8BFF}
-.amb-type.class-sword{border-top-color:#E85DA0}
-.amb-type.class-sword .amb-class-icon{border-color:#E85DA0}
-.amb-type.class-sword .amb-class-icon .ic{color:#E85DA0}
-.amb-type.class-sword .amb-class-tag{color:#E85DA0}
+/* class-shield reuses --ne-blue-text (2026-08-26) instead of its own
+   hardcoded #3D8BFF -- that hex was the AA-era blue, replaced site-wide
+   by the brighter AAA-safe --ne-blue-text; reusing the variable here
+   means this can never drift back out of sync with that fix. */
+.amb-type.class-shield{border-top-color:var(--ne-blue-text)}
+.amb-type.class-shield .amb-class-icon{border-color:var(--ne-blue-text)}
+.amb-type.class-shield .amb-class-icon .ic{color:var(--ne-blue-text)}
+.amb-type.class-shield .amb-class-tag{color:var(--ne-blue-text)}
+.amb-type.class-sword{border-top-color:#ED7FB4}
+.amb-type.class-sword .amb-class-icon{border-color:#ED7FB4}
+.amb-type.class-sword .amb-class-icon .ic{color:#ED7FB4}
+.amb-type.class-sword .amb-class-tag{color:#ED7FB4}
 .amb-type.class-bow{border-top-color:#3FBF6B}
 .amb-type.class-bow .amb-class-icon{border-color:#3FBF6B}
 .amb-type.class-bow .amb-class-icon .ic{color:#3FBF6B}
@@ -1099,8 +1122,8 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .host-card.tier-diamond[data-flare="aurora"] .node{background:#8fffe0}
 .host-card.tier-diamond[data-flare="amethyst"]{--tier-c:#b08fff;border-color:#b08fff}
 .host-card.tier-diamond[data-flare="amethyst"] .node{background:#b08fff}
-.host-card.tier-diamond[data-flare="crimson"]{--tier-c:#ff6b82;border-color:#ff6b82}
-.host-card.tier-diamond[data-flare="crimson"] .node{background:#ff6b82}
+.host-card.tier-diamond[data-flare="crimson"]{--tier-c:#FF6E85;border-color:#FF6E85}
+.host-card.tier-diamond[data-flare="crimson"] .node{background:#FF6E85}
 
 /* ===== Unified metallic shine ("gz-shine") =====
    2026-08-25 rebuild, replacing two separate near-duplicate effects (the
@@ -1428,7 +1451,7 @@ html:not(.board-mode) .eu-board{aspect-ratio:1/1;min-height:0}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
-.eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.86),rgba(4,5,7,.9) 55%,rgba(4,5,7,.96));}
+.eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97));}
 .eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.5rem,1.3cqw,.75rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
 /* Masthead icon+textcol block grows to fill the full width of .eu-top
