@@ -989,27 +989,21 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mile.tier-diamond .mc-num{color:#8fe3ff}
 .mile.tier-diamond .rank-badge{border-color:#8fe3ff;color:#8fe3ff}
 
-/* Chromatic texturing — a faceted, low-opacity crosshatch tinted to each
-   tier's own --tier-c, sitting behind the card's real content (z-index:0;
-   the content itself is bumped to z-index:2 on both .host-card and .mile
-   -- every text/badge element in both gets an explicit z-index:2 now; .mile
-   previously had gaps here (its unlock title, bullet list, count badge and
-   rank badge had no z-index at all), which let the old Diamond shine paint
-   ON TOP of that text during its flash instead of behind it. That gap is
-   what was actually driving the "text goes unreadable" complaint, not just
-   the texture itself). 2026-08-25: also cut this texture's own opacity
-   roughly in half (14/9% -> 6/4%) — even correctly layered behind text, a
-   crosshatch this strong reads as a busy grid competing with the copy
-   sitting on top of it rather than a subtle "this card has rank" flavor.
-   Standing rule going forward, also in this repo's CLAUDE.md: no decorative
-   texture/effect ships at a strength that reduces text legibility, on this
-   component or any other -- check this on every visual pass. */
-.mile::before, .host-card::before{
-  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
-  background:
-    repeating-linear-gradient(115deg, color-mix(in srgb, var(--tier-c, transparent) 6%, transparent) 0 3px, transparent 3px 22px),
-    repeating-linear-gradient(25deg, color-mix(in srgb, var(--tier-c, transparent) 4%, transparent) 0 3px, transparent 3px 30px);
-}
+/* 2026-08-26: the chromatic crosshatch texture that used to sit here (a
+   faceted, low-opacity diagonal lattice behind .mile/.host-card content,
+   tinted to each tier's --tier-c) was removed outright per Eric's explicit
+   call — even after halving its opacity and fixing the z-index gaps that
+   let it read as worse than it was, it still read as "a grid" competing
+   with the card's real text rather than a subtle material finish. Rank
+   flavor now comes entirely from the border/glow (below) and the Diamond
+   shine, not a persistent background pattern. Do not re-add a texture
+   here without confirming it holds up against the readability rule in
+   CLAUDE.md first — this is the second visual attempt at "rank flavor" on
+   this component that ran into that exact problem.
+   The real .mile/.host-card content still keeps its explicit z-index:2
+   (see the .host-card rules above and .mile-count/.unlock/ul/.rank-badge
+   below) so it stays correctly layered above the Diamond shine regardless
+   of whatever ships here in the future. */
 
 /* Diamond "flare" — a few subtle color-tinge variants layered on top of
    the base diamond blue, for fun/rarity flavor once ambassadors are
