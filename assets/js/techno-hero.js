@@ -277,7 +277,16 @@
     // bug: there's never a frozen anchor left over from before a scroll.
     const r = heroStackEl.getBoundingClientRect();
     anchorX = r.left + r.width / 2;
-    anchorY = r.top + r.height / 2; // dead center of the "GET IN / THE ZONE" heading, per Eric's redesign
+    // 2026-08-26 (per Eric: "move the white shape down by 15%"): offset the
+    // anchor 15% of the viewport height below the heading's true center,
+    // rather than sitting exactly on it. Sized off H (the canvas viewport
+    // height, recomputed in size() on resize) rather than a fixed pixel
+    // value or PATH_RADIUS, so the shift scales consistently across screen
+    // sizes the same way every other size in this file already does, and
+    // stays resize-driven, never scroll-driven (same rule sizeGame() above
+    // already follows). This moves the whole game (ground shape, character,
+    // hazards) down together, since all of it is anchored off anchorY.
+    anchorY = r.top + r.height / 2 + H * 0.15;
     // baseRingZ is the one fixed depth at which a hazard ring visually
     // arrives exactly at the anchor point (see hazardScreenPos below) —
     // solved the same way the tunnel's own rings scale with depth
