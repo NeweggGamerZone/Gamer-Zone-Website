@@ -302,7 +302,17 @@ html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; tr
    colored glyph it used to be. */
 .reg-step { text-align: center; }
 .reg-step-top { display: flex; flex-direction: column; align-items: center; gap: .5rem; margin-bottom: .5rem; }
-.reg-step-num { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, var(--ne-orange), #c96f10); color: #fff; font-family: var(--head); font-weight: 800; font-size: 1.55rem; box-shadow: 0 0 0 4px rgba(250,157,40,.18), 0 6px 18px rgba(0,0,0,.4); }
+/* Number color: black, not white -- this was the one spot on the site
+   where light text sat directly on the orange background instead of
+   following the same black-on-orange pattern every other orange badge
+   uses (.btn, .tag.orange, .chip.active, .node, .pin-btn, etc). White
+   measured 2.12:1 at the gradient's light end and 3.64:1 at its dark
+   end -- both well under WCAG AAA's 4.5:1 large-text minimum. Black
+   clears 9.92:1 / 5.76:1 at the same two points -- still not a full
+   7:1 at the darkest corner, but this text is 24.8px bold (>=24px
+   counts as "large text" under AAA, whose bar there is 4.5:1, not
+   7:1), so it's a comfortable pass throughout the gradient. */
+.reg-step-num { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, var(--ne-orange), #c96f10); color: #000; font-family: var(--head); font-weight: 800; font-size: 1.55rem; box-shadow: 0 0 0 4px rgba(250,157,40,.18), 0 6px 18px rgba(0,0,0,.4); }
 .reg-step h3 { text-align: center; }
 .reg-step p.dim { text-align: left; }
 /* Verkada callout: highlighted box calling out the Verkada guest pass as the
@@ -558,9 +568,7 @@ details.archive-month .grid { margin-top: 1rem; }
    h3 title read as broken/cut-off content when shown through that sliver
    -- centered text means the visible edge shows a mid-word fragment (e.g.
    "OADCAST" instead of "Broadcast", "ACING & IMMERS" instead of "Racing &
-   Immersive") rather than a clean preview. Peeking cards now show only the
-   art + the ZONE badge, which is plenty to tell you "there's another zone
-   over here" without any text getting visibly severed. */
+   Immersive") rather than a clean preview. */
 .zone-card[data-pos="prev"] .zone-card-body p,
 .zone-card[data-pos="next"] .zone-card-body p,
 .zone-card[data-pos="far-prev"] .zone-card-body p,
@@ -569,19 +577,22 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-card[data-pos="next"] .zone-card-body h3,
 .zone-card[data-pos="far-prev"] .zone-card-body h3,
 .zone-card[data-pos="far-next"] .zone-card-body h3 { display: none; }
-/* The ZONE badge itself was also getting visibly severed on peeking cards:
-   it's anchored to the card's own top-RIGHT corner, but a peeking card's
-   own left and right edges are each hidden -- one by .zone-stack's
-   overflow:hidden, the other by the front/center card painted on top of it
-   (higher z-index) -- leaving only a narrow strip through the middle of the
-   peeking card actually visible. A right-anchored badge sits mostly outside
-   that middle strip (for "next" it's entirely outside it, so the badge
-   never appeared at all). Re-centering it horizontally puts it inside the
-   one part of the card that's reliably visible on both sides. */
+/* The ZONE badge is also hidden on every peeking position (2026-08-26,
+   pixel-verified contrast audit) -- it used to stay visible and
+   re-centered here as "enough to say there's another zone over here,"
+   but that reasoning didn't account for .zone-card's own opacity
+   (.3 near peek / .14 far peek per Eric's second peek layer, added the
+   same day) pulling the badge's black-on-orange text toward whatever's
+   behind the whole card, collapsing their contrast to as low as 1.07:1
+   -- nowhere near AAA's 7:1, and not fixable by recoloring alone since
+   it's the *opacity*, not the color, doing the damage. The card's own
+   art plus its position in the stack already reads as "another zone is
+   here" without needing the badge to survive being faded that far. */
 .zone-card[data-pos="prev"] .zone-card-code,
 .zone-card[data-pos="next"] .zone-card-code,
 .zone-card[data-pos="far-prev"] .zone-card-code,
-.zone-card[data-pos="far-next"] .zone-card-code { left: 50%; right: auto; transform: translateX(-50%); }
+.zone-card[data-pos="far-next"] .zone-card-code,
+.zone-card[data-pos="hidden"] .zone-card-code { display: none; }
 .zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
 .zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
 .zone-stack-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }
@@ -877,11 +888,27 @@ body.home-page { background: transparent; }
    through rather than a small mark sitting inside it. Line thickness
    bumped slightly (1.5px -> 2px half-width) since the same line now
    crosses a longer diagonal, so it doesn't read as thinner/sparser than
-   before at the new, larger size. */
+   before at the new, larger size.
+   2026-08-26 (same day, follow-up): a pixel-verified contrast audit
+   caught a real regression from the change above -- the X now crosses
+   directly through the cell's own day-number text instead of staying
+   confined to a smaller inset area, so the white .dn number sits on
+   this X-mark color at its most-visible point, not just the cell's
+   base tint. At the old rgba(124,131,143,.9) that measured only
+   4.25:1 -- under WCAG AAA's 7:1.
+   2026-08-26 (second follow-up, same day): Eric flagged this by eye
+   before the first fix's darker gray (80,80,80) had even shipped --
+   still not dark enough for him to read the number comfortably.
+   Darkened further to rgb(35,35,35) at the same .9 alpha (15.38:1
+   with white text, a large buffer past the 7:1 floor) -- reads as a
+   clearly dark grey X, with the number now popping cleanly on top of
+   it instead of competing with it. Re-check this pairing with the
+   pixel audit (see the contrast-rule comment near the top of this
+   file) if either color changes again. */
 .cal-cell.cal-closed::before{content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    linear-gradient(45deg, transparent calc(50% - 2px), rgba(124,131,143,.9) calc(50% - 2px), rgba(124,131,143,.9) calc(50% + 2px), transparent calc(50% + 2px)),
-    linear-gradient(-45deg, transparent calc(50% - 2px), rgba(124,131,143,.9) calc(50% - 2px), rgba(124,131,143,.9) calc(50% + 2px), transparent calc(50% + 2px));
+    linear-gradient(45deg, transparent calc(50% - 2px), rgba(35,35,35,.9) calc(50% - 2px), rgba(35,35,35,.9) calc(50% + 2px), transparent calc(50% + 2px)),
+    linear-gradient(-45deg, transparent calc(50% - 2px), rgba(35,35,35,.9) calc(50% - 2px), rgba(35,35,35,.9) calc(50% + 2px), transparent calc(50% + 2px));
 }
 .cal-cell.cal-free{background:rgba(61,139,255,.24);border-color:var(--cal-free)}
 .cal-cell.cal-theme{background:rgba(95,211,232,.26);border-color:var(--cal-theme)}
@@ -901,7 +928,7 @@ body.home-page { background: transparent; }
 @keyframes cal-today-flash{0%,4%,100%{opacity:0}1.6%,2.4%{opacity:.55}}
 @media (prefers-reduced-motion: reduce){.cal-cell.today::after{animation:none;display:none}}
 .cal-cell.sel{box-shadow:inset 0 0 0 3px #fff}
-.cal-cell .dn{font-family:var(--head);font-weight:700;font-size:.82rem;color:var(--ink);position:relative;z-index:1}
+.cal-cell .dn{font-family:var(--head);font-weight:700;font-size:1.05rem;color:var(--ink);position:relative;z-index:1}
 .cal-legend{display:flex;gap:.9rem;margin-top:.9rem;font-size:.68rem;color:var(--ink-dim);flex-wrap:wrap}
 .cal-legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}
 .cal-legend i.lg-closed{background:var(--cal-closed)}
@@ -1440,7 +1467,23 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    whichever viewport width lands closest to its own target ratio using
    the un-scaled min-height floor above -- this rule and the JS scaling
    step both leave that pipeline untouched. */
-html:not(.board-mode) .eu-board{aspect-ratio:1/1;min-height:0}
+/* justify-content:center added 2026-08-26 -- Eric flagged that the live
+   square board "still isn't square." The BOX itself was already a true
+   1:1 square (confirmed via getBoundingClientRect at every breakpoint),
+   but .eu-board's base rule never actually set justify-content (this
+   comment block below claimed .eu-board-inner was centered "via its own
+   justify-content," but no such rule existed outside board-mode) -- so
+   on any week whose content is shorter than the forced square height,
+   .eu-board-inner (a flex item with no stretch/flex:1) sits pinned to
+   the top with the rest of the square empty and black beneath it. That
+   reads as "not square" even though it technically is: a tall content
+   block sitting in the top slice of a square, not a square. Centering
+   vertically distributes that leftover space evenly above and below
+   instead, so the square reads as a deliberate, filled square at any
+   content length -- matching what board-mode already does for its own
+   export capture (html.board-mode .eu-board{justify-content:center}
+   below), which is the precedent this follows. */
+html:not(.board-mode) .eu-board{aspect-ratio:1/1;min-height:0;justify-content:center}
 /* .eu-board-inner takes over .eu-board's own former flex-column role for
    its children (.board-logo's align-self:center, .eu-bottom-group's
    board-mode margin-top:auto, etc. all still assume a flex-column

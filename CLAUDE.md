@@ -19,6 +19,7 @@ This is v1 of this file, consolidated 2026-08-26 from everything established acr
 9. **Every visitor-facing change should make someone feel more wowed, seen, or accepted — never less.** These are real design goals, not vibes. See "Soft goals" below, and run the gut-check in the QA workflow.
 10. **In any card grid, a title's line count must never shift where the content below it starts.** A one-line title and a two-line title, sitting side by side, must still line up on the row beneath them. See "Card row alignment" below.
 11. **No feature or change is "done" until it has been explicitly checked against every rule above.** Run the QA checklist at the end of this file before considering any change finished, and again before pushing to `main` — treat this file as an active checklist to execute, not background reading.
+12. **Run the pixel-verified WCAG AAA contrast audit on every passover — every content update and every page change, not only layout/visual work.** A manual/grep-based color check is not sufficient; it already missed a real failure (`.reg-step-num` white-on-orange) that only surfaced because Eric caught it by eye. See "Readability" below for the exact method and how to run it.
 
 ---
 
@@ -53,6 +54,24 @@ No decorative texture, glow, shine, or background effect ships (or stays shipped
 - **Z-index every layer explicitly.** Any element that layers a decorative background behind real text must keep every text/interactive child at a higher `z-index` than the effect — check this explicitly, don't assume default stacking gets it right. The 2026-08-25 "grids make the text unreadable" bug happened because `.mile`'s content (`.unlock`, `ul`, `.mile-count`, `.rank-badge`) had no `z-index` at all, so the shine painted on top of it.
 - **Keep decorative opacity low enough to read as flavor, not as a competing pattern.** If a texture reads as "a grid," "noise," or any other recognizable pattern in its own right rather than a subtle surface finish, it's too strong — this project's tier crosshatch texture went through two rounds of opacity cuts before being removed outright on 2026-08-26 because it never stopped competing with the card's own text. When a texture keeps needing readability rescue passes, the right fix is often to cut it, not tune it further.
 - **Check this on every visual/design pass**, the same way the no-ellipsis rule gets checked — don't just check "does the effect look cool," check "is every line of text on this component still comfortably legible with the effect running," at rest AND at its most visually intense moment.
+
+### Mandatory: run the pixel-verified contrast audit on every passover
+
+A grep/manual review of CSS color declarations is **not sufficient** — it already missed a real, live failure (`.reg-step-num` white text on the orange gradient background, only caught because Eric spotted it by eye on 2026-08-26). Checking named CSS variables in isolation doesn't tell you which components actually combine them, or what a gradient/photo-overlay/opacity stack renders as at runtime.
+
+The reliable method (built 2026-08-26, reusable every session) actually walks the live DOM and samples real rendered pixels rather than reasoning about CSS values on paper:
+
+1. **Enumerate every real text node** via `document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, ...)`, skipping hidden/zero-opacity nodes, and record each node's computed `color`, `fontSize`, `fontWeight`, plus its precise glyph rect from `Range.getClientRects()` (more accurate than the parent element's box).
+2. **Screenshot the page twice**: once normally, and once with a temporary stylesheet forcing `* { color: transparent !important; text-shadow: none !important; -webkit-text-fill-color: transparent !important; }` — this isolates the true rendered background (gradients, photo overlays, decorative effects, opacity stacking) with the text removed.
+3. **Sample the background-only screenshot** at each text node's position (small median-based pixel window, to dodge anti-aliasing noise) to get the actual effective background color that piece of text sits on.
+4. **Compute the real WCAG contrast ratio** (relative luminance formula, implemented directly — `srgb_to_linear` → `relative_luminance` → contrast ratio) between the text's computed color and the sampled background, and check it against 7:1 (normal text) or 4.5:1 (large text: ≥24px, or ≥18.66px bold).
+5. Run this across **all 5 pages** (`index.html`, `events.html`, `games.html`, `edu.html`, `ambassador.html`), including a full scroll-through first so scroll-triggered `.reveal` fade-ins are actually visible when the DOM is walked.
+
+This needs Puppeteer + Pillow in the sandbox; a working implementation lived at `/tmp/audit2/collect.js` + `/tmp/audit2/analyze.py` as of 2026-08-26 (ephemeral sandbox paths — rebuild from this description if that directory is gone in a future session; it is not part of the git repo).
+
+**Non-text UI elements** (borders, focus rings, button shapes, icons, chart slices) aren't covered by the text-node walk above — check those separately against the 3:1 AA floor (see the "Non-text UI/graphical elements" bullet above) whenever a session touches them.
+
+**Do this on every content update and every page change** — not only dedicated "color audit" or visual-redesign sessions. A copy edit, a new section, a new card, or a background swap can just as easily introduce a real contrast failure as a deliberate color-system change can.
 
 ## Container & sizing discipline
 
@@ -137,7 +156,7 @@ Run this before considering **any** visual, layout, or interactive change finish
 
 **1. Rule compliance pass.** Re-read the "Core rules" list above against the actual diff. For each rule that could plausibly apply to what changed, explicitly confirm it — don't just assume a rule wasn't relevant because the task description didn't mention it.
 
-**2. Readability check.** For anything touching text-over-background, decorative effects, or color: check contrast at rest AND at any animated effect's most intense moment (force the effect to that state and screenshot it — don't eyeball from the CSS values). Target WCAG AAA (7:1 normal text, 4.5:1 large text; 3:1 for non-text UI elements, which have no AAA tier).
+**2. Readability check — mandatory on every content update and page change, not just visual passes.** Run the full pixel-verified contrast audit (see "Mandatory: run the pixel-verified contrast audit on every passover" under "Readability" above) — real DOM text-node walk + rendered-pixel background sampling, not a CSS-value read-through. Check contrast at rest AND at any animated effect's most intense moment (force the effect to that state and screenshot it). Target WCAG AAA (7:1 normal text, 4.5:1 large text; 3:1 for non-text UI elements, which have no AAA tier). A grep-based check already missed a real failure once (`.reg-step-num`) — treat that as proof this step can't be skipped or shortcut.
 
 **3. Container/sizing check.** For anything touching layout, sizing, or responsive behavior: screenshot at mobile (~390–400px), tablet (~768–820px), and desktop (~1280–1400px+). Check for clipping, overflow, and content that's too long/short for the new layout — not just the example content used while building it. Also check it against the page around it: does the new/changed section's width and side padding match the shared `.container`/`--safe-x` system, or did it quietly invent its own — either shrink-wrapped tight to its content or stretched wider than everything else on the page?
 

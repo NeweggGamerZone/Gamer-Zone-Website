@@ -79,6 +79,21 @@ Per Eric: raise the site's readability bar from WCAG 2.1 AA to AAA (7:1 contrast
 
 No layout, copy, or functional changes — this was a color-only pass. Re-run this same computed-contrast method (not a visual eyeball) any time a new color is introduced anywhere on the site.
 
+## Part 2f — Pixel-verified contrast audit (2026-08-26)
+
+Part 2e's computed-contrast pass checked named CSS color *variables* against each other in the abstract — it missed a real, live failure: `.reg-step-num`'s white numeral text sat directly on the orange gradient background on `events.html` (2.12:1/3.64:1, nowhere near AAA), because that specific component combination was never cross-checked against actual usage. Eric caught it by eye and flagged it directly. His follow-up — "all colors and elements need to pass" — made clear the method itself needed to be more rigorous, not just re-run.
+
+**New method: pixel-verified, not variable-verified.** Built a real audit tool rather than continuing ad-hoc grep checks: walks every real text node in the live DOM (`TreeWalker`), screenshots each page twice (once normal, once with all text forced transparent to isolate true rendered backgrounds — gradients, photo overlays, opacity stacking included), samples the actual rendered background pixels behind each text node, and computes the real WCAG contrast ratio from measured colors rather than reasoned-about ones. Full method now documented in `CLAUDE.md`'s "Mandatory: run the pixel-verified contrast audit on every passover" section — this is a standing, reusable process now, not a one-off.
+
+**Findings and fixes, this pass:**
+- `.reg-step-num`: white text on `--ne-orange` gradient (2.12:1/3.64:1, fail) → changed to black (9.92:1/5.76:1, pass; qualifies as AAA "large text" at 24.8px bold so the 4.5:1 threshold applies).
+- Zone-card-code "peek" badges (`.zone-card[data-pos="prev"/"next"/"far-prev"/"far-next"]`): contrast collapsed to ~1.07–1.82:1 because the peeking card's own `opacity:.14/.3` composites its *entire* subtree as one semi-transparent layer — a child element can't opt out with its own `opacity:1`. Fixed by hiding the code badge entirely on non-center peek cards (`display:none`) instead of trying to boost a color that's fundamentally undermined by parent opacity.
+- Calendar day-numbers over the closed-date X-mark (`.cal-cell.cal-closed::before`): the X's gray fill, blended over the cell tint, was dragging the white day-number below AAA. Darkened the X twice this session — first `rgba(124,131,143,.9)` → `rgba(80,80,80,.9)` (8.42:1, fixing the audit failure), then further to `rgba(35,35,35,.9)` per Eric's direct follow-up that the number still wasn't popping enough against it.
+- Calendar day-number font-size increased `.82rem` → `1.05rem` (~28%) per Eric's explicit request, for the same legibility goal.
+- `.eu-board` (Weekly Lineup) gained `justify-content:center`: unrelated to contrast, but investigated in the same session after Eric flagged "still not square" — the box was already a geometrically true 1:1 square at every breakpoint (confirmed via `getBoundingClientRect`), but its flex column had no `justify-content` set, so a week with less content than the forced square height left dead space at the bottom instead of centering — reading as "not square" even though it technically was. Now mirrors board-mode's existing `justify-content:center`. Verified visually via screenshot post-fix: content now sits centered with even space above/below.
+
+**Result:** re-running the full pixel audit across all 5 pages after these fixes returned **0 failures across 606 checked text items** — the current clean baseline.
+
 ## On the tracking-system question
 
 Eric asked directly: if the Featured Ambassadors section isn't hitting hard enough, should we build a system to track all ambassadors?
