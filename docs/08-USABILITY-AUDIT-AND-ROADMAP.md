@@ -12,7 +12,7 @@ This is a planning reference, not a bug list — everything flagged below is eit
 
 **Events.** The registration steps, calendar, and Weekly Lineup board are all clear and functional. Past Events currently holds a single recap (Street Fighter Saturday Slam). That's correct today, but it's worth a reminder that this section needs an ongoing content habit — after a few more public events pass without a recap added, "Past Events" will read as stale rather than sparse.
 
-**Games.** Truncation is fixed this round (see below). The SENET chart is genuinely real for All-Time but simulated (reseeded daily) for This Week/This Month — a regular who checks their own session hours against the chart and doesn't see them reflected could read that as the chart being fake, when it's really just an honest MVP compromise documented in the code but invisible to a visitor. The ~90-title PC list has device/genre filter chips but no text search; that's fully usable today, but if the library keeps growing, scanning becomes real work.
+**Games.** Truncation is fixed this round (see below). The SENET chart is now permanently All-Time only (the This Week/This Month toggle and its simulated data were removed this round — see Part 2) so every number on it is real; that also removes the "why don't my hours show up" risk the old simulated ranges carried. The ~90-title PC list has device/genre filter chips but no text search; that's fully usable today, but if the library keeps growing, scanning becomes real work.
 
 **Ambassador.** Now that Featured Ambassadors are correctly all-Diamond (see Part 2), the value proposition is clear and the tier ladder is legible. The one real gap: there's no way for an existing ambassador to check their own progress toward the next tier — they'd have to ask staff directly. That's a genuine usability hole once the program has more than a handful of active hosts, and it's the same gap Eric raised as the tracking-system question (see Roadmap #1).
 
@@ -24,8 +24,14 @@ This is a planning reference, not a bug list — everything flagged below is eit
 
 ## Part 2 — What changed this round
 
-- **Games list truncation** replaced 1-line ellipsis with a uniform 2-line wrap (`min-height` reserved on every row) — titles are readable without a hover, and every row is the same height whether the title is short or long. Only the one exceptionally long title still falls back to browser ellipsis + the existing hover/tap popup.
-- **Featured Ambassadors reconciled to the real design intent:** every card is Diamond tier again (featuring is the *reward* for reaching Diamond, not a progress demo — mixing tiers there was a misread on my part last round, now corrected). Variety comes from entity type instead: a 4th example card represents an organization (a fictional collegiate esports club, "Ridge Valley Esports") with a distinct square/bordered avatar and an "Organization" tag, so the section doesn't read as four identical people, without breaking the all-Diamond rule.
+- **Games list truncation** replaced 1-line ellipsis with a uniform 2-line wrap (`min-height` reserved on every row) — titles are readable without a hover, and every row is the same height whether the title is short or long. Only the one exceptionally long title still falls back to browser ellipsis + the existing hover/tap popup. Codified as a standing rule in the repo's `CLAUDE.md`: no ellipsis truncation inside card grids going forward.
+- **Featured Ambassadors reconciled to the real design intent:** every card is Diamond tier again (featuring is the *reward* for reaching Diamond, not a progress demo — mixing tiers there was a misread on my part last round, now corrected). Variety comes from entity type instead: a pillar tag on every card (Content Creator / Esports Team / Community Organizer / Organization) plus a cosmetic Diamond "flare" color variant, and a 4th example card representing an organization (a fictional collegiate esports club, "Example Valley Esports") with a distinct square/bordered avatar — so the section doesn't read as four identical people, without breaking the all-Diamond rule.
+- **"Choose Your Class" labels** now read Community Leader / Esports Team / Event Organizer (were Shield/Sword/Bow), matching the pillar tags above.
+- **Diamond tier visuals redone:** seamless single-flash shine (was firing 3x with a visible corner artifact), staggered per card so four Diamond cards on screen don't all flash together, plus chromatic texturing across all tiers (Bronze through Diamond) and stronger borders/glow.
+- **SENET pie chart** simplified to All-Time only (chip UI removed per Eric's call — no manual pipeline work justified until real admin-portal access exists) with a more tactile exploded-slice hover effect.
+- **Weekly Lineup board:** crown/theme-icon oversizing fixed (was sizing by width alone, assuming a wide asset shape that didn't match the actual icons in rotation) and a mobile content-clipping bug — introduced by this same round's square-board pass — was root-caused and fixed with a CSS-only `min-height` floor instead of a hard-clipping `aspect-ratio`. See `.eu-board` in `style.css` for the full history.
+- **Hero mini-game:** genuinely enlarged and moved to one of the outermost, fixed-position shapes; added WASD alongside Arrow keys.
+- **Events registration:** added a 4th step, "Preregister your Cafe account," linking SENET.ID.
 
 ## On the tracking-system question
 
@@ -37,40 +43,42 @@ Short answer: not yet at current scale, but it's the right next investment once 
 
 ## Part 3 — Simulated user feedback
 
-Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself.
+Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.
 
-**Jaden, 16, drops in most Saturdays.** "The weekly theme thing is cool, I like seeing what's up before I even walk in. I didn't realize the triangle thing on the home page was a game until I scrolled past it once and came back — maybe make that more obvious."
-
-**Priya, parent looking into the PC Building workshop for her son.** "The page told me clearly what the workshop covers and how many sessions, which I liked. Both tracks said 'Closed' though, and there was no 'next session' date, so I wasn't sure if this was even something we could still sign up for or if we'd missed it entirely."
-
-**Marcus, part-time streamer considering the Ambassador program.** "I like that it calls out influencers by name in the intro, and the class system (Shield/Sword/Bow) is a fun way to frame it instead of just three boring checkboxes. My one question after reading the whole page: once I apply and start hosting, how do I actually know how close I am to Diamond? Do I just email you guys?"
-
-**Devonte, officer for a community college esports club.** "Most of these 'become an ambassador' pages assume you're a solo streamer. Seeing an actual club example (Ridge Valley Esports) on the Featured list told me orgs are welcome here too, not just individual influencers — that mattered more to me than any of the copy."
-
-**Grace, found the Zone through a Google search, never been.** "The reviews and the star rating built trust fast. The new About/Visit Us/Preregister three-card layout answered my three actual questions (what is this place, where and when, how do I get in) without me having to hunt around the page."
-
-**Alex, navigates mostly by keyboard.** "The games list works with Tab now — I can land on a truncated title and see the full name pop up, which a lot of sites get wrong. The calendar was a little less obvious to operate by keyboard, but I didn't hit anything broken."
+- **Jaden, 16, drops in most Saturdays.** Make the hero game read as a game before he scrolls past it — he didn't realize the shape was interactive until he'd already scrolled by once.
+- **Priya, parent checking out the PC Building workshop.** Add a next-cohort date or waitlist link when a track shows "Closed" — right now two closed tracks in a row reads as "not really running."
+- **Marcus, part-time streamer considering Ambassador.** Give ambassadors a way to check their own Diamond progress without emailing staff directly.
+- **Devonte, esports club officer.** Show more than one organization example in Featured — one club card told him orgs are welcome, but a second would confirm it's a real category, not a one-off.
+- **Grace, found the Zone via Google, never been.** Add a one-line "no purchase or account needed to walk in and play" note — the three-card layout answered what/where/how, but not "am I allowed to just show up."
+- **Alex, navigates mostly by keyboard.** Improve calendar keyboard operability — the games list and hover/tap popups already work well with Tab, the calendar is the one spot that's merely functional, not smooth.
 
 ---
 
 ## Part 4 — Roadmap (supersedes the earlier starter ideas)
 
-The Community Activations doc's original ideas (Graffiti Wall, GZ Passport, a standalone Discord server, World Wall Map) are being sunset per Eric's call — they were early brainstorm-stage ideas that didn't hold up once weighed against what actually moves the site forward. The items below are scoped against what's *already built* rather than starting from a blank page, which is why they're bigger and more load-bearing than the old list.
+The Community Activations doc's original ideas (GZ Passport, a standalone Discord server, World Wall Map) stay sunset per Eric's call — brainstorm-stage ideas that didn't hold up once weighed against what actually moves the site forward. The Graffiti Wall is the exception: Eric asked directly what it was trying to achieve and how to pursue that goal differently (see item #2 below), so it's un-sunset in spirit, redesigned rather than resurrected as-is. The items below are scoped against what's *already built* rather than starting from a blank page, which is why they're bigger and more load-bearing than the old list.
 
 **1. Ambassador program backend (tier tracking + status page).**
 Directly answers the tracking-system question above. A lightweight event-log (staff logs each hosted event per ambassador — reuses the same lightweight-admin pattern already used for referral tracking) feeds automatic tier computation, flags anyone who's just crossed Diamond for a staff-reviewed featuring decision, and gives each ambassador their own progress lookup (SENET-ID-style lookup, no account/login system needed) so "how close am I" stops being an email question. This turns the Ambassador page from a static pitch into an operating program.
 
-**2. Live SENET data pipeline.**
-The Games page's All-Time numbers are real; This Week/This Month are still simulated, by design, until a small read-only proxy exists (already scoped in `senet-chart.js`'s own header comment — a scheduled job that logs into the real Senet admin panel server-side and writes JSON the static site can fetch). Closing this gap makes the whole Live-at-the-Zone chart trustworthy, not just the headline number.
+**2. "Live at the Zone" hub — the graffiti wall's actual goal, rebuilt for a static site.**
+Eric's framing: the graffiti wall was never really about drawing — it was trying to make a visitor feel like other people are here, right now, doing something, in a space that's alive. A real-time shared canvas is the expensive, hard-to-moderate way to deliver that feeling, and that's most of why it stalled out originally. Three cheaper components get closer to the same goal, in rough build-cost order:
+  - *Community leaderboard.* The hero game's "BEST" score is currently a private, per-browser `localStorage` number — nobody else ever sees it. Surfacing a "Top scores today/this week" board (fed by the same lightweight event-log pattern as item #1) turns a solo minigame into visible proof that other people are playing, with no new real-time infrastructure.
+  - *"Who's here" pulse.* Every guest already checks in via SENET/Verkada. A simple aggregate readout on Home — "14 people checked in today," or a lightweight live/recent activity ticker — delivers "this place is alive right now" directly from data that already exists, rather than from a game mechanic at all.
+  - *Community trail mosaic (closest to the original wall in spirit).* Each completed hero-game run contributes one small piece — a colored tile, a segment — to a slowly-accumulating shared pattern rendered on the page, built asynchronously from aggregate play data rather than a live multi-user canvas. It reads as "a wall other people left their mark on" without needing real-time sync, accounts, or moderation of user-drawn content.
+  The hero game itself should stay exactly as simple as Eric asked (single shape, fixed position, WASD/Arrows only) — the "group ideation" layer wraps around it rather than complicating the game.
 
-**3. Unified visitor identity, anchored on the SENET ID.**
-Every guest already registers a SENET ID at check-in. That's a ready-made anchor for a lightweight persistent profile — personal play-time history, visit streaks, badges — without building a login system. This is the more meaningful, data-backed successor to the old "Zone Points leaderboard" idea: same spirit (recognize regulars), but built on real check-in data instead of a manually-dropped spreadsheet.
+**3. Live SENET data pipeline.**
+The Games page's All-Time numbers are real and (per Eric's call this round) that's now the permanent, only view — no This Week/This Month toggle to keep in sync. A live pipeline is still worth scoping *if* admin-portal access becomes available (a scheduled job that logs into the real Senet admin panel server-side and writes JSON the static site can fetch), but it's no longer blocking anything on the current page.
 
-**4. Vendor/Partner showcase.**
+**4. Unified visitor identity, anchored on the SENET ID.**
+Every guest already registers a SENET ID at check-in. That's a ready-made anchor for a lightweight persistent profile — personal play-time history, visit streaks, badges — without building a login system. This is the more meaningful, data-backed successor to the old "Zone Points leaderboard" idea: same spirit (recognize regulars), but built on real check-in data instead of a manually-dropped spreadsheet. (Item #2's leaderboard is the lightweight first slice of this.)
+
+**5. Vendor/Partner showcase.**
 The site's own stated identity is "one part vendors, one part customers," but vendors currently only get a rolling banner line. The Ambassador program just proved out a full pattern — tiered application, showcase cards, reward structure — that a Partner program could reuse directly at low build cost, giving vendors a real showcase instead of a footnote.
 
-**5. Automated weekly social export.**
+**6. Automated weekly social export.**
 The screenshot-based 1:1/16:9 Weekly Lineup export pipeline already exists and produces polished output; today it still has to be run by hand. Scheduling it end-to-end (generate + stage for posting each week) removes a recurring manual step and keeps the marketing motion consistent even on a busy week.
 
-**6. Live "Zone status" widget (stretch).**
-Using the same daily Verkada-link automation that already exists for check-in, surface a simple "open now / free play today" live indicator on Home instead of static hours text. Lower priority than 1–5, but a distinctive touch for a venue whose whole pitch is being live and social.
+**7. Live "Zone status" widget (stretch).**
+Using the same daily Verkada-link automation that already exists for check-in, surface a simple "open now / free play today" live indicator on Home instead of static hours text. Lower priority than 1–6, but a distinctive touch for a venue whose whole pitch is being live and social.

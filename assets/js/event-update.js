@@ -201,26 +201,37 @@
       if (el.getBoundingClientRect().height > size * 1.3) el.style.fontSize = '';
     });
   }
-  fitBoardTitles();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitBoardTitles);
+  // A JS safety net used to live here for .eu-board's square sizing, but
+  // it's no longer needed: style.css now uses `min-height:100cqw` (a true
+  // floor, not a forced height) instead of `aspect-ratio:1/1`, so a
+  // content-heavy week grows the box taller on its own instead of getting
+  // clipped -- see the min-height comment on .eu-board in style.css for
+  // the full history (an earlier `aspect-ratio` attempt forced a hard
+  // height with no content-based minimum, and the scrollHeight-based JS
+  // patch tried here first proved unreliable on this exact
+  // justify-content:center + overflow:hidden combination).
+
+  function refit() { fitBoardTitles(); }
+  refit();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
   // No debounce here on purpose: the social-capture script resizes the
   // viewport and screenshots again after its own short fixed wait, so a
   // debounced recalc here could easily lose that race and get captured
-  // mid-flight. fitBoardTitles() itself is cheap (a handful of elements),
-  // so recalculating on every resize event is fine.
-  window.addEventListener('resize', fitBoardTitles);
+  // mid-flight. refit() itself is cheap (a handful of elements), so
+  // recalculating on every resize event is fine.
+  window.addEventListener('resize', refit);
 
   // The Weekly Lineup section is also a `.reveal` block (see main.js): it
   // sits rotated/translated/hidden (opacity:0) until scrolled into view,
   // then animates to its resting state over .7s. Both calls above normally
   // run before that reveal ever happens (data usually loads well before a
-  // visitor scrolls this far down), so they measure titles against that
-  // rotated/hidden geometry — an unreliable basis for "does this wrap?"
-  // that could leave a title stuck at the wrong size once the section
-  // actually becomes visible. Re-measuring once the reveal transition
-  // finishes guarantees at least one correct pass against the section's
-  // true resting layout.
+  // visitor scrolls this far down), so they measure titles/height against
+  // that rotated/hidden geometry — an unreliable basis for "does this
+  // wrap/fit?" that could leave a title or the board's own height stuck
+  // wrong once the section actually becomes visible. Re-measuring once the
+  // reveal transition finishes guarantees at least one correct pass
+  // against the section's true resting layout.
   document.querySelectorAll('.eu-section.reveal').forEach(sec => {
-    sec.addEventListener('transitionend', fitBoardTitles, { once: true });
+    sec.addEventListener('transitionend', refit, { once: true });
   });
 })();

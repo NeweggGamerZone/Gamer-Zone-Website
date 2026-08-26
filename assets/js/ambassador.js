@@ -69,3 +69,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
+/* Diamond "flare" rarity table + picker — not wired to anything live yet.
+   The 4 example cards on this page have their data-flare set by hand in
+   the HTML. Once the Ambassador event-log backend exists (see
+   docs/08-USABILITY-AUDIT-AND-ROADMAP.md, roadmap #1) and can compute who
+   has actually reached Diamond, call pickDiamondFlare(stableId) — a
+   stable per-ambassador id, e.g. their email or SENET ID — to get a
+   deterministic flare name to write into that card's data-flare
+   attribute. Deterministic means the same id always rolls the same
+   flare (no server-side storage needed just for this), while still
+   being effectively random across different ambassadors. Weights sum to
+   100; crimson ("Red Diamond") is the rarest at 1% on purpose. */
+const DIAMOND_FLARES = [
+  { name: 'sapphire', weight: 55 },
+  { name: 'aurora',   weight: 24 },
+  { name: 'amethyst', weight: 20 },
+  { name: 'crimson',  weight: 1 },
+];
+function pickDiamondFlare(stableId, table = DIAMOND_FLARES) {
+  let h = 0;
+  for (let i = 0; i < stableId.length; i++) h = (h * 31 + stableId.charCodeAt(i)) >>> 0;
+  const roll = (h % 10000) / 100; // deterministic 0.00-99.99 from the id
+  let cumulative = 0;
+  for (const flare of table) {
+    cumulative += flare.weight;
+    if (roll < cumulative) return flare.name;
+  }
+  return table[0].name;
+}

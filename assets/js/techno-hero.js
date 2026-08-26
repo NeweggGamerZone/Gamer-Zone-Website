@@ -213,11 +213,23 @@
   // the entire game in without any scrolling. These smaller ratios (and
   // the matching .hero-runner padding-top in style.css) are sized against
   // that real measurement instead of a round-number guess.
-  let PATH_RADIUS = 150, JUMP_CLEAR = 68;
+  // 2026-08-25: bumped meaningfully larger per Eric's real-world testing
+  // feedback ("the shape is very small") -- the previous ratios (H*0.10 /
+  // H*0.08, then H*0.10 / H*0.045) were tuned purely to avoid the overflow
+  // bug from task #169 and erred small. This is a genuine size increase
+  // (~40-60% larger radius depending on viewport height), re-measured the
+  // same way: real-browser screenshots at 1400x900, 1366x768, and 1280x700
+  // confirming the whole runner (shape + score/hint text) still fits above
+  // the fold without scrolling. .hero-runner's padding-top in style.css is
+  // scaled to match. The shape stays a fixed, anchored size/position (see
+  // updateAnchor below) -- it does not recede with the ambient tunnel rings
+  // and does not move once the page has loaded, only its silhouette morphs
+  // in lockstep with the background, per Eric's "hold still" instruction.
+  let PATH_RADIUS = 210, JUMP_CLEAR = 90;
   const ANGLE_SPEED = 0.3;
   function sizeGame() {
-    PATH_RADIUS = Math.max(70, Math.min(150, H * 0.10));
-    JUMP_CLEAR = Math.max(32, Math.min(68, H * 0.045));
+    PATH_RADIUS = Math.max(95, Math.min(210, H * 0.16));
+    JUMP_CLEAR = Math.max(40, Math.min(90, H * 0.07));
   }
 
   if (gameOn) { best = loadBest(); bestEl.textContent = String(best); }
@@ -471,15 +483,18 @@
       gameActive = true;
       runnerWrap.classList.add('is-active');
     }
+    // WASD and Arrow keys only, both bound to the exact same movement
+    // logic (held Left/A or Right/D carries the character around the
+    // loop at ANGLE_SPEED, same as before) -- no other keyboard scheme.
     document.addEventListener('keydown', e => {
       if (!gameActive) return;
-      if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
-      else if (e.code === 'ArrowLeft') { e.preventDefault(); leftHeld = true; }
-      else if (e.code === 'ArrowRight') { e.preventDefault(); rightHeld = true; }
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); jump(); }
+      else if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); leftHeld = true; }
+      else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); rightHeld = true; }
     });
     document.addEventListener('keyup', e => {
-      if (e.code === 'ArrowLeft') leftHeld = false;
-      else if (e.code === 'ArrowRight') rightHeld = false;
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') leftHeld = false;
+      else if (e.code === 'ArrowRight' || e.code === 'KeyD') rightHeld = false;
     });
     // Touch/mouse: a quick tap jumps (matching the original single-tap
     // behavior); holding down on either half of the runner area instead

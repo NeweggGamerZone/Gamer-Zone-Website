@@ -1,58 +1,38 @@
-/* SENET Live Play Chart — radial pie chart of hours-played distribution
-   across the top games at the Zone, with a Weekly / Monthly / All-Time
-   range switcher and a hover/touch breakdown per slice.
+/* SENET Live Play Chart — radial pie chart of all-time hours-played
+   distribution across the top games at the Zone, with a hover/touch
+   breakdown per slice.
 
    IMPORTANT — there is no working public API this static site can call.
-   The URL the team pointed at (neweggmagenell.admin.enes.tech/statistic/
-   content-usage) is an authenticated admin-panel single-page app, not a
-   public JSON endpoint — fetching it from a visitor's browser would return
-   the app's empty HTML shell, not data, and there is no login flow a
-   static GitHub Pages site can safely perform (and no credential belongs
-   in public client-side code regardless). So this renders data simulated
-   from the Zone's real game library instead, re-seeded once per calendar
-   day rather than continuously, so the section is visually and
-   functionally complete today. To go live for real: stand up a small
-   read-only proxy/endpoint that returns JSON like
-   { "week": [{ "name": "Fortnite", "hours": 12.4 }, ...],
-     "month": [...], "alltime": [...] } and swap fetchPlayData() below for
-   a real fetch() to it — rendering, the range chips, and the daily
-   reseed check all keep working unchanged.
+   The URL the team pointed at (an authenticated admin-panel single-page
+   app) is not a public JSON endpoint — fetching it from a visitor's
+   browser would return the app's empty HTML shell, not data, and there
+   is no login flow a static GitHub Pages site can safely perform (and no
+   credential belongs in public client-side code regardless). Eric
+   confirmed (2026-08-25) he'll keep refreshing ALLTIME_REAL by hand from
+   a Senet export rather than standing up a live pipeline for this right
+   now — see docs/08-USABILITY-AUDIT-AND-ROADMAP.md, "On the SENET data
+   pipeline," for the full reasoning. If that ever changes, a small
+   read-only proxy/endpoint returning JSON like
+   [{ "name": "Fortnite", "hours": 12.4 }, ...] is the only piece needed —
+   swap fetchPlayData() in for the hardcoded array below and everything
+   else (rendering, daily label, hover) keeps working unchanged.
 
-   A scheduled weekly/daily job on our side (hitting the real admin panel
-   with real credentials, server-side, then writing that JSON somewhere
-   this static site can fetch) is the only way to get live numbers here —
-   the site itself can't run on a schedule or hold a login, since it's
-   just files served by GitHub Pages with no server of its own. Once that
-   small proxy exists, this file's fetch/reseed logic doesn't need to
-   change at all.
-
-   UPDATE 2026-08-22 — the "All Time" range is no longer simulated. Eric
-   pulled a real "Total duration" export from the Senet dashboard, so
-   ALLTIME_REAL below is an actual snapshot (hardcoded, since there's still
-   no live feed). Week/month remain simulated via hoursFor()/POOL until we
-   have real numbers for those too — don't assume all three ranges are the
-   same kind of data. */
+   UPDATE 2026-08-25 — this chart is now All-Time only, permanently (the
+   This Week / This Month range chips were removed at Eric's request:
+   those two ranges were simulated placeholder data reseeded daily, which
+   risked reading as fake to a regular comparing it against their own
+   actual session -- All-Time is the one range that's ever been real, so
+   it's now the only option, full stop). Do not reintroduce a range
+   switcher without real data behind every option it offers. */
 (function () {
   const rowsEl = document.getElementById('senet-chart-rows');
-  const rangeWrap = document.getElementById('senet-chart-range');
   const updatedEl = document.getElementById('senet-updated');
   const pieSvg = document.getElementById('senet-pie-svg');
   const heroValueEl = document.getElementById('senet-hero-value');
   const pieTip = document.getElementById('senet-pie-tip');
   const pieTipVal = document.getElementById('senet-pie-tip-val');
   const pieTipLabel = document.getElementById('senet-pie-tip-label');
-  if (!rowsEl || !rangeWrap || !pieSvg) return;
-
-  // Cross-platform pool of Zone favorites — the chart surfaces whichever N
-  // currently have the most hours logged for the selected range. (Still
-  // used for week/month, which are simulated -- see ALLTIME_REAL below for
-  // the one range that's now real.)
-  const POOL = [
-    'Fortnite', 'VALORANT', 'League of Legends', 'Rocket League', 'Counter-Strike 2',
-    'Apex Legends', 'Super Smash Bros.', 'Mario Kart', 'Street Fighter 6', 'Tekken 8',
-    'Beat Saber', 'Forza Horizon 6', 'Overwatch 2', 'Call of Duty: Warzone',
-    'Marvel Rivals', 'Dota 2', 'Fall Guys',
-  ];
+  if (!rowsEl || !pieSvg) return;
 
   // Real "Total duration" (all-time hours played) snapshot from the Senet
   // dashboard, captured 2026-08-25 (replaces the 2026-08-22 export -- every
@@ -71,36 +51,8 @@
     { name: 'Mecha Chameleon', hours: 55 + 8 / 60 },
   ];
 
-  // min/max total hours-played per title for the selected range.
-  const RANGES = {
-    week: { min: 6, max: 44 },
-    month: { min: 24, max: 190 },
-    alltime: { min: 240, max: 1680 },
-  };
-
   const TOP_N = 6; // slices shown in the pie / rows below it
   const SLICE_COLORS = ['#FA9D28', '#3D8BFF', '#5FD3E8', '#3FBF6B', '#E85DA0', '#B98CE8'];
-
-  const todayKey = GZ.todayISO(); // reseeds once per calendar day (visitor's local date, not UTC)
-
-  // Deterministic string -> uint32 generator, so "today" always produces
-  // the same numbers no matter how many times the page re-renders, and
-  // the whole chart shifts to a new (but still deterministic) look the
-  // next calendar day.
-  function makeRng(seedStr) {
-    let h = 0;
-    for (let i = 0; i < seedStr.length; i++) h = (h * 31 + seedStr.charCodeAt(i)) >>> 0;
-    return function next() {
-      h = (Math.imul(h, 1664525) + 1013904223) >>> 0;
-      return h / 4294967296;
-    };
-  }
-
-  function hoursFor(name, rangeKey) {
-    const r = RANGES[rangeKey];
-    const rng = makeRng(`${name}|${rangeKey}|${todayKey}`);
-    return r.min + (r.max - r.min) * rng();
-  }
 
   function fmtHours(h) {
     return h >= 1000 ? Math.round(h).toLocaleString('en-US') : h.toFixed(1);
@@ -126,10 +78,11 @@
 
   let sliceData = [];
 
-  function showTip(clientRect, d) {
+  function showTip(evt, d) {
     if (!pieTip || !pieTipVal || !pieTipLabel) return;
     pieTipVal.textContent = `${fmtHours(d.hours)}h`;
     pieTipLabel.textContent = `${d.name} · ${d.pct.toFixed(1)}%`;
+    pieTip.style.setProperty('--tip-c', d.color);
     pieTip.classList.add('is-visible');
   }
   function moveTip(evt) {
@@ -146,6 +99,12 @@
     document.querySelectorAll('#senet-pie-svg path').forEach(p => p.classList.remove('is-hover'));
   }
 
+  // Slices "pop" outward from the donut center on hover (see .senetdb-pie
+  // path.is-hover in style.css) -- --mx/--my are the unit vector toward
+  // each slice's own middle angle, so the CSS transform can push it
+  // straight outward along that exact direction rather than a generic
+  // scale-in-place. --slice-c backs the hover glow with the slice's own
+  // color instead of a flat white highlight.
   function renderPie(data) {
     const cx = 100, cy = 100, r = 92;
     let angle = 0;
@@ -154,7 +113,12 @@
       const path = slicePath(cx, cy, r, angle, angle + sweep);
       const midAngle = angle + sweep / 2;
       angle += sweep;
-      return `<path d="${path}" fill="${SLICE_COLORS[i % SLICE_COLORS.length]}" data-i="${i}" data-mid="${midAngle}"></path>`;
+      const rad = (midAngle - 90) * Math.PI / 180;
+      const mx = Math.cos(rad).toFixed(3);
+      const my = Math.sin(rad).toFixed(3);
+      const color = SLICE_COLORS[i % SLICE_COLORS.length];
+      d.color = color;
+      return `<path d="${path}" fill="${color}" data-i="${i}" style="--mx:${mx};--my:${my};--slice-c:${color}"></path>`;
     }).join('');
     pieSvg.innerHTML = paths;
 
@@ -163,24 +127,21 @@
       el.addEventListener('mouseenter', e => {
         document.querySelectorAll('#senet-pie-svg path').forEach(p => p.classList.remove('is-hover'));
         el.classList.add('is-hover');
-        showTip(null, data[i]);
+        showTip(e, data[i]);
         moveTip(e);
       });
       el.addEventListener('mousemove', moveTip);
       el.addEventListener('mouseleave', hideTip);
       el.addEventListener('touchstart', e => {
         el.classList.add('is-hover');
-        showTip(null, data[i]);
+        showTip(e, data[i]);
         moveTip(e);
       }, { passive: true });
     });
   }
 
-  function render(rangeKey) {
-    const data = (rangeKey === 'alltime'
-      ? ALLTIME_REAL.slice()
-      : POOL.map(name => ({ name, hours: hoursFor(name, rangeKey) }))
-    )
+  function render() {
+    const data = ALLTIME_REAL.slice()
       .sort((a, b) => b.hours - a.hours)
       .slice(0, TOP_N);
     const total = data.reduce((a, g) => a + g.hours, 0);
@@ -214,15 +175,5 @@
     }
   }
 
-  rangeWrap.addEventListener('click', e => {
-    const btn = e.target.closest('.chip');
-    if (!btn) return;
-    rangeWrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    render(btn.dataset.range);
-  });
-
-  // Default to the one range that's real now (see ALLTIME_REAL above);
-  // matches the "active" chip already set in games.html.
-  render('alltime');
+  render();
 })();
