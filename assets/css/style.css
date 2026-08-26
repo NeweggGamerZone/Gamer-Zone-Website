@@ -1316,6 +1316,36 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      matching how the board-mode export already centers this same group
      (see html.board-mode .eu-bottom-group below). */
   justify-content:center}
+/* 2026-08-26, per Eric: the live in-page board specifically (board-mode's
+   export pipeline is untouched -- see below) must be a literal 1:1
+   square, not just the min-height floor above. Going back to a plain
+   `aspect-ratio:1/1` here would reintroduce the exact clipping bug this
+   file's history already warns about (a block box gets no content-based
+   minimum size, so overflow:hidden silently cuts off whatever doesn't
+   fit) -- UNLESS something actually shrinks the content to match, which
+   is what's different this time: .eu-board-inner (wrapping everything
+   that used to be .eu-board's direct flex children) gets a JS-computed
+   `--eu-scale` (see event-update.js's fitBoard()) that scales the whole
+   masthead+rows+icon group down just enough to fit the square on a
+   content-heavy week, instead of relying on the box growing taller. A
+   normal week needs no scaling at all (scale stays 1). transform:scale
+   shrinks visually without changing box-model units, so it works
+   regardless of whether a given size was set in cqw, px, or rem -- the
+   one thing a from-scratch font-size rewrite couldn't guarantee here.
+   Scoped to html:not(.board-mode) deliberately: Eric asked for this on
+   "the weekly lineup on our website" specifically, and board-mode's own
+   export pipeline (weekcapture.js, outside this repo) already picks
+   whichever viewport width lands closest to its own target ratio using
+   the un-scaled min-height floor above -- this rule and the JS scaling
+   step both leave that pipeline untouched. */
+html:not(.board-mode) .eu-board{aspect-ratio:1/1;min-height:0}
+/* .eu-board-inner takes over .eu-board's own former flex-column role for
+   its children (.board-logo's align-self:center, .eu-bottom-group's
+   board-mode margin-top:auto, etc. all still assume a flex-column
+   parent) -- .eu-board itself stays display:flex too, now with exactly
+   one child (.eu-board-inner) to center via its own justify-content. */
+.eu-board-inner{width:100%;display:flex;flex-direction:column;transform:scale(var(--eu-scale,1));transform-origin:center center}
+@media (prefers-reduced-motion: no-preference){.eu-board-inner{transition:transform .25s ease}}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}

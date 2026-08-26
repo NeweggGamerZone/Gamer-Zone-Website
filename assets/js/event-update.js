@@ -201,17 +201,41 @@
       if (el.getBoundingClientRect().height > size * 1.3) el.style.fontSize = '';
     });
   }
-  // A JS safety net used to live here for .eu-board's square sizing, but
-  // it's no longer needed: style.css now uses `min-height:100cqw` (a true
-  // floor, not a forced height) instead of `aspect-ratio:1/1`, so a
-  // content-heavy week grows the box taller on its own instead of getting
-  // clipped -- see the min-height comment on .eu-board in style.css for
-  // the full history (an earlier `aspect-ratio` attempt forced a hard
-  // height with no content-based minimum, and the scrollHeight-based JS
-  // patch tried here first proved unreliable on this exact
-  // justify-content:center + overflow:hidden combination).
+  // 2026-08-26, per Eric: the live in-page board must be a literal 1:1
+  // square (see html:not(.board-mode) .eu-board in style.css), not just
+  // the min-height floor used everywhere else (including board-mode,
+  // which this function deliberately skips -- see below). A hard square
+  // with no other safety net is exactly what clipped content on the
+  // earlier aspect-ratio attempt (see style.css's history comment), so
+  // this scales the whole masthead+rows+icon group (.eu-board-inner) down
+  // just enough to fit a content-heavy week, via a CSS custom property
+  // (--eu-scale) rather than a fixed-size rewrite -- transform:scale
+  // shrinks visually regardless of whether a given size was originally
+  // set in cqw, px, or rem, which a font-size-only approach couldn't
+  // guarantee across this board's mixed units. scrollHeight (unlike
+  // getBoundingClientRect) reads the element's un-transformed layout
+  // size, so this is safe to call repeatedly without resetting the scale
+  // first -- each pass measures the true content height and recomputes
+  // scale from scratch.
+  function fitBoard() {
+    if (document.documentElement.classList.contains('board-mode')) return; // board-mode's own export pipeline is untouched, see style.css
+    document.querySelectorAll('.eu-board').forEach(board => {
+      const inner = board.querySelector('.eu-board-inner');
+      if (!inner) return;
+      const cs = getComputedStyle(board);
+      const available = board.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const needed = inner.scrollHeight;
+      // Floor of 0.55 so a truly packed week (several closures + a major
+      // event) still reads instead of shrinking into illegibility -- any
+      // remaining excess past that floor is caught by .eu-board's
+      // overflow:hidden as a last resort, same safety net every other
+      // sizing rule on this board already relies on.
+      const scale = needed > 0 && available > 0 ? Math.max(0.55, Math.min(1, available / needed)) : 1;
+      board.style.setProperty('--eu-scale', String(scale));
+    });
+  }
 
-  function refit() { fitBoardTitles(); }
+  function refit() { fitBoardTitles(); fitBoard(); }
   refit();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
   // No debounce here on purpose: the social-capture script resizes the

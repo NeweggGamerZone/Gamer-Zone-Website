@@ -85,24 +85,31 @@
   <section class="reveal eu-section" id="week">
     <h2>Weekly lineup</h2>
     <div class="eu-board">
-      <!-- Brand mark in the top-center of the board — visible on the live
-           page too, not just the board-mode export (see .board-logo in
-           style.css). Kept identical to index.html's Weekly Lineup markup
-           so both pages render the same board. -->
-      <img class="board-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone">
-      <div class="eu-top">
-        <div class="eu-eyebrow">
-          <div class="eu-eyebrow-textcol">
-            <div class="eu-eyebrow-titlerow">
-              <h3 class="eu-eyebrow-title" id="eu-eyebrow-title">Gamer Zone <span class="eu-theme-highlight">Weekly Lineup</span></h3>
-              <span class="eu-theme-dates" id="eu-eyebrow-dates">-</span>
+      <!-- .eu-board-inner wraps everything that used to be .eu-board's
+           direct flex children -- event-update.js's fitBoard() applies a
+           JS-computed --eu-scale to this wrapper so a content-heavy week
+           still fits the live page's literal 1:1 square (see the
+           html:not(.board-mode) .eu-board comment in style.css). -->
+      <div class="eu-board-inner">
+        <!-- Brand mark in the top-center of the board — visible on the live
+             page too, not just the board-mode export (see .board-logo in
+             style.css). Kept identical to index.html's Weekly Lineup markup
+             so both pages render the same board. -->
+        <img class="board-logo" src="assets/img/newegg-gamerzone-white.png" alt="Newegg Gamer Zone">
+        <div class="eu-top">
+          <div class="eu-eyebrow">
+            <div class="eu-eyebrow-textcol">
+              <div class="eu-eyebrow-titlerow">
+                <h3 class="eu-eyebrow-title" id="eu-eyebrow-title">Gamer Zone <span class="eu-theme-highlight">Weekly Lineup</span></h3>
+                <span class="eu-theme-dates" id="eu-eyebrow-dates">-</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="eu-list" id="eu-list"></div>
-      <div class="eu-bottom-group">
-        <div class="eu-board-icon" id="eu-board-icon" hidden><img id="eu-board-icon-img" alt=""></div>
+        <div class="eu-list" id="eu-list"></div>
+        <div class="eu-bottom-group">
+          <div class="eu-board-icon" id="eu-board-icon" hidden><img id="eu-board-icon-img" alt=""></div>
+        </div>
       </div>
     </div>
   </section>
