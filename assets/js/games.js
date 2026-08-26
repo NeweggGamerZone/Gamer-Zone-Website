@@ -59,7 +59,7 @@
     ['League of Legends', 'pc', 'competitive'], ['VALORANT', 'pc', 'competitive'], ['Teamfight Tactics', 'pc', 'competitive'],
     ['Legends of Runeterra', 'pc', 'competitive'],
     ['Roblox', 'pc'],
-    ['Call of Duty: Warzone', 'pc', 'competitive'], ['Overwatch 2', 'pc', 'competitive'],
+    ['Call of Duty: Warzone', 'pc', 'competitive'], ['Overwatch', 'pc', 'competitive'],
     // Party titles — played on the PCs, tagged Co-op.
     ['Taiko no Tatsujin: Rhythm Festival', 'pc', 'coop'],
     ['Jackbox Party Pack 4', 'pc', 'coop'], ['Jackbox Party Pack 6', 'pc', 'coop'],

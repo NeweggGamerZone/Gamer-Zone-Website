@@ -15,7 +15,14 @@
    read-only proxy/endpoint returning JSON like
    [{ "name": "Fortnite", "hours": 12.4 }, ...] is the only piece needed —
    swap fetchPlayData() in for the hardcoded array below and everything
-   else (rendering, daily label, hover) keeps working unchanged.
+   else (rendering, hover) keeps working unchanged.
+
+   UPDATE 2026-08-26 — removed the "Updated [today's date]" label per
+   Eric's call: it always rendered the CURRENT date regardless of when
+   ALLTIME_REAL was actually last refreshed, which read as a live-data
+   claim this static snapshot can't back up. Don't reintroduce a date
+   label here unless it's driven by the real last-refresh date, not
+   today's date.
 
    UPDATE 2026-08-25 — this chart is now All-Time only, permanently (the
    This Week / This Month range chips were removed at Eric's request:
@@ -26,7 +33,6 @@
    switcher without real data behind every option it offers. */
 (function () {
   const rowsEl = document.getElementById('senet-chart-rows');
-  const updatedEl = document.getElementById('senet-updated');
   const pieSvg = document.getElementById('senet-pie-svg');
   const heroValueEl = document.getElementById('senet-hero-value');
   const pieTip = document.getElementById('senet-pie-tip');
@@ -44,7 +50,7 @@
     { name: 'VALORANT', hours: 484 + 50 / 60 },
     { name: 'League of Legends', hours: 432 + 50 / 60 },
     { name: 'Fortnite', hours: 194 + 31 / 60 },
-    { name: 'Overwatch 2', hours: 175 + 40 / 60 },
+    { name: 'Overwatch', hours: 175 + 40 / 60 },
     { name: 'Marvel Rivals', hours: 143 + 4 / 60 },
     { name: 'Fall Guys', hours: 131 + 14 / 60 },
     { name: 'Counter-Strike 2', hours: 75 + 34 / 60 },
@@ -97,6 +103,7 @@
   function hideTip() {
     if (pieTip) pieTip.classList.remove('is-visible');
     document.querySelectorAll('#senet-pie-svg path').forEach(p => p.classList.remove('is-hover'));
+    document.querySelectorAll('.senetdb-row').forEach(r => r.classList.remove('is-hover'));
   }
 
   // Slices "pop" outward from the donut center on hover (see .senetdb-pie
@@ -127,6 +134,9 @@
       el.addEventListener('mouseenter', e => {
         document.querySelectorAll('#senet-pie-svg path').forEach(p => p.classList.remove('is-hover'));
         el.classList.add('is-hover');
+        const row = rowsEl.querySelector(`.senetdb-row[data-i="${i}"]`);
+        document.querySelectorAll('.senetdb-row').forEach(r => r.classList.remove('is-hover'));
+        if (row) row.classList.add('is-hover');
         showTip(e, data[i]);
         moveTip(e);
       });
@@ -153,7 +163,7 @@
     if (heroValueEl) heroValueEl.textContent = fmtHours(total);
 
     rowsEl.innerHTML = data.map((g, i) => `
-      <div class="senetdb-row" data-i="${i}">
+      <div class="senetdb-row" data-i="${i}" style="--row-c:${SLICE_COLORS[i % SLICE_COLORS.length]}">
         <span class="senetdb-swatch" style="background:${SLICE_COLORS[i % SLICE_COLORS.length]}"></span>
         <span class="senetdb-name">${GZ.esc(g.name)}</span>
         <span class="senetdb-pct">${g.pct.toFixed(1)}%</span>
@@ -163,16 +173,14 @@
     rowsEl.querySelectorAll('.senetdb-row').forEach(row => {
       const i = Number(row.dataset.i);
       row.addEventListener('mouseenter', () => {
+        document.querySelectorAll('#senet-pie-svg path').forEach(p => p.classList.remove('is-hover'));
+        document.querySelectorAll('.senetdb-row').forEach(r => r.classList.remove('is-hover'));
+        row.classList.add('is-hover');
         const path = pieSvg.querySelector(`path[data-i="${i}"]`);
-        if (path) { document.querySelectorAll('#senet-pie-svg path').forEach(p => p.classList.remove('is-hover')); path.classList.add('is-hover'); }
+        if (path) path.classList.add('is-hover');
       });
       row.addEventListener('mouseleave', hideTip);
     });
-
-    if (updatedEl) {
-      const label = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-      updatedEl.textContent = `Updated ${label}`;
-    }
   }
 
   render();

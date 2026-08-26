@@ -356,9 +356,19 @@ html.board-mode .review-waterfall .review-card { opacity: 1; transform: none; tr
   .senetdb-pie path.is-hover{transform:none}
 }
 .senetdb-rows { flex: 1 1 260px; min-width: 220px; }
-.senetdb-row { display: flex; align-items: center; gap: .7rem; padding: .4rem 0; border-top: 1px solid var(--line); cursor: default; }
+/* Row <-> pie-slice link: hovering a row (or the matching slice, via JS
+   toggling .is-hover on the row from senet-chart.js's pie mouseenter
+   handler) lifts the row with a neutral background plus a left accent
+   bar in that row's own slice color (--row-c, set inline per-row) --
+   box-shadow instead of a border so the bar doesn't reserve layout space
+   or shift content on hover/unhover. The swatch dot also scales up as a
+   second, color-agnostic confirmation for anyone who can't distinguish
+   the accent-bar color itself. */
+.senetdb-row { display: flex; align-items: center; gap: .7rem; padding: .4rem .5rem; margin: 0 -.5rem; border-top: 1px solid var(--line); border-radius: 4px; cursor: pointer; transition: background .15s ease, box-shadow .15s ease; }
 .senetdb-row:first-child { border-top: none; }
-.senetdb-swatch { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.senetdb-row:hover, .senetdb-row.is-hover { background: rgba(255,255,255,.06); box-shadow: inset 3px 0 0 0 var(--row-c, var(--ne-orange)); }
+.senetdb-row:hover .senetdb-swatch, .senetdb-row.is-hover .senetdb-swatch { transform: scale(1.3); }
+.senetdb-swatch { width: 11px; height: 11px; border-radius: 50%; flex: none; transition: transform .15s ease; }
 .senetdb-name { flex: 1; font-family: var(--eu-body); font-weight: 600; font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .senetdb-pct { width: 48px; flex: none; text-align: right; font-family: var(--eu-body); font-size: .78rem; color: var(--ink-dim); }
 .senetdb-hours { width: 64px; flex: none; text-align: right; font-family: var(--head); font-weight: 700; font-size: .85rem; font-variant-numeric: tabular-nums; color: #fff; }
