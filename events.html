@@ -225,7 +225,15 @@
   </div>
   <p class="legal">Minors under 18 must be accompanied by an adult (18+) at all times &middot; ID may be required &middot; Free play subject to availability; hours may change for private events &middot; &copy; 2026 Newegg Commerce, Inc.</p>
 </footer>
+<!-- Persistent floating Preregister node (see .pin-node in style.css /
+     assets/js/preregister-node.js) -- draggable, closeable for this page
+     view only, comes back on the next page load/refresh. -->
+<div class="pin-node" id="pin-node">
+  <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister<br>Now</a>
+  <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
+</div>
 <script src="assets/js/main.js?v=56" defer></script>
+<script src="assets/js/preregister-node.js?v=56" defer></script>
 <script src="assets/js/events.js?v=56" defer></script>
 <script src="assets/js/calendar.js?v=56" defer></script>
 <script src="assets/js/event-update.js?v=56" defer></script>

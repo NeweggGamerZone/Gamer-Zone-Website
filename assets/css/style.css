@@ -433,6 +433,29 @@ details.archive-month .grid { margin-top: 1rem; }
 .lightbox.open { display: flex; }
 .lightbox img { max-height: 92vh; object-fit: contain; }
 
+/* Floating "Preregister Now" node -- a persistent, draggable circular CTA
+   pinned bottom-right on every page (see assets/js/preregister-node.js).
+   Per Eric: closing it only lasts for the current page view -- it comes
+   back on refresh/next page load, so there's no localStorage dismissal
+   state to fight with, unlike a typical "closed forever" cookie banner.
+   z-index:60 -- above .site-header (50) so it's never hidden under the
+   nav, below .lightbox (100) so a photo lightbox still wins if both are
+   somehow open at once. */
+.pin-node{position:fixed;right:1.2rem;bottom:1.2rem;z-index:60;touch-action:none}
+.pin-node.is-dragging{transition:none}
+.pin-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:92px;height:92px;border-radius:50%;background:linear-gradient(145deg,var(--ne-orange),var(--ne-orange-deep));color:#000;text-align:center;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.72rem;line-height:1.15;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18);cursor:grab;user-select:none;-webkit-user-select:none}
+.pin-btn:hover{filter:brightness(1.08)}
+.pin-btn:focus-visible{outline:none;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18),0 0 0 3px #fff}
+.pin-node.is-dragging .pin-btn{cursor:grabbing}
+/* Close control: small, its own real button (not part of the link), so
+   Tab/Enter/Space work on it independently of the main CTA -- see
+   "Keyboard accessibility" in CLAUDE.md. */
+.pin-close{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+.pin-close:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
+.pin-close:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
+@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{width:78px;height:78px;font-size:.64rem}}
+@media (prefers-reduced-motion: reduce){.pin-node{transition:none}}
+
 .wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; }
 
 /* About Gamer Zone: a gamefied "trading card" stack — one zone shown at a
