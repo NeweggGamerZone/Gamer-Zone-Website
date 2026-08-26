@@ -801,11 +801,18 @@ body.home-page { background: transparent; }
 .cal-cell.empty{background:transparent;border:none;cursor:default}
 .cal-cell.cal-closed{background:rgba(124,131,143,.32);border-color:var(--cal-closed);color:var(--ink-dim);cursor:default}
 /* X-mark overlay for closed days, sat behind the day number (z-index:1 on
-   .dn keeps it readable) so a closed date reads as clearly crossed out. */
-.cal-cell.cal-closed::before{content:"";position:absolute;inset:20% 12%;pointer-events:none;
+   .dn keeps it readable) so a closed date reads as clearly crossed out.
+   2026-08-26: inset was 20% 12% (a smaller X floating inside the cell
+   with visible margin around it) -- per Eric, the X now spans corner to
+   corner of the square (inset:0), reading as the whole day being struck
+   through rather than a small mark sitting inside it. Line thickness
+   bumped slightly (1.5px -> 2px half-width) since the same line now
+   crosses a longer diagonal, so it doesn't read as thinner/sparser than
+   before at the new, larger size. */
+.cal-cell.cal-closed::before{content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    linear-gradient(45deg, transparent calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% + 1.5px), transparent calc(50% + 1.5px)),
-    linear-gradient(-45deg, transparent calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% - 1.5px), rgba(124,131,143,.9) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+    linear-gradient(45deg, transparent calc(50% - 2px), rgba(124,131,143,.9) calc(50% - 2px), rgba(124,131,143,.9) calc(50% + 2px), transparent calc(50% + 2px)),
+    linear-gradient(-45deg, transparent calc(50% - 2px), rgba(124,131,143,.9) calc(50% - 2px), rgba(124,131,143,.9) calc(50% + 2px), transparent calc(50% + 2px));
 }
 .cal-cell.cal-free{background:rgba(61,139,255,.24);border-color:var(--cal-free)}
 .cal-cell.cal-theme{background:rgba(95,211,232,.26);border-color:var(--cal-theme)}

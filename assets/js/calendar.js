@@ -172,11 +172,15 @@
     }
   });
   // Preview a day's event just by hovering — no click needed on desktop.
-  // Closed days show too (with a "Closed" tag), so hovering always tells
-  // you something rather than silently doing nothing.
+  // 2026-08-26, per Eric: closed (greyed-out, X'd) days no longer preview
+  // on hover -- they're not a real destination (nothing to preregister,
+  // nothing to browse), so treating a hover the same as an open day
+  // implied more interactivity than a closed day actually has. A closed
+  // day's "Closed" detail still shows on a deliberate click (see the
+  // click handler below), just not from an incidental mouse-over.
   grid.addEventListener('mouseover', e => {
     const c = e.target.closest('.cal-cell[data-d]');
-    if (!c) return;
+    if (!c || c.classList.contains('cal-closed')) return;
     show(c.dataset.d);
   });
   // Once the cursor leaves the grid entirely, fall back to today rather than
