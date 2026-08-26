@@ -51,6 +51,18 @@ This is a planning reference, not a bug list — everything flagged below is eit
 - Verified via a real headless-browser playtest (held-key movement and jump sequences over several seconds, real scroll simulation, a real pointer tap on the CTA button) plus screenshots at 1400×900, 800×1000, and 400×850 — zero console errors, zero stray artifacts after scrolling past and waiting, CTA button confirmed still functional.
 - See Part 4, item 2a below for the (not-yet-built) brainstorm on adding virality/group-building hooks on top of this redesigned game.
 
+## Part 2d — Site-wide container-width audit (2026-08-26)
+
+Eric asked for a full audit confirming every section across the site actually uses its section's full width, using the Past Events photo waterfall as the reference for what "full width" should look like, plus an update to the project instructions codifying the rule going forward (see the new bullets under "One shared container width" in `CLAUDE.md`).
+
+**Method:** two passes, not just a CSS read-through. (1) A headless-browser DOM measurement across all 5 pages (`index.html`, `events.html`, `games.html`, `edu.html`, `ambassador.html`) at desktop (1400px), tablet (800px), and mobile (400px) — every direct child section of `main.container` had its rendered left/right edges compared against the container's own content-box edges. (2) A real scrolled-through, full-page screenshot of every page at desktop, since the site's scroll-triggered `.reveal` fade-in meant a naive full-page screenshot without first scrolling through the page showed most sections at `opacity:0` — a capture artifact, not a real bug, but worth noting for next time this audit is repeated.
+
+**Finding: the section-wrapper width system is already fully consistent.** Every section on every page, at every breakpoint, sits flush against the shared `.container`/`--safe-x` edges with zero pixel drift, with exactly one documented, intentional exception: `.hero-stage` (the Home hero, full-bleed `100vw` by design, holds the hero mini-game's own background layers). No section was found shrink-wrapped tight to its own content or independently stretched wider than its siblings. This is the direct result of an already-completed "every section spans its full container width" pass from earlier work (see the code comments on `.review-waterfall` and `.zone-stack` in `style.css`) — this audit is a confirmation that pass held up, not a discovery of new drift.
+
+**The one real gap found was a content-level one, not a wrapper-width one:** "About Gamer Zone" (`.zone-stack`) is already `width:100%` of its section, but only a single centered carousel card is visible at a time, so it *reads* narrower than its actual box — the same "technically full-width, doesn't read that way" pattern Eric called out directly. This is intentionally not patched by just stretching the carousel track (the card itself needs to stay a fixed, legible size) — it's Roadmap item below (flanking peek-cards), tracked as its own task rather than folded into this audit's fixes.
+
+**No other sections needed changes.** Card grids with few items (e.g. Games' VR/Racing Simulators lists) correctly hold the shared container width with the grid reflowing around whatever count of items is actually there, rather than shrinking to fit — the correct behavior per the container-width rule, not a bug to fix.
+
 ## On the tracking-system question
 
 Eric asked directly: if the Featured Ambassadors section isn't hitting hard enough, should we build a system to track all ambassadors?
