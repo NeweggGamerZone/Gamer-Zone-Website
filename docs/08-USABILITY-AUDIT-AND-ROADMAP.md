@@ -108,3 +108,42 @@ The screenshot-based 1:1/16:9 Weekly Lineup export pipeline already exists and p
 
 **7. Live "Zone status" widget (stretch).**
 Using the same daily Verkada-link automation that already exists for check-in, surface a simple "open now / free play today" live indicator on Home instead of static hours text. Lower priority than 1–6, but a distinctive touch for a venue whose whole pitch is being live and social.
+
+---
+
+## Part 5 — Launch phases + review rubric (Eric's framework, 2026-08-26)
+
+### Eric's original framework, verbatim
+
+Eric handed this over as a first draft, with an explicit instruction to refine it once the visual pass was further along: *"Lets define some larger phases and refine the phases after the visual pass. I want these phases to be larger milestones while we build this website to be launched to Gamer Zone visitors."* His original three phases and rubric, unedited:
+
+> Phase 1 — Visual/atmosphere (starting now, cheapest to execute, no data dependency): motion language, hover states, card/tier framing, iconography consistency, the "does this feel like a gamer built it" test.
+> Phase 2 — Progression/achievement in the ambassador program: legibility of the tier ladder, what unlocks feel like, whether earning something is visible the moment it happens (not just listed on a static page).
+> Phase 3 — Competition/community site-wide: leaderboard visibility outside the leaderboard's own section, cross-page nudges, social proof loops.
+>
+> Review rubric per section (holistic + sectional). For each section, score 1–5 against:
+> 1. Clarity — does a first-timer know what this is/does immediately
+> 2. Gamer authenticity — does it read as built by gamers, or generic corporate-with-a-controller-icon
+> 3. Progression legibility — is "where am I, what's next" obvious (ambassador-specific, but flag anywhere else it'd help)
+> 4. Motion/feedback quality — does interaction feel responsive and intentional, not just decorative
+> 5. Mobile parity — same read at 400/640/900px breakpoints
+
+**The rubric stands as-is** — apply it to every section, on every visual/design pass, the same way the QA checklist at the end of this file already gets run. It's a permanent standing tool, not a one-time exercise.
+
+**The three phases below are refined into four launch milestones**, per Eric's own ask — scoped against what's actually shipped as of this entry rather than starting from a blank page, and expanded because "launched to Gamer Zone visitors" is a bigger bar than "visual pass done."
+
+### Refined launch milestones
+
+**Milestone 1 — Visual & Interaction Foundation** *(supersedes Phase 1 — substantially underway)*
+Motion language, hover/focus states, card and tier framing, iconography consistency, and general "does this feel like a gamer built it" polish. Largely shipped already: the unified `gz-shine` effect, the redone Diamond tier visuals and chromatic tier texturing, the hero mini-game's redesign (sizing, anchoring, scroll-fade, real playtesting), the Games/Ambassador live search features, the Past Events photo waterfall, the Weekly Lineup 1:1 square, keyboard-operable calendar, and the card-row-alignment rule are all Milestone 1 work. Open under this milestone: the site-wide container-width consistency audit and the About Gamer Zone full-width treatment (both queued below), plus a final rubric pass across every section once those land.
+
+**Milestone 2 — Progression & Program Backbone** *(supersedes Phase 2 — partially shipped, backend still open)*
+Legibility of the Ambassador tier ladder and whether earning something feels visible in the moment, not just listed on a static page. Shipped: the tier ladder itself, the Diamond flare system, generalized pillar tags, and Ambassador search. Still open, and the real unlock for this milestone: Roadmap item #1 (the event-log + tier-tracking backend) — without it, "where am I, what's next" still resolves to "ask staff," which is the one gap Marcus's persona feedback flagged and only partially addressed so far.
+
+**Milestone 3 — Community & Competition Layer** *(supersedes Phase 3 — speced, not yet built)*
+Leaderboard visibility beyond its own section, cross-page nudges, social-proof loops. This milestone absorbs Roadmap item #2 ("Live at the Zone" hub — community leaderboard, "who's here" pulse, trail mosaic) and item #2a (the hero-game virality brainstorm: self-ghost, shared daily challenge seed, shareable challenge links, in-person tie-in). None of this is built yet; it's the next major scoping/build target once Milestone 2's backend exists, since the leaderboard and progress-tracking pieces of Milestones 2 and 3 share the same underlying event-log data source rather than needing two separate systems.
+
+**Milestone 4 — Launch Hardening & Go-Live Readiness** *(new — not in Eric's original three, but implied by "launched to Gamer Zone visitors")*
+The first three milestones are about the site feeling good to a visitor already looking at it. This one is about the site being genuinely ready to be the front door for real Gamer Zone visitors: closing every no-fabrication gap flagged in Part 1 (the Academy "Closed" tracks need a real waitlist/next-cohort answer, not just accurate silence), a full site-wide rubric pass on every section rather than the sections touched most recently, the container-width consistency audit, real (not simulated) data everywhere a chart or number appears, and a final cross-page QA sweep (all 5 pages, both breakpoints, zero console errors) immediately before any go-live announcement. This milestone is never really "done" once live — it's the standing bar every future change gets held to, same spirit as the QA workflow at the end of this file.
+
+**Status note:** as of this entry, Milestone 1 is furthest along, Milestone 2 has its visible half shipped with its backend half open, and Milestones 3–4 are scoped but not started. Update each milestone's status in this section as work lands, rather than leaving this snapshot stale.
