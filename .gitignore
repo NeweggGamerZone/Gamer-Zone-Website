@@ -19,3 +19,7 @@ archive/
 node_modules/
 out/
 .worktrees/
+
+# tools/audit/: fetched headless-Chrome shared libs (see tools/audit/setup.sh) —
+# re-fetched per environment, not portable/versioned
+tools/audit/.deps/

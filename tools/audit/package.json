@@ -1,0 +1,8 @@
+{
+  "name": "gz-contrast-audit",
+  "private": true,
+  "description": "Pixel-verified WCAG AAA contrast audit tooling for the Gamer Zone site. See README.md.",
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}
