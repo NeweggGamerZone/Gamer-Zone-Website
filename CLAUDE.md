@@ -20,6 +20,7 @@ This is v1 of this file, consolidated 2026-08-26 from everything established acr
 10. **In any card grid, a title's line count must never shift where the content below it starts.** A one-line title and a two-line title, sitting side by side, must still line up on the row beneath them. See "Card row alignment" below.
 11. **No feature or change is "done" until it has been explicitly checked against every rule above.** Run the QA checklist at the end of this file before considering any change finished, and again before pushing to `main` — treat this file as an active checklist to execute, not background reading.
 12. **Run the pixel-verified WCAG AAA contrast audit on every passover — every content update and every page change, not only layout/visual work.** A manual/grep-based color check is not sufficient; it already missed a real failure (`.reg-step-num` white-on-orange) that only surfaced because Eric caught it by eye. See "Readability" below for the exact method and how to run it.
+13. **A QA loop pass only ever reports findings — it never fixes anything on its own.** When Eric asks for a QA loop run, run the scripted checks (`tools/audit/run-full-qa.sh`) plus the manual persona/soft-goals/interactive review, compile everything into one findings summary, and stop. Only implement whatever Eric explicitly says to act on. See `docs/QA-RUNBOOK.md` for the full loop.
 
 ---
 
@@ -158,6 +159,8 @@ The hard rules above (readability, sizing, keyboard access) are the floor — a 
 
 Run this before considering **any** visual, layout, or interactive change finished — and run it again as a final pass before pushing to `main`. Don't rely on memory of having done it earlier in a long session; re-check against the actual current state of the files.
 
+This is the *execute-and-verify* half of the process — it runs after a change is implemented, as part of getting that one change ready to ship. It's distinct from a **QA loop pass** (`docs/QA-RUNBOOK.md`, core rule 13): a standalone, on-demand review across the whole site that only ever reports findings for Eric to approve before anything gets changed. Steps 2, 3, and 5 below are largely automated now — `bash tools/audit/run-full-qa.sh` runs the contrast audit, container-width check, and cross-page console smoke test in one pass (see `tools/audit/README.md`).
+
 **1. Rule compliance pass.** Re-read the "Core rules" list above against the actual diff. For each rule that could plausibly apply to what changed, explicitly confirm it — don't just assume a rule wasn't relevant because the task description didn't mention it.
 
 **2. Readability check — mandatory on every content update and page change, not just visual passes.** Run the full pixel-verified contrast audit (see "Mandatory: run the pixel-verified contrast audit on every passover" under "Readability" above) — real DOM text-node walk + rendered-pixel background sampling, not a CSS-value read-through. Check contrast at rest AND at any animated effect's most intense moment (force the effect to that state and screenshot it). Target WCAG AAA (7:1 normal text, 4.5:1 large text; 3:1 for non-text UI elements, which have no AAA tier). A grep-based check already missed a real failure once (`.reg-step-num`) — treat that as proof this step can't be skipped or shortcut.
@@ -166,7 +169,7 @@ Run this before considering **any** visual, layout, or interactive change finish
 
 **4. Interactive/functional check.** For anything touching a game, form, calendar, or other widget: actually operate it via simulated real input (held keys, sequences over multiple seconds, keyboard-only operation) and confirm the *behavior*, not just the absence of thrown errors. Check the browser console for errors and warnings regardless (excluding known-harmless `file://` CORS noise during local testing).
 
-**5. Cross-page smoke test.** Before pushing to `main`, load every page that could plausibly be affected (when in doubt, all of them: `index.html`, `events.html`, `games.html`, `ambassador.html`, `edu.html`) and confirm no new console errors.
+**5. Cross-page smoke test.** Before pushing to `main`, load every page that could plausibly be affected (when in doubt, all of them: `index.html`, `events.html`, `games.html`, `ambassador.html`, `edu.html`) and confirm no new console errors — `node tools/audit/console-check.js` (or the full `run-full-qa.sh`) automates this.
 
 **6. Roadmap alignment check.** Did this session's work touch anything on the Part 4 roadmap? If so, update that entry. Did anything come up that should become a new roadmap item? Write it in, don't leave it only in chat.
 
