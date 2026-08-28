@@ -83,4 +83,37 @@
     node.style.left = clamp(r.left, 4, window.innerWidth - r.width - 4) + 'px';
     node.style.top = clamp(r.top, 4, window.innerHeight - r.height - 4) + 'px';
   });
+
+  /* Collision avoidance -- 2026-08-28 QA fix. This fixed-position node
+     ignores every page section's own layout/padding by definition (that's
+     the point of `position:fixed`), so on narrow viewports it can land on
+     top of something a visitor actually needs to see or use -- confirmed on
+     Games, where it covered part of the SENET "Top Played Games" donut and
+     its legend rows. Padding on the chart section itself can't fix this: the
+     collision depends on scroll position, not on the section's own size.
+     Sliding to the opposite corner was tried and measured first, but the
+     legend rows run nearly edge-to-edge on mobile (same shared container as
+     the rest of the site), so no corner is actually clear -- see the CSS
+     comment on .pin-node.yield for the measurement that ruled it out.
+     Instead, any element marked data-pin-avoid is watched with an
+     IntersectionObserver; while one is meaningfully on screen, the node
+     fades out and stops accepting clicks via the .yield class, then fades
+     back in once scrolled past -- the only version of this that actually
+     guarantees it never sits on top of real content. Reusable for any
+     future interactive/data element that turns out to need the same
+     treatment -- just add data-pin-avoid to it, no JS changes required. */
+  const avoidTargets = document.querySelectorAll('[data-pin-avoid]');
+  if (avoidTargets.length && 'IntersectionObserver' in window) {
+    const active = new Set();
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) active.add(entry.target);
+        else active.delete(entry.target);
+      });
+      // Never fight a position the visitor chose themselves by dragging.
+      if (node.style.left) return;
+      node.classList.toggle('yield', active.size > 0);
+    }, { threshold: 0.15 });
+    avoidTargets.forEach(el => io.observe(el));
+  }
 })();

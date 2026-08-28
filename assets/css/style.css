@@ -489,8 +489,36 @@ details.archive-month .grid { margin-top: 1rem; }
    z-index:60 -- above .site-header (50) so it's never hidden under the
    nav, below .lightbox (100) so a photo lightbox still wins if both are
    somehow open at once. */
-.pin-node{position:fixed;right:1.2rem;bottom:1.2rem;z-index:60;touch-action:none}
+.pin-node{position:fixed;right:1.2rem;bottom:1.2rem;z-index:60;touch-action:none;transition:opacity .3s ease,transform .3s ease}
 .pin-node.is-dragging{transition:none}
+/* .yield: applied by preregister-node.js (IntersectionObserver watching any
+   [data-pin-avoid] element, e.g. the Games SENET chart's donut+legend) while
+   that content is in view, so the fixed corner button doesn't sit on top of
+   something a visitor is meant to read/interact with.
+
+   First attempt here was sliding the node to the opposite corner instead of
+   fading it -- rejected after actually measuring it (see the 2026-08-28 QA
+   fix notes in the roadmap doc): the SENET legend rows (.senetdb-rows) run
+   nearly edge-to-edge on mobile, same as most content on this site's shared
+   container, so there is no corner a 78-92px circular button can sit in
+   without covering *some* real content -- swapping sides just swaps which
+   line of the legend gets covered. A translucent-but-present state doesn't
+   fix it either: text partially showing through a button is still degraded
+   contrast, which is exactly what CLAUDE.md's readability rule forbids.
+   Fully stepping back (opacity+pointer-events, not display:none, so it's a
+   real transition rather than a jump-cut) is the only version of this that
+   actually guarantees zero readability impact while the avoided content is
+   on screen -- it reappears the moment the visitor scrolls past. The node's
+   own close (X) button still exists for anyone who wants it gone for good;
+   this only ever affects the temporary/automatic state. */
+.pin-node.yield{opacity:0;pointer-events:none;transform:scale(.85);visibility:hidden;transition:opacity .3s ease,transform .3s ease,visibility 0s linear .3s}
+/* visibility is delayed until the fade-out finishes (not instant) so the
+   node doesn't visually snap away mid-fade, but going the other way (class
+   removed) falls back to .pin-node's plain, undelayed rule above -- so it
+   becomes focusable/visible again the instant it starts fading back in,
+   not after. Needed on top of pointer-events:none: that alone stops clicks
+   but a keyboard user could still Tab onto an invisible, dead focus target
+   without it -- see CLAUDE.md "Keyboard accessibility". */
 .pin-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:92px;height:92px;border-radius:50%;background:linear-gradient(145deg,var(--ne-orange),var(--ne-orange-deep));color:#000;text-align:center;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.72rem;line-height:1.15;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18);cursor:grab;user-select:none;-webkit-user-select:none}
 .pin-btn:hover{filter:brightness(1.08)}
 .pin-btn:focus-visible{outline:none;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18),0 0 0 3px #fff}

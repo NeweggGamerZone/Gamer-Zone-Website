@@ -116,6 +116,20 @@ Per Eric: analyze Pinterest-style "waterfalling" content and redesign the Past E
 
 ---
 
+## Part 2h — QA loop pass #1 + Preregister/SENET-chart overlap fix (2026-08-28)
+
+First real end-to-end run of the report-then-approve QA loop (`docs/QA-RUNBOOK.md`). Scripted checks + manual review surfaced one confirmed real bug, one false alarm the review correctly ruled out before reporting it, and one soft note — see the loop's own findings summary in chat for the full writeup. Eric approved fixing the confirmed bug; the other two are still open for a deeper pass.
+
+**Fixed: floating Preregister button (`.pin-node`) overlapping the Games SENET chart.** Confirmed via a real (non-fullPage) viewport screenshot at mobile width — the fixed bottom-right CTA sat on top of the donut chart and its legend rows, in some cases from the moment the page loads (the chart starts high enough up the page that it's already ~46% visible in-viewport at mobile scroll-top). Padding on the chart section itself couldn't fix this: the collision depends on scroll position relative to a fixed-position element, not on the section's own size.
+
+First approach tried and rejected after actually measuring it: sliding the button to the opposite corner. Didn't work — the SENET legend rows run nearly edge-to-edge on mobile (same shared container width as the rest of the site), so no corner is actually clear; swapping sides just swapped which line of text got covered. Landed on a different mechanism instead: any element marked `data-pin-avoid` (currently just `.senetdb-chart`) is watched via `IntersectionObserver` in `assets/js/preregister-node.js`; while one is meaningfully on screen, `.pin-node` gets a `.yield` class (`style.css`) that fades it to `opacity:0` + `pointer-events:none` + a delayed `visibility:hidden` (so it also drops out of the keyboard tab order, not just off-screen visually — a translucent/repositioned button would have still degraded the underlying text's contrast, which is exactly what the readability rule forbids). Reappears the instant the visitor scrolls past. Reusable for any future interactive/data element that turns out to need the same treatment — just add `data-pin-avoid`.
+
+**Two real tooling bugs found and fixed in `tools/audit/collect.js` while verifying this** (per CLAUDE.md's standing instruction to fix tool bugs in place rather than reasoning around them): (1) the "is this text node hidden" check only read the text's *direct* parent's `display`/`visibility`/`opacity`, missing elements hidden via an *ancestor's* opacity — exactly what `.pin-node.yield` does (opacity lives on the outer wrapper, not the inner `.pin-btn` that holds the text). Switched to `Element.checkVisibility()`, which correctly walks the full ancestor chain, with a manual fallback for older engines. (2) Even after that fix, the audit still caught the fade **mid-transition** once (opacity `0.007`, not yet settled at `0`) because nothing paused for the `.3s` CSS transition (plus the async `IntersectionObserver` callback ahead of it) to actually finish after the scroll-to-top reset — same root-cause category as the earlier `scroll-behavior:smooth` race (see Part 2f), different trigger. Added a 400ms settle wait after the scroll-position confirmation. Re-ran the full scripted pass after both fixes: 0 contrast failures, 0 width-consistency findings, 0 console errors, all 5 pages.
+
+**Verified:** real single-viewport screenshots (not fullPage, which misrepresents `position:fixed` elements) at mobile width in all three states — chart not yet faded into view, chart centered in view, scrolled well past into the footer — confirm the button is genuinely absent while overlapping content is on screen and genuinely present and usable everywhere else. Full `run-full-qa.sh` pass re-run clean after the fix.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.

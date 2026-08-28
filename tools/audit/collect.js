@@ -66,6 +66,17 @@ const OUT_DIR = process.env.OUT_DIR || path.join(__dirname, 'out');
     // Belt-and-suspenders: confirm scrollY is actually 0 before proceeding
     // rather than trusting the wait alone.
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 3000 }).catch(() => {});
+    // Same category of bug as the scroll-race above, different trigger:
+    // anything that reacts to scroll position with an IntersectionObserver
+    // + CSS transition (e.g. the floating Preregister node fading itself
+    // out via .pin-node.yield while it's avoiding on-screen content, added
+    // 2026-08-28) needs a moment to actually finish animating after the
+    // scroll settles -- the IO callback itself fires async, then the CSS
+    // transition takes its own .3s on top. Without this wait, this script
+    // caught the fade mid-flight once (opacity 0.007, not yet the settled
+    // 0) and produced a bogus "black text on black background" contrast
+    // failure for text that's actually fully invisible a moment later.
+    await new Promise(r => setTimeout(r, 400));
 
     // Collect every real text node's rect + computed style, in page (document) coordinates
     const items = await page.evaluate(() => {
@@ -75,8 +86,24 @@ const OUT_DIR = process.env.OUT_DIR || path.join(__dirname, 'out');
           if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
           const p = node.parentElement;
           if (!p) return NodeFilter.FILTER_REJECT;
-          const cs = getComputedStyle(p);
-          if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return NodeFilter.FILTER_REJECT;
+          // checkVisibility() (Chrome 105+) walks the FULL ancestor chain for
+          // display/visibility/opacity, not just the immediate parent -- the
+          // older manual `getComputedStyle(p)` check here missed elements
+          // hidden via an ANCESTOR's opacity/visibility rather than their own
+          // (found 2026-08-28: the floating Preregister node fades itself out
+          // via opacity:0 on the OUTER .pin-node wrapper while it's avoiding
+          // on-screen content, but its text sits in the INNER .pin-btn, whose
+          // own computed opacity is still 1 -- the old check missed this and
+          // flagged real text with a real 1.04:1 contrast failure that no
+          // visitor can actually see, since the whole button is invisible at
+          // that moment). Fall back to the old direct-parent-only check on
+          // older engines that lack checkVisibility.
+          if (typeof p.checkVisibility === 'function') {
+            if (!p.checkVisibility({ opacityProperty: true, visibilityProperty: true, contentVisibilityAuto: true })) return NodeFilter.FILTER_REJECT;
+          } else {
+            const cs = getComputedStyle(p);
+            if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return NodeFilter.FILTER_REJECT;
+          }
           return NodeFilter.FILTER_ACCEPT;
         }
       });
