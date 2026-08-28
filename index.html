@@ -7,7 +7,7 @@
 <title>Newegg Gamer Zone | Get in the Zone | Free-to-Play Gaming Lounge, Diamond Bar CA</title>
 <meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=57">
+<link rel="stylesheet" href="assets/css/style.css?v=58">
 </head>
 <body class="home-page">
 <div id="gz-veil" aria-hidden="true"></div>
@@ -51,6 +51,14 @@
         <span>Score<b id="hr-score-val">0</b></span>
         <span>Best<b id="hr-best-val">0</b></span>
       </div>
+      <!-- 2026-08-28: each hazard is one of the site's own real zones (see
+           ZONES in techno-hero.js) -- this line names which one was just
+           cleared/missed, tying the abstract dodge mechanic back to real
+           parts of the actual venue instead of an unlabeled orange arc.
+           Starts empty (nothing to report before the first hazard
+           resolves); aria-hidden is inherited from .hero-runner, same as
+           the rest of this decorative HUD. -->
+      <p class="hero-runner-zone" id="hr-zone-val"></p>
       <p class="hero-runner-hint">WASD or Arrow keys to move and jump, or tap/hold to play</p>
     </div>
     <!-- "A real look inside" -- real venue photography (the same photos
@@ -319,13 +327,13 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister<br>Now</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=57" defer></script>
-<script src="assets/js/preregister-node.js?v=57" defer></script>
-<script src="assets/js/techno-hero.js?v=57" defer></script>
-<script src="assets/js/photo-waterfall.js?v=57" defer></script>
-<script src="assets/js/events.js?v=57" defer></script>
-<script src="assets/js/event-update.js?v=57" defer></script>
-<script src="assets/js/zone-stack.js?v=57" defer></script>
-<script src="assets/js/reviews.js?v=57" defer></script>
+<script src="assets/js/main.js?v=58" defer></script>
+<script src="assets/js/preregister-node.js?v=58" defer></script>
+<script src="assets/js/techno-hero.js?v=58" defer></script>
+<script src="assets/js/photo-waterfall.js?v=58" defer></script>
+<script src="assets/js/events.js?v=58" defer></script>
+<script src="assets/js/event-update.js?v=58" defer></script>
+<script src="assets/js/zone-stack.js?v=58" defer></script>
+<script src="assets/js/reviews.js?v=58" defer></script>
 </body>
 </html>

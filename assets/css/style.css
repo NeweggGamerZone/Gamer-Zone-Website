@@ -816,6 +816,14 @@ body.home-page { background: transparent; }
 .hero-runner { position: relative; z-index: 1; width: 100%; max-width: 560px; margin: 2.4rem auto 0; opacity: 0; pointer-events: none; cursor: pointer; }
 .hero-runner-scores { display: flex; justify-content: center; gap: 1.4rem; margin-top: .35rem; font-family: var(--head); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
 .hero-runner-scores b { color: var(--ink); font-size: .82rem; margin-left: .35rem; letter-spacing: 0; }
+/* Names which real zone the last hazard represented (see ZONES in
+   techno-hero.js) -- empty/absent until the first hazard resolves, then
+   a plain instant text swap (see announceZone's comment in
+   techno-hero.js for why this is deliberately NOT animated). */
+.hero-runner-zone { text-align: center; margin-top: .3rem; font-size: .7rem; font-weight: 600; letter-spacing: .02em; color: var(--ink-dim); }
+.hero-runner-zone::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: .5em; vertical-align: middle; background: var(--ink-dim); }
+.hero-runner-zone.is-clear::before { background: #3ddc84; }
+.hero-runner-zone.is-miss::before { background: #ff5c5c; }
 .hero-runner-hint { text-align: center; margin-top: .3rem; font-size: .68rem; color: var(--ink-dim); opacity: .75; letter-spacing: .04em; }
 @media (prefers-reduced-motion: reduce) { .hero-runner { display: none; } }
 

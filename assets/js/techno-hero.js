@@ -198,6 +198,7 @@
   const runnerWrap = document.getElementById('hero-runner');
   const scoreEl = document.getElementById('hr-score-val');
   const bestEl = document.getElementById('hr-best-val');
+  const zoneEl = document.getElementById('hr-zone-val');
   const heroStackEl = document.querySelector('.hero-stack');
   const heroStageEl = document.querySelector('.hero-stage');
   const gameOn = !!(runnerWrap && scoreEl && bestEl && heroStackEl && !reduceMotion);
@@ -205,6 +206,31 @@
   const HS_KEY = 'gzHeroRunnerBest';
   function loadBest() { try { return parseInt(localStorage.getItem(HS_KEY), 10) || 0; } catch { return 0; } }
   function saveBest(v) { try { localStorage.setItem(HS_KEY, String(v)); } catch { /* private mode etc — fine to skip */ } }
+
+  // 2026-08-28: ties the abstract dodge-a-hazard mechanic to the real
+  // venue, per Eric's feedback that the hero game on its own doesn't
+  // communicate "this is a real place." Each hazard is now labeled (in
+  // the real, accessible HUD text below -- see zoneEl -- not drawn onto
+  // the canvas itself) with one of the site's own real zone names,
+  // exact same names/wording as About Gamer Zone's zone-stack cards
+  // (index.html) -- no new or invented copy. Cycled in order rather than
+  // randomly so a player sees a fair, even rotation across all five
+  // rather than a random skew toward whichever the RNG favors this run.
+  const ZONES = ['PC Gaming Zone', 'Racing & Immersive Zone', 'VR & Mixed Reality Zone', 'Console Gaming Zone', 'Broadcast'];
+  let zoneCycleIdx = 0;
+  // Deliberately a plain, un-animated text/class swap (no fade-in/out) --
+  // an opacity or visibility transition here would risk the exact bug
+  // the pin-node collision-avoidance fix (see CLAUDE.md's "Preregister
+  // button" note) just had to work around: a contrast-audit screenshot
+  // landing mid-transition and sampling a half-faded, technically-still-
+  // there text node. This text is either fully present or (before the
+  // first hazard resolves) not there at all -- nothing in between.
+  function announceZone(zone, result) {
+    if (!zoneEl) return;
+    zoneEl.textContent = result === 'clear' ? `Cleared: ${zone}` : `Missed: ${zone}`;
+    zoneEl.classList.toggle('is-clear', result === 'clear');
+    zoneEl.classList.toggle('is-miss', result === 'miss');
+  }
 
   let score = 0, best = 0;
   let gameActive = false; // derived every frame from heroFade — true while the hero is substantially on screen
@@ -353,16 +379,18 @@
     jumping = true; vy = JUMP_V;
   }
 
-  function onMiss() {
+  function onMiss(zone) {
     score = 0; flashT = 0.3; surviveTime = 0;
     scoreEl.textContent = '0';
+    announceZone(zone, 'miss');
   }
-  function onClear() {
+  function onClear(zone) {
     score += 1;
     best = Math.max(best, score);
     scoreEl.textContent = String(score);
     bestEl.textContent = String(best);
     saveBest(best);
+    announceZone(zone, 'clear');
   }
 
   function spawnHazard() {
@@ -374,7 +402,9 @@
     // for how that maps to an actual screen position as it approaches.
     const width = 0.14 + Math.random() * 0.18;
     const start = Math.random();
-    hazards.push({ z: Z_FAR, resolved: false, arcStart: start, arcWidth: width });
+    const zone = ZONES[zoneCycleIdx % ZONES.length];
+    zoneCycleIdx++;
+    hazards.push({ z: Z_FAR, resolved: false, arcStart: start, arcWidth: width, zone });
   }
 
   function updateGame(dt, rot, speed) {
@@ -412,7 +442,7 @@
       if (!hz.resolved && hz.z <= baseRingZ) {
         hz.resolved = true;
         const airborneEnough = -charY > CHAR_R * 2.6;
-        if (!inArc(charT, hz.arcStart, hz.arcWidth) || airborneEnough) onClear(); else onMiss();
+        if (!inArc(charT, hz.arcStart, hz.arcWidth) || airborneEnough) onClear(hz.zone); else onMiss(hz.zone);
       }
     }
     hazards = hazards.filter(hz => hz.z > Z_NEAR - 40);
