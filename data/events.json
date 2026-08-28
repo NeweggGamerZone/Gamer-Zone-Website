@@ -180,6 +180,16 @@
       "reservation": false
     },
     {
+      "id": "closed-labor-day-2026-09-05",
+      "title": "Closed: Labor Day",
+      "date": "2026-09-05",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed for Labor Day.",
+      "featured": false,
+      "reservation": false
+    },
+    {
       "id": "xp-fortnite-training-2026-09-09",
       "title": "XP League: Fortnite Training",
       "boardNoShrink": true,
@@ -243,7 +253,7 @@
     },
     {
       "id": "street-fighter-saturday-slam-2026-09-26",
-      "title": "Street Fighter Saturday Slam",
+      "title": "Street Fighter 6 Saturday Slam",
       "subtitle": "SF6 local throwdown: enter the bracket, claim the crown.",
       "date": "2026-09-26",
       "time": "11:00 AM to 7:00 PM",
