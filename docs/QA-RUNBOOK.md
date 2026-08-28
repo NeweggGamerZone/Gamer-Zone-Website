@@ -136,3 +136,24 @@ self-review workflow for that half of the loop. Then re-run
 `tools/audit/run-full-qa.sh` (at minimum) to confirm the fix actually
 resolved the finding and didn't introduce a new one, before considering
 that round of the loop closed.
+
+## The loop terminates every time — it never chains into another round on its own
+
+Added 2026-08-28, per Eric's explicit instruction after the first real
+run of this loop: **finishing Step 4 is not license to go find more
+things and start Step 1 again unprompted.** Every complete cycle —
+whether it ended in "nothing found," "found things, none approved," or
+"fixed what was approved and re-verified" — ends with a check-in to
+Eric, not a silent restart. That check-in should include real questions,
+not just a status recap: what's still open and ambiguous, what a next
+round could focus on, what decision only he can make (tone, priority,
+scope, anything closer to a design call than a rule violation).
+
+This applies just as much to a single request that implies "keep going"
+(e.g. "see what else you notice," "keep digging") as it does to an
+open-ended standing loop — treat that as "run one more focused pass,
+then check in again," not as blanket permission to iterate
+indefinitely. The failure mode this rule exists to prevent: a QA pass
+that surfaces N findings, gets approval for one, fixes it, then treats
+that as momentum to go looking for N+1 without Eric ever being asked
+whether that's what he wants right now.
