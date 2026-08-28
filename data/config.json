@@ -4,6 +4,7 @@
   "announcement": "",
   "hours": "Tuesday to Saturday \u00b7 10:00 AM to 7:00 PM",
   "hoursNote": "Occasionally closed for private events: check Events before you visit.",
+  "hoursSchedule": { "days": [2, 3, 4, 5, 6], "open": "10:00", "close": "19:00", "timeZone": "America/Los_Angeles" },
   "address": "21688 Gateway Center Dr, Ste 130, Diamond Bar, CA 91765",
   "phone": "(626) 271-9700 ext. 29900",
   "mapsUrl": "https://www.google.com/maps/place/Newegg+Gamer+Zone/@33.999655,-117.8360825,17z/data=!4m6!3m5!1s0x80c32b304d605d03:0x495c6a3c824488a7!8m2!3d33.999655!4d-117.8335076!16s%2Fg%2F11z0321nsl?entry=ttu&g_ep=EgoyMDI2MDcyNy4wIKXMDSoASAFQAw%3D%3D",

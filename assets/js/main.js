@@ -109,6 +109,54 @@ const GZ = {
       const dur = Math.max(12, halfWidth / speed);
       track.style.setProperty('--gz-marquee-dur', dur + 's');
     });
+  },
+  // Real open/closed status computed from config.json's hoursSchedule --
+  // 2026-08-28, built for the homepage hero redesign (see index.html's
+  // .hero-status). Deliberately computed in the VENUE's own timezone
+  // (America/Los_Angeles), not the visitor's browser timezone -- a
+  // visitor checking the site from another timezone should see whether
+  // the Diamond Bar location is actually open right now, not whether it's
+  // "10am-7pm" wherever they happen to be. This is the one thing on the
+  // homepage that's allowed to say something time-sensitive as fact, so
+  // it has to be actually correct, not just plausible -- see CLAUDE.md's
+  // "No fabrication of facts": every value here traces back to the same
+  // real hoursSchedule the footer's plain-text hours already display, not
+  // a second hand-typed guess that could quietly drift out of sync.
+  openStatus(cfg) {
+    const sched = cfg && cfg.hoursSchedule;
+    if (!sched || !Array.isArray(sched.days) || !sched.open || !sched.close) return null;
+    const tz = sched.timeZone || 'America/Los_Angeles';
+    const now = new Date();
+    let parts;
+    try {
+      parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(now);
+    } catch { return null; } // unsupported timeZone/Intl in a very old engine -- fail quiet, no status shown
+    const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayIdx = dayNames.indexOf(map.weekday);
+    const minutesNow = (parseInt(map.hour, 10) % 24) * 60 + parseInt(map.minute, 10);
+    const toMin = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+    const openMin = toMin(sched.open), closeMin = toMin(sched.close);
+    const fmt12 = mins => {
+      const h24 = Math.floor(mins / 60), m = mins % 60;
+      const h12 = ((h24 + 11) % 12) + 1;
+      return `${h12}:${String(m).padStart(2, '0')} ${h24 < 12 ? 'AM' : 'PM'}`;
+    };
+    if (dayIdx >= 0 && sched.days.includes(dayIdx) && minutesNow >= openMin && minutesNow < closeMin) {
+      return { isOpen: true, text: `Open now · Closes at ${fmt12(closeMin)}` };
+    }
+    // Find the next day (starting today) that's a real open day, to say
+    // exactly when it reopens rather than a vague "closed right now."
+    for (let i = 0; i < 8; i++) {
+      const d = (dayIdx + i) % 7;
+      if (!sched.days.includes(d)) continue;
+      const isToday = i === 0 && minutesNow < openMin;
+      if (i === 0 && !isToday) continue; // today's open window already passed -- keep looking
+      const label = isToday ? 'today' : (i === 1 ? 'tomorrow' : fullDayNames[d]);
+      return { isOpen: false, text: `Closed now · Opens ${label} at ${fmt12(openMin)}` };
+    }
+    return { isOpen: false, text: 'Closed now' };
   }
 };
 
@@ -167,6 +215,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     el.href = v;
     if (!v.startsWith('mailto:') && !v.startsWith('tel:')) { el.target = '_blank'; el.rel = 'noopener'; }
   });
+  // Live open/closed status for the homepage hero (.hero-status) -- see
+  // GZ.openStatus above for why this is computed, not typed. Only touches
+  // the element if it's actually present on this page (currently just
+  // index.html's hero).
+  const heroStatusEl = document.getElementById('hero-status');
+  if (heroStatusEl) {
+    const status = GZ.openStatus(cfg);
+    if (status) {
+      heroStatusEl.textContent = status.text;
+      heroStatusEl.classList.add(status.isOpen ? 'is-open' : 'is-closed');
+    } else {
+      heroStatusEl.remove(); // no real hours data to report -- say nothing rather than guess
+    }
+  }
+
   const ann = document.getElementById('announcement');
   if (ann && cfg.announcement) ann.textContent = cfg.announcement;
 

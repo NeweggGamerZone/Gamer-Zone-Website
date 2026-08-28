@@ -819,6 +819,29 @@ body.home-page { background: transparent; }
 .hero-runner-hint { text-align: center; margin-top: .3rem; font-size: .68rem; color: var(--ink-dim); opacity: .75; letter-spacing: .04em; }
 @media (prefers-reduced-motion: reduce) { .hero-runner { display: none; } }
 
+/* ---- hero real-venue-proof additions (2026-08-28) ----
+   Two small, honest additions addressing that the hero on its own reads
+   as a web game/animation rather than a real, physical, free venue (see
+   CLAUDE.md's Part 2h/roadmap note): a live open/closed line computed
+   from real hours (GZ.openStatus in main.js), and a real-photo strip
+   reusing the exact photos/captions already used in About Gamer Zone's
+   zone-stack below, via the same shared marquee gallery mechanism the
+   Past Events waterfall established (assets/js/photo-waterfall.js). */
+.hero-status { text-align: center; margin-top: .6rem; font-size: .78rem; font-weight: 600; letter-spacing: .02em; color: var(--ink-dim); }
+.hero-status::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: .5em; background: var(--ink-dim); vertical-align: middle; }
+.hero-status.is-open::before { background: #3ddc84; box-shadow: 0 0 6px rgba(61,220,132,.6); }
+.hero-status.is-closed::before { background: var(--ink-dim); }
+
+.hero-proof-wrap { margin-top: 2rem; }
+.hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
+/* Smaller than .photo-waterfall's own cards -- this is a supporting
+   strip inside the hero, not a primary content section, so it should
+   read as a "peek," not compete with GET IN THE ZONE above it. */
+.hero-proof .pw-item { position: relative; flex: 0 0 auto; width: 168px; aspect-ratio: 16/10; overflow: hidden; border-radius: 2px; border: 1px solid var(--line); background: var(--bg-3); }
+.hero-proof .pw-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero-proof .pw-item .pw-cap { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: .35rem .5rem .3rem; background: rgba(4,5,7,.97); color: #fff; font-size: .62rem; font-weight: 600; letter-spacing: .01em; line-height: 1.3; }
+@media (max-width: 560px) { .hero-proof .pw-item { width: 132px; } }
+
 /* ---- bulletin photo posts (polaroid) ---- */
 .sticky.has-photo { padding-bottom: 1rem; }
 .sticky img { border: 6px solid #fff; box-shadow: 0 3px 10px rgba(0,0,0,.35); transform: rotate(1deg); }

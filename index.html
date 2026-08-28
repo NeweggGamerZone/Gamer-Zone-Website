@@ -7,7 +7,7 @@
 <title>Newegg Gamer Zone | Get in the Zone | Free-to-Play Gaming Lounge, Diamond Bar CA</title>
 <meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=56">
+<link rel="stylesheet" href="assets/css/style.css?v=57">
 </head>
 <body class="home-page">
 <div id="gz-veil" aria-hidden="true"></div>
@@ -40,12 +40,39 @@
     <div class="btn-row hero-in" style="--d:.68s">
       <a class="btn" href="events.html#calendar">Plan your visit</a>
     </div>
+    <!-- Real, live venue-status line -- computed in main.js from
+         data/config.json's hoursSchedule (venue timezone, not the
+         visitor's), not a hand-typed guess. Removed by JS entirely if
+         that data isn't available, rather than showing a fabricated
+         status -- see GZ.openStatus's comment in main.js. -->
+    <p class="hero-status hero-in" id="hero-status" style="--d:.78s" aria-live="polite"></p>
     <div class="hero-runner" id="hero-runner" aria-hidden="true">
       <div class="hero-runner-scores">
         <span>Score<b id="hr-score-val">0</b></span>
         <span>Best<b id="hr-best-val">0</b></span>
       </div>
       <p class="hero-runner-hint">WASD or Arrow keys to move and jump, or tap/hold to play</p>
+    </div>
+    <!-- "A real look inside" -- real venue photography (the same photos
+         and captions already used in About Gamer Zone's zone-stack
+         below), not stock/AI imagery, addressing that the hero on its
+         own reads as a web game rather than a real, physical, free
+         venue. Reuses the exact shared marquee gallery mechanism the
+         Past Events waterfall already established (see
+         assets/js/photo-waterfall.js) instead of a bespoke hero-only
+         carousel. Slower speed (22px/s vs the waterfall's 34) since this
+         is a supporting element inside the hero, not a primary section. -->
+    <div class="hero-proof-wrap hero-in" style="--d:.86s">
+      <p class="hero-proof-label">A real look inside the Zone</p>
+      <div class="hero-proof" data-gallery data-speed="22" aria-label="Real photos of the Newegg Gamer Zone space">
+        <template>
+          <img src="assets/calendar/BGAssets/dailyplay-bg.jpg" alt="PC Gaming Zone">
+          <img src="assets/calendar/BGAssets/vr-station-bg.jpg" alt="VR &amp; Mixed Reality Zone">
+          <img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="Racing &amp; Immersive Zone">
+          <img src="assets/calendar/BGAssets/broadcast-bg.jpg" alt="Broadcast setup">
+          <img src="assets/calendar/BGAssets/console-lounge-bg.jpg" alt="Console Gaming Zone">
+        </template>
+      </div>
     </div>
   </section>
 
@@ -292,12 +319,13 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister<br>Now</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=56" defer></script>
-<script src="assets/js/preregister-node.js?v=56" defer></script>
-<script src="assets/js/techno-hero.js?v=56" defer></script>
-<script src="assets/js/events.js?v=56" defer></script>
-<script src="assets/js/event-update.js?v=56" defer></script>
-<script src="assets/js/zone-stack.js?v=56" defer></script>
-<script src="assets/js/reviews.js?v=56" defer></script>
+<script src="assets/js/main.js?v=57" defer></script>
+<script src="assets/js/preregister-node.js?v=57" defer></script>
+<script src="assets/js/techno-hero.js?v=57" defer></script>
+<script src="assets/js/photo-waterfall.js?v=57" defer></script>
+<script src="assets/js/events.js?v=57" defer></script>
+<script src="assets/js/event-update.js?v=57" defer></script>
+<script src="assets/js/zone-stack.js?v=57" defer></script>
+<script src="assets/js/reviews.js?v=57" defer></script>
 </body>
 </html>
