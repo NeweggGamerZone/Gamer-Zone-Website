@@ -1,35 +1,73 @@
-# Verkada Pre-Registration — Daily Link Automation
+# Verkada Pre-Registration — Yearly Link Refresh
 
-Goal: retire the reservation page and let guests pre-sign a **Verkada guest link** so check-in is instant. The link rotates roughly **twice a week**, so it needs refreshing. Two ways to keep it current:
+Goal: let guests pre-sign a **Verkada guest link** so check-in is instant,
+without the reservation page. The site's Visit/Preregister CTA reads
+`verkadaUrl` directly (`assets/js/main.js`, `assets/js/calendar.js`):
+
+    cfg.verkadaUrl || cfg.reservationUrl
+
+**Update 2026-08-28 (corrected from the original "rotates ~2x/week"
+assumption):** Verkada's guest self-registration link — the one Verkada
+Command's Guest module hands you via **Get QR code -> Print a sign-in
+page** — is long-lived, about **one year** from generation (the printed
+page states an explicit expiration date). It is not a daily- or
+twice-weekly-rotating token. Two earlier links that looked "expired" were
+actually a broken/expired one-off link and, separately, an internal
+Verkada Command **staff dashboard URL** that was mistakenly used instead
+of the real guest-facing link — not evidence the real link rotates
+often. Never publish a `newegg.command.verkada.com` staff-dashboard URL
+(guest list, live camera feeds, "New Guest" button) as the public link;
+the real one always resolves to a page whose title is "Guest Registration"
+and shows the visit-type sign-in form.
+
+An earlier plan (still visible in `scripts/update_verkada.py`'s prior
+version and this doc's git history) called for a `verkadaDailyUrl` +
+`verkadaDailyDate` pair with same-day priority logic. That logic was
+never actually implemented in `main.js`/`calendar.js` — both read
+`verkadaUrl` directly — so those two fields were dead weight and have
+been removed from `data/config.json` (2026-08-28 cleanup).
+
+## Current fields in `data/config.json`
+
+- `verkadaUrl` — the live guest self-registration link. This is what the
+  site actually uses.
+- `verkadaUrlUpdated` — ISO date this link was last refreshed.
+- `verkadaUrlExpires` — ISO date Verkada's own "Valid for 1 year" printout
+  said this link expires. Refresh before this date.
+- `reservationUrl` — legacy Newegg reservation-page fallback, used only if
+  `verkadaUrl` is ever cleared/missing.
 
 ## A. Manual (always available)
 
-1. In Verkada Command, open the Gamer Zone guest site and copy the current web sign-in URL.
-2. Run: `python scripts/update_verkada.py "PASTE_URL_HERE"`
-   - This writes `verkadaDailyUrl` + today's date into `data/config.json`.
-3. Commit/push. The site's Visit CTA now uses it.
-4. To fall back to the static link: `python scripts/update_verkada.py --clear`
+1. In Verkada Command, open the Gamer Zone (Diamond Bar) guest site's
+   dashboard, click the **QR Code** toolbar button, then **Print a
+   sign-in page**. The printed page/QR states the expiration date.
+2. Get the actual URL: the same toolbar's **Sign in** link (next to the
+   QR Code button) exposes the current registration URL directly in the
+   page — no need to decode the QR image itself. Copy it.
+3. Run: `python scripts/update_verkada.py "PASTE_URL_HERE" "YYYY-MM-DD (expiry)"`
+   — this writes `verkadaUrl`, `verkadaUrlUpdated`, and (if given)
+   `verkadaUrlExpires` into `data/config.json`.
+4. **Before publishing, verify the link actually opens a public
+   registration form** (page title "Guest Registration", a visit-type
+   sign-in form) in a fresh tab — never a "Can't Check In" error and
+   never an internal staff dashboard (guest list, camera tiles, "New
+   Guest" button). If the only link available is broken or internal,
+   stop and leave the existing link in place rather than guessing.
+5. Commit/push. The site's Visit CTA now uses it.
+6. To fall back to the static reservation link: `python scripts/update_verkada.py --clear`
 
-Or just tell Cowork: *"Here's today's Verkada link: … — update the site."*
+## B. Headless (Cowork scheduled task, yearly)
 
-## B. Headless (Cowork scheduled task, ~2×/week)
-
-A scheduled Cowork task can grab the link automatically using the Claude-in-Chrome tools:
-
-1. One-time: sign in to `newegg.command.verkada.com` in the Chrome profile Claude controls (Verkada login/SSO — done by you; Claude never stores credentials).
-2. Scheduled task prompt (e.g. Tue & Fri, 9:00 AM):
-   > "Open the Newegg Gamer Zone guest site in Verkada Command, copy the current guest web sign-in URL, then run `python scripts/update_verkada.py "<url>"` in the Gamer Zone Website folder and push."
-3. If the session is logged out or the link can't be read, the task should message Eric to paste it manually (option A) — the site keeps working on the static fallback meanwhile.
-
-## Visit CTA priority (implemented in `assets/js/main.js`)
-
-1. `verkadaDailyUrl` **if** `verkadaDailyDate == today` → today's live sign-in
-2. else static `verkadaUrl` (guest site)
-3. else `reservationUrl` (Newegg reservation — legacy fallback)
+The `daily-updates` scheduled task (despite its name/history) now runs
+**weekly, Mondays**, since that's the cadence the leaderboard refresh
+still needs — the Verkada portion only actually acts when
+`verkadaUrlExpires` is within about 30 days (or already past), otherwise
+it's a no-op. This avoids relying on a single exact-day annual cron firing
+correctly. See the task's own prompt (in Cowork's Scheduled Tasks) for the
+exact logic.
 
 Walk-ins are always welcome; pre-registration only skips the line.
-
-> Ready to enable option B on a schedule? Say the word and I'll set up the recurring task (after you've logged into Verkada in the Chrome profile).
 
 ## Recurring guest events — the low-maintenance setup (researched Jul 2026)
 
