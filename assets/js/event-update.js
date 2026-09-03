@@ -21,6 +21,30 @@
     boards.forEach(b => b.style.setProperty('--eu-bg', `url('${url}')`));
   })();
 
+  // Live square board: the real in-page Weekly Lineup board should read as
+  // a filled square like the social-export screenshots, not a top-anchored
+  // banner with dead space on a light week (see style.css's #week .eu-board
+  // rule -- justify-content:center there does the actual centering, this
+  // just supplies the min-height that makes it square in the first place).
+  // Done here in JS, not with a CSS cqw value, because .eu-board is itself
+  // the container-type:inline-size query container: a cqw length used on
+  // that same element can't resolve against itself, so it silently fell
+  // back to measuring against an ancestor (the viewport) instead of this
+  // box's own rendered width -- confirmed via Playwright screenshots at
+  // 400/640/900/1400px, which is exactly the kind of thing rule #6 says
+  // not to skip. min-height only ever raises the floor, never clips: a
+  // busy week's real content still pushes the box taller than square,
+  // same as before this existed (rule #1 -- never truncate).
+  (function squareBoardMinHeight() {
+    const boards = document.querySelectorAll('#week .eu-board');
+    if (!boards.length) return;
+    const apply = () => boards.forEach(b => {
+      b.style.minHeight = b.getBoundingClientRect().width + 'px';
+    });
+    apply();
+    window.addEventListener('resize', apply);
+  })();
+
   function embedded() {
     const el = document.getElementById('eu-embedded-events');
     try { return el ? JSON.parse(el.textContent) : { events: [] }; } catch { return { events: [] }; }

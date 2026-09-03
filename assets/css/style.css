@@ -1179,6 +1179,31 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
      around the content sitting centered with the icon/address group
      pinned to the bottom. */
   justify-content:flex-start}
+/* Live square override for the real Weekly Lineup board specifically
+   (index.html/events.html #week) -- Eric asked for the live in-page board
+   to actually read as a filled square like the social-export screenshots,
+   not just the export pipeline. Scoped to #week so screenshot-monthly-
+   calendar.html's #month .eu-board (a different, intentionally taller
+   list layout) is untouched. min-height (not a fixed height) keeps rule
+   #1's "let it grow, never truncate" intact: a busy week's real content
+   can still push past square; a light week just gets centered inside a
+   square footprint instead of top-anchored with dead space below. The
+   per-week weeklyThemes[].icon (data/events.json) is what actually fills
+   that space now that it's centered -- reusing the icon slot that
+   already existed for this purpose (rule #3: no bespoke one-off fill),
+   rather than any board-mode/export-only trick.
+
+   min-height itself is set from JS (event-update.js, squareBoardMinHeight),
+   not a CSS unit, on purpose: .eu-board already establishes its own
+   container-type:inline-size context (for the cqw-based type scale
+   below), and a cqw value used on that SAME element cannot resolve
+   against itself -- spec has it fall back to an ancestor container
+   instead, which here silently resolved against the viewport/hero
+   section rather than this box's own rendered width (confirmed via
+   Playwright: produced a 920x1400 box at a 1400px viewport instead of
+   ~920x920). Measuring this box's own clientWidth in JS and setting an
+   explicit px min-height sidesteps that circularity entirely. */
+#week .eu-board{justify-content:center}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
