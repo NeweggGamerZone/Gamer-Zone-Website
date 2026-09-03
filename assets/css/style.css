@@ -1567,29 +1567,50 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    whichever viewport width lands closest to its own target ratio using
    the un-scaled min-height floor above -- this rule and the JS scaling
    step both leave that pipeline untouched. */
-/* justify-content:center added 2026-08-26 -- Eric flagged that the live
-   square board "still isn't square." The BOX itself was already a true
-   1:1 square (confirmed via getBoundingClientRect at every breakpoint),
-   but .eu-board's base rule never actually set justify-content (this
-   comment block below claimed .eu-board-inner was centered "via its own
-   justify-content," but no such rule existed outside board-mode) -- so
-   on any week whose content is shorter than the forced square height,
-   .eu-board-inner (a flex item with no stretch/flex:1) sits pinned to
-   the top with the rest of the square empty and black beneath it. That
-   reads as "not square" even though it technically is: a tall content
-   block sitting in the top slice of a square, not a square. Centering
-   vertically distributes that leftover space evenly above and below
-   instead, so the square reads as a deliberate, filled square at any
-   content length -- matching what board-mode already does for its own
-   export capture (html.board-mode .eu-board{justify-content:center}
-   below), which is the precedent this follows. */
-html:not(.board-mode) .eu-board{aspect-ratio:1/1;min-height:0;justify-content:center}
+/* justify-content:center (added 2026-08-26) was reverted to flex-start
+   2026-09-04 per Eric: the live board should read top-aligned, matching
+   the square/positioning already established on the screenshot-capture
+   pipeline's own hidden pages -- a light week's content should start at
+   the top of the square rather than floating centered with empty black
+   space split above and below it. The square floor itself (aspect-ratio,
+   min-height:0) and the fitBoard()/--eu-scale content-shrinking safety
+   net (see .eu-board-inner below and event-update.js) are unchanged --
+   only the vertical anchor of that content within the square moved.
+   Scoped to #week specifically (it wasn't before): this rule used to
+   read bare `.eu-board`, which meant it also silently applied to
+   screenshot-monthly-calendar.html's #month board whenever that hidden
+   page was opened directly (not through the board-mode capture script)
+   -- #month has no #eu-list (its rows are hand-authored, not JS-driven),
+   so event-update.js's very first guard (`if (!list) return`) bails
+   before ever reaching fitBoard(), meaning that page had zero overflow
+   protection: the forced 1:1 square + overflow:hidden was silently
+   clipping real rows off the bottom (confirmed: the September calendar's
+   last two Special Events entries were invisible) any time someone
+   opened it plain. #month's own file-header comment already says this
+   layout "intentionally differs" from the square design -- scoping this
+   rule to #week restores that intent instead of fighting it. */
+html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-content:flex-start}
 /* .eu-board-inner takes over .eu-board's own former flex-column role for
    its children (.board-logo's align-self:center, .eu-bottom-group's
    board-mode margin-top:auto, etc. all still assume a flex-column
    parent) -- .eu-board itself stays display:flex too, now with exactly
-   one child (.eu-board-inner) to center via its own justify-content. */
-.eu-board-inner{width:100%;display:flex;flex-direction:column;transform:scale(var(--eu-scale,1));transform-origin:center center}
+   one child (.eu-board-inner) whose position within the square is set by
+   .eu-board's own justify-content above (flex-start on the live #week
+   page, center in board-mode's export capture below). */
+/* transform-origin:top center (not center center) -- with justify-content:
+   flex-start above, .eu-board-inner already sits flush against the square's
+   top edge before any scaling. Scaling from the center would shrink it back
+   toward the middle of the square, splitting the freed space evenly above
+   and below and making even a top-anchored board *read* as centered on any
+   week busy enough for fitBoard()'s --eu-scale to kick in below 1 -- exactly
+   the "fully centered" complaint this pass is fixing. Anchoring the scale
+   at the top keeps the shrunk content's top edge pinned to the square's top
+   edge (flush against padding) at every scale factor, so the freed space
+   only ever appears below the content, never above it. board-mode's own
+   justify-content:center (untouched, below) still centers deliberately for
+   the actual screenshot-export layout -- this only affects the live #week
+   top-aligned case. */
+.eu-board-inner{width:100%;display:flex;flex-direction:column;transform:scale(var(--eu-scale,1));transform-origin:top center}
 @media (prefers-reduced-motion: no-preference){.eu-board-inner{transition:transform .25s ease}}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
@@ -1698,6 +1719,18 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
+/* Closures (row() in event-update.js) render as a single left-aligned line
+   -- "SEP 5: CLOSED FOR LABOR DAY" -- instead of the two-column
+   .eu-date-wrap/.eu-info split every timed event still uses above. .eu-row
+   is already display:flex;justify-content:space-between, which is moot
+   with only one child, but flex-start keeps this row's single .eu-name
+   pinned left rather than however a lone flex child would otherwise sit.
+   Font-size matches --eu-date-size (same token --eu-name-size derives
+   from, so this is a no-op today, but stays correct if the two tokens are
+   ever split apart) and allows normal wrapping instead of .eu-date's
+   white-space:nowrap, since a closure line runs the full row width. */
+.eu-closure-line{justify-content:flex-start}
+.eu-closure-line .eu-name{font-size:var(--eu-date-size);white-space:normal}
 
 /* Sub-section label between two .eu-list blocks on the same board (e.g.
    "Special Events" under a "theme weeks" list) — same divider language

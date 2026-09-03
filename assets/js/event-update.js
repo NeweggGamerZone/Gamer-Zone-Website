@@ -118,13 +118,26 @@
     // may still carry a boardDesc field on some events, but it's simply
     // ignored here now rather than read into its own block.
     const descHtml = '';
+    // Closures (no time value, nothing to react to) get one single
+    // left-aligned line -- "SEP 5: Closed for Labor Day" -- instead of the
+    // two-column date/title layout every timed event still uses below.
+    // Matches the masthead's own single-line "SEP 1 - 5: Riot Games Week"
+    // treatment (per request) rather than splitting date and name into
+    // separate flex columns the way a real event row does, since a
+    // closure has no time subtagline to justify keeping that structure.
+    if (closure) {
+      const strippedName = name.replace(/^Closed\s*[:—-]\s*/, '');
+      return `<div class="eu-row eu-closure eu-closure-line">
+        <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(mon.toUpperCase())} ${day}: Closed for ${GZ.esc(strippedName)}</div>
+      </div>${descHtml}`;
+    }
     // Time subtagline moved out of .eu-info (the right-hand title column)
     // and into .eu-date-wrap, stacked under the date itself — per request,
     // it now left-aligns flush with the date's own left edge instead of
     // sitting under (and aligned to) the title on the right. Only rendered
     // when there's a time to show, so date-only rows don't pick up an
     // empty blank line underneath.
-    return `<div class="eu-row${isMajor ? ' eu-major' : ''}${closure ? ' eu-closure' : ''}">
+    return `<div class="eu-row${isMajor ? ' eu-major' : ''}">
       <div class="eu-date-wrap">
         <div class="eu-date-top">
           <span class="eu-date">${mon.toUpperCase()} ${day}</span>
@@ -133,7 +146,7 @@
         ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
       </div>
       <div class="eu-info">
-        <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${closure ? 'Closed: ' : ''}${GZ.esc(name.replace(/^Closed\s*[:—-]\s*/, ''))}</div>
+        <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(name)}</div>
       </div>
     </div>${descHtml}`;
   }

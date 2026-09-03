@@ -14,7 +14,7 @@
      data/events.json — update it manually when the month's theme weeks
      or special events change. Safe to delete once no longer needed. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=61">
+<link rel="stylesheet" href="assets/css/style.css?v=62">
 <!-- Page-scoped tweaks for this screenshot only — do not touch the shared
      .eu-major/.eu-row rules in style.css, since those also drive the real
      live Weekly Lineup on index.html/events.html and this month-at-a-glance
@@ -88,6 +88,17 @@
 
       <h4 class="eu-sublist-head">Special Events</h4>
       <div class="eu-list">
+        <!-- Single-line closure row -- "SEP 5: Closed for Labor Day" -- same
+             markup/class convention row() in event-update.js now emits for
+             closure-type events on the live Weekly Lineup (index.html /
+             events.html), so this hand-authored month view stays visually
+             consistent with the data-driven weekly one instead of using the
+             two-column date/title layout every timed event below still
+             uses. Source of truth for the date/title text is data/events.json's
+             "closed-labor-day-2026-09-05" entry. -->
+        <div class="eu-row eu-closure eu-closure-line">
+          <div class="eu-name">SEP 5: Closed for Labor Day</div>
+        </div>
         <div class="eu-row">
           <div class="eu-date-wrap">
             <span class="eu-date">SEP 9</span>
@@ -118,7 +129,7 @@
             <div class="eu-meta">11:00 AM to 7:00 PM</div>
           </div>
           <div class="eu-info">
-            <div class="eu-name">Mario Kart 8 Deluxe Tournament</div>
+            <div class="eu-name">Mario Kart World Tournament</div>
           </div>
         </div>
         <div class="eu-row">
@@ -151,7 +162,7 @@
             <div class="eu-meta">11:00 AM to 7:00 PM</div>
           </div>
           <div class="eu-info">
-            <div class="eu-name">Street Fighter Saturday Slam</div>
+            <div class="eu-name">Street Fighter 6 Saturday Slam</div>
           </div>
         </div>
       </div>
