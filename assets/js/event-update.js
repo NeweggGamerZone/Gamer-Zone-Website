@@ -137,11 +137,20 @@
     // sitting under (and aligned to) the title on the right. Only rendered
     // when there's a time to show, so date-only rows don't pick up an
     // empty blank line underneath.
+    // The star mark is now ALWAYS rendered (never omitted), just made
+    // invisible via .eu-major-mark--placeholder on a non-major row. Only
+    // rendering it for major rows used to mean .eu-date-top (and, via
+    // .eu-info's own left-aligned flex:1 below, every row title's start x)
+    // shifted left/right depending on whether THAT ROW happened to be
+    // major -- a row-to-row jitter on the exact vertical line the eye
+    // uses to scan the list. Reserving the same width whether or not the
+    // star is visible keeps every row's date-top width identical, so
+    // titles all start at the same x regardless of major/non-major mix.
     return `<div class="eu-row${isMajor ? ' eu-major' : ''}">
       <div class="eu-date-wrap">
         <div class="eu-date-top">
           <span class="eu-date">${mon.toUpperCase()} ${day}</span>
-          ${isMajor ? '<span class="eu-major-mark" aria-hidden="true">&#9733;</span>' : ''}
+          <span class="eu-major-mark${isMajor ? '' : ' eu-major-mark--placeholder'}" aria-hidden="true">&#9733;</span>
         </div>
         ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
       </div>

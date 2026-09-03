@@ -859,15 +859,20 @@ body.home-page { background: transparent; }
 .stat-status b.is-closed { color: #ff8a8a; }
 /* 2026-09-04 (per Eric: "Status Open" wording + a green dot). The dot
    uses currentColor, so it automatically matches whichever state color
-   the .is-open/.is-closed class above sets on the parent <b> -- one
-   mechanism drives both the text and the dot, they can't drift apart. */
-.status-dot { display: inline-block; width: .5em; height: .5em; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; margin-right: .4em; vertical-align: middle; }
+   the .is-open/.is-closed class above sets on the parent <b>. 2026-09-04
+   follow-up (per Eric): reverted back to the bare word, no dot -- the
+   .status-dot rule that used to live here was removed as dead CSS since
+   nothing in the markup references it anymore. */
 /* 2026-09-04 (per Eric: "5 Stars looks awkward" -- replace with one
    larger yellow star icon). Sized up from the sibling stats' 1.5rem
    number so it reads as a real icon, not just bigger text; the rating
    itself stays conveyed to screen readers via the visually-hidden text
-   right after it in the markup (see index.html). */
-.stat-star-icon { font-size: 2rem; line-height: 1; color: #ffd447; text-shadow: 0 0 10px rgba(255,212,71,.5); }
+   right after it in the markup (see index.html). 2026-09-04 follow-up
+   (per Eric): put the visible "5" back in front of the icon -- .stat-star-num
+   matches the sibling stats' plain bold-number look, sized to sit
+   comfortably next to the enlarged star glyph. */
+.stat-star-num { font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #fff; margin-right: .15em; vertical-align: middle; }
+.stat-star-icon { font-size: 2rem; line-height: 1; color: #ffd447; text-shadow: 0 0 10px rgba(255,212,71,.5); vertical-align: middle; }
 
 .hero-proof-wrap { margin-top: 3.6rem; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
@@ -1854,7 +1859,26 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
    the same color everywhere on the site. */
 .eu-major .eu-date{color:var(--cal-major)}
 .eu-major-mark{flex:none;font-size:clamp(18px,3.2cqw,30px);line-height:1;color:var(--ne-orange)}
-.eu-info{text-align:right;min-width:0}
+/* 2026-09-04, per Eric: the star mark is now ALWAYS in the markup (see
+   row() in event-update.js), just invisible on a non-major row -- so
+   every row's .eu-date-top reserves identical width whether or not a
+   given row happens to be major, and .eu-info (now flex:1, see below)
+   starts at the same x on every row instead of jittering row to row. */
+.eu-major-mark--placeholder{visibility:hidden}
+/* 2026-09-04, per Eric: event titles are now LEFT-aligned, not right --
+   flex:1 (up from no flex, sized to its own content) means .eu-info now
+   fills whatever width .eu-row's own flex layout leaves after
+   .eu-date-wrap's fixed-width column, so a title starts immediately
+   after the date/star column (plus .eu-row's own gap) and reads as one
+   consistent left-hand text column down the whole list -- rather than
+   the old right-aligned layout, where a short title's own box sat far
+   right with a big dead gap in the row's middle (part of what read as
+   "so much empty space, not structured" on a light week's social-image
+   capture, where board-mode's small event count made that dead center
+   gap especially visible). min-width:0 (kept) still lets it shrink
+   below its content's natural width so a long title can wrap instead of
+   overflowing. */
+.eu-info{text-align:left;min-width:0;flex:1 1 auto}
 /* event title: same size, weight, and line-height as the date so the two
    columns' text tops land on the exact same baseline across the row. */
 .eu-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1;color:var(--ink)}
@@ -1863,10 +1887,10 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
    raising --eu-meta-size itself (which was reverted back to its
    original, unbumped value along with --eu-date-size above), so this
    and .eu-desc below can each be tuned independently. Keeps .eu-meta in
-   line with .eu-desc, which got the same two bumps. */
-/* Left-aligned per request, overriding .eu-info's own text-align:right —
-   the row title above stays right-aligned, only the time line below it
-   shifts to the left edge of the (title-width) .eu-info column. */
+   line with .eu-desc, which got the same two bumps. Left-aligned to the
+   date's own left edge -- now the same direction .eu-info's title uses
+   too (see above), so the whole row reads as two left-aligned columns
+   rather than mixed alignments. */
 .eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);letter-spacing:.01em;text-align:left;white-space:nowrap}
 .eu-major .eu-name{color:var(--cal-major)}
 /* extra description line for major/featured events only — same family as
@@ -1893,7 +1917,14 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
   .eu-eyebrow-title{white-space:normal}
   .eu-eyebrow .ic{width:28px;height:28px}
   .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem}
-  .eu-info{text-align:left}
+  /* .eu-row's main axis is vertical at this breakpoint (flex-direction:
+     column above) -- .eu-info's flex:1 1 auto (now the base rule; see
+     that rule's own comment) would grow it to fill leftover COLUMN
+     height instead of leftover row width, stretching the title's box
+     tall for no reason. flex:none restores natural, content-based
+     height here; text-align:left is already the base default now so
+     this breakpoint no longer needs its own override for that part. */
+  .eu-info{flex:none}
   .eu-date-wrap{gap:.4rem}
 }
 @media (max-width: 400px){
@@ -1946,10 +1977,22 @@ html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5re
    same as everywhere else. The square's leftover vertical space (see
    weekcapture.js, which pads the box out to an exact 1:1 square) is just
    left as background + the icon's own bottom-overlap treatment instead. */
-/* Board-mode only: shrink the per-week theme icon (crown, etc.) further
-   than its normal on-page size, so a busy week (2 closures + a two-line
-   title) still has room to breathe in an isolated capture. */
-html.board-mode .eu-board-icon img{width:min(37.4%,374px)}
+/* 2026-09-04, per Eric: bumped from min(37.4%,374px) -- on a light week
+   (few/no Special Events rows) the old size left the export reading as
+   "so much empty space, not structured," the same icon-too-small root
+   cause already fixed for the live in-page board (see .eu-board-icon img
+   base rule above). Kept more conservative than the live page's bump
+   (74%/720px) rather than matching it 1:1: board-mode has NO fitBoard()
+   overflow safety net at all (that function's very first line bails
+   immediately when html.board-mode is set — see event-update.js), so a
+   too-large icon here risks the sharp `cover`+`position:'top'` resize
+   step in capture-social-images.mjs cropping it off the bottom on a
+   busy week instead of just shrinking gracefully. Verified via the real
+   capture script against both the lightest week in rotation (Racing
+   Games Week, Sep 15-19, no icon at all) and the busiest icon-bearing
+   week (Fortnite Week, Aug 25-29, 3 events + icon) -- no cropping on
+   either at the real 1200x1200/1920x1080 output. */
+html.board-mode .eu-board-icon img{width:min(50%,480px)}
 /* +10% size (above) paired with a bit more top margin here so it sits
    slightly lower too, per request — scoped to board-mode only, same as
    the size bump, so the live in-page board is untouched. */
