@@ -212,6 +212,14 @@ Continuing the same findings walkthrough, several changes in one round:
 
 **Not addressed, asked about but not actioned:** Eric asked to change the review buttons to "Review Us on Google"/"Review Us on Yelp" (done) *and* link them to each platform's actual review-composer (write-a-review) flow, not just the listing page. `config.json`'s `googlePageUrl`/`yelpUrl` are confirmed-real listing-page links, but there's no confirmed write-a-review deep link for either platform on file — fabricating one (e.g. guessing a Google Place ID-based `writereview` URL, or a Yelp business-ID-based `writeareview` URL) would risk sending visitors to a broken or wrong-business link. Left the buttons pointing at the existing confirmed URLs and asked Eric for the two real review-composer links instead of guessing.
 
+## Part 2o — F-05 resolved: marquee-duplicated content no longer double-announced to screen readers (2026-09-04)
+
+**F-05 ("Great reviews, hostile delivery," MED)** had three parts: cards clip mid-viewport, DOM content is duplicated so screen readers hear everything twice, and motion fights reading. The clipping and motion are inherent to the continuous-marquee format Eric deliberately chose (already tuned: no hover-pause per his own explicit override, a readable fixed card width, 5-line quote clamp) — not treated as bugs here. The double-announcement was a real, confirmed bug: `GZ.marquee()`'s seamless-loop trick duplicates every card in the DOM (`items.join('') + items.join('')`), and the duplicate half had no `aria-hidden`, so a screen reader would read every review/photo caption twice back-to-back.
+
+**Fix:** the duplicate half is now wrapped in a `<div aria-hidden="true" style="display:contents">`. `display:contents` keeps every duplicated card as a real flex child of `.gz-marquee-track` — the layout, `gap`, and animation math are completely unaffected — while `aria-hidden` removes that whole subtree from the accessibility tree. Sighted users see zero visual difference; screen reader users now hear each real review or photo exactly once. One shared fix in `main.js` covers every `GZ.marquee` instance site-wide (both review lanes + both photo waterfalls), not a per-component patch.
+
+**Verified:** DOM-checked all 3 marquee instances on `index.html` — each duplicate wrapper is present with the exact right child count (e.g. 11 real hero photos → 11 hidden duplicates, 12 real reviews per lane → 12 hidden duplicates). Full scripted QA pass clean: 0 contrast failures, 0 container-width findings, 0 console errors across all 5 pages. Shared asset version bumped `v=64` → `v=65`.
+
 ---
 
 ## Part 3 — Simulated user feedback

@@ -1654,6 +1654,19 @@ html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-cont
    the actual screenshot-export layout -- this only affects the live #week
    top-aligned case. */
 .eu-board-inner{width:100%;display:flex;flex-direction:column;transform:scale(var(--eu-scale,1));transform-origin:top center}
+/* Live page only: .eu-board-inner otherwise shrink-wraps to its own
+   content height, which left the .eu-bottom-group centering rule above
+   with nothing to center within -- the leftover square space sat OUTSIDE
+   .eu-board-inner entirely (between its natural bottom edge and the
+   square's true bottom edge), not inside it. flex:1 makes .eu-board-inner
+   itself claim all of .eu-board's available height (.eu-board is the
+   only other flex item in that column, with nothing else to grow into),
+   so .eu-bottom-group's own flex:1 + centering now has real, live space
+   to work with on every week, light or busy. Scoped away from board-mode:
+   that export already centers via .eu-board's own justify-content:center
+   + a fixed-height square, a different, already-tuned mechanism this
+   isn't meant to touch. */
+html:not(.board-mode) .eu-board-inner{flex:1 1 auto;min-height:0}
 @media (prefers-reduced-motion: no-preference){.eu-board-inner{transition:transform .25s ease}}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
@@ -1677,6 +1690,24 @@ html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-cont
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
 .eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7cqw,1.2rem);padding-bottom:clamp(.08rem,.25cqw,.15rem)}
+/* 2026-09-04, per Eric: on the live board specifically, the icon used to
+   sit right under the last text row with only its own small fixed
+   margin-top for breathing room -- close enough on a busy week to read
+   as crowded once the icon itself got bigger (see the size bump above).
+   Letting .eu-bottom-group grow (flex:1) to consume whatever space is
+   left below .eu-list, then centering its one child inside that grown
+   box, means the icon's gap from the text above and its gap from the
+   board's own bottom padding land roughly even instead of the icon
+   riding right under the copy -- on ANY week, light or busy, since it's
+   driven by leftover flex space rather than a fixed distance from either
+   edge. Scoped to html:not(.board-mode): board-mode's own positioning
+   (`.eu-bottom-group{margin-top:auto}` below) already pins this group to
+   the bottom of its export deliberately and is untouched. margin-top:0
+   overrides .eu-board-icon's own fixed top margin above, which would
+   otherwise add extra space on top of the centering and throw off the
+   even top/bottom balance this is going for. */
+html:not(.board-mode) .eu-bottom-group{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:clamp(.8rem,2.4cqw,1.7rem)}
+html:not(.board-mode) .eu-board-icon{margin-top:0}
 /* Reverted: the square export's forced 1:1 height (weekcapture.js pads
    the box out to match its own width) left a lot of extra vertical space,
    and pinning the icon flush to the bottom (.eu-bottom-group's
@@ -1709,7 +1740,7 @@ html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-cont
    max-width) so the aspect-ratio-driven sizing above still holds: a
    portrait or near-square icon grows by the same proportion as a wide
    landscape one instead of one dimension outrunning the other. */
-.eu-board-icon img{width:auto;height:auto;max-width:min(68%,680px);max-height:min(48cqw,500px)}
+.eu-board-icon img{width:auto;height:auto;max-width:min(74%,720px);max-height:min(52cqw,540px)}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this

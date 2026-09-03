@@ -96,7 +96,18 @@ const GZ = {
     // Duplicated once so translateX(-50%) is exactly one full loop of the
     // real content -- the second copy picks up seamlessly where the first
     // left off, no visible seam or jump.
-    track.innerHTML = items.join('') + items.join('');
+    // 2026-09-04, F-05 fix (scenes-not-specs audit: "content is duplicated
+    // in the DOM, screen readers hear everything twice"): the duplicate
+    // half is wrapped in a `display:contents` element marked
+    // `aria-hidden="true"` -- display:contents keeps every duplicated
+    // card as a real flex child of .track (so the layout/gap/animation
+    // math is completely unaffected), while aria-hidden removes that
+    // whole subtree from the accessibility tree. Sighted users see no
+    // difference at all; screen reader users now hear each real review/
+    // photo exactly once instead of twice back-to-back. Applies to every
+    // GZ.marquee instance site-wide (reviews + both photo waterfalls) in
+    // this one shared fix.
+    track.innerHTML = items.join('') + `<div aria-hidden="true" style="display:contents">${items.join('')}</div>`;
     container.appendChild(track);
     // 2026-09-04 fix (per Eric: "sometimes at the end, it shows it not
     // looping properly until it crosses the middle point of the screen"):
