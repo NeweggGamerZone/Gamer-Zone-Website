@@ -95,7 +95,6 @@
   --line: #23262d;
   --radius: 4px;
   --clip: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
-  --marker: 'Permanent Marker', 'Comic Sans MS', cursive;
   /* Titles: Montserrat everywhere. Body copy: Open Sans everywhere — --sans
      and --eu-body are kept as two variables (lots of existing rules
      reference one or the other) but now resolve to the same stack, with
@@ -639,7 +638,7 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-stack-dot.active { background: var(--ne-orange); }
 @media (max-width: 480px) { .zone-stack { height: 500px; } }
 .console-systems { margin-bottom: .4rem; }
-.sticky { font-family: var(--marker); color: #16181d; padding: 1.1rem 1rem 1.3rem; box-shadow: 5px 7px 16px rgba(0,0,0,.55); position: relative; min-height: 140px; font-size: 1rem; line-height: 1.4; word-wrap: break-word; }
+.sticky { font-family: var(--head); color: #16181d; padding: 1.1rem 1rem 1.3rem; box-shadow: 5px 7px 16px rgba(0,0,0,.55); position: relative; min-height: 140px; font-size: 1rem; line-height: 1.4; word-wrap: break-word; }
 .sticky::before { content: ""; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 54px; height: 16px; background: rgba(255,255,255,.32); }
 .sticky .who { display: block; margin-top: .7rem; font-size: .84rem; opacity: .72; }
 .sticky .badges { position: absolute; top: .45rem; right: .55rem; color: rgba(0,0,0,.55); }
