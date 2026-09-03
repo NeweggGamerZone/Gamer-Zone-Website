@@ -112,7 +112,7 @@ const GZ = {
   },
   // Real open/closed status computed from config.json's hoursSchedule --
   // 2026-08-28, built for the homepage hero redesign (see index.html's
-  // .hero-status). Deliberately computed in the VENUE's own timezone
+  // .stat-status, formerly .hero-status). Deliberately computed in the VENUE's own timezone
   // (America/Los_Angeles), not the visitor's browser timezone -- a
   // visitor checking the site from another timezone should see whether
   // the Diamond Bar location is actually open right now, not whether it's
@@ -143,8 +143,12 @@ const GZ = {
       const h12 = ((h24 + 11) % 12) + 1;
       return `${h12}:${String(m).padStart(2, '0')} ${h24 < 12 ? 'AM' : 'PM'}`;
     };
+    // Returns word/detail as a pair (for the hero stat-row's big-word +
+    // small-label layout) alongside the original full-sentence `text`
+    // (kept for anything that still wants one string, e.g. an aria-live
+    // announcement of the whole thing at once).
     if (dayIdx >= 0 && sched.days.includes(dayIdx) && minutesNow >= openMin && minutesNow < closeMin) {
-      return { isOpen: true, text: `Open now · Closes at ${fmt12(closeMin)}` };
+      return { isOpen: true, word: 'Open', detail: `Closes at ${fmt12(closeMin)}`, text: `Open now · Closes at ${fmt12(closeMin)}` };
     }
     // Find the next day (starting today) that's a real open day, to say
     // exactly when it reopens rather than a vague "closed right now."
@@ -154,9 +158,9 @@ const GZ = {
       const isToday = i === 0 && minutesNow < openMin;
       if (i === 0 && !isToday) continue; // today's open window already passed -- keep looking
       const label = isToday ? 'today' : (i === 1 ? 'tomorrow' : fullDayNames[d]);
-      return { isOpen: false, text: `Closed now · Opens ${label} at ${fmt12(openMin)}` };
+      return { isOpen: false, word: 'Closed', detail: `Opens ${label} at ${fmt12(openMin)}`, text: `Closed now · Opens ${label} at ${fmt12(openMin)}` };
     }
-    return { isOpen: false, text: 'Closed now' };
+    return { isOpen: false, word: 'Closed', detail: '', text: 'Closed now' };
   }
 };
 
@@ -215,18 +219,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     el.href = v;
     if (!v.startsWith('mailto:') && !v.startsWith('tel:')) { el.target = '_blank'; el.rel = 'noopener'; }
   });
-  // Live open/closed status for the homepage hero (.hero-status) -- see
+  // Live open/closed status for the homepage hero's stat row -- see
   // GZ.openStatus above for why this is computed, not typed. Only touches
-  // the element if it's actually present on this page (currently just
-  // index.html's hero).
-  const heroStatusEl = document.getElementById('hero-status');
-  if (heroStatusEl) {
+  // the elements if they're actually present on this page (currently
+  // just index.html's hero). 2026-09-03: split into a word (#hero-status-
+  // word, the big stat number's spot) + detail (#hero-status-detail, the
+  // small label spot) pair instead of one sentence, to match the stat
+  // row's other 3 cards (PCs/reviews/free) -- see .stat-status in
+  // style.css. If there's no real hours data, the whole stat card is
+  // removed rather than left showing an empty/fabricated value.
+  const heroStatusWordEl = document.getElementById('hero-status-word');
+  if (heroStatusWordEl) {
     const status = GZ.openStatus(cfg);
     if (status) {
-      heroStatusEl.textContent = status.text;
-      heroStatusEl.classList.add(status.isOpen ? 'is-open' : 'is-closed');
+      heroStatusWordEl.textContent = status.word;
+      heroStatusWordEl.classList.add(status.isOpen ? 'is-open' : 'is-closed');
+      const detailEl = document.getElementById('hero-status-detail');
+      if (detailEl) detailEl.textContent = status.detail;
     } else {
-      heroStatusEl.remove(); // no real hours data to report -- say nothing rather than guess
+      const card = heroStatusWordEl.closest('.stat') || heroStatusWordEl;
+      card.remove(); // no real hours data to report -- say nothing rather than guess
     }
   }
 

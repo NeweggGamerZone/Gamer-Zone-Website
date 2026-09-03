@@ -24,7 +24,11 @@
     }));
     if (!photos.length) return;
 
-    const cards = photos.map(p => `<div class="pw-item"><img src="${GZ.esc(p.src)}" alt="${GZ.esc(p.alt)}" loading="lazy">${p.alt ? `<span class="pw-cap">${GZ.esc(p.alt)}</span>` : ''}</div>`);
+    // 2026-09-03 (per Eric): visible caption overlays removed from every
+    // gallery -- alt text stays on the <img> itself (screen readers still
+    // get the description), it's just no longer rendered as an on-photo
+    // label for sighted visitors.
+    const cards = photos.map(p => `<div class="pw-item"><img src="${GZ.esc(p.src)}" alt="${GZ.esc(p.alt)}" loading="lazy"></div>`);
     const speed = parseFloat(wrap.dataset.speed) || 34;
     GZ.marquee(wrap, cards, { speed });
   }

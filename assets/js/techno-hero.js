@@ -151,7 +151,26 @@
   // profile only affects the animated tunnel, never overrides that rule.
   // ------------------------------------------------------------------
   const RGB_KEY = 'gzHeroLighting';
-  const PROFILES = ['cycle', 'static', 'breathe', 'flame', 'wave'];
+  const PROFILES = ['cycle', 'static', 'breathe', 'flame', 'wave', 'meteor', 'city'];
+
+  // Fixed (not Math.random()-seeded) per-ring variation for the City
+  // Lights profile, so each ring drifts its own independent hue and
+  // twinkles on its own phase/speed — reads as scattered colorful lights
+  // rather than one synchronized effect, the same idea as a Govee app's
+  // multicolor "twinkle"/"comet" scenes. Fixed values (not randomized at
+  // load) keep the effect visually consistent across reloads/screenshots.
+  const CITY_SEEDS = [
+    { hue: 200, speed: 18, tPhase: 0.0, tSpeed: 1.3 },
+    { hue: 320, speed: -14, tPhase: 0.7, tSpeed: 1.7 },
+    { hue: 40, speed: 10, tPhase: 1.4, tSpeed: 1.1 },
+    { hue: 150, speed: -20, tPhase: 2.1, tSpeed: 1.9 },
+    { hue: 280, speed: 16, tPhase: 2.8, tSpeed: 1.4 },
+    { hue: 10, speed: -12, tPhase: 3.5, tSpeed: 1.6 },
+    { hue: 190, speed: 22, tPhase: 4.2, tSpeed: 1.2 },
+    { hue: 340, speed: -18, tPhase: 4.9, tSpeed: 1.8 },
+    { hue: 90, speed: 14, tPhase: 5.6, tSpeed: 1.5 },
+  ];
+  const METEOR_PERIOD = 2.6; // seconds per pass, far -> near
   function loadProfile() {
     try {
       const v = localStorage.getItem(RGB_KEY);
@@ -174,9 +193,12 @@
 
   // Returns the color state for this frame: a base hue (used for the
   // radiating spokes), a per-ring hue function (so profiles like Wave can
-  // vary hue by depth), and a brightness multiplier (breatheMul) applied
-  // on top of the existing fade-in — Breathe and Flame both modulate this
-  // instead of needing a second, separate alpha pipeline.
+  // vary hue by depth), a brightness multiplier (breatheMul) applied on
+  // top of the existing fade-in (Breathe and Flame both modulate this
+  // instead of needing a second, separate alpha pipeline), and an
+  // optional per-ring alpha function (ringAlpha(i, z), default 1 — how
+  // Meteor and City Lights make individual rings flash/twinkle
+  // independently rather than the whole tunnel moving as one brightness).
   function colorState(elapsed) {
     switch (profile) {
       case 'static':
@@ -192,6 +214,42 @@
       }
       case 'wave':
         return { hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + i * 26 + elapsed * 40) % 360 };
+      case 'meteor': {
+        // A single bright streak races from the vanishing point toward the
+        // viewer once every METEOR_PERIOD seconds; every ring outside its
+        // glow stays dim, so the tunnel reads as mostly-dark with one
+        // traveling flash — a comet/meteor scene, not a synchronized wash.
+        const t = (elapsed % METEOR_PERIOD) / METEOR_PERIOD;
+        const meteorZ = Z_FAR - t * (Z_FAR - Z_NEAR);
+        const width = 220;
+        return {
+          hue: 195,
+          breatheMul: 1,
+          ringHue: () => 195,
+          ringAlpha: (i, z) => {
+            const spike = Math.max(0, 1 - Math.abs(z - meteorZ) / width);
+            return 0.16 + spike * spike * 3.4;
+          },
+        };
+      }
+      case 'city': {
+        // Scattered, independently-drifting colored lights -- each ring
+        // owns its own fixed hue drift speed and twinkle phase (CITY_SEEDS
+        // above) instead of the whole tunnel sharing one hue, the Govee-
+        // style "multicolor twinkle" scene rather than a single-color mode.
+        return {
+          hue: 210,
+          breatheMul: 1,
+          ringHue: i => {
+            const s = CITY_SEEDS[i % CITY_SEEDS.length];
+            return ((s.hue + elapsed * s.speed) % 360 + 360) % 360;
+          },
+          ringAlpha: i => {
+            const s = CITY_SEEDS[i % CITY_SEEDS.length];
+            return 0.45 + 0.85 * (0.5 + 0.5 * Math.sin(elapsed * s.tSpeed + s.tPhase));
+          },
+        };
+      }
       case 'cycle':
       default:
         return { hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + elapsed * 6 + i * 12) % 360 };
@@ -215,11 +273,13 @@
   function strokeSpokes(rot, globalFade, hue) {
     const rFar = A * F / Z_FAR, rNear = A * F / Z_NEAR;
     const grad = ctx.createLinearGradient(rFar, 0, rNear, 0);
+    // 2026-09-03 (per Eric: "a little bit brighter and a bit thicker"):
+    // alpha stops raised (.26/.5 -> .4/.7) and line width raised (1 -> 1.5).
     grad.addColorStop(0, `hsla(${hue}, 70%, 55%, 0)`);
-    grad.addColorStop(0.35, `hsla(${hue}, 70%, 55%, ${0.26 * globalFade})`);
-    grad.addColorStop(1, `hsla(${hue + 30}, 85%, 65%, ${0.5 * globalFade})`);
+    grad.addColorStop(0.35, `hsla(${hue}, 70%, 55%, ${0.4 * globalFade})`);
+    grad.addColorStop(1, `hsla(${hue + 30}, 85%, 65%, ${0.7 * globalFade})`);
     ctx.strokeStyle = grad;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     for (const angle of SPOKES) {
       ctx.save();
       ctx.translate(cx, cy);
@@ -232,11 +292,18 @@
     }
   }
 
-  function drawRing(ring, unitPts, rot, globalFade, hue) {
+  function drawRing(ring, unitPts, rot, globalFade, hue, alphaMul) {
     const f = fadeFor(ring.z) * globalFade;
     if (f <= 0.01) return;
-    ctx.strokeStyle = `hsla(${hue}, 72%, 62%, ${0.36 * f})`;
-    ctx.lineWidth = 1.3;
+    // 2026-09-03: alpha base raised .36 -> .5 and line width 1.3 -> 1.8
+    // ("a little bit brighter and a bit thicker" per Eric), clamped to 1
+    // since alphaMul (Meteor/City Lights' per-ring flash/twinkle) can push
+    // it well past 1 on its own. Line width also grows slightly with a
+    // bright spike so Meteor's streak reads as a thicker line passing
+    // through, not just a color change.
+    const am = alphaMul == null ? 1 : alphaMul;
+    ctx.strokeStyle = `hsla(${hue}, 72%, 62%, ${Math.min(1, 0.5 * f * am)})`;
+    ctx.lineWidth = 1.8 + Math.max(0, am - 1) * 1.2;
     const n = unitPts.length;
     const pts = new Array(n);
     for (let i = 0; i < n; i++) {
@@ -306,7 +373,7 @@
       const r = rings[i];
       r.z -= BASE_SPEED * dt;
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
-      drawRing(r, pts, rot, globalFade, cs.ringHue(i));
+      drawRing(r, pts, rot, globalFade, cs.ringHue(i), cs.ringAlpha ? cs.ringAlpha(i, r.z) : 1);
     }
 
     raf = requestAnimationFrame(frame);

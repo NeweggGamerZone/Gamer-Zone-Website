@@ -7,7 +7,7 @@
 <title>Newegg Gamer Zone | Get in the Zone | Free-to-Play Gaming Lounge, Diamond Bar CA</title>
 <meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=59">
+<link rel="stylesheet" href="assets/css/style.css?v=60">
 </head>
 <body class="home-page">
 <div id="gz-veil" aria-hidden="true"></div>
@@ -32,6 +32,26 @@
 </header>
 <main class="container">
   <section class="hero-stage">
+    <!-- 2026-09-03 (per Eric): a corner settings control, not part of the
+         hero's own vertical flow -- top-right of the hero stage, out of
+         the way of the headline/CTA/stats. Same RGB-lighting-profile
+         <select> as before (native control, keyboard/AT support for
+         free), just repositioned; two new profiles added (Meteor, City
+         Lights -- see techno-hero.js's colorState()). Label is visually
+         hidden (.sr-only) since the corner placement doesn't have room
+         for it, but stays in the DOM for screen readers. -->
+    <div class="hero-lighting">
+      <label for="hero-lighting-select" class="sr-only">Background lighting</label>
+      <select id="hero-lighting-select">
+        <option value="cycle">Color Cycle</option>
+        <option value="static">Static</option>
+        <option value="breathe">Breathe</option>
+        <option value="flame">Flame</option>
+        <option value="wave">Wave</option>
+        <option value="meteor">Meteor</option>
+        <option value="city">City Lights</option>
+      </select>
+    </div>
     <div class="hero-stack">
       <span class="hs-line solid hero-in" style="--d:.15s">Get in</span>
       <span class="hs-line outline hero-in" style="--d:.32s">The Zone</span>
@@ -40,33 +60,21 @@
     <div class="btn-row hero-in" style="--d:.68s">
       <a class="btn" href="events.html#calendar">Plan your visit</a>
     </div>
-    <!-- Real, live venue-status line -- computed in main.js from
-         data/config.json's hoursSchedule (venue timezone, not the
-         visitor's), not a hand-typed guess. Removed by JS entirely if
-         that data isn't available, rather than showing a fabricated
-         status -- see GZ.openStatus's comment in main.js. -->
-    <p class="hero-status hero-in" id="hero-status" style="--d:.78s" aria-live="polite"></p>
-    <!-- 2026-09-03: replaces the old hero-runner mini-game entirely (per
-         Eric: too distracting, a bigger source of brand dissonance than
-         the retail logo mark ever was -- see the scenes-not-specs audit's
-         F-02). The hero background keeps only the morphing grid-shape
-         tunnel (still assets/js/techno-hero.js); this control lets a
-         visitor pick which RGB-lighting-style color profile drives that
-         tunnel's hues, the same idea as a classic RGB peripheral app
-         (Breathe/Flame/Wave/etc). A plain, real <select> rather than a
-         custom widget -- native keyboard support and screen-reader
-         labeling for free, no bespoke ARIA needed for something this
-         simple (see CLAUDE.md's keyboard-accessibility rule). Choice
-         persists via localStorage (see techno-hero.js). -->
-    <div class="hero-lighting hero-in" style="--d:.94s">
-      <label for="hero-lighting-select">Background lighting</label>
-      <select id="hero-lighting-select">
-        <option value="cycle">Color Cycle</option>
-        <option value="static">Static</option>
-        <option value="breathe">Breathe</option>
-        <option value="flame">Flame</option>
-        <option value="wave">Wave</option>
-      </select>
+    <!-- 2026-09-03 (per Eric): the stat row from the earlier hero mockup,
+         brought back for real. Real facts only: 25+ PCs is the same
+         number already used in About Gamer Zone's copy, live status is
+         the same GZ.openStatus() computation the old standalone
+         .hero-status line used (see main.js), reviews match the real
+         aggregate stat shown in the Reviews section below, and $0 is the
+         site's own standing "always free" claim. -->
+    <div class="stat-row hero-in" style="--d:.78s">
+      <div class="stat"><b>25+</b><span>Gaming PCs</span></div>
+      <div class="stat stat-status">
+        <b id="hero-status-word" aria-live="polite">&nbsp;</b>
+        <span id="hero-status-detail"></span>
+      </div>
+      <div class="stat"><b><span class="stat-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 5.0</b><span>110 Google Reviews</span></div>
+      <div class="stat"><b>$0</b><span>Always Free To Play</span></div>
     </div>
     <!-- "A real look inside" -- real venue photography (the same photos
          and captions already used in About Gamer Zone's zone-stack
@@ -331,16 +339,16 @@
      assets/js/preregister-node.js) -- draggable, closeable for this page
      view only, comes back on the next page load/refresh. -->
 <div class="pin-node" id="pin-node">
-  <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister<br>Now</a>
+  <a class="pin-btn" data-verkada href="#" aria-label="Register now">Register<br>Now</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=59" defer></script>
-<script src="assets/js/preregister-node.js?v=59" defer></script>
-<script src="assets/js/techno-hero.js?v=59" defer></script>
-<script src="assets/js/photo-waterfall.js?v=59" defer></script>
-<script src="assets/js/events.js?v=59" defer></script>
-<script src="assets/js/event-update.js?v=59" defer></script>
-<script src="assets/js/zone-stack.js?v=59" defer></script>
-<script src="assets/js/reviews.js?v=59" defer></script>
+<script src="assets/js/main.js?v=60" defer></script>
+<script src="assets/js/preregister-node.js?v=60" defer></script>
+<script src="assets/js/techno-hero.js?v=60" defer></script>
+<script src="assets/js/photo-waterfall.js?v=60" defer></script>
+<script src="assets/js/events.js?v=60" defer></script>
+<script src="assets/js/event-update.js?v=60" defer></script>
+<script src="assets/js/zone-stack.js?v=60" defer></script>
+<script src="assets/js/reviews.js?v=60" defer></script>
 </body>
 </html>

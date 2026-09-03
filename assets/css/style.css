@@ -585,8 +585,13 @@ details.archive-month .grid { margin-top: 1rem; }
    peeking card to bring it to front" handler could never actually fire
    from a direct click on the card — only the prev/next buttons and dot
    nav worked. Re-enabled here plus a pointer cursor for the affordance. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: .3; z-index: 4; cursor: pointer; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: .3; z-index: 4; cursor: pointer; }
+/* 2026-09-03 (per Eric): peeking cards used to dim via opacity, which let
+   whatever sits behind .zone-stack show through -- reads as "translucent,"
+   not "greyed out." Switched to grayscale+brightness filters instead, kept
+   at full opacity, so the card itself is what's muted, not its visibility
+   against the page behind it. */
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: 1; filter: grayscale(.85) brightness(.55); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: 1; filter: grayscale(.85) brightness(.55); z-index: 4; cursor: pointer; }
 /* Second, further-out peek layer -- per Eric's "another layer of cards
    on the outermost left and right of center" ask for About Gamer Zone.
    These are real zone cards from the same rotation (not decorative
@@ -596,8 +601,8 @@ details.archive-month .grid { margin-top: 1rem; }
    by real content instead of just being a wide empty wrapper around one
    centered card. Lower z-index than the near peek layer so they sit
    visually behind it. */
-.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154%)) scale(.8); opacity: .14; z-index: 3; cursor: pointer; }
-.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154%)) scale(.8); opacity: .14; z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154%)) scale(.8); opacity: 1; filter: grayscale(1) brightness(.35); z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154%)) scale(.8); opacity: 1; filter: grayscale(1) brightness(.35); z-index: 3; cursor: pointer; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
 /* Only a sliver of a prev/next card is actually visible (mostly hidden by
    .zone-stack's own overflow:hidden). Both the paragraph AND the centered
@@ -616,14 +621,13 @@ details.archive-month .grid { margin-top: 1rem; }
 /* The ZONE badge is also hidden on every peeking position (2026-08-26,
    pixel-verified contrast audit) -- it used to stay visible and
    re-centered here as "enough to say there's another zone over here,"
-   but that reasoning didn't account for .zone-card's own opacity
-   (.3 near peek / .14 far peek per Eric's second peek layer, added the
-   same day) pulling the badge's black-on-orange text toward whatever's
-   behind the whole card, collapsing their contrast to as low as 1.07:1
-   -- nowhere near AAA's 7:1, and not fixable by recoloring alone since
-   it's the *opacity*, not the color, doing the damage. The card's own
-   art plus its position in the stack already reads as "another zone is
-   here" without needing the badge to survive being faded that far. */
+   but that reasoning didn't account for .zone-card's own dimming (then
+   opacity .3/.14, now the grayscale+brightness filter above) pulling the
+   badge's black-on-orange text toward whatever's behind the whole card,
+   collapsing their contrast well below AAA's 7:1. Still hidden today even
+   though the dimming mechanism changed 2026-09-03 (filter, not opacity) --
+   the card's own art plus its position in the stack already reads as
+   "another zone is here" without needing the badge to survive it. */
 .zone-card[data-pos="prev"] .zone-card-code,
 .zone-card[data-pos="next"] .zone-card-code,
 .zone-card[data-pos="far-prev"] .zone-card-code,
@@ -792,10 +796,14 @@ body.home-page { background: transparent; }
    app's profile list (Breathe/Flame/Wave/Cycle/Static). A native <select>
    rather than a bespoke widget, so full keyboard operability and
    screen-reader labeling come for free. */
-.hero-lighting { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: .6rem; margin: 1.6rem auto 0; }
-.hero-lighting label { font-family: var(--head); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim); }
-.hero-lighting select { background: var(--bg-2); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: .4rem .9rem; font-family: var(--eu-body); font-size: .8rem; cursor: pointer; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+/* 2026-09-03: moved from the hero's inline flow to a fixed corner spot --
+   top-right of .hero-stage (which is position:relative -- see its rule
+   above), out of the way of the headline/CTA/stats. */
+.hero-lighting { position: absolute; top: 1rem; right: var(--safe-x, 1.2rem); z-index: 2; }
+.hero-lighting select { background: var(--bg-2); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: .4rem .9rem; font-family: var(--eu-body); font-size: .78rem; cursor: pointer; }
 .hero-lighting select:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 2px; }
+@media (max-width: 640px) { .hero-lighting { position: relative; top: auto; right: auto; display: flex; justify-content: center; margin: 1rem 0 0; } }
 
 /* ---- hero real-venue-proof additions (2026-08-28) ----
    Two small, honest additions addressing that the hero on its own reads
@@ -805,20 +813,30 @@ body.home-page { background: transparent; }
    reusing the exact photos/captions already used in About Gamer Zone's
    zone-stack below, via the same shared marquee gallery mechanism the
    Past Events waterfall established (assets/js/photo-waterfall.js). */
-.hero-status { text-align: center; margin-top: .6rem; font-size: .78rem; font-weight: 600; letter-spacing: .02em; color: var(--ink-dim); }
-.hero-status::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: .5em; background: var(--ink-dim); vertical-align: middle; }
-.hero-status.is-open::before { background: #3ddc84; box-shadow: 0 0 6px rgba(61,220,132,.6); }
-.hero-status.is-closed::before { background: var(--ink-dim); }
+/* ---- hero stat row (2026-09-03, per Eric: bring back the stat nodes
+   from the earlier hero mockup) -- 4 real facts under the CTA: PC count
+   (real copy already used in About Gamer Zone), live open/closed status
+   (replaces the old standalone .hero-status line -- same GZ.openStatus()
+   computation in main.js, just split into a word + detail pair instead
+   of one sentence so it fits the same big-number treatment as its
+   siblings), the real Google rating, and the always-free price point. */
+.stat-row { position: relative; z-index: 1; display: flex; justify-content: center; flex-wrap: wrap; gap: 2.2rem; margin-top: 1.6rem; }
+.stat { text-align: center; }
+.stat b { display: block; font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #fff; }
+.stat span { font-size: .68rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+.stat .stat-stars { color: var(--ne-orange); letter-spacing: .08em; }
+.stat-status b.is-open { color: #3ddc84; }
+.stat-status b.is-closed { color: #fff; }
+.stat-status span { text-transform: none; letter-spacing: .01em; font-weight: 600; }
 
 .hero-proof-wrap { margin-top: 2rem; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
-/* Smaller than .photo-waterfall's own cards -- this is a supporting
-   strip inside the hero, not a primary content section, so it should
-   read as a "peek," not compete with GET IN THE ZONE above it. */
-.hero-proof .pw-item { position: relative; flex: 0 0 auto; width: 168px; aspect-ratio: 16/10; overflow: hidden; border-radius: 2px; border: 1px solid var(--line); background: var(--bg-3); }
+/* 2026-09-03 (per Eric): sized up to match .photo-waterfall's own card
+   treatment exactly (was a smaller 168px "peek" strip) and caption
+   overlay removed (alt text stays on the <img> for screen readers). */
+.hero-proof .pw-item { position: relative; flex: 0 0 auto; width: 300px; aspect-ratio: 16/9; overflow: hidden; border-radius: 2px; border: 1px solid var(--line); background: var(--bg-3); }
 .hero-proof .pw-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.hero-proof .pw-item .pw-cap { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: .35rem .5rem .3rem; background: rgba(4,5,7,.97); color: #fff; font-size: .62rem; font-weight: 600; letter-spacing: .01em; line-height: 1.3; }
-@media (max-width: 560px) { .hero-proof .pw-item { width: 132px; } }
+@media (max-width: 560px) { .hero-proof .pw-item { width: 220px; } }
 
 /* ---- bulletin photo posts (polaroid) ---- */
 .sticky.has-photo { padding-bottom: 1rem; }
@@ -1317,13 +1335,18 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    GZ.marquee builds the DOM for both) — same "gz-shine" principle of
    never writing a second bespoke version of an effect that already
    exists. The mask-image edge fade keeps cards from looking like they're
-   cutting off hard at the section's edge; animation-play-state:paused on
-   hover/focus-within lets someone actually read a card instead of it
-   sliding away mid-glance. */
+   cutting off hard at the section's edge.
+   2026-09-03 (per Eric, explicit override): the previous
+   animation-play-state:paused on hover/focus-within was removed --
+   waterfalls should keep scrolling under the cursor, full stop, on every
+   gallery this drives (photos and reviews alike). This trades away the
+   site's own "pause control on all auto-motion" non-negotiable for this
+   one component; flagged here rather than silently dropped in case a
+   future accessibility pass wants a different pause mechanism (e.g. a
+   real pause button) instead of hover/focus. */
 .gz-marquee{position:relative;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 .gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
 .gz-marquee-track.rev{animation-direction:reverse}
-.gz-marquee:hover .gz-marquee-track,.gz-marquee:focus-within .gz-marquee-track{animation-play-state:paused}
 @keyframes gz-marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 /* Reduced motion: GZ.marquee renders only the real (non-duplicated) set of
    cards in this case, so no animation + wrapping is the correct static
@@ -1343,20 +1366,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    aspect-ratio is safe here for the same reason the project's container/
    sizing rules already carve out for fixed media: this is a known, fixed
    ratio, not unpredictable-length text, so there's no clipping risk. */
-.photo-waterfall .pw-item{position:relative;flex:0 0 auto;width:300px;aspect-ratio:16/9;overflow:hidden;border-radius:2px;border:1px solid var(--line);background:var(--bg-3)}
+/* 2026-09-03 (per Eric): sized up 50% (300px -> 450px, mobile 220px ->
+   330px) and caption overlay removed entirely (alt text stays on the
+   <img> for screen readers -- see photo-waterfall.js) -- no visible
+   label on any photo in this gallery anymore. */
+.photo-waterfall .pw-item{position:relative;flex:0 0 auto;width:450px;aspect-ratio:16/9;overflow:hidden;border-radius:2px;border:1px solid var(--line);background:var(--bg-3)}
 .photo-waterfall .pw-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease, filter .3s ease}
 .photo-waterfall .pw-item:hover img{transform:scale(1.04);filter:brightness(1.06)}
-/* Caption bar: solid (not gradient) rgba(4,5,7,.97) backing -- the same
-   alpha already pixel-verified AAA-safe against a worst-case bright photo
-   in the site-wide color audit (see the contrast-rule comment near the
-   top of this file), reused here rather than re-deriving a new value.
-   z-index set explicitly above the img per the readability rule (never
-   assume default stacking order gets a text-over-photo layer right).
-   Text wraps rather than truncates -- these captions are short real event
-   names/dates, not the kind of long copy the no-ellipsis rule is aimed
-   at, but wrapping costs nothing and avoids the question entirely. */
-.photo-waterfall .pw-item .pw-cap{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:.45rem .6rem .4rem;background:rgba(4,5,7,.97);color:#fff;font-size:.68rem;font-weight:600;letter-spacing:.01em;line-height:1.3}
-@media (max-width:560px){.photo-waterfall .pw-item{width:220px}}
+@media (max-width:560px){.photo-waterfall .pw-item{width:330px}}
 @media (prefers-reduced-motion: reduce){
   .photo-waterfall .pw-item img{transition:none}
 }
