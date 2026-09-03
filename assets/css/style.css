@@ -1424,7 +1424,6 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .host-card .node{position:absolute;left:.7rem;top:.7rem;z-index:2}
 .host-avatar{width:56px;height:56px;border-radius:50%;background:var(--ne-navy);color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:1.05rem;margin:.6rem auto .7rem;flex-shrink:0;position:relative;z-index:2}
 .host-card h3{white-space:normal;flex-shrink:0;position:relative;z-index:2}
-.host-email{font-size:.8rem;margin-top:.1rem;white-space:normal;word-break:break-word;flex-shrink:0;position:relative;z-index:2}
 .host-cat{font-size:.85rem;margin-top:.5rem;color:var(--ink);flex-shrink:0;position:relative;z-index:2}
 .host-social{display:flex;justify-content:center;gap:.55rem;margin-top:.6rem;flex-shrink:0;position:relative;z-index:2}
 .host-social a{width:30px;height:30px;border-radius:50%;background:var(--bg-3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-dim);transition:color .15s,border-color .15s}
@@ -1440,8 +1439,26 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    bordered avatar (vs. the circular initials used for individual people)
    so it reads as "not a person" at a glance even before you read the tag. */
 .host-tag{position:absolute;right:.7rem;top:.7rem;z-index:2;font-family:var(--head);font-weight:800;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);border:1px solid var(--line);border-radius:3px;padding:.2rem .45rem;background:var(--bg-3)}
-.host-avatar-org{border-radius:8px;background:var(--bg-3);border:1px solid var(--ne-orange)}
-.host-avatar-org .ic{width:28px;height:28px;color:var(--ne-orange)}
+
+/* 2026-09-04, F-04 resolution: Featured Ambassadors is down to one
+   explicitly-marked illustrative card (no real Ambassador backend exists
+   yet -- roadmap #1) instead of 5 fabricated real-looking profiles. This
+   ribbon is the visual cue that makes it unmistakable at a glance, not
+   just in the body copy above the grid -- centered top, above both the
+   Diamond node and the pillar tag so it reads first. #host-grid caps to
+   one comfortably-sized card instead of the 3-column grid stretching a
+   single card edge-to-edge (the same "don't let a container balloon
+   around whatever happens to be in it today" principle as this file's
+   container-width rules, just applied at the single-card scale here). */
+.host-card-example{border-style:dashed}
+/* In normal flow (not absolutely positioned like .node/.host-tag) and
+   given room to clear them via margin-top -- the card's top row is
+   already occupied by the Diamond node (left) and pillar tag (right); a
+   third absolutely-positioned badge sharing that row would crowd or
+   overlap both on a card this narrow. */
+.host-example-badge{display:block;width:max-content;margin:2.2rem auto 0;position:relative;z-index:2;font-family:var(--head);font-weight:800;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:#0c1620;background:var(--ne-orange);border-radius:3px;padding:.2rem .5rem}
+.host-card-example .host-avatar{margin-top:.5rem}
+#host-grid{max-width:340px;margin:1rem auto 0}
 
 /* ===== v9: home leaderboard + refined dark polish ===== */
 .lbx{display:flex;flex-direction:column;gap:8px;max-width:620px}

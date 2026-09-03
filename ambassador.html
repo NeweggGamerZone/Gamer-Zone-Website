@@ -8,7 +8,7 @@
 <meta name="description" content="Become a Newegg Gamer Zone Ambassador: community leaders, esports teams, and event organizers run recurring events at the Zone and unlock growing perks (gift card & product prizing, catered meals, and a featured host spot on our website) as they host more events.">
 
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=62">
+<link rel="stylesheet" href="assets/css/style.css?v=63">
 </head>
 <body>
 <div id="gz-veil" aria-hidden="true"></div>
@@ -142,78 +142,37 @@
 
   <section class="reveal" id="featured-hosts">
     <h2>Featured Ambassadors</h2>
-    <p class="dim">Featuring here is the reward for reaching Diamond: every Ambassador below has actually hit that tier.</p>
-    <div class="gz-search" id="host-search-wrap">
-      <span class="gz-search-ic"><i data-ic="search"></i></span>
-      <input type="search" id="host-search" placeholder="Search by name or tag&hellip;" aria-label="Search Featured Ambassadors by name or tag" autocomplete="off">
-      <button type="button" class="gz-search-clear" id="host-search-clear" aria-label="Clear search"><i data-ic="close"></i></button>
-    </div>
-    <p class="gz-search-empty" id="host-search-empty" hidden>No Ambassadors matched that search.</p>
-    <div class="grid cols-3" id="host-grid" style="margin-top:1rem">
-      <div class="card host-card tier-diamond" data-flare="sapphire">
+    <!-- 2026-09-04, F-04 resolution (per Eric, from the scenes-not-specs
+         audit): this section used to show 5 fully-fabricated profiles
+         (fake names, @example.com/.edu emails) directly under copy
+         claiming "every Ambassador below has actually hit that tier" --
+         a real violation of this project's own no-fabrication rule, since
+         there's no Ambassador backend yet (roadmap #1) to feature real
+         people from. Resolved by relabeling rather than deleting: down to
+         ONE clearly-marked "Example" card (an EXAMPLE ribbon, a generic
+         name, no fake contact details) showing what this wall will look
+         like once real Ambassadors reach Diamond, plus honest copy that
+         says so directly instead of overclaiming. The live search UI
+         (assets/js/ambassador.js's host-search IIFE) was removed for now
+         too -- a search box over a single illustrative card is its own
+         kind of dishonest-looking, since it implies a real roster to
+         search through. Bring both back (real cards, real search) once
+         roadmap #1's event-log backend can identify real Diamond
+         Ambassadors -- see pickDiamondFlare() in ambassador.js. -->
+    <p class="dim">Reaching Diamond earns a spot on this wall. Real Ambassador profiles aren't live yet, so here's an illustrative example of what a Featured Ambassador card looks like.</p>
+    <div class="grid cols-3" id="host-grid">
+      <div class="card host-card tier-diamond host-card-example" data-flare="sapphire">
         <span class="node">Diamond</span>
+        <span class="host-example-badge">Example</span>
         <span class="host-tag">Content Creator</span>
-        <div class="host-avatar" aria-hidden="true">MT</div>
-        <h3>Maya Torres</h3>
-        <p class="dim host-email">maya.torres@example.com</p>
-        <p class="host-cat">Community &amp; Variety Streaming &middot; Fortnite, Minecraft &amp; Just Chatting</p>
+        <div class="host-avatar" aria-hidden="true">EX</div>
+        <h3>Example Ambassador</h3>
+        <p class="host-cat">This is what a real profile will show: name, pillar, focus games, social links, and events hosted -- once Ambassadors start reaching Diamond.</p>
         <div class="host-social">
-          <a href="#" aria-label="Twitch"><i data-ic="twitch"></i></a>
-          <a href="#" aria-label="YouTube"><i data-ic="youtube"></i></a>
+          <a href="#" aria-label="Twitch" tabindex="-1" aria-disabled="true"><i data-ic="twitch"></i></a>
+          <a href="#" aria-label="YouTube" tabindex="-1" aria-disabled="true"><i data-ic="youtube"></i></a>
         </div>
-        <p class="host-count"><b>6</b> events hosted</p>
-      </div>
-      <div class="card host-card tier-diamond" data-flare="amethyst">
-        <span class="node">Diamond</span>
-        <span class="host-tag">Esports Team</span>
-        <div class="host-avatar" aria-hidden="true">DC</div>
-        <h3>Derek Chen</h3>
-        <p class="dim host-email">derek.chen@example.com</p>
-        <p class="host-cat">Competitive FPS &middot; Valorant &amp; CS2</p>
-        <div class="host-social">
-          <a href="#" aria-label="Twitch"><i data-ic="twitch"></i></a>
-          <a href="#" aria-label="YouTube"><i data-ic="youtube"></i></a>
-        </div>
-        <p class="host-count"><b>9</b> events hosted</p>
-      </div>
-      <div class="card host-card tier-diamond" data-flare="aurora">
-        <span class="node">Diamond</span>
-        <span class="host-tag">Community Organizer</span>
-        <div class="host-avatar" aria-hidden="true">AB</div>
-        <h3>Aaliyah Brooks</h3>
-        <p class="dim host-email">aaliyah.brooks@example.com</p>
-        <p class="host-cat">Fighting Games &middot; Street Fighter 6 &amp; Tekken 8</p>
-        <div class="host-social">
-          <a href="#" aria-label="Twitch"><i data-ic="twitch"></i></a>
-          <a href="#" aria-label="YouTube"><i data-ic="youtube"></i></a>
-        </div>
-        <p class="host-count"><b>7</b> events hosted</p>
-      </div>
-      <div class="card host-card tier-diamond host-org" data-flare="sapphire">
-        <span class="node">Diamond</span>
-        <span class="host-tag">Organization</span>
-        <div class="host-avatar host-avatar-org" aria-hidden="true"><i data-ic="users"></i></div>
-        <h3>Example Valley Esports</h3>
-        <p class="dim host-email">esports@example.edu</p>
-        <p class="host-cat">Collegiate Esports Club &middot; Valorant, League &amp; Rocket League</p>
-        <div class="host-social">
-          <a href="#" aria-label="Twitch"><i data-ic="twitch"></i></a>
-          <a href="#" aria-label="YouTube"><i data-ic="youtube"></i></a>
-        </div>
-        <p class="host-count"><b>11</b> events hosted</p>
-      </div>
-      <div class="card host-card tier-diamond host-org" data-flare="aurora">
-        <span class="node">Diamond</span>
-        <span class="host-tag">Organization</span>
-        <div class="host-avatar host-avatar-org" aria-hidden="true"><i data-ic="users"></i></div>
-        <h3>Example City Youth Esports</h3>
-        <p class="dim host-email">info@example-cye.org</p>
-        <p class="host-cat">Nonprofit Youth League &middot; Rocket League, Overwatch &amp; Smash Bros</p>
-        <div class="host-social">
-          <a href="#" aria-label="Twitch"><i data-ic="twitch"></i></a>
-          <a href="#" aria-label="YouTube"><i data-ic="youtube"></i></a>
-        </div>
-        <p class="host-count"><b>8</b> events hosted</p>
+        <p class="host-count"><b>&mdash;</b> events hosted</p>
       </div>
     </div>
   </section>
@@ -287,8 +246,8 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Register now">Register<br>Now</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=62" defer></script>
-<script src="assets/js/preregister-node.js?v=62" defer></script>
-<script src="assets/js/ambassador.js?v=62" defer></script>
+<script src="assets/js/main.js?v=63" defer></script>
+<script src="assets/js/preregister-node.js?v=63" defer></script>
+<script src="assets/js/ambassador.js?v=63" defer></script>
 </body>
 </html>

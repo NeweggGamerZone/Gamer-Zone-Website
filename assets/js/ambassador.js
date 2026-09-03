@@ -101,12 +101,17 @@ function pickDiamondFlare(stableId, table = DIAMOND_FLARES) {
 
 /* Featured Ambassadors live search -- matches on name (h3) or pillar tag
    (.host-tag, e.g. "Content Creator", "Organization"). Same approach as
-   the Games page search (assets/js/games.js): the handful of cards are
-   already fully rendered in the page's own HTML (5 today), so filtering
-   is just toggling each card's [hidden] attribute in place -- no data
-   array, no re-render, no fetch/cache layer to build. Reuses the shared
-   .gz-search component (style.css) so both search boxes on the site look
-   and behave identically. */
+   the Games page search (assets/js/games.js): filtering is just toggling
+   each card's [hidden] attribute in place -- no data array, no re-render,
+   no fetch/cache layer to build. Reuses the shared .gz-search component
+   (style.css) so both search boxes on the site look and behave
+   identically.
+   2026-09-04, F-04 resolution: the search markup itself was removed from
+   ambassador.html (down to a single illustrative "Example" card -- see
+   that file's own comment for why), so this IIFE's null guard below now
+   makes it a no-op. Left in place rather than deleted so the real search
+   UI just needs to be added back to the HTML once roadmap #1's real
+   Ambassador roster exists -- no JS rewrite needed. */
 (function () {
   const wrap = document.getElementById('host-search-wrap');
   const input = document.getElementById('host-search');
