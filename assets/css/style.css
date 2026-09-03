@@ -587,11 +587,16 @@ details.archive-month .grid { margin-top: 1rem; }
    nav worked. Re-enabled here plus a pointer cursor for the affordance. */
 /* 2026-09-03 (per Eric): peeking cards used to dim via opacity, which let
    whatever sits behind .zone-stack show through -- reads as "translucent,"
-   not "greyed out." Switched to grayscale+brightness filters instead, kept
-   at full opacity, so the card itself is what's muted, not its visibility
-   against the page behind it. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: 1; filter: grayscale(.85) brightness(.55); z-index: 4; cursor: pointer; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: 1; filter: grayscale(.85) brightness(.55); z-index: 4; cursor: pointer; }
+   not "greyed out." Switched to full-opacity filters instead, so the card
+   itself is what's muted, not its visibility against the page behind it.
+   2026-09-04 follow-up (per Eric: grayscale "looks too depressing"):
+   swapped grayscale+brightness for blur+brightness -- the peek cards stay
+   in full, vivid color (nothing desaturated) and just read as
+   out-of-focus background depth, the same visual cue a camera's depth-of-
+   field blur gives a background subject, rather than draining their color
+   entirely. */
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
 /* Second, further-out peek layer -- per Eric's "another layer of cards
    on the outermost left and right of center" ask for About Gamer Zone.
    These are real zone cards from the same rotation (not decorative
@@ -1680,7 +1685,15 @@ html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-cont
    reads as a similar, proportionate size regardless of its shape —
    matching the board-mode export's own icon sizing below instead of
    ballooning past it. */
-.eu-board-icon img{width:auto;height:auto;max-width:min(40%,420px);max-height:min(28cqw,320px)}
+/* 2026-09-04, per Eric: on a light week (e.g. Sep 1-5's single Labor Day
+   closure) the board's own square floor left a lot of empty room below
+   the masthead/closure line -- bigger badge art fills more of that space
+   instead of leaving it dead, on this week's flag icon and any future
+   icon added to rotation. Both caps raised ~35-40% together (not just
+   max-width) so the aspect-ratio-driven sizing above still holds: a
+   portrait or near-square icon grows by the same proportion as a wide
+   landscape one instead of one dimension outrunning the other. */
+.eu-board-icon img{width:auto;height:auto;max-width:min(68%,680px);max-height:min(48cqw,500px)}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
@@ -1916,7 +1929,13 @@ html.board-mode .reveal{opacity:1;transform:none;transition:none}
    section's top edge instead of sitting at the padding's full depth.
    Bumped another 25%, then another 10% (clamp(45px,9vw,75px) ->
    clamp(56px,11.25vw,94px) -> clamp(61.6px,12.375vw,103.4px)). */
-.board-logo{display:block;align-self:center;height:clamp(73.92px,14.85vw,124.08px);width:auto;margin:clamp(-.8rem,-1.6vw,-.4rem) 0 clamp(1rem,3vw,1.6rem)}
+/* 2026-09-04, per Eric: reverted the negative top margin -- it pulled the
+   logo up into .eu-board's own top padding, which on a wide board could
+   leave as little as ~8px of real clearance above it (measured at 900px
+   viewport before this change). Swapped for a real positive minimum so
+   there's always a comfortable gap between the square's top edge and the
+   logo, on top of whatever .eu-board's own padding already provides. */
+.board-logo{display:block;align-self:center;height:clamp(73.92px,14.85vw,124.08px);width:auto;margin:clamp(.6rem,1.4vw,1rem) 0 clamp(1rem,3vw,1.6rem)}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
    and lets .eu-board span the full viewport width, but every size/spacing
    value inside the board (logo, type scale, row gaps) — and its overall
