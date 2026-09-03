@@ -7,7 +7,7 @@
 <title>Newegg Gamer Zone | Get in the Zone | Free-to-Play Gaming Lounge, Diamond Bar CA</title>
 <meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=65">
+<link rel="stylesheet" href="assets/css/style.css?v=66">
 </head>
 <body class="home-page">
 <div id="gz-veil" aria-hidden="true"></div>
@@ -215,16 +215,17 @@
     <p class="review-stat"><span class="review-stat-stars" aria-hidden="true">★★★★★</span> <span id="review-stat-text">5.0 rating &middot; 110 Google reviews</span></p>
     <div class="review-waterfall" id="review-waterfall"></div>
     <p style="margin-top:1.2rem;text-align:center">
-      <!-- 2026-09-04 (per Eric): renamed to "Review Us on..." and meant to
-           deep-link straight to each platform's review-composer, not just
-           the business listing page. NOT changed yet: config.json's
-           googlePageUrl/yelpUrl are the general listing pages (confirmed
-           real), not confirmed write-a-review links -- see this session's
-           chat response asking Eric for the actual review-composer URLs
-           (Google Business Profile's own "get more reviews" link, and
-           Yelp's real business ID) before wiring a guessed URL here. -->
-      <a class="btn" data-cfg-href="googlePageUrl" href="#">Review Us on Google</a>
-      <a class="btn" style="margin-left:.6rem" data-cfg-href="yelpUrl" href="#">Review Us on Yelp</a>
+      <!-- 2026-09-04 (per Eric): deep-links straight to each platform's
+           review composer, not just the listing page -- googleReviewUrl
+           is Google's own #lrd=<CID>,3 review-dialog fragment (opens the
+           review composer directly on the search-results page), and
+           yelpReviewUrl is Yelp's /writeareview/biz/<business-id> URL,
+           both supplied directly by Eric (config.json). Distinct from
+           googlePageUrl/yelpUrl (the general listing pages), which
+           "Our Google page"/"Reviews on Yelp" elsewhere on this page
+           still correctly use. -->
+      <a class="btn" data-cfg-href="googleReviewUrl" href="#">Review Us on Google</a>
+      <a class="btn" style="margin-left:.6rem" data-cfg-href="yelpReviewUrl" href="#">Review Us on Yelp</a>
     </p>
   </section>
 
@@ -344,8 +345,8 @@
       </div>
       <div>
         <h4>Reviews</h4>
-        <a class="ftr-link" data-cfg-href="googlePageUrl" href="#"><i data-ic="google"></i><span>Review Us on Google</span></a>
-        <a class="ftr-link" data-cfg-href="yelpUrl" href="#"><i data-ic="yelp"></i><span>Review Us on Yelp</span></a>
+        <a class="ftr-link" data-cfg-href="googleReviewUrl" href="#"><i data-ic="google"></i><span>Review Us on Google</span></a>
+        <a class="ftr-link" data-cfg-href="yelpReviewUrl" href="#"><i data-ic="yelp"></i><span>Review Us on Yelp</span></a>
       </div>
       <div>
         <h4>Connect</h4>
@@ -373,13 +374,13 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Register now">Register<br>Now</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=65" defer></script>
-<script src="assets/js/preregister-node.js?v=65" defer></script>
-<script src="assets/js/techno-hero.js?v=65" defer></script>
-<script src="assets/js/photo-waterfall.js?v=65" defer></script>
-<script src="assets/js/events.js?v=65" defer></script>
-<script src="assets/js/event-update.js?v=65" defer></script>
-<script src="assets/js/zone-stack.js?v=65" defer></script>
-<script src="assets/js/reviews.js?v=65" defer></script>
+<script src="assets/js/main.js?v=66" defer></script>
+<script src="assets/js/preregister-node.js?v=66" defer></script>
+<script src="assets/js/techno-hero.js?v=66" defer></script>
+<script src="assets/js/photo-waterfall.js?v=66" defer></script>
+<script src="assets/js/events.js?v=66" defer></script>
+<script src="assets/js/event-update.js?v=66" defer></script>
+<script src="assets/js/zone-stack.js?v=66" defer></script>
+<script src="assets/js/reviews.js?v=66" defer></script>
 </body>
 </html>

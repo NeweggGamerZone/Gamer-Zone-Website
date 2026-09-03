@@ -220,6 +220,16 @@ Continuing the same findings walkthrough, several changes in one round:
 
 **Verified:** DOM-checked all 3 marquee instances on `index.html` — each duplicate wrapper is present with the exact right child count (e.g. 11 real hero photos → 11 hidden duplicates, 12 real reviews per lane → 12 hidden duplicates). Full scripted QA pass clean: 0 contrast failures, 0 container-width findings, 0 console errors across all 5 pages. Shared asset version bumped `v=64` → `v=65`.
 
+## Part 2p — Real write-a-review URLs wired; one non-fabricated review pruned; byline cleanup (2026-09-03)
+
+Closes the loop Part 2n left open: Eric supplied the two real review-composer links directly, so `googleReviewUrl` and `yelpReviewUrl` were added to `data/config.json` (kept separate from the existing `googlePageUrl`/`yelpUrl` general listing links, which were deliberately left unchanged — only the write-a-review CTAs were repointed). The homepage hero's review buttons and all 5 pages' footer "Review Us on Google/Yelp" links now point at these via `data-cfg-href`, with button copy updated to "Review Us on Google" / "Review Us on Yelp" to match.
+
+- **Duplicate check first, then one review pruned** — before touching content, ran a script confirming all 63 entries in `assets/js/reviews.js`'s REVIEWS pool were unique q+n combinations (no duplicates to clean up). Then removed one entry attributed to the Google display name "7 3" — an odd, likely-truncated real name — rather than inventing a corrected name, per core rule 4 (no fabrication). Pool is now 62 written reviews; the header comments above the REVIEWS array were updated to reflect the new count.
+- **Byline cleanup** — removed the ", Google Review" suffix from every review card's `.review-source` line (`assets/js/reviews.js`); cards now show just the reviewer's name.
+- Shared asset version bumped `v=65` → `v=66` across all 6 HTML files.
+
+**Verified:** Full scripted QA pass (`tools/audit/run-full-qa.sh`) clean: 0 contrast failures (AAA), 0 container-width findings, 0 console errors across all 5 pages, 15 screenshots captured at mobile/tablet/desktop.
+
 ---
 
 ## Part 3 — Simulated user feedback

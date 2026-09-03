@@ -34,16 +34,21 @@
   const wrap = document.getElementById('review-waterfall');
   if (!wrap) return;
 
-  // 63 written Google reviews (5 stars each), captured in an earlier sync
+  // 62 written Google reviews (5 stars each), captured in an earlier sync
   // with Google's listing. The aggregate stat line in index.html
   // ("5.0 rating · 110 Google reviews") is refreshed daily against the
   // live Google Business Profile count (still 5.0, now 110 total reviews
   // as of 2026-09-03, up from 109) -- this written pool is NOT re-scraped
   // by that daily refresh (per request, it only updates the quantity, it
-  // never adds/edits written reviews), so the gap between 63 written here
-  // and the real total will keep growing over time (47 unwritten 5-star
-  // ratings as of this count). Re-sync this pool itself in its own pass
-  // if the written reviews ever need refreshing.
+  // never adds/edits written reviews), so the gap between 62 written here
+  // and the real total will keep growing over time (48 unwritten/other
+  // 5-star ratings as of this count). Re-sync this pool itself in its own
+  // pass if the written reviews ever need refreshing.
+  // 2026-09-04 (per Eric): one review whose only attribution Google had on
+  // file was the display name "7 3" was removed rather than guessing a
+  // "corrected" name for a real person -- that would be misattributing a
+  // real reviewer's real quote to a name they never used (core rule 4, no
+  // fabrication of facts, applies to attribution too, not just claims).
   const REVIEWS = [
     { q: "Awesome space and such a cool community here!", n: "Sirena M." },
     { q: "Had a lot of fun experiencing the very best of gaming with the Gamer Zone’s desktop pcs. Internet cafes aren't super big in America so it’s really cool to have this spot for people to try out gaming at its best picture and performance for free.", n: "Samantha A." },
@@ -52,7 +57,6 @@
     { q: "Great place. Playing the game and making connections here was great.", n: "Darvion M." },
     { q: "Awesome place to test out high-end PCs and gear before buying! The setup at their Diamond Bar showroom lets you try prebuilt gaming rigs, mechanical keyboards, mice, and even VR/racing setups for free. Super friendly staff, open to the public, and a great spot for local gamers. Definitely worth dropping by if you're trying to play some games!", n: "Aaron C." },
     { q: "Great space and really cool atmosphere. I even got to meet n0thing.", n: "Roby H." },
-    { q: "Excellent place to go hang out and chill they have snacks and a really cool environment", n: "7 3" },
     { q: "Very fun place to visit they treat you right", n: "Aden P." },
     { q: "Great place for my kids. Clean stations, and the staff is very courteous and helpful. An added benefit for newcomers like us!", n: "Jin" },
     { q: "Very cool place! The staff was very friendly and helpful. I came with my wife and kids and we played a handful of games with each other. Would definitely come again!", n: "Perdana A." },
@@ -130,14 +134,14 @@
     return `<div class="card review-card" tabindex="-1" data-full="${full}">
       <div class="review-stars" aria-hidden="true">★★★★★</div>
       <p class="review-quote">${GZ.esc(r.q)}</p>
-      <p class="review-source dim">${GZ.esc(r.n)}, Google Review</p>
+      <p class="review-source dim">${GZ.esc(r.n)}</p>
     </div>`;
   }
 
   // Two lanes, shuffled once per page load (not re-shuffled after -- see
   // GZ.marquee for why nothing changes post-render) so a repeat visitor
   // sees a different real mix each time without any runtime jank. 24 of
-  // the 63 written reviews is enough for two dense-feeling lanes without
+  // the 62 written reviews is enough for two dense-feeling lanes without
   // shipping the entire pool's worth of DOM/text on every homepage load;
   // "Read our Google reviews" below links out to the rest -- real link,
   // not a fabricated "see more" that goes nowhere.
