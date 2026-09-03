@@ -832,7 +832,12 @@ body.home-page { background: transparent; }
    they're floating at a different height. */
 .stat-row { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; max-width: 640px; margin: 1.6rem auto 0; }
 @media (max-width: 560px) { .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 420px; } }
-.stat { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; text-align: center; background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 16px; padding: .75rem .5rem; }
+/* 2026-09-03 (per Eric): the bubble fill was a low-alpha white
+   (rgba(255,255,255,.05)) -- a translucent "glass" tint that let the
+   tunnel background show through underneath. Switched to the same solid,
+   fully opaque --bg-2 fill used elsewhere on the site (e.g. .gz-search
+   input) so these nodes read as solid cards, not a see-through overlay. */
+.stat { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; text-align: center; background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px; padding: .75rem .5rem; }
 .stat b { display: block; font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #fff; }
 /* .stat-status's span (the live "Closes at 7:00 PM"-style detail) now
    inherits this exact same treatment as every other stat's label -- it
@@ -843,7 +848,7 @@ body.home-page { background: transparent; }
 .stat-status b.is-open { color: #3ddc84; }
 .stat-status b.is-closed { color: #fff; }
 
-.hero-proof-wrap { margin-top: 2rem; }
+.hero-proof-wrap { margin-top: 3.6rem; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
 /* 2026-09-03 (per Eric): sized up to match .photo-waterfall's own card
    treatment exactly (was a smaller 168px "peek" strip) and caption
