@@ -1582,7 +1582,7 @@ html:not(.board-mode) .eu-board{aspect-ratio:1/1;min-height:0;justify-content:ce
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
 .eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97));}
 .eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.5rem,1.3cqw,.75rem);border-bottom:3px solid var(--ne-orange)}
-.eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0}
+.eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0;width:100%}
 /* Masthead icon+textcol block grows to fill the full width of .eu-top
    (its only child otherwise sits at natural content width), so the
    title row's space-between inside it reaches the section's true right
@@ -1644,27 +1644,25 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
    range (inside eu-eyebrow-titlerow) then sits flush against the true
    right edge of the masthead, decoupled from the desc line below and
    robust to any future subtitle length. */
-.eu-eyebrow-textcol{min-width:0;flex:1}
-/* Title and date range are true flex siblings on the same row/line —
-   not just vertically centered against the whole eyebrow block, which
-   could visually drift off the title's own baseline when the
-   description line below varies in length. */
-.eu-eyebrow-titlerow{display:flex;align-items:baseline;justify-content:space-between;gap:.3rem;flex-wrap:wrap}
-/* masthead: the instantly-recognizable ID of this board */
-/* Title + date-range: a full further +15% here (per "increase all the
-   elements") empirically wraps the date range to a second line at
-   normal desktop widths, even after tightening .eu-eyebrow-titlerow's
-   gap to .3rem (from 1rem) to reclaim space per the user's suggestion —
-   the combined text is simply content-bound, not gap-bound, on this
-   specific row. Squeezed out the actual empirically-safe maximum instead
-   (clamp(1.44rem,3.12vw,2.4rem) -> clamp(1.46rem,3.16vw,2.44rem), ~2%),
-   which is still comfortably one line with the tighter gap. */
-/* Capped at clamp(...,2.78rem) rather than the prior 2.928rem — adding the
-   "THEME: " prefix back lengthened the masthead text enough that the
-   full +20% size wrapped it to two lines at normal desktop widths.
-   Empirically re-tightened to the actual one-line ceiling for the new,
-   longer text ("THEME: CO-OP GAMES WEEK  AUG 18 – 22"). */
-.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601cqw,2.78rem);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7)}
+.eu-eyebrow-textcol{min-width:0;flex:1;width:100%}
+/* Title row now holds a single child (the combined date+theme line) —
+   left-aligned rather than the old two-child space-between layout that
+   used to push a separate date/theme element to the right edge. */
+.eu-eyebrow-titlerow{display:flex;align-items:baseline;justify-content:flex-start;gap:.3rem;flex-wrap:wrap;width:100%;min-width:0}
+/* masthead: the instantly-recognizable ID of this board. Sized off
+   var(--eu-date-size) — the same token the Special Events rows below
+   use for their own date text — rather than its own independent clamp,
+   so the masthead line and every row date always match in size and stay
+   in lockstep at every breakpoint (--eu-date-size is redefined at the
+   640px/400px breakpoints below; this rule just follows it, no separate
+   override needed here anymore). min-width:0/max-width:100%/overflow-
+   wrap:break-word guard against a nested-flex overflow bug found while
+   testing this: without an explicit width down the whole
+   eu-eyebrow -> eu-eyebrow-textcol -> eu-eyebrow-titlerow chain, a long
+   theme name could render ~25px wider than #week .eu-board's own content
+   box and get silently clipped by its overflow:hidden — see CLAUDE.md's
+   "Weekly Lineup masthead" section for the full diagnosis. */
+.eu-eyebrow-title{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:var(--eu-date-size);letter-spacing:.005em;line-height:1.25;margin:0;display:block;white-space:normal;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.7);min-width:0;max-width:100%;overflow-wrap:break-word}
 .eu-eyebrow-title::after{content:none}
 .eu-eyebrow-title .accent{color:var(--ne-blue-text)}
 /* Plain <p> inside .eu-eyebrow — only still used by the hand-authored
@@ -1683,15 +1681,6 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
    "Weekly Theme: ..." row used to give it before that row was folded into
    this one. */
 .eu-theme-highlight{color:var(--ne-blue-text)}
-/* Date range + theme name sit together on the right side of the masthead
-   row, at the same font weight/size as the plain "Weekly Theme" label on
-   the left (not a smaller caption) -- grouped as one right-aligned unit
-   per request, rather than the date alone on the right with the theme
-   name on the left. white-space:nowrap dropped (was fine for a short date
-   alone, but this can now run long with a longer theme name) in favor of
-   text-align:right, so it wraps onto its own additional line rather than
-   overflowing when the combined text doesn't fit the row. */
-.eu-theme-dates{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:clamp(1.664rem,3.601cqw,2.78rem);letter-spacing:.005em;line-height:1.25;color:#fff;text-align:right;text-shadow:0 2px 22px rgba(0,0,0,.7)}
 .eu-row.eu-closure{opacity:.85}
 .eu-row.eu-closure .eu-name{color:var(--ink-dim)}
 .eu-row.eu-closure .eu-date{color:var(--ink-dim)}
@@ -1772,7 +1761,7 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
      row padding at this breakpoint too, so the gap above the first event
      still matches the gap above every other one on mobile widths. */
   .eu-board{--eu-date-size: clamp(2.1rem, 11vw, 3rem);--eu-row-pad: clamp(.9rem,4vw,1.3rem);padding:clamp(1.6rem,7vw,2.6rem) var(--safe-x)}
-  .eu-eyebrow-title{font-size:clamp(1.05rem,4.6vw,1.5rem);white-space:normal}
+  .eu-eyebrow-title{white-space:normal}
   .eu-eyebrow .ic{width:28px;height:28px}
   .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem}
   .eu-info{text-align:left}
@@ -1780,7 +1769,7 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
 }
 @media (max-width: 400px){
   .eu-board{--eu-date-size: clamp(1.9rem, 13vw, 2.6rem)}
-  .eu-eyebrow-title{font-size:clamp(.95rem,5vw,1.3rem);white-space:normal}
+  .eu-eyebrow-title{white-space:normal}
 }
 
 /* ---- board-only render mode: isolates just the calendar block for clean
