@@ -3,6 +3,6 @@
   "private": true,
   "description": "Pixel-verified WCAG AAA contrast audit tooling for the Gamer Zone site. See README.md.",
   "dependencies": {
-    "puppeteer": "^23.0.0"
+    "puppeteer": "^23.11.1"
   }
 }
