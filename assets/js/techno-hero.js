@@ -103,7 +103,10 @@
       const n = 48, pts = [];
       for (let i = 0; i < n; i++) {
         const a = (Math.PI * 2 / n) * i - Math.PI / 2;
-        const squash = 1 + 0.3 * Math.sin(a); // ~0.7 at top, ~1.3 at bottom
+        // 2026-09-04 fix (per Eric: rendered upside-down): flipped the
+        // sign so the ROUND/blunt end sits at the top (~1.3) and the
+        // narrower end at the bottom (~0.7), matching a right-side-up egg.
+        const squash = 1 - 0.3 * Math.sin(a);
         pts.push([Math.cos(a) * 0.82, Math.sin(a) * squash]);
       }
       return pts;
@@ -238,13 +241,13 @@
       case 'static':
         return {
           hue: 205, breatheMul: 1, ringHue: () => 205,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.0, 240, 0.5, 1.6),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.0, 240, 0.42, 2.0),
         };
       case 'breathe': {
         const mul = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(elapsed * 1.1));
         return {
           hue: 28, breatheMul: mul, ringHue: () => 28,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 4.2, 300, 0.6, 1.0),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 4.2, 300, 0.5, 1.7),
         };
       }
       case 'flame': {
@@ -252,13 +255,13 @@
         const h = 18 + Math.sin(elapsed * 2.3) * 14 + Math.sin(elapsed * 5.1) * 6; // wanders across red-orange-yellow
         return {
           hue: h, breatheMul: flicker, ringHue: i => h + i * 2,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.2, 200, 0.55, 1.5),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.2, 200, 0.48, 2.1),
         };
       }
       case 'wave':
         return {
-          hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + i * 26 + elapsed * 40) % 360,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.8, 260, 0.6, 1.2),
+          hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + i * 34 + elapsed * 52) % 360,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.8, 260, 0.5, 1.9),
         };
       case 'meteor': {
         // A single bright streak races from the vanishing point toward the
@@ -274,7 +277,7 @@
           ringHue: () => 195,
           ringAlpha: (i, z) => {
             const spike = Math.max(0, 1 - Math.abs(z - meteorZ) / width);
-            return 0.16 + spike * spike * 3.4;
+            return 0.12 + spike * spike * 4.2;
           },
         };
       }
@@ -292,7 +295,7 @@
           },
           ringAlpha: i => {
             const s = CITY_SEEDS[i % CITY_SEEDS.length];
-            return 0.45 + 0.85 * (0.5 + 0.5 * Math.sin(elapsed * s.tSpeed + s.tPhase));
+            return 0.32 + 1.35 * (0.5 + 0.5 * Math.sin(elapsed * s.tSpeed + s.tPhase));
           },
         };
       }
@@ -300,7 +303,7 @@
       default:
         return {
           hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + elapsed * 6 + i * 12) % 360,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.4, 260, 0.55, 1.4),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.4, 260, 0.48, 1.8),
         };
     }
   }
@@ -310,6 +313,16 @@
   // per profile), not just Meteor and City Lights -- so Cycle, Static,
   // Breathe, Flame, and Wave all have real depth motion now instead of a
   // flat, evenly-lit tunnel. See travelSpike() above for the shared math.
+  // 2026-09-04 (per Eric: "push the RGB effects and glows and unique
+  // patterns a bit more... make the options unique and eye catching"):
+  // every profile's ringAlpha amplitude raised again (roughly +30-40%)
+  // for punchier bright moments, and drawRing/strokeSpokes below now add
+  // real glow (shadowBlur/shadowColor) and saturation that scale with how
+  // bright a given ring/spoke is at that instant -- so the brightest
+  // point of any profile's cycle now actually glows instead of just
+  // getting more opaque, and each profile's already-different spike
+  // timing/width/hue behavior reads as more visually distinct once it's
+  // rendered with real light-bloom instead of flat strokes.
 
   // Radiating spokes from the vanishing point out to the frame edge —
   // same gradient treatment as the site's original rail lines, but at
@@ -335,6 +348,11 @@
     grad.addColorStop(1, `hsla(${hue + 30}, 85%, 65%, ${0.7 * globalFade})`);
     ctx.strokeStyle = grad;
     ctx.lineWidth = 1.5;
+    // 2026-09-04: a soft constant glow on the spokes (scaled by the same
+    // globalFade every other brightness value already uses) so the tunnel
+    // has real light-bloom even on frames where no ring is mid-spike.
+    ctx.shadowColor = `hsla(${hue + 30}, 90%, 68%, ${0.55 * globalFade})`;
+    ctx.shadowBlur = 10 * globalFade;
     for (const angle of SPOKES) {
       ctx.save();
       ctx.translate(cx, cy);
@@ -345,6 +363,7 @@
       ctx.stroke();
       ctx.restore();
     }
+    ctx.shadowBlur = 0; // never leave glow bleeding into the next draw call
   }
 
   function drawRing(ring, unitPts, rot, globalFade, hue, alphaMul) {
@@ -357,8 +376,23 @@
     // bright spike so Meteor's streak reads as a thicker line passing
     // through, not just a color change.
     const am = alphaMul == null ? 1 : alphaMul;
-    ctx.strokeStyle = `hsla(${hue}, 72%, 62%, ${Math.min(1, 0.5 * f * am)})`;
-    ctx.lineWidth = 1.8 + Math.max(0, am - 1) * 1.2;
+    // 2026-09-04 (per Eric: push the glows/patterns more): saturation and
+    // lightness now scale up with the same per-ring brightness spike that
+    // already drives alpha/line-width, so a profile's bright traveling
+    // moment reads as genuinely more vivid, not just more opaque -- and a
+    // real shadowBlur glow kicks in once a ring is meaningfully above its
+    // resting brightness (am > 1.05), reset after stroke() so it never
+    // bleeds into whatever draws next.
+    const bright = Math.max(0, am - 1);
+    const sat = Math.min(100, 70 + bright * 12);
+    const light = Math.min(74, 60 + bright * 6);
+    const alpha = Math.min(1, 0.5 * f * am);
+    ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, ${alpha})`;
+    ctx.lineWidth = 1.8 + bright * 1.5;
+    if (bright > 0.05) {
+      ctx.shadowColor = `hsla(${hue}, 95%, 68%, ${Math.min(1, alpha * 1.2)})`;
+      ctx.shadowBlur = Math.min(30, bright * 15);
+    }
     const n = unitPts.length;
     const pts = new Array(n);
     for (let i = 0; i < n; i++) {
@@ -381,6 +415,7 @@
     }
     ctx.closePath();
     ctx.stroke();
+    ctx.shadowBlur = 0; // never leave glow bleeding into the next ring/spoke draw
   }
 
   function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }

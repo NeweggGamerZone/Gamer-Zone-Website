@@ -98,6 +98,21 @@ const GZ = {
     // left off, no visible seam or jump.
     track.innerHTML = items.join('') + items.join('');
     container.appendChild(track);
+    // 2026-09-04 fix (per Eric: "sometimes at the end, it shows it not
+    // looping properly until it crosses the middle point of the screen"):
+    // the CSS rule (`animation: gz-marquee-scroll var(--gz-marquee-dur,
+    // 46s) linear infinite`) starts playing the INSTANT this element is
+    // appended, using the 46s fallback duration -- because --gz-marquee-
+    // dur isn't set to the real computed value until the rAF callback
+    // below runs a frame later. Changing a custom property referenced by
+    // an already-running animation's duration doesn't restart it; the
+    // browser just recomputes "how far through the cycle am I" against
+    // the new duration, which can visibly jump the very first time it
+    // happens -- exactly the "doesn't loop right until partway across"
+    // symptom. Fix: hold the animation paused until the real duration is
+    // known, then start it -- so it only ever plays at its correct,
+    // final-form speed and the loop math is right from frame one.
+    track.style.animationPlayState = 'paused';
     // Duration is derived from the track's own real measured width (not a
     // fixed guess) so the per-card scroll SPEED stays constant regardless
     // of how many cards are in the pool -- a bigger photo/review pool gets
@@ -108,6 +123,7 @@ const GZ = {
       const speed = opts.speed || 40; // px/second
       const dur = Math.max(12, halfWidth / speed);
       track.style.setProperty('--gz-marquee-dur', dur + 's');
+      track.style.animationPlayState = 'running';
     });
   },
   // Real open/closed status computed from config.json's hoursSchedule --
@@ -228,11 +244,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // row's other 3 cards (PCs/reviews/free) -- see .stat-status in
   // style.css. If there's no real hours data, the whole stat card is
   // removed rather than left showing an empty/fabricated value.
+  // 2026-09-04 (per Eric): the big value now reads "Status Open"/"Status
+  // Closed" plus a colored dot instead of just the bare word -- so only
+  // the dynamic Open/Closed piece (#hero-status-value) gets its text set
+  // here now, not the whole <b> (which also holds the fixed "Status" text
+  // and the .status-dot indicator -- see index.html/style.css).
   const heroStatusWordEl = document.getElementById('hero-status-word');
-  if (heroStatusWordEl) {
+  const heroStatusValueEl = document.getElementById('hero-status-value');
+  if (heroStatusWordEl && heroStatusValueEl) {
     const status = GZ.openStatus(cfg);
     if (status) {
-      heroStatusWordEl.textContent = status.word;
+      heroStatusValueEl.textContent = status.word;
       heroStatusWordEl.classList.add(status.isOpen ? 'is-open' : 'is-closed');
       const detailEl = document.getElementById('hero-status-detail');
       if (detailEl) detailEl.textContent = status.detail;

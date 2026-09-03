@@ -264,7 +264,9 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 /* Aggregate rating line above the carousel. The review count (86) still
    covers the 23 reviewers who left 5 stars with no written text — they're
    just no longer named individually below (see reviews.js). */
-.review-stat { font-weight: 700; margin-top: .3rem; }
+/* 2026-09-04 (per Eric): more breathing room before the review waterfall
+   below -- this line and the marquee sat too close together. */
+.review-stat { font-weight: 700; margin-top: .3rem; margin-bottom: 1.8rem; }
 .review-stat-stars { color: var(--ne-orange); letter-spacing: .1em; }
 /* Review waterfall, 2026-08-26 "Pinterest / loved-by" redesign: two
    .gz-marquee lanes (see the shared .gz-marquee block below), each a real
@@ -606,8 +608,8 @@ details.archive-month .grid { margin-top: 1rem; }
    by real content instead of just being a wide empty wrapper around one
    centered card. Lower z-index than the near peek layer so they sit
    visually behind it. */
-.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154%)) scale(.8); opacity: 1; filter: grayscale(1) brightness(.35); z-index: 3; cursor: pointer; }
-.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154%)) scale(.8); opacity: 1; filter: grayscale(1) brightness(.35); z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154%)) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154%)) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
 /* Only a sliver of a prev/next card is actually visible (mostly hidden by
    .zone-stack's own overflow:hidden). Both the paragraph AND the centered
@@ -851,7 +853,21 @@ body.home-page { background: transparent; }
    siblings in the same row. */
 .stat span { font-size: .68rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
 .stat-status b.is-open { color: #3ddc84; }
-.stat-status b.is-closed { color: #fff; }
+/* 2026-09-04 (per Eric: was plain white -- switched to a soft red so the
+   Closed state gets its own real color cue too, not just different text,
+   consistent with is-open getting green). */
+.stat-status b.is-closed { color: #ff8a8a; }
+/* 2026-09-04 (per Eric: "Status Open" wording + a green dot). The dot
+   uses currentColor, so it automatically matches whichever state color
+   the .is-open/.is-closed class above sets on the parent <b> -- one
+   mechanism drives both the text and the dot, they can't drift apart. */
+.status-dot { display: inline-block; width: .5em; height: .5em; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; margin-right: .4em; vertical-align: middle; }
+/* 2026-09-04 (per Eric: "5 Stars looks awkward" -- replace with one
+   larger yellow star icon). Sized up from the sibling stats' 1.5rem
+   number so it reads as a real icon, not just bigger text; the rating
+   itself stays conveyed to screen readers via the visually-hidden text
+   right after it in the markup (see index.html). */
+.stat-star-icon { font-size: 2rem; line-height: 1; color: #ffd447; text-shadow: 0 0 10px rgba(255,212,71,.5); }
 
 .hero-proof-wrap { margin-top: 3.6rem; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
