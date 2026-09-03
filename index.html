@@ -7,7 +7,7 @@
 <title>Newegg Gamer Zone | Get in the Zone | Free-to-Play Gaming Lounge, Diamond Bar CA</title>
 <meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=58">
+<link rel="stylesheet" href="assets/css/style.css?v=59">
 </head>
 <body class="home-page">
 <div id="gz-veil" aria-hidden="true"></div>
@@ -46,20 +46,27 @@
          that data isn't available, rather than showing a fabricated
          status -- see GZ.openStatus's comment in main.js. -->
     <p class="hero-status hero-in" id="hero-status" style="--d:.78s" aria-live="polite"></p>
-    <div class="hero-runner" id="hero-runner" aria-hidden="true">
-      <div class="hero-runner-scores">
-        <span>Score<b id="hr-score-val">0</b></span>
-        <span>Best<b id="hr-best-val">0</b></span>
-      </div>
-      <!-- 2026-08-28: each hazard is one of the site's own real zones (see
-           ZONES in techno-hero.js) -- this line names which one was just
-           cleared/missed, tying the abstract dodge mechanic back to real
-           parts of the actual venue instead of an unlabeled orange arc.
-           Starts empty (nothing to report before the first hazard
-           resolves); aria-hidden is inherited from .hero-runner, same as
-           the rest of this decorative HUD. -->
-      <p class="hero-runner-zone" id="hr-zone-val"></p>
-      <p class="hero-runner-hint">WASD or Arrow keys to move and jump, or tap/hold to play</p>
+    <!-- 2026-09-03: replaces the old hero-runner mini-game entirely (per
+         Eric: too distracting, a bigger source of brand dissonance than
+         the retail logo mark ever was -- see the scenes-not-specs audit's
+         F-02). The hero background keeps only the morphing grid-shape
+         tunnel (still assets/js/techno-hero.js); this control lets a
+         visitor pick which RGB-lighting-style color profile drives that
+         tunnel's hues, the same idea as a classic RGB peripheral app
+         (Breathe/Flame/Wave/etc). A plain, real <select> rather than a
+         custom widget -- native keyboard support and screen-reader
+         labeling for free, no bespoke ARIA needed for something this
+         simple (see CLAUDE.md's keyboard-accessibility rule). Choice
+         persists via localStorage (see techno-hero.js). -->
+    <div class="hero-lighting hero-in" style="--d:.94s">
+      <label for="hero-lighting-select">Background lighting</label>
+      <select id="hero-lighting-select">
+        <option value="cycle">Color Cycle</option>
+        <option value="static">Static</option>
+        <option value="breathe">Breathe</option>
+        <option value="flame">Flame</option>
+        <option value="wave">Wave</option>
+      </select>
     </div>
     <!-- "A real look inside" -- real venue photography (the same photos
          and captions already used in About Gamer Zone's zone-stack
@@ -327,13 +334,13 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister<br>Now</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=58" defer></script>
-<script src="assets/js/preregister-node.js?v=58" defer></script>
-<script src="assets/js/techno-hero.js?v=58" defer></script>
-<script src="assets/js/photo-waterfall.js?v=58" defer></script>
-<script src="assets/js/events.js?v=58" defer></script>
-<script src="assets/js/event-update.js?v=58" defer></script>
-<script src="assets/js/zone-stack.js?v=58" defer></script>
-<script src="assets/js/reviews.js?v=58" defer></script>
+<script src="assets/js/main.js?v=59" defer></script>
+<script src="assets/js/preregister-node.js?v=59" defer></script>
+<script src="assets/js/techno-hero.js?v=59" defer></script>
+<script src="assets/js/photo-waterfall.js?v=59" defer></script>
+<script src="assets/js/events.js?v=59" defer></script>
+<script src="assets/js/event-update.js?v=59" defer></script>
+<script src="assets/js/zone-stack.js?v=59" defer></script>
+<script src="assets/js/reviews.js?v=59" defer></script>
 </body>
 </html>
