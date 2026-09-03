@@ -141,6 +141,79 @@ more than one level deep, don't assume `min-width:0` on the outermost
 item is enough — check `scrollWidth` vs. the true container width at
 every level, not just the one you touched.
 
+## Weekly Lineup: single-line closures, top-aligned square, and the monthly-calendar drift bug
+
+Added 2026-09-04 at Eric's request, after he caught the live board reading
+"fully centered" instead of top-aligned, the Sep 5 Labor Day closure
+splitting back into two lines, and `screenshot-monthly-calendar.html` no
+longer matching the live page.
+
+**Closures render as one line.** `row()` in `assets/js/event-update.js`
+now gives closure-type events (`type: "closed"`, e.g. Sep 5) their own
+early-return path: a single `.eu-name` line reading "SEP 5: Closed for
+Labor Day" (class `eu-closure-line`, sized off `var(--eu-date-size)` in
+`style.css`), instead of the two-column `.eu-date-wrap`/`.eu-info` split
+every timed event still uses. `screenshot-monthly-calendar.html`'s hand-
+authored Special Events list uses the identical markup/class for its own
+Sep 5 row, so the two pages stay visually consistent even though one is
+data-driven and the other is hand-authored.
+
+**Why the live board read "centered" even after being told to top-align:**
+two separate bugs stacked. First, `html:not(.board-mode) .eu-board`'s
+`justify-content:center` (added 2026-08-26) was unscoped — it read bare
+`.eu-board`, not `#week .eu-board` — so it also silently applied to
+`screenshot-monthly-calendar.html`'s `#month` board. Fixed by scoping it
+to `#week` and changing it to `flex-start`. Second, and less obviously:
+`.eu-board-inner`'s `transform-origin` was `center center`. `fitBoard()`
+(same file) shrinks `.eu-board-inner` via `transform:scale(var(--eu-scale))`
+on any week whose content doesn't fit the forced 1:1 square — and scaling
+from the center pulls the shrunk content back toward the middle of the
+square, splitting the freed space evenly above and below it. That made
+even a `justify-content:flex-start` board *read* as centered on any week
+busy enough to trigger scaling, which is exactly what Eric was seeing.
+Changed `transform-origin` to `top center` so the scale anchors at the
+top instead — the shrunk content's top edge now stays flush against the
+square's own top padding at every scale factor, and the freed space only
+ever appears below the content. Verified via Playwright (`getBoundingClientRect`
+on `.eu-board` vs `.eu-board-inner`, not just visual screenshots) that the
+gap above the content equals the board's own padding at 400/640/900/1400px,
+including on a week whose `--eu-scale` was measured at ~0.69.
+
+**Why `screenshot-monthly-calendar.html` had drifted from the live page:**
+two causes, not one. (1) An unrelated upstream commit (hero/gallery work)
+substantially rewrote this file's template — new `.eu-week-row`/Special
+Events structure — and during an earlier integration pass I diffed it for
+`eu-eyebrow`/`eu-board`/events-data keyword overlap, saw none, and
+wrongly concluded "no changes needed" without noticing the content itself
+(Sep 5 closure, the two September renames) had been reset to stale
+values by that rewrite. Keyword-matching a diff is not the same as
+re-reading a file after its second rebase — for a hand-authored page with
+no data-file source of truth, that's the only way to know it's still
+accurate. (2) Independent of the content loss, the unscoped
+`justify-content:center` bug above meant `#month`'s forced 1:1 square was
+clipping real content: `event-update.js`'s very first line is
+`const list = document.getElementById('eu-list'); if (!list) return;`,
+and this file's rows are hand-authored (`class="eu-list"`, no
+`id="eu-list"`) — so the entire script, including `fitBoard()`'s overflow
+safety net, never ran here. The last two Special Events rows (Sep 26)
+were completely invisible any time someone opened the file directly
+instead of through the actual board-mode capture script. Both are fixed
+now: content restored (Sep 5 closure, "Mario Kart World Tournament",
+"Street Fighter 6 Saturday Slam" — reconciled directly against
+`data/events.json`, the real source of truth, not the earlier stale
+edit), and `#month` is no longer forced into any square outside
+board-mode, matching the "intentionally differs" note already in this
+file's own header comment.
+
+**Lesson for next time:** when an upstream commit touches a file you've
+hand-edited, re-read the full current file after every rebase/reset —
+don't rely on a keyword-scoped diff to declare "no changes needed,"
+especially for a page with no JSON/data source of truth to fall back on.
+And when a CSS rule is meant to apply to one board (`#week` or `#month`)
+specifically, scope the selector to that board's id explicitly — a bare
+`.eu-board` rule silently reaches every board on the site, including ones
+whose JS never runs to protect against it.
+
 ## Sep 1-5 Riot Games Week uses the flag icon on a light week
 
 `weeklyThemes[].icon` (`data/events.json`) already existed as a per-week
