@@ -135,6 +135,52 @@ specifically to `#week .eu-board` — `screenshot-monthly-calendar.html`'s
   weekly export images.
 
 
+## Weekly Lineup masthead: one combined line, and a nested-flex overflow gotcha
+
+Added 2026-09-03 at Eric's request: the masthead on `#week .eu-board` used
+to be two separate elements — `#eu-eyebrow-title` (the date range, e.g.
+"SEP 1 - 5") on the left and a since-removed `.eu-theme-dates` span
+("WEEKLY THEME: RIOT GAMES WEEK") right-aligned across the row. It's now a
+single left-aligned line built entirely in `#eu-eyebrow-title`
+(`assets/js/event-update.js`, the `eyebrowTitleEl` block) — e.g.
+"SEP 1 - 5: RIOT GAMES WEEK" — sized off `var(--eu-date-size)`, the same
+token the Special Events rows below use for their own date text, instead
+of its own independent clamp. That was the point of the request: the
+masthead and the rows now always match in size and stay left-aligned in
+lockstep at every breakpoint, rather than risking drift between two
+independently-sized, independently-aligned elements. `.eu-theme-dates`
+and its `#eu-eyebrow-dates` element are gone entirely (removed from
+`index.html`, `events.html`, and `style.css`) — nothing else referenced
+them.
+
+**Overflow gotcha found while testing this with a deliberately long theme
+name:** a long combined line (e.g. "SEP 1 - 5: FIGHTING GAMES COMMUNITY
+CHAMPIONSHIP WEEK") was rendering ~25px wider than `#week .eu-board`'s own
+content box at a 400px viewport and getting silently clipped by the
+board's `overflow:hidden` — a real rule-#1 violation, not a hypothetical
+one. Root cause: `.eu-eyebrow` → `.eu-eyebrow-textcol` → `.eu-eyebrow-
+titlerow` → `#eu-eyebrow-title` is a chain of nested flex containers, and
+a flex item's computed box can end up wider than its own flex container
+when a descendant several levels down doesn't have an explicit width —
+`min-width:0` on the immediate flex item alone isn't sufficient once
+there's more than one level of nesting between the sized container and
+the actual text. Fixed by adding `width:100%` down the whole chain
+(`.eu-eyebrow`, `.eu-eyebrow-textcol`, `.eu-eyebrow-titlerow`) plus
+`min-width:0;max-width:100%;overflow-wrap:break-word` on
+`#eu-eyebrow-title` itself, so it's now guaranteed to wrap (or, in the
+extreme case of a single word wider than the column, break mid-word)
+rather than ever overflow its container. Verified via Playwright at
+400/640/900/1400px with both the real Sep 2026 data and an artificially
+long stress-test theme name — confirmed zero page-level overflow and, via
+`scrollWidth`/`clientWidth`/`getBoundingClientRect` measurements at each
+nesting level (not just a visual screenshot check), that the title
+element's own box no longer exceeds its container. If a future masthead
+or eyebrow-style component nests flex containers more than one level
+deep, don't assume `min-width:0` on the outermost item is enough — check
+`scrollWidth` vs. the true container width at every level, not just the
+one you touched.
+
+
 ## Unified metallic shine effect ("gz-shine")
 
 There is exactly one metallic shine/flash effect on this site — the `.mile.tier-diamond::after, .host-card.tier-diamond::after, .btn::after` rule block in `assets/css/style.css` (search "Unified metallic shine"), driven by the `gz-shine` keyframe. Do not write a new bespoke shine animation for a future component — extend that selector list to include the new element instead, so there's one cadence and one look site-wide. Spec: exactly one flash every 60s (no idle mid-cycle resting state — rest is `opacity:0`, not a parked-off-screen gradient), a crisp white sweep with minimal feather (no soft blur), plus two small fixed four-point sparkle glints that twinkle on with the flash. Keep sparkle `background-position` placement near a component's corners/margins, not its center — the center is usually where the real text sits.

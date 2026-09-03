@@ -93,30 +93,25 @@
     return { mon: d.toLocaleDateString('en-US', { month: 'short' }), day: d.getDate() };
   };
 
-  // Masthead layout: the week's date range sits plainly on the LEFT (e.g.
-  // "AUG 25 - 29"), with "WEEKLY THEME: <theme name>" grouped together on
-  // the far RIGHT of that same row — date first, then the descriptive
-  // label+title, mirroring how a Special Events row reads left-to-right
-  // (date, then title) but keeping the theme's own label/name paired as
-  // one right-aligned unit rather than splitting label and date across
-  // the row. Earlier versions tried the reverse grouping (theme label
-  // left, date+name right); per request the date now leads on the left
-  // and "Weekly Theme: <name>" reads together on the right.
+  // Masthead layout: a single left-aligned line — date range, then the
+  // theme name — matching how a Special Events row below it reads (date,
+  // then title) and sized to match (var(--eu-date-size), the same token
+  // the rows use) so the two never drift out of alignment at any
+  // breakpoint. The separate right-aligned "WEEKLY THEME: <name>" element
+  // this used to be split across is gone entirely; the label text itself
+  // ("Weekly Theme:") is also dropped per request, since the date+name
+  // format already reads unambiguously without it.
   const eyebrowTitleEl = document.getElementById('eu-eyebrow-title');
-  const eyebrowDatesEl = document.getElementById('eu-eyebrow-dates');
   if (eyebrowTitleEl) {
     const s = monthDate(weekStart), e = monthDate(weekEnd);
     const dateRange = s.mon === e.mon ? `${s.mon} ${s.day} - ${e.day}` : `${s.mon} ${s.day} - ${e.mon} ${e.day}`;
-    eyebrowTitleEl.textContent = dateRange.toUpperCase();
+    eyebrowTitleEl.innerHTML = `${GZ.esc(dateRange.toUpperCase())}: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
   }
   // Weekly-theme subtitle line (the old #eu-eyebrow-desc paragraph, e.g.
   // "XP League Fortnite training and tournament play all week.") was
   // removed from the board entirely per request — themeDesc is still read
   // above (data/events.json still carries a desc field per theme, used
   // elsewhere), it's just never rendered on this board anymore.
-  if (eyebrowDatesEl) {
-    eyebrowDatesEl.innerHTML = `WEEKLY THEME: <span class="eu-theme-highlight">${GZ.esc(themeName.toUpperCase())}</span>`;
-  }
 
   // Optional per-week badge art (data.weeklyThemes[].icon) shown bottom-
   // center of the board — e.g. a crown for a tournament week. Weeks
