@@ -801,7 +801,7 @@ body.home-page { background: transparent; }
    top-right of .hero-stage (which is position:relative -- see its rule
    above), out of the way of the headline/CTA/stats. */
 .hero-lighting { position: absolute; top: 1rem; right: var(--safe-x, 1.2rem); z-index: 2; }
-.hero-lighting select { background: var(--bg-2); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: .4rem .9rem; font-family: var(--eu-body); font-size: .78rem; cursor: pointer; }
+.hero-lighting select { background: var(--bg-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8e8ec' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right .7rem center/.85em; background-size: .85em; appearance: none; -webkit-appearance: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: .4rem 2.1rem .4rem .9rem; font-family: var(--eu-body); font-size: .78rem; cursor: pointer; }
 .hero-lighting select:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 2px; }
 @media (max-width: 640px) { .hero-lighting { position: relative; top: auto; right: auto; display: flex; justify-content: center; margin: 1rem 0 0; } }
 
@@ -820,14 +820,28 @@ body.home-page { background: transparent; }
    computation in main.js, just split into a word + detail pair instead
    of one sentence so it fits the same big-number treatment as its
    siblings), the real Google rating, and the always-free price point. */
-.stat-row { position: relative; z-index: 1; display: flex; justify-content: center; flex-wrap: wrap; gap: 2.2rem; margin-top: 1.6rem; }
-.stat { text-align: center; }
+/* 2026-09-03 same-day follow-up (per Eric): grid instead of gap-flex so
+   all 4 nodes sit in equal-width columns, evenly spaced from the row's own
+   center regardless of how long each stat's own text happens to be --
+   flex+gap let a longer neighbor (e.g. "110 Google Reviews") visually
+   throw off the row's balance. Grid's default align-items:stretch also
+   means every node's bubble matches whichever one is tallest in the row,
+   the same "reserve the tallest as the shared floor" approach this
+   project already uses for card titles (see .card h3 min-height) -- so a
+   label that wraps to two lines doesn't leave its neighbors looking like
+   they're floating at a different height. */
+.stat-row { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; max-width: 640px; margin: 1.6rem auto 0; }
+@media (max-width: 560px) { .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 420px; } }
+.stat { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; text-align: center; background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 16px; padding: .75rem .5rem; }
 .stat b { display: block; font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #fff; }
+/* .stat-status's span (the live "Closes at 7:00 PM"-style detail) now
+   inherits this exact same treatment as every other stat's label -- it
+   used to override text-transform/letter-spacing/weight to look "more
+   like a sentence," which just made it read as inconsistent with its
+   siblings in the same row. */
 .stat span { font-size: .68rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
-.stat .stat-stars { color: var(--ne-orange); letter-spacing: .08em; }
 .stat-status b.is-open { color: #3ddc84; }
 .stat-status b.is-closed { color: #fff; }
-.stat-status span { text-transform: none; letter-spacing: .01em; font-weight: 600; }
 
 .hero-proof-wrap { margin-top: 2rem; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }

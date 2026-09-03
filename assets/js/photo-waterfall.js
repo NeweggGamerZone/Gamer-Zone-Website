@@ -28,7 +28,19 @@
     // gallery -- alt text stays on the <img> itself (screen readers still
     // get the description), it's just no longer rendered as an on-photo
     // label for sighted visitors.
-    const cards = photos.map(p => `<div class="pw-item"><img src="${GZ.esc(p.src)}" alt="${GZ.esc(p.alt)}" loading="lazy"></div>`);
+    //
+    // Same-day follow-up: dropped `loading="lazy"` -- every photo (both
+    // copies, since GZ.marquee duplicates the set for the seamless loop)
+    // is already sitting in the DOM from the start here, just visually
+    // clipped by the track's own overflow:hidden, not actually absent from
+    // the page. Lazy-loading images that are already fully present (just
+    // moved into view later via a CSS transform, not real scrolling) only
+    // risks a photo popping in mid-sweep instead of being ready up front,
+    // which reads as a stall/"loading error" on a strip that's supposed to
+    // be continuously moving. Also added a graceful onerror fallback: if a
+    // given photo URL ever 404s or fails to load, that single card hides
+    // itself instead of sitting there as a broken-image icon mid-loop.
+    const cards = photos.map(p => `<div class="pw-item"><img src="${GZ.esc(p.src)}" alt="${GZ.esc(p.alt)}" onerror="this.closest('.pw-item').style.display='none'"></div>`);
     const speed = parseFloat(wrap.dataset.speed) || 34;
     GZ.marquee(wrap, cards, { speed });
   }

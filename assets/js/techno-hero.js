@@ -35,7 +35,11 @@
   const ROT_SPEED = 0;
 
   // Fixed progression every ring works through, one step at a time.
-  const SHAPES = ['square', 'triangle', 'star', 'pentagon', 'hexagon', 'circle'];
+  // 'egg' added 2026-09-03 (per Eric, referencing a CSS egg-shape example)
+  // -- since this project's shapes are canvas-drawn vertex arrays, not CSS
+  // border-radius boxes, the egg is reproduced as a continuous asymmetric
+  // ovoid (see shapeVertices('egg') below) rather than ported literally.
+  const SHAPES = ['square', 'triangle', 'star', 'pentagon', 'hexagon', 'egg', 'circle'];
   const HOLD_DUR = 2.6, MORPH_DUR = 1.8, CYCLE = HOLD_DUR + MORPH_DUR;
   // Every ring reads morphStateAt(elapsed) directly (no per-ring time
   // offset) so all rings hold/morph in perfect unison — one synchronized
@@ -85,6 +89,22 @@
       for (let i = 0; i < n; i++) {
         const a = (Math.PI * 2 / n) * i - Math.PI / 2;
         pts.push([Math.cos(a), Math.sin(a)]);
+      }
+      return pts;
+    }
+    if (type === 'egg') {
+      // A smooth, continuous ovoid -- narrower "small end" at the top,
+      // rounder "large end" at the bottom -- built the same way as the
+      // circle above (direct point sampling, no polygon corners to
+      // resample from) so it morphs into/out of its neighbors cleanly.
+      // The CSS reference (a border-radius asymmetric ellipse) can't be
+      // ported literally since this is a canvas vertex path; a sinusoidal
+      // radius squash produces the same egg silhouette without any seam.
+      const n = 48, pts = [];
+      for (let i = 0; i < n; i++) {
+        const a = (Math.PI * 2 / n) * i - Math.PI / 2;
+        const squash = 1 + 0.3 * Math.sin(a); // ~0.7 at top, ~1.3 at bottom
+        pts.push([Math.cos(a) * 0.82, Math.sin(a) * squash]);
       }
       return pts;
     }
@@ -171,6 +191,20 @@
     { hue: 90, speed: 14, tPhase: 5.6, tSpeed: 1.5 },
   ];
   const METEOR_PERIOD = 2.6; // seconds per pass, far -> near
+
+  // Shared traveling-brightness helper (2026-09-03, per Eric: "please
+  // ensure all the rgb profiles have similar motion" after liking Meteor's
+  // traveling streak). One bright band travels far->near every `period`
+  // seconds and every profile below now uses this same mechanic, just
+  // tuned differently (Meteor and City Lights already had their own
+  // hand-rolled version of this idea; this generalizes it instead of
+  // leaving Cycle/Static/Breathe/Flame/Wave as flat, motionless washes).
+  function travelSpike(elapsed, z, period, width, baseline, amp) {
+    const t = (elapsed % period) / period;
+    const travelZ = Z_FAR - t * (Z_FAR - Z_NEAR);
+    const spike = Math.max(0, 1 - Math.abs(z - travelZ) / width);
+    return baseline + spike * spike * amp;
+  }
   function loadProfile() {
     try {
       const v = localStorage.getItem(RGB_KEY);
@@ -202,18 +236,30 @@
   function colorState(elapsed) {
     switch (profile) {
       case 'static':
-        return { hue: 205, breatheMul: 1, ringHue: () => 205 };
+        return {
+          hue: 205, breatheMul: 1, ringHue: () => 205,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.0, 240, 0.5, 1.6),
+        };
       case 'breathe': {
         const mul = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(elapsed * 1.1));
-        return { hue: 28, breatheMul: mul, ringHue: () => 28 };
+        return {
+          hue: 28, breatheMul: mul, ringHue: () => 28,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 4.2, 300, 0.6, 1.0),
+        };
       }
       case 'flame': {
         const flicker = 0.72 + 0.28 * Math.sin(elapsed * 9 + Math.sin(elapsed * 3.7) * 2.2);
         const h = 18 + Math.sin(elapsed * 2.3) * 14 + Math.sin(elapsed * 5.1) * 6; // wanders across red-orange-yellow
-        return { hue: h, breatheMul: flicker, ringHue: i => h + i * 2 };
+        return {
+          hue: h, breatheMul: flicker, ringHue: i => h + i * 2,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.2, 200, 0.55, 1.5),
+        };
       }
       case 'wave':
-        return { hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + i * 26 + elapsed * 40) % 360 };
+        return {
+          hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + i * 26 + elapsed * 40) % 360,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.8, 260, 0.6, 1.2),
+        };
       case 'meteor': {
         // A single bright streak races from the vanishing point toward the
         // viewer once every METEOR_PERIOD seconds; every ring outside its
@@ -252,9 +298,18 @@
       }
       case 'cycle':
       default:
-        return { hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + elapsed * 6 + i * 12) % 360 };
+        return {
+          hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + elapsed * 6 + i * 12) % 360,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.4, 260, 0.55, 1.4),
+        };
     }
   }
+
+  // 2026-09-03 follow-up: every profile above now carries a ringAlpha
+  // traveling-brightness pass via travelSpike() (period/width/amp tuned
+  // per profile), not just Meteor and City Lights -- so Cycle, Static,
+  // Breathe, Flame, and Wave all have real depth motion now instead of a
+  // flat, evenly-lit tunnel. See travelSpike() above for the shared math.
 
   // Radiating spokes from the vanishing point out to the frame edge —
   // same gradient treatment as the site's original rail lines, but at
