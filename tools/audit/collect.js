@@ -43,7 +43,10 @@ const OUT_DIR = process.env.OUT_DIR || path.join(__dirname, 'out');
   for (const p of PAGES) {
     const page = await browser.newPage();
     await page.setViewport({ width: 1400, height: 1000 });
-    await page.goto(BASE + p, { waitUntil: 'networkidle0' });
+    // 2026-09-04: explicit 45s timeout added (was the puppeteer default of
+    // 30s) -- the homepage hero photo reel now carries ~208 real <img>
+    // requests, same reason as screenshot-all.js/console-check.js.
+    await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 45000 });
     await new Promise(r => setTimeout(r, 500));
 
     // Real scroll-through so scroll-triggered .reveal fade-ins are all visible

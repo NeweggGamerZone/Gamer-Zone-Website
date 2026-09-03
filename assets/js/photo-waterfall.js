@@ -15,13 +15,28 @@
    scoped to that gallery's own class (.photo-waterfall vs .hero-proof),
    not here. */
 (function () {
+  // 2026-09-04 (per Eric: "randomize the starting photos on the photo
+  // reel"): a plain Fisher-Yates shuffle, not a fixed reorder -- every
+  // gallery using this file (currently just the hero's expanded 104-photo
+  // reel) starts on a different set/order of photos each page load,
+  // instead of always opening on the same first few images from the
+  // template's markup order.
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   function initGallery(wrap) {
     const template = wrap.querySelector('template');
     if (!template) return;
-    const photos = Array.from(template.content.querySelectorAll('img')).map(img => ({
+    const photos = shuffle(Array.from(template.content.querySelectorAll('img')).map(img => ({
       src: img.getAttribute('src'),
       alt: img.getAttribute('alt') || '',
-    }));
+    })));
     if (!photos.length) return;
 
     // 2026-09-03 (per Eric): visible caption overlays removed from every

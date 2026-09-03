@@ -37,7 +37,9 @@ const OUT_DIR = process.env.OUT_DIR || path.join(__dirname, 'out');
       pageErrors.push({ type: 'request failed', text: `${req.method()} ${req.url()} — ${req.failure()?.errorText}` });
     });
 
-    await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 20000 });
+    // 2026-09-04: timeout raised 20s -> 45s, same reason as screenshot-all.js
+    // (the homepage hero photo reel now carries ~208 real <img> requests).
+    await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 45000 });
     await new Promise(r => setTimeout(r, 500));
     const h = await page.evaluate(() => document.body.scrollHeight);
     for (let y = 0; y < h; y += 350) { await page.evaluate(yy => window.scrollTo({ top: yy, behavior: 'instant' }), y); await new Promise(r => setTimeout(r, 40)); }

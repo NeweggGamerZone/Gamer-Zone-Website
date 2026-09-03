@@ -34,7 +34,12 @@ const BREAKPOINTS = [
     for (const bp of BREAKPOINTS) {
       const page = await browser.newPage();
       await page.setViewport({ width: bp.width, height: bp.height });
-      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 20000 });
+      // 2026-09-04: timeout raised 20s -> 45s after the homepage hero photo
+      // reel grew from 6 to 104 real photos (each duplicated once by
+      // GZ.marquee for its seamless loop, so ~208 <img> requests on that
+      // one page) -- networkidle0 genuinely needs more real time to settle
+      // with that many requests in flight, this isn't masking a hang.
+      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 45000 });
       await new Promise(r => setTimeout(r, 500));
       // Real scroll-through so scroll-triggered .reveal fade-ins are visible in the shot
       const h = await page.evaluate(() => document.body.scrollHeight);

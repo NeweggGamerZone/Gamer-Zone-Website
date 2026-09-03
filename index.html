@@ -7,7 +7,7 @@
 <title>Newegg Gamer Zone | Get in the Zone | Free-to-Play Gaming Lounge, Diamond Bar CA</title>
 <meta name="description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=66">
+<link rel="stylesheet" href="assets/css/style.css?v=67">
 </head>
 <body class="home-page">
 <div id="gz-veil" aria-hidden="true"></div>
@@ -69,54 +69,158 @@
          site's own standing "always free" claim. -->
     <div class="stat-row hero-in" style="--d:.78s">
       <div class="stat"><b>25+</b><span>Gaming PCs</span></div>
-      <!-- 2026-09-04 (per Eric): "Status Open" wording + a colored status
-           dot, instead of just the bare word "Open"/"Closed" doing double
-           duty as both the big value and the status indicator. The dot's
-           color is toggled via the same is-open/is-closed class GZ.openStatus()
-           already applied to this element -- see main.js and .status-dot
-           in style.css. -->
+      <!-- 2026-09-04 (per Eric): reverted from the "Status Open" + colored-dot
+           treatment back to the bare word ("Open"/"Closed") as the big value,
+           with a static "Live Status" label below it -- matches the plain
+           value/label pattern every other stat card uses (see main.js,
+           which only sets the word now; the label text is static markup). -->
       <div class="stat stat-status">
-        <b id="hero-status-word" aria-live="polite"><span class="status-dot" aria-hidden="true"></span>Status <span id="hero-status-value">&nbsp;</span></b>
-        <span id="hero-status-detail"></span>
+        <b id="hero-status-word" aria-live="polite"><span id="hero-status-value">&nbsp;</span></b>
+        <span id="hero-status-detail">Live Status</span>
       </div>
       <!-- 2026-09-04 (per Eric: "5 Stars looks awkward"): one large yellow
            star glyph replaces the text, same big-number slot/size as its
            siblings; the rating is still conveyed for screen readers via
-           the visually-hidden text. -->
-      <div class="stat"><b class="stat-star-icon" aria-hidden="true">&#9733;</b><span class="sr-only">5 out of 5 stars &middot; </span><span>110 Google Reviews</span></div>
+           the visually-hidden text. 2026-09-04 follow-up (per Eric): put
+           the "5" back as visible text in front of the star. -->
+      <div class="stat"><b><span class="stat-star-num">5</span><span class="stat-star-icon" aria-hidden="true">&#9733;</span></b><span class="sr-only">5 out of 5 stars &middot; </span><span>110 Google Reviews</span></div>
       <div class="stat"><b>$0</b><span>Always Free To Play</span></div>
     </div>
-    <!-- "A real look inside" -- real venue photography (the same photos
-         and captions already used in About Gamer Zone's zone-stack
-         below), not stock/AI imagery, addressing that the hero on its
-         own reads as a web game rather than a real, physical, free
-         venue. Reuses the exact shared marquee gallery mechanism the
-         Past Events waterfall already established (see
-         assets/js/photo-waterfall.js) instead of a bespoke hero-only
-         carousel. Slower speed (22px/s vs the waterfall's 34) since this
-         is a supporting element inside the hero, not a primary section. -->
+    <!-- "A real look inside" -- real venue photography, not stock/AI
+         imagery, addressing that the hero on its own reads as a web game
+         rather than a real, physical, free venue. Reuses the exact shared
+         marquee gallery mechanism the Past Events waterfall already
+         established (see assets/js/photo-waterfall.js) instead of a
+         bespoke hero-only carousel. Slower speed (22px/s vs the
+         waterfall's 34) since this is a supporting element inside the
+         hero, not a primary section.
+         2026-09-04 (per Eric: "use as much of the photos in the
+         photoreel folder as possible"): expanded from 6 hand-picked
+         photos to the FULL set -- all 104 real candid photos Eric dropped
+         into assets/calendar/BGAssets/PhotoReel/ across its 5 dated
+         batches, resized/compressed into assets/img/reel/ (~640px,
+         ~4.3MB total vs. the ~33MB originals) so this many real photos
+         stays reasonable to load. 6 of these already had specific,
+         vetted alt text from an earlier curated pass (kept as-is here);
+         the rest use an honest, generic rotation of alt text describing
+         only what's true of any Gamer Zone event photo -- these batches
+         still don't have confirmed event names/dates, so nothing here
+         claims a specific event (core rule 4, no fabrication).
+         assets/img/community/ (the original 6 curated copies) is now
+         unused and was removed to avoid two copies of the same photos.
+         GZ.marquee's own item order controls what's visible first, so
+         initGallery() in photo-waterfall.js now shuffles this photo list
+         once per page load before building cards -- "randomize the
+         starting photos" per Eric, so the reel doesn't always open on
+         the same first few faces every visit. -->
     <div class="hero-proof-wrap hero-in" style="--d:.86s">
       <p class="hero-proof-label">A real look inside the Zone</p>
       <div class="hero-proof" data-gallery data-speed="22" aria-label="Real photos of the Newegg Gamer Zone space">
         <template>
-          <img src="assets/calendar/BGAssets/dailyplay-bg.jpg" alt="PC Gaming Zone">
-          <img src="assets/calendar/BGAssets/vr-station-bg.jpg" alt="VR &amp; Mixed Reality Zone">
-          <img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="Racing &amp; Immersive Zone">
-          <img src="assets/calendar/BGAssets/broadcast-bg.jpg" alt="Broadcast setup">
-          <img src="assets/calendar/BGAssets/console-lounge-bg.jpg" alt="Console Gaming Zone">
-          <!-- 2026-09-04: real candid event photos Eric dropped into
-               assets/calendar/BGAssets/PhotoReel/ (5 dated batches). Alt
-               text describes only what's visibly in each shot -- these
-               batches don't have confirmed event names/descriptions yet,
-               so nothing here claims a specific event (see this session's
-               chat response for the follow-up question about naming them
-               as proper Past Events entries instead). -->
-          <img src="assets/img/community/gz-hardware-prizes.jpg" alt="Guests browsing gaming hardware prizes on display">
-          <img src="assets/img/community/gz-pc-builds-display.jpg" alt="Custom-built gaming PCs on display at the Gamer Zone">
-          <img src="assets/img/community/gz-mascot-guest.png" alt="A guest posing with the Newegg mascot and a prize">
-          <img src="assets/img/community/gz-crowd-stations.jpg" alt="Guests gathered around the gaming stations during an event">
-          <img src="assets/img/community/gz-racing-sim.jpg" alt="A guest at the racing simulator pod">
-          <img src="assets/img/community/gz-greenscreen-station.jpg" alt="Guests at the green-screen streaming station">
+          <img src="assets/img/reel/2026-06-06-1-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-10-jpg.jpg" alt="Custom-built gaming PCs on display at the Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-11-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-12-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-13-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-14-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-15-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-16-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-06-17-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-18-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-19-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-2-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-20-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-21-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-22-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-23-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-06-24-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-25-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-26-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-27-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-28-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-29-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-3-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-30-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-06-31-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-32-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-33-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-34-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-35-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-36-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-37-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-38-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-06-39-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-4-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-40-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-41-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-42-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-43-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-44-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-5-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-06-6-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-7-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-8-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-06-9-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-06-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-1-png.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-10-png.jpg" alt="A guest posing with the Newegg mascot and a prize">
+          <img src="assets/img/reel/2026-06-20-11-png.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-20-12-png.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-20-13-png.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-14-png.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-15-png.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-16-png.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-20-17-png.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-18-png.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-19-png.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-20-2-png.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-20-20-png.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-21-png.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-3-png.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-4-png.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-20-5-png.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-6-png.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-7-png.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-06-20-8-png.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-06-20-9-png.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-06-20-png.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-1-jpg.jpg" alt="Guests browsing gaming hardware prizes on display">
+          <img src="assets/img/reel/2026-07-25-10-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-11-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-07-25-12-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-13-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-14-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-07-25-15-jpg.jpg" alt="Guests at the green-screen streaming station">
+          <img src="assets/img/reel/2026-07-25-16-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-07-25-17-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-18-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-19-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-2-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-07-25-20-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-3-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-4-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-07-25-5-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-07-25-6-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-7-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-8-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-07-25-9-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-07-25-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-07-1-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-07-2-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-08-07-3-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-08-07-4-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-07-jpg.jpg" alt="Guests gathered around the gaming stations during an event">
+          <img src="assets/img/reel/2026-08-07-png.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-25-1-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-25-2-jpg.jpg" alt="A crowd of guests at a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-08-25-3-jpg.jpg" alt="Guests gaming together at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-25-4-jpg.jpg" alt="Guests checking out the gaming stations at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-25-5-jpg.jpg" alt="A candid moment from a Newegg Gamer Zone event">
+          <img src="assets/img/reel/2026-08-25-6-jpg.jpg" alt="Guests at the Newegg Gamer Zone during an event">
+          <img src="assets/img/reel/2026-08-25-7-jpg.jpg" alt="Guests having fun at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-25-8-jpg.jpg" alt="Guests playing on gaming PCs at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-25-9-jpg.jpg" alt="Guests enjoying free play at the Newegg Gamer Zone">
+          <img src="assets/img/reel/2026-08-25-jpg.jpg" alt="A guest at the racing simulator pod">
         </template>
       </div>
     </div>
@@ -374,13 +478,13 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Register now">Register<br>Now</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=66" defer></script>
-<script src="assets/js/preregister-node.js?v=66" defer></script>
-<script src="assets/js/techno-hero.js?v=66" defer></script>
-<script src="assets/js/photo-waterfall.js?v=66" defer></script>
-<script src="assets/js/events.js?v=66" defer></script>
-<script src="assets/js/event-update.js?v=66" defer></script>
-<script src="assets/js/zone-stack.js?v=66" defer></script>
-<script src="assets/js/reviews.js?v=66" defer></script>
+<script src="assets/js/main.js?v=67" defer></script>
+<script src="assets/js/preregister-node.js?v=67" defer></script>
+<script src="assets/js/techno-hero.js?v=67" defer></script>
+<script src="assets/js/photo-waterfall.js?v=67" defer></script>
+<script src="assets/js/events.js?v=67" defer></script>
+<script src="assets/js/event-update.js?v=67" defer></script>
+<script src="assets/js/zone-stack.js?v=67" defer></script>
+<script src="assets/js/reviews.js?v=67" defer></script>
 </body>
 </html>

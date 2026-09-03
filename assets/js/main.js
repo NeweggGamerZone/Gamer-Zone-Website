@@ -124,17 +124,39 @@ const GZ = {
     // known, then start it -- so it only ever plays at its correct,
     // final-form speed and the loop math is right from frame one.
     track.style.animationPlayState = 'paused';
+    // 2026-09-04 fix (per Eric: photos on the hero's expanded 104-photo
+    // reel "do not render until they cross the halfway point threshold"):
+    // the animation used to start (see the paused->running flip below) as
+    // soon as ONE frame had passed, regardless of whether the real <img>
+    // files behind it had actually finished downloading yet. On a small
+    // gallery that's invisible because a handful of images load near-
+    // instantly; on a much bigger real-photo pool, cards toward the back
+    // of the track are still mid-download when the track first scrolls
+    // into view, so they visibly pop in partway through the loop instead
+    // of already being there. Fix: wait for every real <img> in the track
+    // to finish loading (or fail) before computing the duration and
+    // starting the scroll -- capped at 2.5s so a slow network doesn't
+    // hold a gallery frozen indefinitely; whatever hasn't loaded by then
+    // just finishes in the background exactly like before.
+    const imgs = Array.from(track.querySelectorAll('img'));
+    const waits = imgs.map(img => (img.complete && img.naturalWidth > 0)
+      ? Promise.resolve()
+      : new Promise(resolve => { img.addEventListener('load', resolve, { once: true }); img.addEventListener('error', resolve, { once: true }); }));
+    const timeout = new Promise(resolve => setTimeout(resolve, 2500));
     // Duration is derived from the track's own real measured width (not a
     // fixed guess) so the per-card scroll SPEED stays constant regardless
     // of how many cards are in the pool -- a bigger photo/review pool gets
     // a proportionally longer loop instead of the same loop just playing
-    // faster. Measured on the next frame so layout has actually happened.
-    requestAnimationFrame(() => {
-      const halfWidth = track.scrollWidth / 2;
-      const speed = opts.speed || 40; // px/second
-      const dur = Math.max(12, halfWidth / speed);
-      track.style.setProperty('--gz-marquee-dur', dur + 's');
-      track.style.animationPlayState = 'running';
+    // faster. Measured after images are ready (or the timeout) so layout
+    // has actually happened and scrollWidth is trustworthy either way.
+    Promise.race([Promise.all(waits), timeout]).then(() => {
+      requestAnimationFrame(() => {
+        const halfWidth = track.scrollWidth / 2;
+        const speed = opts.speed || 40; // px/second
+        const dur = Math.max(12, halfWidth / speed);
+        track.style.setProperty('--gz-marquee-dur', dur + 's');
+        track.style.animationPlayState = 'running';
+      });
     });
   },
   // Real open/closed status computed from config.json's hoursSchedule --
@@ -255,11 +277,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // row's other 3 cards (PCs/reviews/free) -- see .stat-status in
   // style.css. If there's no real hours data, the whole stat card is
   // removed rather than left showing an empty/fabricated value.
-  // 2026-09-04 (per Eric): the big value now reads "Status Open"/"Status
-  // Closed" plus a colored dot instead of just the bare word -- so only
-  // the dynamic Open/Closed piece (#hero-status-value) gets its text set
-  // here now, not the whole <b> (which also holds the fixed "Status" text
-  // and the .status-dot indicator -- see index.html/style.css).
+  // 2026-09-04 (per Eric, reverted from the "Status Open" + dot treatment):
+  // the big value is just the bare word "Open"/"Closed" again, colored via
+  // the same is-open/is-closed class (see style.css). The label below it
+  // is now a static "Live Status" string in the markup, not the dynamic
+  // hours-detail sentence GZ.openStatus() also computes -- that computed
+  // .detail string (e.g. "Closes 7:00 PM today") is intentionally unused
+  // here now; nothing fabricated, just not displayed in this spot anymore.
   const heroStatusWordEl = document.getElementById('hero-status-word');
   const heroStatusValueEl = document.getElementById('hero-status-value');
   if (heroStatusWordEl && heroStatusValueEl) {
@@ -267,8 +291,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (status) {
       heroStatusValueEl.textContent = status.word;
       heroStatusWordEl.classList.add(status.isOpen ? 'is-open' : 'is-closed');
-      const detailEl = document.getElementById('hero-status-detail');
-      if (detailEl) detailEl.textContent = status.detail;
     } else {
       const card = heroStatusWordEl.closest('.stat') || heroStatusWordEl;
       card.remove(); // no real hours data to report -- say nothing rather than guess
