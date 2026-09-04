@@ -292,19 +292,13 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    fixed-cardinality grid like Featured Ambassadors. */
 .review-waterfall .review-quote { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
 .review-waterfall .review-card:focus { outline: none; }
-/* Same attr(data-full) hover/tap popup as .game-list li[data-full] --
-   tabindex="-1" (set in reviews.js) keeps every card out of the normal
-   Tab sequence (nobody should have to Tab through 20 review cards to get
-   past this section) while still making the popup reachable by click/tap
-   focus on touch devices with no :hover. */
-.review-waterfall .review-card[data-full]:hover::after,
-.review-waterfall .review-card[data-full]:focus::after {
-  content: attr(data-full);
-  position: absolute; left: 0; right: 0; top: 100%; margin-top: .5rem; z-index: 30;
-  background: var(--bg-3); border: 1px solid var(--line); color: var(--ink);
-  padding: .6rem .75rem; font-size: .8rem; font-style: normal; line-height: 1.45;
-  white-space: normal; box-shadow: 0 6px 18px rgba(0,0,0,.6);
-}
+/* Shared body-level tooltip (GZ.initFullTextTooltips() in main.js) now
+   backs this card's popup too -- see the .game-list li[data-full] comment
+   above .gz-tooltip in this file for why it moved off a per-element
+   ::after. tabindex="-1" (set in reviews.js) keeps every card out of the
+   normal Tab sequence (nobody should have to Tab through 20 review cards
+   to get past this section) while still making the popup reachable by
+   click/tap focus on touch devices with no :hover. */
 @media (max-width: 560px) { .review-waterfall .review-card { width: 250px; } }
 /* Registration steps: the step number is the most emphasized element (big,
    orange, bold) — matching the reference "AI mode" step pattern — while the
@@ -349,21 +343,39 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    this automatically), plus the same hover/tap popup as a fallback so
    nothing is ever fully unreadable. */
 .game-list li .gl-name { flex: 1 1 auto; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 1.3; min-height: 2.6em; }
-/* :focus (paired with tabindex="-1" in games.js) makes this also work on
-   tap for touch devices, which have no :hover -- otherwise a still-clipped
-   title (rare, only past 2 lines) was unreadable on mobile with no way to
-   reveal it. */
-.game-list li[data-full]:hover::after,
-.game-list li[data-full]:focus::after {
-  content: attr(data-full);
-  position: absolute; left: 0; top: 100%; margin-top: .35rem; z-index: 30;
-  background: var(--bg-3); border: 1px solid var(--line); color: var(--ink);
-  padding: .4rem .65rem; font-size: .74rem; font-weight: 600; letter-spacing: normal;
-  text-transform: none; white-space: normal; max-width: 260px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.6);
-}
+/* 2026-09-04 (per Eric: the games page's popups shouldn't ever change the
+   size of the container underneath them): this used to be a per-element
+   ::after popup, same as .review-waterfall's below -- visually fine, but
+   tying the popup's box to its trigger meant it lived inside .game-list's
+   CSS multi-column formatting context. Some browser engines have real,
+   documented bugs mismeasuring an absolutely positioned descendant of a
+   multicol item, which can grow the column's own box -- not reproducible
+   in this project's Chromium-based testing, but not provably safe either.
+   Rebuilt as GZ.initFullTextTooltips() in main.js: one shared tooltip
+   element appended directly to <body>, positioned in JS via
+   getBoundingClientRect() and never a descendant of anything it
+   describes. That's not just "observed to not resize things" -- it's
+   structurally unable to, on any browser, since it isn't part of any
+   container's box model in the first place. See .gz-tooltip below for the
+   shared visual style (used by both this list and .review-waterfall's
+   identical popup, replacing two near-duplicate ::after rules with one
+   real implementation, per this file's own "one shared implementation"
+   principle). :focus (paired with tabindex="-1" in games.js) still makes
+   this work on tap for touch devices, which have no :hover. */
 .game-list li[data-full]:focus { outline: none; }
 .gl-emoji { flex: 0 0 auto; font-size: .95rem; filter: grayscale(0) saturate(1); margin-top: .1em; }
+/* Shared "full text" tooltip -- one element, appended to <body> once by
+   GZ.initFullTextTooltips() in main.js, reused by every [data-full]
+   trigger on the site (.game-list li, .review-waterfall .review-card).
+   position:fixed + JS-computed coordinates instead of a per-element
+   ::after: this element is never a descendant of the thing it's
+   describing, so it structurally cannot affect that thing's (or any
+   ancestor's) box size, regardless of browser or layout context (CSS
+   multi-column, flex, grid, whatever). See the .game-list li[data-full]
+   comment above for the specific bug class this replaces. */
+.gz-tooltip { position: fixed; z-index: 500; pointer-events: none; background: var(--bg-3); border: 1px solid var(--line); color: var(--ink); padding: .5rem .7rem; font-family: var(--eu-body); font-size: .78rem; font-weight: 600; line-height: 1.45; border-radius: 5px; box-shadow: 0 6px 18px rgba(0,0,0,.6); opacity: 0; transform: translateY(-4px); transition: opacity .12s ease, transform .12s ease; }
+.gz-tooltip.is-visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { .gz-tooltip { transition: opacity .12s ease; transform: none; } }
 .game-list li:last-child { border-bottom: none; }
 @media (max-width: 760px) { .game-list-panel { padding: 1.5rem 1.3rem; } }
 @media (max-width: 460px) { .game-list { column-width: 100%; } }
@@ -875,7 +887,15 @@ body.home-page { background: transparent; }
    than a losing specificity fight). Fixed by having the span explicitly
    inherit rather than re-declaring the color match by hand, so it can
    never drift from whatever .is-open/.is-closed sets again. */
-.stat-status #hero-status-value { color: inherit; }
+/* 2026-09-04 follow-up (per Eric: "Open/Closed should be the same size as
+   25+"): same root cause as the color bug documented above, different
+   property -- .stat span's font-size:.68rem (meant for the small label
+   text under each stat) was also reaching this nested span and shrinking
+   "Open"/"Closed" down to label-size instead of the big stat-number size
+   every sibling stat uses. Inheriting font-size/font-weight/letter-spacing
+   here locks it to whatever .stat b (the shared big-number style) sets,
+   so it can't drift out of sync with its siblings again either. */
+.stat-status #hero-status-value { color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; text-transform: inherit; }
 .stat-status b.is-open { color: #3ddc84; }
 /* 2026-09-04 (per Eric: was plain white -- switched to a soft red so the
    Closed state gets its own real color cue too, not just different text,
@@ -945,14 +965,24 @@ body.home-page { background: transparent; }
 .score-guide .sg .lbl { font-family:var(--head); text-transform:uppercase; font-size:.8rem; letter-spacing:.03em; margin-top:.2rem; }
 /* Achievement-badge framing for each attendance bonus tier — bronze/silver/
    gold escalation, like unlocking a side-quest reward. */
-.sg-badge { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; margin-bottom:.5rem; }
-.sg-badge .ic { width:18px; height:18px; fill:currentColor; }
+/* 2026-09-04 (per Eric, same "hit harder" pass as the .mile ladder above):
+   enlarged badge + bigger, bolder point value, plus the same contained
+   BG-asset-texture-behind-icon technique as .rank-badge (never behind
+   real text -- see that rule's comment for the readability reasoning). */
+.sg-badge { position:relative; display:flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:50%; margin-bottom:.6rem; overflow:hidden; }
+.sg-badge::before { content:""; position:absolute; inset:0; background-size:cover; background-position:center; opacity:.4; z-index:0; }
+.sg-badge::after { content:""; position:absolute; inset:0; background:radial-gradient(circle,transparent 15%,rgba(6,7,8,.6) 100%); z-index:1; }
+.sg-badge .ic { position:relative; z-index:2; width:28px; height:28px; fill:currentColor; filter:drop-shadow(0 1px 3px rgba(0,0,0,.7)); }
+.score-guide .sg .pts { font-size:2.1rem; }
 .sg-unlock { display:block; font-family:var(--head); font-weight:800; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem; }
-.sg-bronze .sg-badge { background:rgba(214,149,85,.18); color:#D69555; }
+.sg-bronze .sg-badge { background:rgba(214,149,85,.18); color:#D69555; box-shadow:0 0 16px -5px #D69555; }
+.sg-bronze .sg-badge::before { background-image:url('../calendar/BGAssets/dailyplay-bg-blurred.jpg'); }
 .sg-bronze .sg-unlock { color:#D69555; }
-.sg-silver .sg-badge { background:rgba(169,188,205,.18); color:#a9bccd; }
+.sg-silver .sg-badge { background:rgba(169,188,205,.18); color:#a9bccd; box-shadow:0 0 16px -5px #a9bccd; }
+.sg-silver .sg-badge::before { background-image:url('../calendar/BGAssets/event-update-bg-week2-blurred.jpg'); }
 .sg-silver .sg-unlock { color:#a9bccd; }
-.sg-gold .sg-badge { background:rgba(250,157,40,.18); color:var(--ne-orange); }
+.sg-gold .sg-badge { background:rgba(250,157,40,.18); color:var(--ne-orange); box-shadow:0 0 16px -5px var(--ne-orange); }
+.sg-gold .sg-badge::before { background-image:url('../calendar/BGAssets/majorevent2-bg-blurred.jpg'); }
 .sg-gold .sg-unlock { color:var(--ne-orange); }
 
 .visit-cta-note { font-size:.78rem; color:var(--ink-dim); margin-top:.4rem; }
@@ -1185,7 +1215,15 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .amb-class-icon{display:flex;align-items:center;justify-content:center;width:64px;height:64px;margin:0 auto .8rem;border-radius:50%;background:var(--bg-3);border:2px solid var(--ne-orange)}
 .amb-class-icon .ic{width:30px;height:30px;color:var(--ne-orange)}
 .amb-class-tag{display:inline-block;font-family:var(--head);font-weight:800;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ne-orange);margin-bottom:.35rem}
-.amb-type h3{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:1rem;margin:.1rem 0 .5rem}
+/* 2026-09-04 (per Eric): the class name used to appear twice per card --
+   small in the "Class: ..." tag above, then again, plural and unstyled
+   white, in the h3 below (e.g. "Class: Community Leader" / "Community
+   Leaders"). Replaced with one real title: the h3 now carries the exact
+   singular class name, sized up to actually read as the card's title, and
+   colored to match its own class accent -- reusing the same per-class
+   color already set on .amb-class-tag/.amb-class-icon just below, rather
+   than inventing a new color for it. */
+.amb-type h3{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:1.3rem;margin:.1rem 0 .5rem;color:var(--ne-orange)}
 /* class-shield reuses --ne-blue-text (2026-08-26) instead of its own
    hardcoded #3D8BFF -- that hex was the AA-era blue, replaced site-wide
    by the brighter AAA-safe --ne-blue-text; reusing the variable here
@@ -1193,15 +1231,15 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .amb-type.class-shield{border-top-color:var(--ne-blue-text)}
 .amb-type.class-shield .amb-class-icon{border-color:var(--ne-blue-text)}
 .amb-type.class-shield .amb-class-icon .ic{color:var(--ne-blue-text)}
-.amb-type.class-shield .amb-class-tag{color:var(--ne-blue-text)}
+.amb-type.class-shield .amb-class-tag, .amb-type.class-shield h3{color:var(--ne-blue-text)}
 .amb-type.class-sword{border-top-color:#ED7FB4}
 .amb-type.class-sword .amb-class-icon{border-color:#ED7FB4}
 .amb-type.class-sword .amb-class-icon .ic{color:#ED7FB4}
-.amb-type.class-sword .amb-class-tag{color:#ED7FB4}
+.amb-type.class-sword .amb-class-tag, .amb-type.class-sword h3{color:#ED7FB4}
 .amb-type.class-bow{border-top-color:#3FBF6B}
 .amb-type.class-bow .amb-class-icon{border-color:#3FBF6B}
 .amb-type.class-bow .amb-class-icon .ic{color:#3FBF6B}
-.amb-type.class-bow .amb-class-tag{color:#3FBF6B}
+.amb-type.class-bow .amb-class-tag, .amb-type.class-bow h3{color:#3FBF6B}
 .quota{background:var(--bg-2);border:1px solid var(--line);border-left:4px solid var(--ne-navy-glow);padding:1.1rem 1.3rem;margin-top:.6rem}
 .quota b{color:var(--ne-blue-text)}
 /* tenure ladder */
@@ -1261,14 +1299,46 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    rounded rank-badge icon sits at the far end of the bar, like the node at
    the end of each step in the reference ladder. */
 .mile-head{display:flex;align-items:center;gap:.85rem;margin:.4rem 0 .7rem}
-.mile-count{position:relative;z-index:2;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;background:var(--bg-3);border:2px solid var(--line)}
-.mc-num{font-family:var(--head);font-weight:800;font-size:1.5rem;line-height:1}
-.mc-lbl{font-family:var(--head);font-weight:700;font-size:.52rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin-top:.1rem}
+/* 2026-09-04 (per Eric: "our ambassadors rank page... does not hit as
+   hard" -- referencing a COD-style "Level Progress" screen with big
+   ribbon-icon badges and a bold per-ribbon count): enlarged both the
+   event-count badge and the rank-badge icon well past their old small
+   corner-accent size so they carry real visual weight, the way the
+   reference's ribbon icons and level-progress number do -- "based on
+   number of events" (the count) and an icon-led badge, not just a small
+   label. Kept the existing cascading-bar ladder layout rather than
+   rebuilding it as a horizontal ribbon row: that structure is already
+   responsive-tested (see the @media(max-width:820px) block below) and
+   still keeps every tier's full perks list attached, which a row of
+   compact ribbon tiles wouldn't have room for. */
+.mile-count{position:relative;z-index:2;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:72px;height:72px;background:var(--bg-3);border:2px solid var(--line)}
+.mc-num{font-family:var(--head);font-weight:800;font-size:2rem;line-height:1}
+.mc-lbl{font-family:var(--head);font-weight:700;font-size:.56rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin-top:.15rem}
 .mile .unlock{position:relative;z-index:2;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:0;flex:1}
-.rank-badge{position:relative;z-index:2;flex:none;margin-left:auto;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:2px solid var(--line)}
-.rank-badge .ic{width:22px;height:22px;fill:currentColor}
-.mile ul{position:relative;z-index:2;color:var(--ink-dim);font-size:.83rem;margin:0;padding-left:1.05rem;display:grid;gap:.3rem}
-.mile ul li::marker{color:var(--ne-orange)}
+/* Rank-badge now carries a real graphic behind its icon -- a low-opacity
+   crop of one of this project's own real event-photography BG assets
+   (assets/calendar/BGAssets/, already used for the calendar/weekly-lineup
+   boards), tinted with each tier's own color and a dark radial gradient
+   so the icon on top stays clearly legible. This is a narrower, more
+   contained reuse of "photo texture behind content" than the crosshatch
+   pattern removed 2026-08-26 (see the block below this one) -- confined
+   to a small circular badge rather than spanning the whole card behind
+   real text, so it can't repeat that readability failure. */
+.rank-badge{position:relative;z-index:2;flex:none;margin-left:auto;width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:2px solid var(--line);overflow:hidden;box-shadow:0 0 18px -5px var(--tier-c, var(--ne-orange))}
+.rank-badge::before{content:"";position:absolute;inset:0;background-size:cover;background-position:center;opacity:.4;z-index:0}
+.rank-badge::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,transparent 15%,rgba(6,7,8,.6) 100%);z-index:1}
+.rank-badge .ic{position:relative;z-index:2;width:34px;height:34px;fill:currentColor;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))}
+.mile.tier-silver .rank-badge::before{background-image:url('../calendar/BGAssets/training-bg-blurred.jpg')}
+.mile.tier-gold .rank-badge::before{background-image:url('../calendar/BGAssets/freeplay-bg2-blurred.jpg')}
+.mile.tier-platinum .rank-badge::before{background-image:url('../calendar/BGAssets/freeplay-bg3-blurred.jpg')}
+.mile.tier-diamond .rank-badge::before{background-image:url('../calendar/BGAssets/tournament-major-bg-blurred.jpg')}
+/* Icon-led perks list (per Eric: "a list of perks", more graphic/icon-led
+   than a plain bullet) -- each <li> now leads with a small SVG icon
+   (assigned per perk's real content in the markup, not decorative/random)
+   instead of a bare ::marker bullet. */
+.mile ul{position:relative;z-index:2;color:var(--ink-dim);font-size:.83rem;margin:0;padding-left:0;list-style:none;display:grid;gap:.45rem}
+.mile ul li{display:flex;align-items:flex-start;gap:.55rem}
+.mile ul li .ic{flex:none;width:16px;height:16px;margin-top:.1rem;fill:var(--tier-c, var(--ne-orange))}
 
 /* Rank-style frames, one per tier. Shared between the Ambassador Journey
    tiles (.mile) and the Featured Ambassador cards (.host-card), which
@@ -1547,7 +1617,12 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    single card edge-to-edge (the same "don't let a container balloon
    around whatever happens to be in it today" principle as this file's
    container-width rules, just applied at the single-card scale here). */
-.host-card-example{border-style:dashed}
+/* 2026-09-04 (per Eric): dashed border removed -- the "EXAMPLE" ribbon
+   badge just below (the actual visual cue the F-04 comment above refers
+   to) plus the explicit "Example" copy already make this an unmistakable
+   placeholder; the dashed border read as a rendering glitch more than an
+   intentional signal. Card now uses the same solid border every other
+   .card/.host-card on the site does. */
 /* In normal flow (not absolutely positioned like .node/.host-tag) and
    given room to clear them via margin-top -- the card's top row is
    already occupied by the Diamond node (left) and pillar tag (right); a

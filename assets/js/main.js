@@ -213,6 +213,54 @@ const GZ = {
   }
 };
 
+// Shared "full text" tooltip (2026-09-04, per Eric: the games page's
+// popups shouldn't ever resize the container underneath them). Backs
+// every [data-full] trigger site-wide (.game-list li's truncated titles,
+// .review-waterfall's clamped review quotes) with ONE tooltip element
+// appended directly to <body> -- see .gz-tooltip in style.css for why
+// that's the actual fix, not just a tweak: a body-level element
+// positioned via getBoundingClientRect() is never a descendant of
+// anything it describes, so it can't affect any container's size on any
+// browser, structurally, rather than "doesn't seem to in this testing."
+// Elements opt in by having both a `data-full` attribute (the full text
+// to show) and `tabindex="-1"` (already set by games.js/reviews.js) so
+// tap/touch focus reaches it without adding it to the Tab sequence.
+GZ.initFullTextTooltips = function initFullTextTooltips(root = document) {
+  const els = root.querySelectorAll('[data-full]');
+  if (!els.length) return;
+  let tip = document.getElementById('gz-shared-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'gz-shared-tooltip';
+    tip.className = 'gz-tooltip';
+    tip.setAttribute('role', 'tooltip');
+    document.body.appendChild(tip);
+  }
+  function show(el) {
+    tip.textContent = el.dataset.full;
+    const r = el.getBoundingClientRect();
+    tip.style.maxWidth = `${Math.max(220, Math.min(320, r.width))}px`;
+    // Render once (off-screen) to measure, then clamp to the viewport so a
+    // trigger near the right/bottom edge never pushes the tooltip off-screen.
+    tip.style.left = '0px'; tip.style.top = '0px'; tip.classList.add('is-visible');
+    const tipRect = tip.getBoundingClientRect();
+    let left = r.left, top = r.bottom + 6;
+    if (left + tipRect.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - tipRect.width - 8);
+    if (top + tipRect.height > window.innerHeight - 8) top = Math.max(8, r.top - tipRect.height - 6);
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  }
+  function hide() { tip.classList.remove('is-visible'); }
+  els.forEach(el => {
+    if (el.dataset.gzTooltipBound) return;
+    el.dataset.gzTooltipBound = '1';
+    el.addEventListener('mouseenter', () => show(el));
+    el.addEventListener('mouseleave', hide);
+    el.addEventListener('focus', () => show(el));
+    el.addEventListener('blur', hide);
+  });
+};
+
 function injectIcons(root = document) {
   root.querySelectorAll('i[data-ic]').forEach(el => {
     const cls = el.dataset.lg !== undefined ? 'ic ic-lg' : 'ic';
@@ -250,6 +298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   })();
 
   injectIcons();
+  GZ.initFullTextTooltips();
 
   const cfg = await GZ.config();
   document.querySelectorAll('[data-cfg]').forEach(el => { const v = cfg[el.dataset.cfg]; if (v) el.textContent = v; });

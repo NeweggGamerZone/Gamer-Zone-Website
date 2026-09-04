@@ -91,6 +91,22 @@
     pieTip.style.setProperty('--tip-c', d.color);
     pieTip.classList.add('is-visible');
   }
+  // 2026-09-04 (per Eric): hovering a row already lit up its matching pie
+  // slice (is-hover, below), but the floating value/label tip only ever
+  // showed up when the mouse was actually over the pie itself -- hovering
+  // the row/name left the tip missing even though the slice was visibly
+  // reacting. Since there's no real cursor position over the pie in that
+  // case, this positions the tip at the hovered slice's own rendered
+  // center (post-hover-transform, since is-hover is added before this
+  // runs) instead of following the mouse.
+  function positionTipAt(el) {
+    if (!pieTip) return;
+    const wrap = pieSvg.closest('.senetdb-pie-holder');
+    const wrapRect = wrap.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    pieTip.style.left = `${elRect.left + elRect.width / 2 - wrapRect.left}px`;
+    pieTip.style.top = `${elRect.top + elRect.height / 2 - wrapRect.top}px`;
+  }
   function moveTip(evt) {
     if (!pieTip) return;
     const wrap = pieSvg.closest('.senetdb-pie-holder');
@@ -177,7 +193,11 @@
         document.querySelectorAll('.senetdb-row').forEach(r => r.classList.remove('is-hover'));
         row.classList.add('is-hover');
         const path = pieSvg.querySelector(`path[data-i="${i}"]`);
-        if (path) path.classList.add('is-hover');
+        if (path) {
+          path.classList.add('is-hover');
+          showTip(null, data[i]);
+          positionTipAt(path);
+        }
       });
       row.addEventListener('mouseleave', hideTip);
     });

@@ -28,7 +28,7 @@
 
   // Physical systems/notes shown alongside a platform's game list.
   const PLATFORM_NOTE = {
-    pc: '25 gaming PCs available.',
+    pc: '26 gaming PCs available.',
     console: 'Systems: Xbox &middot; Nintendo Switch 2 &middot; PlayStation 5 &middot; Retro Games Emulator',
   };
 
@@ -60,6 +60,10 @@
     ['Legends of Runeterra', 'pc', 'competitive'],
     ['Roblox', 'pc'],
     ['Call of Duty: Warzone', 'pc', 'competitive'], ['Overwatch', 'pc', 'competitive'],
+    // Added 2026-09-04, per Eric.
+    ['Black Myth: Wukong', 'pc', 'single'], ['Asphalt Legends Unite', 'pc', 'competitive'],
+    ['Onimusha: Way of the Sword', 'pc', 'single'], ['Stray', 'pc', 'single'],
+    ['007 First Light', 'pc', 'single'], ['Crimson Desert', 'pc', 'single'],
     // Party titles — played on the PCs, tagged Co-op.
     ['Taiko no Tatsujin: Rhythm Festival', 'pc', 'coop'],
     ['Jackbox Party Pack 4', 'pc', 'coop'], ['Jackbox Party Pack 6', 'pc', 'coop'],
@@ -117,27 +121,39 @@
     </section>`;
   }
 
+  // Every render*() function below fully replaces #games-list's innerHTML,
+  // which means any [data-full] tooltip listeners bound to the previous
+  // set of <li> elements are gone along with them (new DOM nodes, not the
+  // same elements). GZ.initFullTextTooltips(list) re-binds the shared
+  // body-level tooltip (see main.js) to whatever's on screen now -- it
+  // no-ops on elements it's already bound (dataset.gzTooltipBound guard),
+  // so this is just "make sure everything current is covered," not a
+  // wasteful full rebind.
   function renderByPlatform() {
     list.innerHTML = PLATFORMS.map(p => {
       const games = GAMES.filter(x => x.platform === p.key);
       return games.length ? panel(p.label, p.icon, games, PLATFORM_NOTE[p.key]) : '';
     }).join('');
+    GZ.initFullTextTooltips(list);
   }
 
   function renderAZ() {
     list.innerHTML = panel('A-Z', null, GAMES);
+    GZ.initFullTextTooltips(list);
   }
 
   function renderPlatform(key) {
     const p = PLATFORM_BY_KEY[key];
     const games = GAMES.filter(x => x.platform === key);
     list.innerHTML = panel(p.label, p.icon, games, PLATFORM_NOTE[key]);
+    GZ.initFullTextTooltips(list);
   }
 
   function renderGenre(key) {
     const g = GENRE_BY_KEY[key];
     const games = GAMES.filter(x => x.genre === key);
     list.innerHTML = panel(g.label, null, games);
+    GZ.initFullTextTooltips(list);
   }
 
   // ---- Live search --------------------------------------------------
@@ -156,6 +172,7 @@
       return;
     }
     list.innerHTML = panel(`Search results for “${query.trim()}”`, 'search', matches);
+    GZ.initFullTextTooltips(list);
   }
 
   function clearSearch({ refocus = false } = {}) {
@@ -216,8 +233,8 @@
   }
 
   // Tapping/clicking a truncated title should reveal the full name via the
-  // :focus popup (see .game-list li[data-full]:focus in style.css) -- but
-  // tabindex="-1" elements don't reliably receive focus from a plain click
+  // shared tooltip's focus listener (GZ.initFullTextTooltips in main.js) --
+  // but tabindex="-1" elements don't reliably receive focus from a plain click
   // in every browser, so call .focus() explicitly. Delegated on the stable
   // #games-list container (survives the innerHTML re-renders above) rather
   // than attached per-row.
