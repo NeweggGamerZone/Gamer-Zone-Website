@@ -131,32 +131,23 @@
         <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(mon.toUpperCase())} ${day}: Closed for ${GZ.esc(strippedName)}</div>
       </div>${descHtml}`;
     }
-    // Time subtagline moved out of .eu-info (the right-hand title column)
-    // and into .eu-date-wrap, stacked under the date itself — per request,
-    // it now left-aligns flush with the date's own left edge instead of
-    // sitting under (and aligned to) the title on the right. Only rendered
-    // when there's a time to show, so date-only rows don't pick up an
-    // empty blank line underneath.
-    // The star mark is now ALWAYS rendered (never omitted), just made
-    // invisible via .eu-major-mark--placeholder on a non-major row. Only
-    // rendering it for major rows used to mean .eu-date-top (and, via
-    // .eu-info's own left-aligned flex:1 below, every row title's start x)
-    // shifted left/right depending on whether THAT ROW happened to be
-    // major -- a row-to-row jitter on the exact vertical line the eye
-    // uses to scan the list. Reserving the same width whether or not the
-    // star is visible keeps every row's date-top width identical, so
-    // titles all start at the same x regardless of major/non-major mix.
-    return `<div class="eu-row${isMajor ? ' eu-major' : ''}">
-      <div class="eu-date-wrap">
-        <div class="eu-date-top">
-          <span class="eu-date">${mon.toUpperCase()} ${day}</span>
-          <span class="eu-major-mark${isMajor ? '' : ' eu-major-mark--placeholder'}" aria-hidden="true">&#9733;</span>
-        </div>
-        ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
-      </div>
-      <div class="eu-info">
-        <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(name)}</div>
-      </div>
+    // 2026-09-04 (v2), per Eric: dropped the star marker entirely (it read
+    // as clutter once every row already carries its own reserved-width
+    // placeholder) and collapsed the date/title/time three-way split into
+    // ONE inclusive line -- date, title, and (if present) time all sit on
+    // the same baseline, left-aligned, wrapping together as a unit instead
+    // of the old two-column layout (a fixed date+star+time column on the
+    // left, a separate title column on the right). That two-column split
+    // was still what produced "so much empty space" on a short-titled row:
+    // even left-aligned, the title lived in its own flex column starting
+    // at a fixed x no matter how short the date above/beside it was. A
+    // single flowing line -- like the closure row below already uses --
+    // reads as one continuous thought ("SEP 26 Street Fighter 6 Saturday
+    // Slam 11:00 AM – 7:00 PM") rather than a form with two fields.
+    return `<div class="eu-row eu-line${isMajor ? ' eu-major' : ''}">
+      <span class="eu-date">${mon.toUpperCase()} ${day}</span>
+      <span class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(name)}</span>
+      ${ev.time ? `<span class="eu-meta">${GZ.esc(ev.time)}</span>` : ''}
     </div>${descHtml}`;
   }
 

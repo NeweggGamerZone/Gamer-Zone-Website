@@ -713,7 +713,10 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
    consistent hover effect — text shifts to orange, icon scales up slightly —
    so the whole footer reads as a clear, scannable list of distinct actions
    rather than plain text links. */
-.ftr-link { display: flex; align-items: center; gap: .55rem; padding: .18rem 0; color: var(--ink); transition: color .15s ease; }
+/* 2026-09-04 (per Eric: "add spacing after each icon"): gap raised
+   .55rem -> .85rem for clearer breathing room between each footer icon
+   and its label. */
+.ftr-link { display: flex; align-items: center; gap: .85rem; padding: .18rem 0; color: var(--ink); transition: color .15s ease; }
 .ftr-link .ic { width: 18px; height: 18px; flex: none; fill: currentColor; transition: transform .15s ease; }
 .ftr-link:hover, .ftr-link:focus-visible { color: var(--ne-orange); }
 .ftr-link:hover .ic, .ftr-link:focus-visible .ic { transform: scale(1.18); }
@@ -1840,59 +1843,44 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
    doubled-up line stacking against the location row below the list
    (last row) — keeps just one clean rule between adjacent event rows. */
 .eu-list .eu-row:first-child{border-top:none}
-/* Stacked column now: the date(+star) row on top, the per-row time
-   subtagline directly below it — left-aligned to the date's own left
-   edge per request, instead of living in .eu-info under the title. */
-/* flex:none (not the default shrink:1) — this column's content (date,
-   star, time range) is short and fixed, so it should never be the one
-   that gives up width under pressure from a long event title next to it.
-   Without this, .eu-date-wrap and .eu-info shrunk proportionally by
-   default, which could squeeze this column narrower than its own time
-   text (e.g. "4:00 PM – 7:00 PM") and wrap it to two lines — .eu-info's
-   title already has its own graceful wrap/shrink handling for exactly
-   this squeeze, so it should absorb all of it instead. */
+/* 2026-09-04 (v2), per Eric: date, title, and time now read as ONE
+   inclusive line per row, like ordinary sentence text -- not a flex row.
+   A flex row was tried first, but flex-wrap breaks BETWEEN items, not
+   inside one that's still too long to fit the remaining space -- so a
+   long title (e.g. "XP League Fortnite Tournament") dropped to its own
+   line entirely, orphaning the date alone above it. display:block here
+   (overriding .eu-row's own display:flex) puts .eu-date/.eu-name/.eu-meta
+   back into normal inline flow, where the browser wraps mid-sentence
+   exactly like text -- "SEP 11 XP League Fortnite" / "Tournament" -- so
+   the date is never left stranded by itself. */
+.eu-row.eu-line{display:block}
+.eu-line .eu-date{margin-right:.5em}
+.eu-line .eu-name{margin-right:.5em}
+/* Still used by the theme-week rows on the hand-authored month-at-a-glance
+   page (screenshot-monthly-calendar.html's #month .eu-week-row) -- those
+   weren't part of this "special events" alignment request and keep their
+   own date-column/title-column split, so these two classes stay defined
+   even though every Special Event row above has moved to .eu-line. */
 .eu-date-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;min-width:0;flex:none}
-.eu-date-top{display:flex;align-items:center;gap:.6rem}
+.eu-info{text-align:left;min-width:0;flex:1 1 auto}
 .eu-date{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:var(--eu-date-size);line-height:1;color:#fff;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
 /* Major/tournament rows use the same orange as the calendar's "Major /
    Tournament" legend swatch (--cal-major), not blue, so a tournament reads
-   the same color everywhere on the site. */
+   the same color everywhere on the site -- the star used to carry this
+   same signal redundantly; the color alone is enough now that it's gone. */
 .eu-major .eu-date{color:var(--cal-major)}
-.eu-major-mark{flex:none;font-size:clamp(18px,3.2cqw,30px);line-height:1;color:var(--ne-orange)}
-/* 2026-09-04, per Eric: the star mark is now ALWAYS in the markup (see
-   row() in event-update.js), just invisible on a non-major row -- so
-   every row's .eu-date-top reserves identical width whether or not a
-   given row happens to be major, and .eu-info (now flex:1, see below)
-   starts at the same x on every row instead of jittering row to row. */
-.eu-major-mark--placeholder{visibility:hidden}
-/* 2026-09-04, per Eric: event titles are now LEFT-aligned, not right --
-   flex:1 (up from no flex, sized to its own content) means .eu-info now
-   fills whatever width .eu-row's own flex layout leaves after
-   .eu-date-wrap's fixed-width column, so a title starts immediately
-   after the date/star column (plus .eu-row's own gap) and reads as one
-   consistent left-hand text column down the whole list -- rather than
-   the old right-aligned layout, where a short title's own box sat far
-   right with a big dead gap in the row's middle (part of what read as
-   "so much empty space, not structured" on a light week's social-image
-   capture, where board-mode's small event count made that dead center
-   gap especially visible). min-width:0 (kept) still lets it shrink
-   below its content's natural width so a long title can wrap instead of
-   overflowing. */
-.eu-info{text-align:left;min-width:0;flex:1 1 auto}
-/* event title: same size, weight, and line-height as the date so the two
-   columns' text tops land on the exact same baseline across the row. */
+/* event title: same size, weight, and line-height as the date so both
+   read as one continuous line of text rather than two mismatched styles. */
 .eu-name{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:var(--eu-name-size);line-height:1;color:var(--ink)}
+.eu-major .eu-name{color:var(--cal-major)}
 /* subtagline: exactly 50% of the event title, floored at 14px. Bumped
    15% then 10% (1.15 * 1.10 = 1.265) via its own calc rather than
    raising --eu-meta-size itself (which was reverted back to its
    original, unbumped value along with --eu-date-size above), so this
    and .eu-desc below can each be tuned independently. Keeps .eu-meta in
-   line with .eu-desc, which got the same two bumps. Left-aligned to the
-   date's own left edge -- now the same direction .eu-info's title uses
-   too (see above), so the whole row reads as two left-aligned columns
-   rather than mixed alignments. */
-.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);letter-spacing:.01em;text-align:left;white-space:nowrap}
-.eu-major .eu-name{color:var(--cal-major)}
+   line with .eu-desc, which got the same two bumps. Trails at the end of
+   the same inclusive line now (not stacked under the date). */
+.eu-meta{font-family:var(--eu-body);font-weight:400;font-size:calc(var(--eu-meta-size) * 1.265);color:var(--ink-dim);letter-spacing:.01em;white-space:nowrap}
 /* extra description line for major/featured events only — same family as
    the subtagline but a touch brighter, since it's called out on purpose.
    Sized above --eu-meta-size directly (rather than bumping that shared
@@ -1917,15 +1905,9 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
   .eu-eyebrow-title{white-space:normal}
   .eu-eyebrow .ic{width:28px;height:28px}
   .eu-row{flex-direction:column;align-items:flex-start;gap:.3rem}
-  /* .eu-row's main axis is vertical at this breakpoint (flex-direction:
-     column above) -- .eu-info's flex:1 1 auto (now the base rule; see
-     that rule's own comment) would grow it to fill leftover COLUMN
-     height instead of leftover row width, stretching the title's box
-     tall for no reason. flex:none restores natural, content-based
-     height here; text-align:left is already the base default now so
-     this breakpoint no longer needs its own override for that part. */
-  .eu-info{flex:none}
-  .eu-date-wrap{gap:.4rem}
+  /* .eu-line's three inline children (date/title/time) still read fine
+     wrapping freely at narrow widths -- no extra override needed here
+     now that .eu-info/.eu-date-wrap (the old two-column split) are gone. */
 }
 @media (max-width: 400px){
   .eu-board{--eu-date-size: clamp(1.9rem, 13vw, 2.6rem)}
@@ -1970,6 +1952,28 @@ html.board-mode section.eu-section{margin:0}
    composition for this isolated capture view even though the live page
    itself now anchors content to the top (see the base .eu-board rule). */
 html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5rem);justify-content:center}
+/* 2026-09-04 (v2), per Eric: the 16:9 export ONLY (targeted here via a
+   min-width query against its own fixed capture width -- 1150px, see
+   FIXED_WIDTH_16X9 in scripts/capture-social-images.mjs; the 1:1 export
+   is 700px and stays centered per the rule above, matching the
+   reference square Eric confirmed looks right) top-anchors instead of
+   centering. Root cause this fixes: the 16:9 export is a straight top-
+   anchored crop of this same square render (sharp's `cover` +
+   `position:'top'`), so it only ever keeps the square's TOP ~56% of
+   height. Centering pushed a light week's short content block down by
+   however much slack the square had below it -- fine for the 1:1
+   export (that's the balanced look Eric wants there), but on a light
+   week (e.g. Racing Games Week: one event + its new Mario Kart icon)
+   that same slack pushed the icon mostly below the 16:9 crop line,
+   confirmed via the real capture script (only the kart's wheels
+   survived). Top-anchoring the 16:9 export specifically removes that
+   slack from ABOVE its content instead, which its crop never reaches
+   regardless of a week's length -- verified afterward against both
+   Racing Games Week (no more cropping) and Fortnite Week (still fully
+   intact -- a busy week had almost no slack to move in the first
+   place, so this is a no-op there), with the 1:1 export for both
+   confirmed unchanged and still centered. */
+@media (min-width:900px){html.board-mode .eu-board{justify-content:flex-start}}
 /* Reverted: an earlier pass enlarged --eu-date-size/--eu-row-pad here to
    fill the square's extra height with bigger text, but that made the row
    text noticeably larger than the 16:9 export/live page for no reason
@@ -1997,6 +2001,25 @@ html.board-mode .eu-board-icon img{width:min(50%,480px)}
    slightly lower too, per request — scoped to board-mode only, same as
    the size bump, so the live in-page board is untouched. */
 html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
+/* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
+   (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
+   with -- the 16:9 export is a straight top-anchored crop of this same
+   square render (see the .eu-board justify-content comment above), and
+   on a light week (few/no Special Events rows) there's little content
+   between the masthead and the crop line, so a full-size icon runs well
+   past it and gets cut off partway down (confirmed via the real capture
+   script: only the front half of the kart survived). This can't be
+   fixed by moving the icon (already as high as top-anchoring puts it)
+   or by a general size cut (the square export's icon size was
+   deliberately bumped larger earlier this session specifically to fill
+   a light week's empty space, and shrinking it there would undo that).
+   Instead, cap it ONLY at the 16:9 capture's own fixed viewport width
+   (1150px -- see FIXED_WIDTH_16X9 in scripts/capture-social-images.mjs;
+   the 1:1 capture is 700px, safely under this query) to a height that
+   fits within the crop line even on the lightest realistic week (one
+   Special Event row), leaving a margin of safety. The square export's
+   icon size is completely untouched by this. */
+@media (min-width:900px){html.board-mode .eu-board-icon img{max-height:170px}}
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,
