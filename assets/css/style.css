@@ -861,6 +861,21 @@ body.home-page { background: transparent; }
    like a sentence," which just made it read as inconsistent with its
    siblings in the same row. */
 .stat span { font-size: .68rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+/* 2026-09-04 follow-up (per Eric: "Open... should be colorized"): the
+   actual "Open"/"Closed" text lives in a nested #hero-status-value SPAN
+   inside the colored <b>, not on the <b> directly (see main.js) -- CSS
+   inheritance only kicks in when nothing else sets `color` on an element
+   itself, so the generic `.stat span` rule just above was silently
+   overriding the inherited green/red with the small-label grey on that
+   inner span. This was invisible in a plain color/DOM check (the <b>
+   itself correctly reports is-open's green), only showing up as grey
+   once you actually looked at the rendered pixels -- same root cause as
+   the star icon's earlier specificity bug just above it in this file,
+   different mechanism (child overriding parent's inherited color rather
+   than a losing specificity fight). Fixed by having the span explicitly
+   inherit rather than re-declaring the color match by hand, so it can
+   never drift from whatever .is-open/.is-closed sets again. */
+.stat-status #hero-status-value { color: inherit; }
 .stat-status b.is-open { color: #3ddc84; }
 /* 2026-09-04 (per Eric: was plain white -- switched to a soft red so the
    Closed state gets its own real color cue too, not just different text,
@@ -880,8 +895,19 @@ body.home-page { background: transparent; }
    (per Eric): put the visible "5" back in front of the icon -- .stat-star-num
    matches the sibling stats' plain bold-number look, sized to sit
    comfortably next to the enlarged star glyph. */
-.stat-star-num { font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #fff; margin-right: .15em; vertical-align: middle; }
-.stat-star-icon { font-size: 2rem; line-height: 1; color: #ffd447; text-shadow: 0 0 10px rgba(255,212,71,.5); vertical-align: middle; }
+/* 2026-09-04 follow-up (per Eric: "Open and 5 stars should be colorized,
+   and the same or similar font size to the 25+ text"): these two rules
+   used to lose to the more specific ".stat span" rule (a class+tag
+   selector beats a single class, regardless of source order), which is
+   why the "5" and star were rendering at the small grey label size
+   instead of their own intended size/color -- scoped under `.stat` here
+   to win that specificity fight for real. Size matched to the sibling
+   stats' 1.5rem number (was 2rem on the icon, visibly bigger than "25+"
+   next to it); num and icon now share the same warm yellow so the whole
+   "5 out of 5" reads as one colorized unit rather than a plain number
+   next to a colored icon. */
+.stat .stat-star-num { font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #ffd447; margin-right: .15em; vertical-align: middle; text-shadow: 0 0 10px rgba(255,212,71,.5); }
+.stat .stat-star-icon { font-size: 1.5rem; line-height: 1; color: #ffd447; text-shadow: 0 0 10px rgba(255,212,71,.5); vertical-align: middle; }
 
 .hero-proof-wrap { margin-top: 3.6rem; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
@@ -985,15 +1011,29 @@ body.home-page { background: transparent; }
    --ink-dim and the blue accent both still clear 4.5:1 no matter what's
    underneath — see the site-wide contrast rule near the top of this file. */
 .cal-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97));}
-.cal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start}
+/* 2026-09-04 (per Eric: "the event calendar section is still not
+   currently wide enough... widen and enlarge that section"). Measured
+   first: .cal-board itself already spans the exact same 1070px content
+   width as every sibling section on this page (reg-step cards, the
+   Weekly Lineup board, Past Events) -- verified via getBoundingClientRect,
+   not just eyeballed -- so this was never actually a shared-container-
+   width violation (rule 5). The real complaint is that the calendar grid
+   and detail card felt small/cramped relative to how much horizontal
+   room the section actually has, so this enlarges the internal layout
+   for real: the two columns go from an even 1fr/1fr split (which gave
+   the small 7-cell grid and the detail card equal width even though the
+   grid needs more room to breathe) to 6fr/5fr favoring the calendar,
+   gaps/padding/type sizes bumped up throughout, and .cal-detail grows
+   taller to match its own now-larger heading size. */
+.cal-wrap{display:grid;grid-template-columns:6fr 5fr;gap:1.6rem;align-items:start}
 @media(max-width:820px){.cal-wrap{grid-template-columns:1fr}}
-.cal{background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1rem}
-.cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}
-.cal-top button{background:rgba(22,24,29,.6);border:1px solid rgba(242,244,248,.2);color:var(--ink);width:34px;height:34px;cursor:pointer;font-size:1.1rem;font-family:var(--head)}
+.cal{background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.4rem}
+.cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-top button{background:rgba(22,24,29,.6);border:1px solid rgba(242,244,248,.2);color:var(--ink);width:40px;height:40px;cursor:pointer;font-size:1.3rem;font-family:var(--head)}
 .cal-top button:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
-.cal-month{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.03em}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.cal-dow{font-family:var(--head);font-size:.6rem;color:var(--ink-dim);text-transform:uppercase;text-align:center;padding:.15rem 0}
+.cal-month{font-family:var(--head);font-weight:800;font-size:1.15rem;text-transform:uppercase;letter-spacing:.03em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.cal-dow{font-family:var(--head);font-size:.7rem;color:var(--ink-dim);text-transform:uppercase;text-align:center;padding:.25rem 0}
 .cal-cell{position:relative;aspect-ratio:1;border:1px solid rgba(242,244,248,.14);background:rgba(22,24,29,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
 .cal-cell.cal-closed{background:rgba(124,131,143,.32);border-color:var(--cal-closed);color:var(--ink-dim);cursor:default}
@@ -1045,7 +1085,7 @@ body.home-page { background: transparent; }
 @keyframes cal-today-flash{0%,4%,100%{opacity:0}1.6%,2.4%{opacity:.55}}
 @media (prefers-reduced-motion: reduce){.cal-cell.today::after{animation:none;display:none}}
 .cal-cell.sel{box-shadow:inset 0 0 0 3px #fff}
-.cal-cell .dn{font-family:var(--head);font-weight:700;font-size:1.05rem;color:var(--ink);position:relative;z-index:1}
+.cal-cell .dn{font-family:var(--head);font-weight:700;font-size:1.3rem;color:var(--ink);position:relative;z-index:1}
 .cal-legend{display:flex;gap:.9rem;margin-top:.9rem;font-size:.68rem;color:var(--ink-dim);flex-wrap:wrap}
 .cal-legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}
 .cal-legend i.lg-closed{background:var(--cal-closed)}
@@ -1072,15 +1112,21 @@ body.home-page { background: transparent; }
    height below is sized (with a small buffer) to the tallest real
    combination measured (2-line title, wrapped meta row, 3-line blurb,
    button) so nothing needs to shrink in the first place. */
-.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.3rem;height:390px;overflow:hidden;isolation:isolate;display:flex;flex-direction:column}
+/* Height bumped 390px -> 440px alongside the enlarge pass above (bigger
+   heading/padding below need more room), still sized with the same
+   buffer-over-tallest-real-combination approach the original comment
+   describes -- re-verified against "Gamer Zone Anniversary" (the longest
+   real title in data/events.json) with a screenshot, not just the math,
+   per the container/sizing discipline rule. */
+.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;height:440px;overflow:hidden;isolation:isolate;display:flex;flex-direction:column}
 .cal-detail>*{flex-shrink:0}
-@media (max-width: 480px) { .cal-detail { height: 480px; } }
+@media (max-width: 480px) { .cal-detail { height: 520px; } }
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center}
 .cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97))}
 .cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
-.cal-detail h3{font-family:var(--head);font-weight:800;font-size:1.46rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.cal-detail h3{font-family:var(--head);font-weight:800;font-size:1.65rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .cal-detail .cd-sub{font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--ne-blue-text);margin:0 0 .6rem;text-shadow:0 1px 10px rgba(0,0,0,.7);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
 .cal-detail>p.dim{font-family:var(--eu-body);color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cal-detail .cd-body{margin-top:.9rem;overflow:hidden}
@@ -2064,7 +2110,27 @@ html.board-mode .eu-board{padding-top:1.1rem}
    gap. Verified against the busiest weeks in rotation (Party Games,
    Fighting Games) for the same square-crop risk called out in the v2
    comment above -- no cropping at this size. */
-html.board-mode .eu-board-icon img{width:min(48%,460px)}
+/* 2026-09-04 (v5), per Eric: the previous fixed-width sizing (min(48%,460px))
+   made the icon's rendered SIZE depend on its own aspect ratio -- a portrait
+   asset (the Party Games wand, ~0.86 w/h) rendered tall (~395px) at that
+   width, while a landscape asset (the Racing Games kart, 1.5 w/h) rendered
+   noticeably shorter (~224px) at the exact same width, leaving it looking
+   small and sitting high with a lot of empty room below it (Eric's "lower
+   and make it larger" note on Week 3's square export). Switched to
+   `max-width`+`max-height` together (both auto width/height) instead of a
+   fixed width -- this is the standard CSS "contain" sizing for a replaced
+   element: the browser scales the image to the largest size that fits
+   BOTH caps while preserving its own aspect ratio, so a portrait and a
+   landscape asset each end up filling a similarly-sized box instead of
+   one being width-bound and the other being starved by the same width.
+   The max-height cap (340px) intentionally lands very close to the old
+   width-based wand height (~395px -> ~393px here) so Week 2's square
+   export -- already confirmed good -- stays effectively unchanged, while
+   the kart (previously width-bound at 224px tall) now grows to fill the
+   same height, which also reads as "lower" since the extra height grows
+   downward from the same top-anchored position. Verified via real
+   capture at the 700px square width. */
+html.board-mode .eu-board-icon img{width:auto;height:auto;max-width:min(72%,620px);max-height:min(40cqw,340px)}
 /* +10% size (above) paired with a bit more top margin here so it sits
    slightly lower too, per request — scoped to board-mode only, same as
    the size bump, so the live in-page board is untouched. */
@@ -2123,14 +2189,34 @@ html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
    instead of one orphaned graphic. Scoped to min-width:900px (16:9 only,
    same gate as the rest of this export's overrides) -- the 1:1 export is
    untouched, still the single full-size centered icon. */
+/* 2026-09-04 (v5), per Eric: the two flanking .eu-board-icon-side copies
+   were rendering visibly stretched (a portrait wand squashed into a wide,
+   flat "shooting star" shape) instead of keeping their own aspect ratio.
+   Root cause was a specificity bug, the same class of bug the v4 comment
+   above already fixed for the CENTER icon via #eu-board-icon-img (an id) --
+   but the side copies have no id, only the .eu-board-icon-side class, and
+   `html.board-mode .eu-board-icon img{...}` (the shared square/base sizing
+   rule above) is MORE specific than a bare `html.board-mode .eu-board-icon-
+   side` class selector (2 type selectors + 2 classes beats 1 type + 2
+   classes) -- so that rule's `width` won for the side images even though
+   `.eu-board-icon-side`'s own `max-height` still applied, decoupling width
+   from height entirely and stretching the image. Fixed by adding `img` to
+   the side selector (`.eu-board-icon img.eu-board-icon-side`), which adds
+   back the missing type-selector weight and now unconditionally outranks
+   the base rule, so `width:auto` from this rule wins too and the image's
+   real aspect ratio is preserved. Also bumped both icon sizes up (110->130,
+   78->98) and added a bit more top margin, per Eric's "lower and increase
+   the sizes of all the icons on the horizontal versions" -- re-verified via
+   real capture that Party Games Week (the tightest real case) still shows
+   zero cropped pixels at these larger sizes. */
 @media (min-width:900px){
-  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;gap:clamp(.6rem,1.6cqw,1rem)}
+  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;gap:clamp(.6rem,1.6cqw,1rem);margin-top:clamp(1.3rem,3cqw,2rem)}
   /* #eu-board-icon-img (an id) always wins specificity over the plain
      ".eu-board-icon-side" class rule below regardless of source order,
      so the two can't fight over max-height the way two class-only rules
      targeting the same <img> would. */
-  html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:110px}
-  html.board-mode .eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:78px;opacity:.55}
+  html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:130px}
+  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:98px;opacity:.55}
 }
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
