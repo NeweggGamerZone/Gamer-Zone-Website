@@ -271,6 +271,20 @@ A round of direct, Eric-specified copy and footer edits on `events.html` and all
 
 ---
 
+## Part 2t — F-07 resolved: closed-day calendar card now shows the real next open date, plus footer address removal and label/spacing cleanup (2026-09-04)
+
+A mix of one external-audit fix (F-07) and several direct Eric-specified footer edits, all on top of Part 2s's round.
+
+1. **F-07 resolved** (scenes-not-specs audit, HIGH): "'Plan your visit' lands on a CLOSED sign" — the Events page calendar's detail panel defaulted to today with no help when today was closed (every Sunday/Monday). After discussing the tradeoff with Eric — a future default day was rejected because the calendar's "Preregister" CTA only ever renders for the exact day being viewed (registration is same-day only), so defaulting to a future day would silently drop the CTA and imply you could register ahead, which isn't true — the agreed fix keeps TODAY as the default even when closed (Sun/Mon closures are the fixed weekly schedule, not an edge case), but replaces the old generic "The Gamer Zone is open Tuesday through Saturday, 10am to 7pm" sentence with the real next open date. `assets/js/calendar.js` gained a `nextOpenInfo(dt)` helper that walks forward day-by-day (capped at 21 days) through the same `data/events.json` data the rest of the calendar already uses, skipping Sun/Mon and any `type: "closed"` override, and returns the next real open date plus whatever event (if any) is on it. The closed-day card now reads e.g. "Reopens Tuesday, September 8 for Free Play." (or the real event's title if one is scheduled) instead of a generic weekly-hours reminder — accurate whenever the venue's schedule changes, and no fabricated "what's next" since it's computed from real data. Special closures (e.g. the Sep 5 Labor Day entry) still show their own real blurb above the new next-open line.
+2. **Footer address line removed** — per Eric, the plain-text street address under the Gamer Zone logo in the footer (`<p class="footer-static" data-cfg="address">`) was removed from all 5 pages; the "Directions" link (Google Maps) and the homepage's "Plan Your Next Visit" section still carry the address, so it wasn't lost, just de-duplicated out of the footer.
+3. **Footer icon-to-label spacing increased again** — per Eric ("add one more space"), `.ftr-link`'s flexbox gap raised from `.85rem` to `1.15rem` in `style.css`. Documented in a code comment that this is CSS flexbox `gap` between the icon and label, not a text character — both stay inside the same `<a class="ftr-link">`, so the whole icon+label pair remains one continuous hyperlink; gap can't and doesn't split a link.
+4. **"Gamer Zone Meetup" simplified to "Meetup"** in the footer's Discover column, per Eric, matching the same-round simplification pass on Academy/Start.GG/Feedback/Google/Yelp from Part 2s.
+5. Asset cache-busting version bumped to v=69 across all 6 HTML files.
+
+**Verified:** Full scripted QA pass (`tools/audit/run-full-qa.sh`) clean — 0 contrast failures (AAA), 0 container-width findings, 0 console errors across all 5 pages. Manually drove the calendar via Puppeteer: clicked a regular Sunday closure (confirmed card read "Reopens Tuesday, September 8 for Free Play.") and the Sep 5 Labor Day closure (confirmed it showed its own "Venue closed for Labor Day." blurb plus the same next-open line beneath it) — both render correctly with real computed dates, not placeholders.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.

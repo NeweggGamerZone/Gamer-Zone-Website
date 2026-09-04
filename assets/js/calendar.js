@@ -51,6 +51,33 @@
   const iso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const pretty = dt => new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
+  // 2026-09-04, F-07 fix (scenes-not-specs audit: "'Plan your visit' lands
+  // on a CLOSED sign" -- a weekend planner had to manually click forward
+  // to find out when the Zone reopens, or whether anything's on that day).
+  // Eric's call after discussion: keep TODAY as the default view even when
+  // it's closed (Sun/Mon closures are the fixed weekly schedule, not an
+  // edge case, and the Preregister CTA is same-day-only anyway -- showing
+  // a future day as the "default" would misleadingly imply you could act
+  // on it now). The actual fix is narrower: replace the old generic
+  // "The Gamer Zone is open Tuesday through Saturday" sentence with the
+  // real next open date, computed from the same events.json data the rest
+  // of the calendar already uses -- no fabricated "what's next," just the
+  // true next day the venue is actually open, walked forward day-by-day
+  // from whichever date is being viewed (capped at 21 days out so a data
+  // gap can't spin forever).
+  function nextOpenInfo(dt) {
+    const d = new Date(dt + 'T12:00:00');
+    for (let i = 0; i < 21; i++) {
+      d.setDate(d.getDate() + 1);
+      const dISO = iso(d.getFullYear(), d.getMonth(), d.getDate());
+      const wd = d.getDay();
+      const ev = byDate[dISO];
+      if (wd === 0 || wd === 1 || (ev && ev.type === 'closed')) continue;
+      return { date: dISO, event: ev || null };
+    }
+    return null;
+  }
+
   function render() {
     const y = view.getFullYear(), m = view.getMonth();
     monthEl.textContent = view.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -111,10 +138,15 @@
         <div class="cd-body">${preregBlock}</div>`;
     } else if (closed) {
       setCardBg(null);
-      const reason = closedByType ? (e.blurb || '') : 'Closed. The Gamer Zone is open Tuesday through Saturday, 10am to 7pm. See you then!';
+      const reasonLine = (closedByType && e.blurb) ? `<p class="cd-blurb">${GZ.esc(e.blurb)}</p>` : '';
+      const next = nextOpenInfo(dt);
+      const nextLine = next
+        ? `Reopens ${pretty(next.date)}${next.event && next.event.title ? ` for ${GZ.esc(next.event.title)}` : ' for Free Play'}.`
+        : 'The Gamer Zone is open Tuesday through Saturday, 10am to 7pm.';
       detail.innerHTML = `<span class="tag cal-closed">Closed</span>
         <h3>${pretty(dt)}</h3>
-        <p class="cd-blurb">${GZ.esc(reason)}</p>`;
+        ${reasonLine}
+        <p class="cd-blurb">${nextLine}</p>`;
     } else {
       setCardBg(FREE_PLAY_BG);
       detail.innerHTML = `<span class="tag cal-free">Free Play</span>

@@ -713,10 +713,16 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
    consistent hover effect — text shifts to orange, icon scales up slightly —
    so the whole footer reads as a clear, scannable list of distinct actions
    rather than plain text links. */
-/* 2026-09-04 (per Eric: "add spacing after each icon"): gap raised
-   .55rem -> .85rem for clearer breathing room between each footer icon
-   and its label. */
-.ftr-link { display: flex; align-items: center; gap: .85rem; padding: .18rem 0; color: var(--ink); transition: color .15s ease; }
+/* 2026-09-04 (per Eric: "add spacing after each icon", then "add one more
+   space"): gap raised .55rem -> .85rem -> 1.15rem for clearer breathing
+   room between each footer icon and its label. This is flexbox `gap`, not
+   a text space character -- it sits between the <i> icon and the <span>
+   label while both stay inside the SAME <a class="ftr-link">, so the
+   entire row (icon + label) is still one continuous hyperlink; `gap`
+   only affects the visual spacing between flex children, it can't split
+   a link the way inserting a literal space/character between two
+   separate elements might imply. */
+.ftr-link { display: flex; align-items: center; gap: 1.15rem; padding: .18rem 0; color: var(--ink); transition: color .15s ease; }
 .ftr-link .ic { width: 18px; height: 18px; flex: none; fill: currentColor; transition: transform .15s ease; }
 .ftr-link:hover, .ftr-link:focus-visible { color: var(--ne-orange); }
 .ftr-link:hover .ic, .ftr-link:focus-visible .ic { transform: scale(1.18); }
