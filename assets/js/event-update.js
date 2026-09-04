@@ -94,10 +94,27 @@
   // without an icon field just leave that slot empty.
   const boardIconEl = document.getElementById('eu-board-icon');
   const boardIconImg = document.getElementById('eu-board-icon-img');
+  // Tracks whether THIS week actually has a theme icon assigned at all --
+  // separate from boardIconEl.hidden, which fitBoardIconForExport() below
+  // also toggles for a completely different reason (export cropping). A
+  // week with no icon should stay hidden regardless of export math; a
+  // week WITH an icon starts visible and only fitBoardIconForExport() gets
+  // to hide it after that.
+  let boardIconHasTheme = false;
   if (boardIconEl && boardIconImg) {
     if (currentTheme && currentTheme.icon) {
+      // fitBoardIconForExport() (below) measures this image's actual
+      // rendered box, but the image loads asynchronously -- at the time
+      // refit() first runs (page load / fonts.ready) the browser may not
+      // yet know the image's intrinsic size, so the icon can measure as
+      // shorter than it really is and wrongly pass the crop-line check.
+      // Re-running refit() once the image itself finishes loading (and
+      // the layout has settled to its real, final height) catches that;
+      // { once: true } since src is set exactly once per render() call.
+      boardIconImg.addEventListener('load', () => refit(), { once: true });
       boardIconImg.src = currentTheme.icon;
       boardIconEl.hidden = false;
+      boardIconHasTheme = true;
     } else {
       boardIconEl.hidden = true;
       boardIconImg.removeAttribute('src');
@@ -131,23 +148,31 @@
         <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(mon.toUpperCase())} ${day}: Closed for ${GZ.esc(strippedName)}</div>
       </div>${descHtml}`;
     }
-    // 2026-09-04 (v2), per Eric: dropped the star marker entirely (it read
+    // 2026-09-04 (v3), per Eric: dropped the star marker entirely (it read
     // as clutter once every row already carries its own reserved-width
-    // placeholder) and collapsed the date/title/time three-way split into
-    // ONE inclusive line -- date, title, and (if present) time all sit on
-    // the same baseline, left-aligned, wrapping together as a unit instead
-    // of the old two-column layout (a fixed date+star+time column on the
-    // left, a separate title column on the right). That two-column split
-    // was still what produced "so much empty space" on a short-titled row:
-    // even left-aligned, the title lived in its own flex column starting
-    // at a fixed x no matter how short the date above/beside it was. A
-    // single flowing line -- like the closure row below already uses --
-    // reads as one continuous thought ("SEP 26 Street Fighter 6 Saturday
-    // Slam 11:00 AM – 7:00 PM") rather than a form with two fields.
+    // placeholder) and the date+title now read as ONE combined line --
+    // "SEP 9: XP League: Fortnite Training" -- reusing the exact same
+    // single .eu-name-line pattern the closure row below already uses,
+    // rather than a separate <span class="eu-date"> next to the title.
+    // The time (when present) is its own line underneath, not crammed
+    // onto the same line -- per request, and also what actually fixes a
+    // real bug the v2 flex-row/inline-line attempts both had: fitBoardTitles()
+    // (below) measures each .eu-name's rendered height to decide whether a
+    // title needs shrinking to fit one line, and when the date shared a
+    // line with the title, only the FIRST wrapped line had less width
+    // (squeezed by the date sitting before it) while any later line had
+    // the row's full width -- the function saw that as "this title needs
+    // 2 lines" and shrank the WHOLE title's font size well below its
+    // intended floor just to force line 1 to fit, even though letting it
+    // wrap normally would have looked fine ("XP League Fortnite Tournament"
+    // rendered at ~79% size instead of the intended 85% floor, visibly
+    // smaller than every other row). Folding the date into the same
+    // .eu-name element means every wrapped line of that title uses the
+    // row's FULL width, the same way the closure line always has --
+    // no more starved first line, no more surprise over-shrink.
     return `<div class="eu-row eu-line${isMajor ? ' eu-major' : ''}">
-      <span class="eu-date">${mon.toUpperCase()} ${day}</span>
-      <span class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(name)}</span>
-      ${ev.time ? `<span class="eu-meta">${GZ.esc(ev.time)}</span>` : ''}
+      <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(mon.toUpperCase())} ${day}: ${GZ.esc(name)}</div>
+      ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
     </div>${descHtml}`;
   }
 
@@ -243,7 +268,41 @@
     });
   }
 
-  function refit() { fitBoardTitles(); fitBoard(); }
+  // 2026-09-04, per Eric: the 16:9 export crops from the top (see
+  // scripts/capture-social-images.mjs's sharp().resize({fit:'cover',
+  // position:'top'}) against a fixed capture width), so anything below a
+  // crop line derived from that width never makes it into the final
+  // image. A CSS max-height cap on the icon (the original fix here) only
+  // worked while every week's row content left a roughly-consistent gap
+  // above that line -- once Special Event rows grew a second (time) line
+  // each (see the .eu-row.eu-line history above), a week with 2-3 events
+  // pushes the icon down by a variable amount depending on how many
+  // rows/lines THAT week actually has, so a fixed cap either still clips
+  // a busy week's icon (Party Games Week, Fortnite Week) or fully hides
+  // it with no way to fit (Fighting Games Week, where the text content
+  // alone already exceeds the crop line before the icon even starts).
+  // The real fix measures the icon's ACTUAL rendered position for this
+  // specific week's content and hides it outright -- rather than ever
+  // showing a partially-cropped sliver -- on any week where it would
+  // fall past the true crop line. Only applies to the 16:9 export (board
+  // width >= 900, matching the 16:9-only top-anchor/justify-content rule
+  // in style.css); the 700px 1:1 export is centered and never cropped by
+  // sharp (fit:'cover' against a matching-ratio target), so its icon is
+  // always shown at full size regardless of content height.
+  function fitBoardIconForExport() {
+    if (!boardIconEl || !boardIconHasTheme) return;
+    if (!document.documentElement.classList.contains('board-mode')) return;
+    const board = boardIconEl.closest('.eu-board');
+    if (!board) return;
+    const boardRect = board.getBoundingClientRect();
+    if (boardRect.width < 900) { boardIconEl.hidden = false; return; }
+    const cropLine = boardRect.width * (1080 / 1920);
+    const iconRect = boardIconEl.getBoundingClientRect();
+    const iconBottomRelative = iconRect.bottom - boardRect.top;
+    boardIconEl.hidden = iconBottomRelative > cropLine;
+  }
+
+  function refit() { fitBoardTitles(); fitBoard(); fitBoardIconForExport(); }
   refit();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
   // No debounce here on purpose: the social-capture script resizes the

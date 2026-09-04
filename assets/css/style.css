@@ -1704,6 +1704,17 @@ html:not(.board-mode) .eu-board-inner{flex:1 1 auto;min-height:0}
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
 .eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7cqw,1.2rem);padding-bottom:clamp(.08rem,.25cqw,.15rem)}
+/* An explicit [hidden] override, same gotcha already documented on
+   .host-card[hidden] above: the bare [hidden] attribute alone is not
+   enough once an author rule with equal specificity (this display:flex
+   rule) also targets the element, since an author rule beats the
+   browser's default [hidden]{display:none} UA rule regardless of
+   specificity ties. Without this, fitBoardIconForExport() in
+   event-update.js setting boardIconEl.hidden=true had no visible effect
+   at all -- confirmed via a real capture where a sliver of the icon
+   still rendered past the 16:9 crop line even though .hidden read true
+   in the DOM. */
+.eu-board-icon[hidden]{display:none}
 /* 2026-09-04, per Eric: on the live board specifically, the icon used to
    sit right under the last text row with only its own small fixed
    margin-top for breathing room -- close enough on a busy week to read
@@ -1849,19 +1860,26 @@ html.board-mode.board-square .eu-bottom-group{margin-top:0}
    doubled-up line stacking against the location row below the list
    (last row) — keeps just one clean rule between adjacent event rows. */
 .eu-list .eu-row:first-child{border-top:none}
-/* 2026-09-04 (v2), per Eric: date, title, and time now read as ONE
-   inclusive line per row, like ordinary sentence text -- not a flex row.
-   A flex row was tried first, but flex-wrap breaks BETWEEN items, not
-   inside one that's still too long to fit the remaining space -- so a
-   long title (e.g. "XP League Fortnite Tournament") dropped to its own
-   line entirely, orphaning the date alone above it. display:block here
-   (overriding .eu-row's own display:flex) puts .eu-date/.eu-name/.eu-meta
-   back into normal inline flow, where the browser wraps mid-sentence
-   exactly like text -- "SEP 11 XP League Fortnite" / "Tournament" -- so
-   the date is never left stranded by itself. */
+/* 2026-09-04 (v3), per Eric: date+title now read as one combined line --
+   "SEP 9: XP League: Fortnite Training" -- with the time (when present)
+   on its own line underneath, not sharing a line with the title. (v2,
+   still described in git history, tried keeping date and title as
+   separate elements sharing one inline-flow line -- that fixed the v1
+   flex-wrap orphaning bug, but turned out to also be the root cause of a
+   real font-shrink bug: fitBoardTitles() below measures each .eu-name's
+   rendered height to decide whether a title needs shrinking to fit one
+   line, and because the date shared a line with the title, only the
+   FIRST wrapped line was width-constrained by the date sitting before
+   it -- fitBoardTitles() saw that as "needs 2 lines" and shrank the
+   WHOLE title well below its intended 85% floor just to force line 1 to
+   fit. Merging date+title into one .eu-name string, per event-update.js's
+   row(), means every wrapped line of that string uses the row's FULL
+   width, matching the closure row's own single-line pattern -- no more
+   starved first line, no more surprise over-shrink.) display:block here
+   (overriding .eu-row's own display:flex) stacks .eu-name and .eu-meta
+   as two plain block lines instead of side by side. */
 .eu-row.eu-line{display:block}
-.eu-line .eu-date{margin-right:.5em}
-.eu-line .eu-name{margin-right:.5em}
+.eu-line .eu-meta{margin-top:.15em}
 /* Still used by the theme-week rows on the hand-authored month-at-a-glance
    page (screenshot-monthly-calendar.html's #month .eu-week-row) -- those
    weren't part of this "special events" alignment request and keep their
@@ -2014,18 +2032,23 @@ html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
    on a light week (few/no Special Events rows) there's little content
    between the masthead and the crop line, so a full-size icon runs well
    past it and gets cut off partway down (confirmed via the real capture
-   script: only the front half of the kart survived). This can't be
-   fixed by moving the icon (already as high as top-anchoring puts it)
-   or by a general size cut (the square export's icon size was
-   deliberately bumped larger earlier this session specifically to fill
-   a light week's empty space, and shrinking it there would undo that).
-   Instead, cap it ONLY at the 16:9 capture's own fixed viewport width
-   (1150px -- see FIXED_WIDTH_16X9 in scripts/capture-social-images.mjs;
-   the 1:1 capture is 700px, safely under this query) to a height that
-   fits within the crop line even on the lightest realistic week (one
-   Special Event row), leaving a margin of safety. The square export's
-   icon size is completely untouched by this. */
-@media (min-width:900px){html.board-mode .eu-board-icon img{max-height:170px}}
+   script: only the front half of the kart survived). A fixed max-height
+   cap here was the first attempt at a fix, but it assumed a roughly
+   constant amount of content above the icon -- once Special Event rows
+   grew a second (time) line each (v3, see event-update.js's .eu-row.eu-line
+   history), a week with 2-3 events pushes the icon down by an amount
+   that varies week to week, so a static cap either still let a busy
+   week's icon get cropped (Party Games Week, Fortnite Week) or was
+   useless on the busiest realistic week (Fighting Games Week, where the
+   TEXT content alone already exceeds the crop line before the icon even
+   starts) -- there is no single height that's simultaneously "big
+   enough to matter" and "always safe." Replaced (v3) with a JS-driven
+   fix instead: fitBoardIconForExport() in event-update.js measures the
+   icon's actual rendered position for THIS week's real content against
+   the true crop line and hides it outright, cleanly, on any week where
+   it would fall past that line -- never a partially-cropped sliver.
+   Nothing here caps its size anymore; only its visibility is toggled,
+   and only for the 16:9 export. */
 /* transition:none here matters, not just the final values: .reveal normally
    animates opacity/transform over .7s (see .reveal above), and without this
    override that animation still plays when board-mode snaps the class on,
