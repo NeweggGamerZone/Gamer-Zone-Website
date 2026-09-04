@@ -183,9 +183,25 @@
   // Aug 29 closure listed AFTER an Aug 28 tournament instead of before it.
   const rows = remaining.map(e => row(e, { closure: e.type === 'closed' }));
 
+  // 2026-09-04, F-08 fix (scenes-not-specs audit: "the liveliness section
+  // can render as a void" -- a quiet week showed a dashed, apologetic
+  // "Just the weekly theme this week" box with nothing else on the board).
+  // Per Eric: every week going forward gets a themed icon (data.weeklyThemes
+  // []).icon, chosen for that week's actual theme, special events, or a
+  // holiday closure -- e.g. the flag for a light Labor Day week) assigned
+  // as real fallback content, not a text apology. So once a week HAS that
+  // icon (boardIconHasTheme, set above), the icon art below is the real
+  // fallback and the dashed placeholder text is redundant clutter sitting
+  // on top of it -- skipped entirely in that case. The dashed text only
+  // still appears as a safety net for the case this fallback hasn't been
+  // filled in yet (no icon assigned for that week) -- honest that the
+  // board has nothing to show, rather than silently rendering as an empty
+  // box with no explanation at all.
   list.innerHTML = rows.length
     ? rows.join('')
-    : '<div class="calendar-empty">Just the weekly theme this week, no closures or special events on the books.</div>';
+    : (boardIconHasTheme
+      ? ''
+      : '<div class="calendar-empty">Just the weekly theme this week, no closures or special events on the books.</div>');
 
   // The title column matches the date's oversized font, so a long title
   // (e.g. "Gamer Zone Anniversary") would otherwise wrap to a second line.
