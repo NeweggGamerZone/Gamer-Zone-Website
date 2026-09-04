@@ -175,6 +175,22 @@ async function main() {
     // only ever needs a small, even crop — never a content-losing one.
     async function captureBoardFit(width, targetW, targetH, outPath) {
       await page.setViewportSize({ width, height: TALL_ENOUGH });
+      // 2026-09-04, per Eric: found via a real bug, not a hypothetical --
+      // event-update.js's fitBoardIconForExport() (board-mode only) decides
+      // whether the theme icon fits above the 16:9/1:1 crop line by
+      // measuring the CURRENT viewport width, and only recomputes when its
+      // own refit() is re-triggered (page load, fonts.ready, the icon
+      // image's own 'load' event, or a real `resize` DOM event). Playwright's
+      // setViewportSize() above changes the actual viewport but does NOT
+      // dispatch a `resize` event, so without this, refit() only ever ran
+      // once at loadBoard()'s default (~1280px) viewport, before this
+      // function's first call -- both the 16:9 (1150px) and 1:1 (700px)
+      // captures were silently reusing that one stale decision instead of
+      // evaluating each capture's own real width, which is how the icon
+      // ended up invisible on weeks where it should have fit. Firing a
+      // real resize event here forces a fresh, correct measurement for
+      // THIS capture's actual width every time.
+      await page.evaluate(() => window.dispatchEvent(new Event('resize')));
       await waitForLogo();
       await page.waitForTimeout(150);
       const box = await page.locator('.eu-board').boundingBox();

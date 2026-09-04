@@ -1998,6 +1998,22 @@ html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5re
    place, so this is a no-op there), with the 1:1 export for both
    confirmed unchanged and still centered. */
 @media (min-width:900px){html.board-mode .eu-board{justify-content:flex-start}}
+/* 2026-09-04, per Eric: the 16:9 export's text was sized identically to
+   the 1:1 export's, but 1150px (the 16:9 capture's fixed width -- see
+   FIXED_WIDTH_16X9 in scripts/capture-social-images.mjs) is well past the
+   point where --eu-date-size's clamp(1.5rem,4.6cqw,3.2rem) above hits its
+   3.2rem ceiling, so the 16:9 export was always rendering text at the
+   clamp's max regardless of how much room was actually available. Per
+   Eric's own suggested fix ("reduce the size of the fonts on the
+   horizontal graphic by 15%"), scoped a flat -15% text-scale to the 16:9
+   export only (same width>=900 gate as the justify-content rule above) --
+   --eu-name-size and --eu-meta-size both derive from --eu-date-size, so
+   overriding it here cascades through the whole board's type scale in one
+   place rather than three separate rules. Frees up real vertical room so
+   the theme icon (see fitBoardIconForExport() in event-update.js and the
+   icon-size rules below) has a place to actually sit instead of needing
+   to be hidden on all but the very lightest weeks. */
+@media (min-width:900px){html.board-mode .eu-board{--eu-date-size: 2.72rem}}
 /* Reverted: an earlier pass enlarged --eu-date-size/--eu-row-pad here to
    fill the square's extra height with bigger text, but that made the row
    text noticeably larger than the 16:9 export/live page for no reason
@@ -2020,11 +2036,33 @@ html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5re
    Games Week, Sep 15-19, no icon at all) and the busiest icon-bearing
    week (Fortnite Week, Aug 25-29, 3 events + icon) -- no cropping on
    either at the real 1200x1200/1920x1080 output. */
-html.board-mode .eu-board-icon img{width:min(50%,480px)}
+/* 2026-09-04 (v2): trimmed 50%/480px -> 40%/400px, per Eric flagging the
+   Party Games Week wand icon getting cut off on the 1:1 export. Root
+   cause: board-mode has no fitBoard() overflow safety net (see comment
+   above), so on a week whose real content grows past the forced square
+   floor (weekcapture.js's own naturalRatio can measure <1, meaning the
+   rendered board is genuinely taller than it is wide), sharp's top-
+   anchored `cover` crop on the SQUARE export cuts off whatever sits
+   lowest -- almost always the icon, since it's the last thing in the
+   column. A smaller icon leaves more slack before that happens on a
+   normal week without needing to touch the row text size (which stays
+   matched to the live page and 16:9 export, per the "should stay the
+   same as everywhere else" note above). */
+html.board-mode .eu-board-icon img{width:min(40%,400px)}
 /* +10% size (above) paired with a bit more top margin here so it sits
    slightly lower too, per request — scoped to board-mode only, same as
    the size bump, so the live in-page board is untouched. */
 html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
+/* 2026-09-04, per Eric: "I still need the graphic to be there" on the
+   16:9 export -- rather than relying only on fitBoardIconForExport()
+   (event-update.js) hiding it outright when it doesn't fit, shrink the
+   icon further for the 16:9 export specifically (on top of the -15%
+   text-scale above, which already frees up real vertical room) so it
+   has a realistic chance of fitting instead of being hidden on all but
+   the very lightest weeks. fitBoardIconForExport() is kept as a last-
+   resort safety net for a week busy enough that even a small icon
+   genuinely has nowhere to go -- it should rarely if ever trigger now. */
+@media (min-width:900px){html.board-mode .eu-board-icon img{width:min(24%,220px)}}
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
    with -- the 16:9 export is a straight top-anchored crop of this same
