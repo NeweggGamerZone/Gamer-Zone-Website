@@ -161,9 +161,17 @@
     if (cell) cell.classList.add('sel');
   }
 
+  // 2026-09-04, per Eric: "Do not let users click on the closed dates."
+  // Consistent with the hover exclusion already below (closed days aren't
+  // a real destination -- nothing to preregister, nothing to browse), a
+  // closed cell no longer responds to a click at all -- it stays focusable
+  // and its aria-label still announces "..., Closed" for screen reader
+  // users, it just doesn't update the detail card or steal the selection
+  // highlight. Today's own default view (show(today) at the bottom of
+  // this file) is unaffected either way, since that's not a click.
   grid.addEventListener('click', e => {
     const c = e.target.closest('.cal-cell[data-d]');
-    if (!c) return;
+    if (!c || c.classList.contains('cal-closed')) return;
     show(c.dataset.d);
     grid.querySelectorAll('[data-d]').forEach(cell => { cell.tabIndex = -1; });
     c.tabIndex = 0;
@@ -181,6 +189,7 @@
     if (!c) return;
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
       e.preventDefault();
+      if (c.classList.contains('cal-closed')) return; // closed days aren't activatable, see click handler above
       show(c.dataset.d);
       return;
     }

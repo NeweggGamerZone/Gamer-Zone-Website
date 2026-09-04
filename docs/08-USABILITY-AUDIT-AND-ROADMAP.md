@@ -285,6 +285,20 @@ A mix of one external-audit fix (F-07) and several direct Eric-specified footer 
 
 ---
 
+## Part 2u — Hero stat colorization bugs fixed, closed calendar days no longer clickable, Event Calendar enlarged, registration copy edit (2026-09-04)
+
+A bundle of direct Eric-specified fixes, on top of Part 2t's round.
+
+1. **"Open" and "5★" stat colors fixed** — both had been rendering grey/uncolored on the homepage hero despite CSS rules that looked correct on paper. Two distinct bugs, only caught via pixel-cropped screenshot inspection (`getComputedStyle()` checks alone gave a false negative on the second one): (a) `.stat-star-num`/`.stat-star-icon` were losing a specificity fight to the more specific `.stat span` rule — rescoped to `.stat .stat-star-num`/`.stat .stat-star-icon` and set to the same yellow (`#ffd447`) as the rest of the star treatment, with the icon's font-size brought down from `2rem` to `1.5rem` to match its sibling stats. (b) The visible "Open"/"Closed" word lives in a nested `#hero-status-value` span inside `<b class="is-open">` — the parent's green color rule was computing correctly, but the child span's own explicit color (inherited from `.stat span`) was overriding it, since an explicit child color always wins over an inherited parent color regardless of specificity. Fixed with `.stat-status #hero-status-value { color: inherit; }`. Lesson written into session practice: color fixes need a real pixel-cropped screenshot check, not just a DOM/computed-style read, especially with nested elements.
+2. **Closed calendar days are no longer clickable**, per Eric ("Do not let users click on the closed dates on event calendar"). `assets/js/calendar.js`'s grid click handler and Enter/Space keydown handler both now bail early on `.cal-closed` cells — the cell stays focusable and its aria-label still announces "Closed" for screen readers, it just no longer updates the detail card or steals the selection highlight. Verified via Puppeteer: clicking a closed cell leaves `#cal-detail`'s content unchanged before/after.
+3. **Event Calendar section enlarged**, per Eric ("the event calendar section is still not currently wide enough"). Confirmed via `getBoundingClientRect()` first that the outer `.cal-board` container already matched the site's shared 1070px container width — this was an internal-layout density issue, not a container-width violation. Enlarged the internal grid instead: `.cal-wrap`'s column split changed from `1fr 1fr` to `6fr 5fr`, plus increased padding/gaps/font-sizes across `.cal`, `.cal-top button`, `.cal-month`, `.cal-grid`, `.cal-dow`, `.cal-cell .dn`, and `.cal-detail` (detail card height `390px` → `440px` desktop, `480px` → `520px` mobile; `.cal-detail h3` font-size `1.46rem` → `1.65rem`). Verified with the longest real event title in `data/events.json` ("Eastern Harmony: Gaming for Good - Street Fighter Tournament," 61 characters) via Puppeteer screenshot on the actual August 2026 calendar view — wraps cleanly to its existing 2-line clamp with no clipping or overflow at the new larger size.
+4. **Registration Step 1 copy edited**, per Eric: "you'll get an email pass that scans you in fast" → "you'll get emailed a guest pass that scans you in fast," on `events.html`.
+5. Asset cache-busting version bumped to v=75 across all 6 HTML files.
+
+**Verified:** Full scripted QA pass (`tools/audit/run-full-qa.sh`) clean. Pixel-cropped screenshots confirmed both stat colors render correctly post-fix. Puppeteer confirmed closed-day clicks are inert and the enlarged calendar handles the longest real event title without clipping.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.
