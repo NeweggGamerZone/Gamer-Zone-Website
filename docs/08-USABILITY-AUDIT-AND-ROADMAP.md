@@ -315,6 +315,16 @@ Per Eric's request, reviewed and approved before implementation. The "How Regist
 
 ---
 
+## Part 2x — Community section pivoted from Discord to Newsletter + Instagram (2026-09-04)
+
+Per Eric's direct correction: the F-09 fix (Part 2v) visualized Discord perks (game nights, LFG, tech help/clips, Zone Points prizes) that don't actually reflect what happens in the real Gamer Zone Discord today, and more importantly, Discord isn't a channel Eric wants to emphasize on the site at all. Rather than re-word the Discord perks to match reality, the section was repointed entirely: heading changed from "Join the community" to "Stay in the loop," copy replaced with Eric's supplied text (lightly smoothed for readability: "miss out a" → "miss out on a", added "straight to your inbox" as a closer, perk phrases lowercased in-sentence since they're already capitalized in the badges below), and the 4 perk badges swapped from Discord-specific items to the newsletter's actual offerings: Special Giveaways (coin icon), Game Nights (gamepad), Tournaments (trophy), Exclusive Events (ticket) — reusing the same `.perk-row`/`.perk-ic`/`.perk-label` pattern from Part 2v rather than inventing a new one.
+
+The single "Join the Gamer Zone Discord" button was replaced with two: a primary "Sign up for our Newsletter" button (`.btn.navy`, matching the section's previous primary-button color) that builds a `mailto:gamerzone@newegg.com?subject=I'd%20like%20to%20subscribe%20to%20the%20Gamer%20Zone%20Newsletter` link via a new `newsletterEmailUrl` config key in `data/config.json` (same `data-cfg-href` pattern as the existing Workshop/Ambassador email links), and a secondary "Follow our Instagram" button (`.btn.ghost`, the site's existing outline-button style) linking to the real `instagramUrl` already in config — confirmed via Puppeteer to resolve to the exact mailto string and to `https://www.instagram.com/newegggamerzone/` with `target="_blank"` applied automatically (the existing `data-cfg-href` handler in `main.js` only skips `target="_blank"` for `mailto:`/`tel:` links).
+
+**Verified:** Full scripted QA pass (`tools/audit/run-full-qa.sh`) clean — 0 contrast/width/console failures across all 5 pages. Cropped Puppeteer screenshots of `.community-card` at mobile (390px) and desktop (1400px) confirm both buttons stack/wrap cleanly with no overlap, and a page-context check confirmed both links' real `href`/`target` values.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.
