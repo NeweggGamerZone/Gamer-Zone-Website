@@ -299,6 +299,14 @@ A bundle of direct Eric-specified fixes, on top of Part 2t's round.
 
 ---
 
+## Part 2v — F-09 resolved: community section perks visualized as labeled icon badges (2026-09-04)
+
+**F-09 resolved** (scenes-not-specs audit, MED): "The best copy on the site is hidden at the bottom" — the homepage's closing "Join the community" section was a single dense sentence naming four separate Discord perks (game nights, LFG, tech help, clips, monthly Zone Points prizes) with nothing visualized, exactly as flagged. Fix, proposed to and approved by Eric before implementation: broke the sentence into a row of 4 labeled icon badges (Game Nights / LFG / Tech Help & Clips / Zone Points & Prizes) reusing the site's existing icon-in-circle pattern (`.perk-ic`, styled off the same orange-ring treatment as `.amb-teaser-num`) plus a `.perk-label`, and gave the card a bit more padding (`.community-card`) so it reads as a real destination. Position kept as the last section on the page — the audit's complaint was that the copy is flat and unvisualized, not that its position alone is disqualifying, and moving it would be a bigger structural call than what was asked. No activity counts or live numbers were added (would violate the no-fabrication rule until a real event-log exists per Roadmap #1/#2) — this is a copy/visualization fix only, using real, already-true perks. Original sentence lightly trimmed to avoid duplicating the same four perks as both prose and badges.
+
+**Verified:** Full scripted QA pass (`tools/audit/run-full-qa.sh`) clean — 0 contrast failures (AAA), 0 container-width findings, 0 console errors across all 5 pages. Cropped Puppeteer screenshots of `.community-card` taken at mobile (390px), tablet (800px), and desktop (1400px) confirm the badge row wraps cleanly (one per row on mobile, all four in a line by tablet/desktop) with no overlap, clipping, or crowding of the button beneath it.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.

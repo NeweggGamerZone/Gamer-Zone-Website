@@ -968,6 +968,22 @@ body.home-page { background: transparent; }
 .amb-teaser-steps { display:flex; align-items:flex-start; gap:0; margin-top:1.3rem; }
 .amb-teaser-step { flex:1; min-width:0; background:var(--bg-2); border:1px solid var(--line); border-top:3px solid var(--ne-orange); padding:1.1rem 1.2rem 1.3rem; }
 .amb-teaser-num { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:var(--bg-3); border:2px solid var(--ne-orange); color:var(--ne-orange); font-family:var(--head); font-weight:800; font-size:1.05rem; }
+
+/* F-09 fix (2026-09-04, external audit "the best copy on the site is
+   hidden at the bottom"): the homepage's closing Discord/community
+   section used to be one dense run-on sentence naming four separate
+   perks (game nights, LFG, tech help/clips, Zone Points) with nothing
+   visualized. This turns those four into a labeled icon-badge row a
+   skimmer can read at a glance, without fabricating any live activity
+   count -- that's Roadmap #1/#2 territory once a real event-log exists.
+   Position stays as the last section on the page; the audit's complaint
+   was that the copy is flat, not that its position alone is disqualifying. */
+.community-card { padding: 1.6rem 1.8rem; }
+.perk-row { display: flex; flex-wrap: wrap; gap: 1.4rem; margin-top: 1.2rem; }
+.perk { display: flex; align-items: center; gap: .6rem; flex: 1 1 190px; min-width: 0; }
+.perk-ic { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; background: var(--bg-3); border: 2px solid var(--ne-orange); color: var(--ne-orange); }
+.perk-ic .ic { width: 20px; height: 20px; }
+.perk-label { font-family: var(--head); font-weight: 800; font-size: .86rem; text-transform: uppercase; letter-spacing: .02em; color: var(--ink); line-height: 1.25; }
 .amb-teaser-step h3 { font-family:var(--head); font-weight:800; text-transform:uppercase; letter-spacing:.03em; font-size:1.02rem; margin:.7rem 0 .35rem; }
 .amb-teaser-step p { font-size:.86rem; line-height:1.45; margin:0; }
 /* A short horizontal rule between steps rather than a full connecting
