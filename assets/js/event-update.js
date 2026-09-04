@@ -99,11 +99,15 @@
   // Games Week), which read as too small on its own -- Eric's suggested
   // fallback was mirrored copies flanking the center icon so a small icon
   // still reads as a deliberate row rather than one lonely small graphic.
-  // These two extra <img> siblings (index.html/events.html markup) are
+  // These extra <img> siblings (index.html/events.html markup) are
   // hidden everywhere except that 16:9 export (see style.css's
-  // .eu-board-icon-side rules) -- kept in sync with the same src as the
-  // main image below, never shown on their own.
-  const boardIconSideImgs = boardIconEl ? boardIconEl.querySelectorAll('.eu-board-icon-side') : [];
+  // .eu-board-icon-side/-outer rules) -- kept in sync with the same src
+  // as the main image below, never shown on their own. 2026-09-04 (v6),
+  // per Eric: a second, smaller pair (.eu-board-icon-outer) was added
+  // flanking the original pair even further out, making a 5-icon row --
+  // selecting both classes together here since they're synced identically,
+  // just sized differently in CSS.
+  const boardIconSideImgs = boardIconEl ? boardIconEl.querySelectorAll('.eu-board-icon-side, .eu-board-icon-outer') : [];
   // Tracks whether THIS week actually has a theme icon assigned at all --
   // separate from boardIconEl.hidden, which fitBoardIconForExport() below
   // also toggles for a completely different reason (export cropping). A

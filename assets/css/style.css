@@ -2150,7 +2150,16 @@ html.board-mode .eu-board-icon img{width:auto;height:auto;max-width:min(72%,620p
 /* +10% size (above) paired with a bit more top margin here so it sits
    slightly lower too, per request — scoped to board-mode only, same as
    the size bump, so the live in-page board is untouched. */
-html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
+/* 2026-09-04 (v6), per Eric: Week 3's kart (still the tallest real test
+   of the max-height-based sizing above, since it grows the most under
+   it) needed to sit lower still -- a further +15% here on top of the
+   v3 bump. This margin only pushes the icon further down into space
+   that already existed below it (the square export's flex column sits
+   flex-start with nothing after the icon claiming that leftover room --
+   see .eu-board's own comments), it doesn't shrink or crop anything.
+   Scoped to the base (non-media) rule, so this only affects the 1:1
+   export -- the 16:9 export keeps its own separate margin-top below. */
+html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
 /* 2026-09-04, per Eric: "I still need the graphic to be there" on the
    16:9 export -- rather than relying only on fitBoardIconForExport()
    (event-update.js) hiding it outright when it doesn't fit, shrink the
@@ -2168,11 +2177,11 @@ html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
    above (Party Games Week, Fighting Games Week) at the real 1150px
    capture width -- still no cropping, fitBoardIconForExport() unchanged
    as the last-resort safety net underneath this. */
-/* .eu-board-icon-side: two extra <img> siblings (index.html/events.html)
-   flanking the real, centered #eu-board-icon-img -- hidden everywhere
-   (live page, 1:1 export) except the 16:9 export below. Never shown on
-   their own. */
-.eu-board-icon-side{display:none}
+/* .eu-board-icon-side / .eu-board-icon-outer: extra <img> siblings
+   (index.html/events.html) flanking the real, centered #eu-board-icon-img
+   -- hidden everywhere (live page, 1:1 export) except the 16:9 export
+   below. Never shown on their own. */
+.eu-board-icon-side,.eu-board-icon-outer{display:none}
 /* 2026-09-04 (v4), per Eric: real measurement (getBoundingClientRect on
    the actual rendered icon vs the true crop line, at the real 1150px
    capture width) showed Party Games Week's icon -- the tightest real
@@ -2225,14 +2234,31 @@ html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
    the sizes of all the icons on the horizontal versions" -- re-verified via
    real capture that Party Games Week (the tightest real case) still shows
    zero cropped pixels at these larger sizes. */
+/* 2026-09-04 (v6), per Eric: two more changes to the 16:9 row --
+   (1) "raise the icons... so the margin at the bottom is a bit more
+   preserved": margin-top here reduced by 10% (2rem cap -> 1.8rem), which
+   pulls the whole row up slightly, leaving more clearance before the
+   crop line rather than less (strictly safer, re-verified against Party
+   Games Week below). (2) a second, smaller pair of flanking copies
+   (.eu-board-icon-outer) was added even further out, making a 5-icon
+   row total: outer / side / center / side / outer. Sized smaller than
+   the .eu-board-icon-side pair (78px vs 98px max-height) and given the
+   exact same specificity fix (an `img.eu-board-icon-outer` selector, for
+   the same reason .eu-board-icon-side needed one in the v5 comment
+   above) so it isn't stretched either. Its opacity matches the existing
+   side pair (.55) -- per Eric's explicit "do not reduce the opacity of
+   the side ones at all," .eu-board-icon-side's own opacity is untouched
+   here, and the new outer pair reuses the same value rather than
+   introducing a third distinct dimming level. */
 @media (min-width:900px){
-  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;gap:clamp(.6rem,1.6cqw,1rem);margin-top:clamp(1.3rem,3cqw,2rem)}
+  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;gap:clamp(.6rem,1.6cqw,1rem);margin-top:clamp(1.17rem,2.7cqw,1.8rem)}
   /* #eu-board-icon-img (an id) always wins specificity over the plain
-     ".eu-board-icon-side" class rule below regardless of source order,
-     so the two can't fight over max-height the way two class-only rules
-     targeting the same <img> would. */
+     ".eu-board-icon-side"/".eu-board-icon-outer" class rules below
+     regardless of source order, so they can't fight over max-height the
+     way two class-only rules targeting the same <img> would. */
   html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:130px}
   html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:98px;opacity:.55}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer{display:block;width:auto;max-width:none;height:auto;max-height:78px;opacity:.55}
 }
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
