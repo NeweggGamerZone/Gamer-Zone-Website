@@ -193,6 +193,19 @@ async function main() {
       await page.evaluate(() => window.dispatchEvent(new Event('resize')));
       await waitForLogo();
       await page.waitForTimeout(150);
+      // 2026-09-04 (v2), per Eric: found via a real capture, not a
+      // hypothetical -- Party Games Week's 16:9 export showed the theme
+      // icon visibly sliced off at the bottom edge of the frame even
+      // though fitBoardIconForExport() (event-update.js) is supposed to
+      // hide it outright rather than let that happen. Root cause: that
+      // function's hide-check ran once, above, before the icon <img>'s
+      // real final rendered size had fully settled (font/layout timing
+      // right after the resize dispatch), and nothing re-ran it before
+      // the screenshot below. One more resize dispatch + short wait here,
+      // immediately before the screenshot, forces a final, correct
+      // re-check against the actual settled layout every time.
+      await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+      await page.waitForTimeout(120);
       const box = await page.locator('.eu-board').boundingBox();
       const buf = await page.locator('.eu-board').screenshot();
       await sharp(buf)

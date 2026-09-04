@@ -94,6 +94,16 @@
   // without an icon field just leave that slot empty.
   const boardIconEl = document.getElementById('eu-board-icon');
   const boardIconImg = document.getElementById('eu-board-icon-img');
+  // 2026-09-04, per Eric: the 16:9 export's single centered icon still had
+  // to be shrunk small enough to clear the crop line on a busy week (Party
+  // Games Week), which read as too small on its own -- Eric's suggested
+  // fallback was mirrored copies flanking the center icon so a small icon
+  // still reads as a deliberate row rather than one lonely small graphic.
+  // These two extra <img> siblings (index.html/events.html markup) are
+  // hidden everywhere except that 16:9 export (see style.css's
+  // .eu-board-icon-side rules) -- kept in sync with the same src as the
+  // main image below, never shown on their own.
+  const boardIconSideImgs = boardIconEl ? boardIconEl.querySelectorAll('.eu-board-icon-side') : [];
   // Tracks whether THIS week actually has a theme icon assigned at all --
   // separate from boardIconEl.hidden, which fitBoardIconForExport() below
   // also toggles for a completely different reason (export cropping). A
@@ -113,11 +123,13 @@
       // { once: true } since src is set exactly once per render() call.
       boardIconImg.addEventListener('load', () => refit(), { once: true });
       boardIconImg.src = currentTheme.icon;
+      boardIconSideImgs.forEach(img => { img.src = currentTheme.icon; });
       boardIconEl.hidden = false;
       boardIconHasTheme = true;
     } else {
       boardIconEl.hidden = true;
       boardIconImg.removeAttribute('src');
+      boardIconSideImgs.forEach(img => img.removeAttribute('src'));
     }
   }
 

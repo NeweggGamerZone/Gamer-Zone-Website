@@ -2086,7 +2086,52 @@ html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
    above (Party Games Week, Fighting Games Week) at the real 1150px
    capture width -- still no cropping, fitBoardIconForExport() unchanged
    as the last-resort safety net underneath this. */
-@media (min-width:900px){html.board-mode .eu-board-icon img{width:min(34%,320px)}}
+/* .eu-board-icon-side: two extra <img> siblings (index.html/events.html)
+   flanking the real, centered #eu-board-icon-img -- hidden everywhere
+   (live page, 1:1 export) except the 16:9 export below. Never shown on
+   their own. */
+.eu-board-icon-side{display:none}
+/* 2026-09-04 (v4), per Eric: real measurement (getBoundingClientRect on
+   the actual rendered icon vs the true crop line, at the real 1150px
+   capture width) showed Party Games Week's icon -- the tightest real
+   case, since its 2 Special Events rows each now render 2 lines and push
+   everything below them further down -- had only ~140px of vertical room
+   left before the crop line, yet the v3 34%/320px sizing rendered it at
+   ~374px tall there, well past that room. That also exposed a real,
+   separate timing bug: fitBoardIconForExport() (event-update.js) is
+   supposed to hide the icon outright when it doesn't fit, but measured
+   it BEFORE the image's real final size had settled and never got a
+   correcting re-check before the actual screenshot, so the icon rendered
+   visibly cut off at the bottom of the exported frame instead of either
+   fitting or being cleanly hidden -- confirmed via a real capture
+   (Party Games Week's wand handle was sliced off at the very bottom
+   edge). Fixed two ways together: (1) sized by max-height instead of
+   width here, capped low enough (110px) to clear even that tightest
+   real week with real margin to spare, verified directly against
+   Party Games Week's actual measured ~140px budget; width:auto lets each
+   icon's own aspect ratio (portrait, landscape, whatever asset) scale
+   naturally under that cap instead of a width-based size guessing at
+   the wrong dimension. (2) capture-social-images.mjs now fires one more
+   resize + short wait immediately before the screenshot itself, so
+   fitBoardIconForExport()'s hide-check (kept as the last-resort net for
+   a week even a 110px icon can't fit) evaluates the real, final,
+   settled layout rather than a possibly-stale mid-load measurement.
+   At 110px tall, a single centered icon read as too small/lonely on its
+   own -- per Eric's own suggested fallback, flanking the center icon
+   with two smaller, dimmed copies (.eu-board-icon-side, synced to the
+   same src in event-update.js) turns that into a deliberate small row
+   instead of one orphaned graphic. Scoped to min-width:900px (16:9 only,
+   same gate as the rest of this export's overrides) -- the 1:1 export is
+   untouched, still the single full-size centered icon. */
+@media (min-width:900px){
+  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;gap:clamp(.6rem,1.6cqw,1rem)}
+  /* #eu-board-icon-img (an id) always wins specificity over the plain
+     ".eu-board-icon-side" class rule below regardless of source order,
+     so the two can't fight over max-height the way two class-only rules
+     targeting the same <img> would. */
+  html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:110px}
+  html.board-mode .eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:78px;opacity:.55}
+}
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
    with -- the 16:9 export is a straight top-anchored crop of this same
