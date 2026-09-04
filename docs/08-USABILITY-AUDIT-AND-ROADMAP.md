@@ -307,6 +307,14 @@ A bundle of direct Eric-specified fixes, on top of Part 2t's round.
 
 ---
 
+## Part 2w — Registration steps: key phrases bolded for skimmers (2026-09-04)
+
+Per Eric's request, reviewed and approved before implementation. The "How Registration Works" section's intro line and 3 step cards on `events.html` each had their single most load-bearing phrase bolded with `<strong>` so a skimmer gets the gist without reading every sentence: "**Free to play**" in the intro, "**emailed a guest pass**" in Step 1, "**scan your preregistration or Verkada guest pass**" in Step 2, and "**free gaming account**" plus "**logs you into any PC**" in Step 3. Kept to one (or two, for Step 3) phrase per paragraph deliberately, so the section doesn't turn into a wall of bold text that defeats the purpose. The Verkada callout's existing "Fastest way to check in:" bold was left as-is. No color change, so the existing WCAG AAA contrast on `.dim` text (muted `#A6AEBC`, previously measured at 9.4:1) is unaffected by the added font-weight.
+
+**Verified:** Full scripted QA pass (`tools/audit/run-full-qa.sh`) clean — 0 contrast/width/console failures. Cropped Puppeteer screenshots of `#preregister` at mobile (390px) and desktop (1400px) confirm the bolded phrases wrap cleanly with no card-height shift or overflow.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.
