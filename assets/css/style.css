@@ -1972,32 +1972,39 @@ html.board-mode main.container{max-width:none;margin:0;padding:0}
 html.board-mode section.eu-section{margin:0}
 /* margin:0 and the roomier board-mode-only padding remove the .container
    gutters and give a capture a bit more breathing room than the live
-   in-page look needs. justify-content:center restores the old centered
-   composition for this isolated capture view even though the live page
-   itself now anchors content to the top (see the base .eu-board rule). */
-html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5rem);justify-content:center}
-/* 2026-09-04 (v2), per Eric: the 16:9 export ONLY (targeted here via a
-   min-width query against its own fixed capture width -- 1150px, see
-   FIXED_WIDTH_16X9 in scripts/capture-social-images.mjs; the 1:1 export
-   is 700px and stays centered per the rule above, matching the
-   reference square Eric confirmed looks right) top-anchors instead of
-   centering. Root cause this fixes: the 16:9 export is a straight top-
-   anchored crop of this same square render (sharp's `cover` +
-   `position:'top'`), so it only ever keeps the square's TOP ~56% of
-   height. Centering pushed a light week's short content block down by
-   however much slack the square had below it -- fine for the 1:1
-   export (that's the balanced look Eric wants there), but on a light
-   week (e.g. Racing Games Week: one event + its new Mario Kart icon)
-   that same slack pushed the icon mostly below the 16:9 crop line,
-   confirmed via the real capture script (only the kart's wheels
-   survived). Top-anchoring the 16:9 export specifically removes that
-   slack from ABOVE its content instead, which its crop never reaches
-   regardless of a week's length -- verified afterward against both
-   Racing Games Week (no more cropping) and Fortnite Week (still fully
-   intact -- a busy week had almost no slack to move in the first
-   place, so this is a no-op there), with the 1:1 export for both
-   confirmed unchanged and still centered. */
-@media (min-width:900px){html.board-mode .eu-board{justify-content:flex-start}}
+   in-page look needs.
+   2026-09-04 (v3), per Eric: justify-content used to be `center` here for
+   the 1:1 export specifically (with a min-width:900px override flipping
+   the 16:9 export to flex-start -- see the removed comment this replaces
+   for that history). That meant the square export's logo distance from
+   the top VARIED week to week: centering splits whatever vertical slack
+   is left (square height minus real content height) evenly above and
+   below the content, so a light week (more slack) pushed the masthead
+   further down than a busy week (less slack) did. Party Games Week
+   happened to look right because its content is nearly as tall as the
+   square already (little slack to redistribute) -- every other week
+   didn't match it. Switched to flex-start uniformly for BOTH exports so
+   the masthead sits at the exact same fixed distance from the top on
+   every week, in both formats -- see the fixed (non-vw) padding-top and
+   .board-logo margin-top overrides below, which is what actually makes
+   that distance identical between the 700px (1:1) and 1150px (16:9)
+   capture widths (the base padding/margin above are still vw-based and
+   would otherwise differ by capture width even at matching multipliers).
+   Any per-week vertical slack now shows up entirely as empty space below
+   the content instead of shifting the masthead -- filled by the larger
+   icon sizing below rather than by moving the logo. */
+html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5rem);justify-content:flex-start}
+/* Fixed (not vw-based) top padding, scoped to board-mode only -- the base
+   rule above still uses a vw-based clamp for left/right/bottom padding
+   (unaffected by this), but a vw value necessarily computes to a
+   different absolute px at 700px (1:1) vs 1150px (16:9), which is
+   exactly why the two exports' logo distance from top didn't match
+   before this fix. A flat rem value is identical regardless of which
+   capture width renders it. Also deliberately smaller than the old vw
+   value produced at either width, per Eric's request to reduce the
+   margin above the logo and free up more vertical room for a bigger
+   theme icon below. */
+html.board-mode .eu-board{padding-top:1.1rem}
 /* 2026-09-04, per Eric: the 16:9 export's text was sized identically to
    the 1:1 export's, but 1150px (the 16:9 capture's fixed width -- see
    FIXED_WIDTH_16X9 in scripts/capture-social-images.mjs) is well past the
@@ -2048,7 +2055,16 @@ html.board-mode .eu-board{margin:0;max-width:none;padding:clamp(1.6rem,5vw,4.5re
    normal week without needing to touch the row text size (which stays
    matched to the live page and 16:9 export, per the "should stay the
    same as everywhere else" note above). */
-html.board-mode .eu-board-icon img{width:min(40%,400px)}
+/* 2026-09-04 (v3), per Eric: bumped 40%/400px -> 48%/460px. With the
+   masthead now fixed-position (padding-top/.board-logo margin-top
+   overrides above) instead of sliding around with justify-content:center,
+   any per-week leftover vertical space no longer moves the logo -- it
+   just sits below the content as empty room, so the icon needs to be
+   bigger to actually read as "filling" it rather than leaving a visible
+   gap. Verified against the busiest weeks in rotation (Party Games,
+   Fighting Games) for the same square-crop risk called out in the v2
+   comment above -- no cropping at this size. */
+html.board-mode .eu-board-icon img{width:min(48%,460px)}
 /* +10% size (above) paired with a bit more top margin here so it sits
    slightly lower too, per request — scoped to board-mode only, same as
    the size bump, so the live in-page board is untouched. */
@@ -2062,7 +2078,15 @@ html.board-mode .eu-board-icon{margin-top:clamp(1rem,2.4cqw,1.7rem)}
    the very lightest weeks. fitBoardIconForExport() is kept as a last-
    resort safety net for a week busy enough that even a small icon
    genuinely has nowhere to go -- it should rarely if ever trigger now. */
-@media (min-width:900px){html.board-mode .eu-board-icon img{width:min(24%,220px)}}
+/* 2026-09-04 (v3), per Eric: bumped 24%/220px -> 34%/320px, using the
+   vertical room freed by the reduced/fixed padding-top and .board-logo
+   margin-top above (see those comments) -- Eric flagged the 16:9 icon
+   as still reading small/off-center relative to the square version.
+   Re-verified against the same crop-risk scenarios as the v2 comment
+   above (Party Games Week, Fighting Games Week) at the real 1150px
+   capture width -- still no cropping, fitBoardIconForExport() unchanged
+   as the last-resort safety net underneath this. */
+@media (min-width:900px){html.board-mode .eu-board-icon img{width:min(34%,320px)}}
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
    with -- the 16:9 export is a straight top-anchored crop of this same
@@ -2116,6 +2140,16 @@ html.board-mode .reveal{opacity:1;transform:none;transition:none}
    there's always a comfortable gap between the square's top edge and the
    logo, on top of whatever .eu-board's own padding already provides. */
 .board-logo{display:block;align-self:center;height:clamp(73.92px,14.85vw,124.08px);width:auto;margin:clamp(.6rem,1.4vw,1rem) 0 clamp(1rem,3vw,1.6rem)}
+/* 2026-09-04, per Eric: fixed (not vw-based) top margin for board-mode
+   specifically, same reasoning as .eu-board's own padding-top override
+   above -- a vw value computes to a different absolute px at 700px (1:1)
+   vs 1150px (16:9), which is part of why the logo sat at different
+   distances from the top between the two exports. Paired with that
+   padding-top override, this fixes the logo at the same total distance
+   from the crop's top edge in both formats, and reduces it from what the
+   vw value produced at either width, freeing more vertical room for the
+   bigger theme icon below. */
+html.board-mode .board-logo{margin-top:.4rem}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
    and lets .eu-board span the full viewport width, but every size/spacing
    value inside the board (logo, type scale, row gaps) — and its overall
