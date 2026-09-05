@@ -326,7 +326,7 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .verkada-callout strong { color: var(--ne-orange); }
 .event-card { border-left: 4px solid var(--ne-orange); }
 .event-card .meta { font-size: .85rem; color: var(--ink-dim); }
-.tag { display: inline-block; font-family: var(--head); font-size: .68rem; font-weight: 800; padding: .18rem .6rem; background: var(--ne-navy); color: #cfe0ff; text-transform: uppercase; letter-spacing: .08em; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
+.tag { display: inline-block; font-family: var(--head); font-size: .75rem; font-weight: 800; padding: .18rem .6rem; background: var(--ne-navy); color: #cfe0ff; text-transform: uppercase; letter-spacing: .08em; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
 .tag.orange { background: var(--ne-orange); color: #000; }
 
 .game-list-panel { background: var(--bg-2); border: 1px solid var(--line); clip-path: var(--clip); padding: 2rem 2.2rem; }
@@ -582,7 +582,7 @@ details.archive-month .grid { margin-top: 1rem; }
    (narrower viewports between 620px and 900px) from ending in a flat cut. */
 .zone-stack { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); }
 .zone-card { position: absolute; top: 0; left: 50%; width: min(340px, 78%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease; }
-.zone-card-code { position: absolute; top: .6rem; right: .8rem; z-index: 2; font-family: var(--head); font-weight: 800; font-size: .62rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
+.zone-card-code { position: absolute; top: .6rem; right: .8rem; z-index: 2; font-family: var(--head); font-weight: 800; font-size: .75rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
 .zone-card-art { position: relative; height: 56%; flex: none; background: #000; }
 .zone-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .zone-card-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, var(--bg-2) 100%); }
@@ -872,7 +872,7 @@ body.home-page { background: transparent; }
    used to override text-transform/letter-spacing/weight to look "more
    like a sentence," which just made it read as inconsistent with its
    siblings in the same row. */
-.stat span { font-size: .68rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+.stat span { font-size: .75rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
 /* 2026-09-04 follow-up (per Eric: "Open... should be colorized"): the
    actual "Open"/"Closed" text lives in a nested #hero-status-value SPAN
    inside the colored <b>, not on the <b> directly (see main.js) -- CSS
@@ -930,7 +930,7 @@ body.home-page { background: transparent; }
 .stat .stat-star-icon { font-size: 1.5rem; line-height: 1; color: #ffd447; text-shadow: 0 0 10px rgba(255,212,71,.5); vertical-align: middle; }
 
 .hero-proof-wrap { margin-top: 3.6rem; }
-.hero-proof-label { text-align: center; font-family: var(--head); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
+.hero-proof-label { text-align: center; font-family: var(--head); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
 /* 2026-09-03 (per Eric): sized up to match .photo-waterfall's own card
    treatment exactly (was a smaller 168px "peek" strip) and caption
    overlay removed (alt text stays on the <img> for screen readers). */
@@ -1132,7 +1132,7 @@ body.home-page { background: transparent; }
 @media (prefers-reduced-motion: reduce){.cal-cell.today::after{animation:none;display:none}}
 .cal-cell.sel{box-shadow:inset 0 0 0 3px #fff}
 .cal-cell .dn{font-family:var(--head);font-weight:700;font-size:1.3rem;color:var(--ink);position:relative;z-index:1}
-.cal-legend{display:flex;gap:.9rem;margin-top:.9rem;font-size:.68rem;color:var(--ink-dim);flex-wrap:wrap}
+.cal-legend{display:flex;gap:.9rem;margin-top:.9rem;font-size:.75rem;color:var(--ink-dim);flex-wrap:wrap}
 .cal-legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}
 .cal-legend i.lg-closed{background:var(--cal-closed)}
 .cal-legend i.lg-free{background:var(--cal-free)}
@@ -1291,7 +1291,7 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mile.tier-diamond{width:88%;margin-left:12%}
 /* Shared rank-pill look, reused by both the Ambassador Journey tiles and
    the Featured Ambassador cards — only the position differs per context. */
-.node{position:relative;overflow:hidden;z-index:2;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
+.node{position:relative;overflow:hidden;z-index:2;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 .mile .node{position:absolute;left:1.1rem;top:-14px}
 /* Progression is the headline here: a big event-count badge sits right
    alongside the benefit it unlocks, instead of a small caption above it —

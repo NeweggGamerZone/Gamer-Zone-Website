@@ -345,6 +345,16 @@ Verified: full scripted QA pass (contrast/width/console, run in 3 stages after t
 
 ---
 
+## Part 2z — F-11: sub-12px text floor (2026-09-04)
+
+F-11 (WCAG minimum text size, 12px floor) was investigated for real rather than trusted from the original audit text: the audit's own example ("game instructions" HUD text) no longer exists since the hero mini-game was removed 2026-09-03, but the finding itself was still real and broader than the audit's two examples. With this site's default 16px root, six selectors sat below the floor: `.zone-card-code` at .62rem (9.92px -- the "ZONE 1"-style badge on the About Gamer Zone carousel cards) and five at .68rem (10.88px) -- `.tag`, `.stat span` (the small caption under each hero stat), `.hero-proof-label`, `.cal-legend` (calendar legend text), and `.node` (the Silver/Gold/Platinum/Diamond rank-pill badges on the Ambassador ladder and journey tiles). `.tag`/`.event-card` are dead CSS (no current page renders them) but were bumped anyway for consistency in case they're reused later.
+
+All six bumped to .75rem (12px), the minimum viable fix -- no layout restructuring, since none of these sit somewhere a size bump risks a wrap/overflow per the no-ellipsis and card-alignment rules. Verified with cropped Puppeteer screenshots at mobile (390px), tablet (800px), and desktop (1400px) of every affected component (hero stat row, About Gamer Zone zone-card badge, hero photo-strip label, calendar legend, Ambassador ladder badge) -- text reads clearly at the new size with no clipping, wrapping, or container-resize regressions. `.stat-status #hero-status-value`'s existing `font-size:inherit` (Part 2y) still correctly pulls from `.stat b`'s 1.5rem, unaffected by this change.
+
+Verified: full scripted QA pass (contrast/width/console, run as separate stages per this environment's command-timeout constraint) -- 0 failures across all 5 pages, 712 text items checked.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.
