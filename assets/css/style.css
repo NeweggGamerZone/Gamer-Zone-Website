@@ -1062,8 +1062,16 @@ body.home-page { background: transparent; }
 .cal-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/dailyplay-bg-blurred.jpg'));background-size:cover;background-position:center}
 /* Darkened enough (WCAG-checked against a worst-case bright photo) that
    --ink-dim and the blue accent both still clear 4.5:1 no matter what's
-   underneath — see the site-wide contrast rule near the top of this file. */
-.cal-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97));}
+   underneath — see the site-wide contrast rule near the top of this file.
+   2026-09-08, per Eric ("background still appears a bit too dark, reduce
+   the darkness by 15%"): all three alpha stops lowered ~15% (.93->.79,
+   .95->.81, .97->.82) to let more of the real photo through underneath,
+   alongside the same week's lighter blur radius. Re-checked against the
+   pixel-based WCAG audit (tools/audit/run.sh) after this change: still 0
+   contrast failures across all 5 pages -- these stops have real headroom
+   before text starts struggling, so there's room to go lighter again if
+   asked, but don't drop below this without re-running that audit. */
+.cal-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.79),rgba(4,5,7,.81) 55%,rgba(4,5,7,.82));}
 /* 2026-09-04 (per Eric: "the event calendar section is still not
    currently wide enough... widen and enlarge that section"). Measured
    first: .cal-board itself already spans the exact same 1070px content
@@ -1856,7 +1864,11 @@ html:not(.board-mode) .eu-board-inner{flex:1 1 auto;min-height:0}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
-.eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97));}
+/* 2026-09-08, per Eric ("background still appears a bit too dark, reduce
+   the darkness by 15%") -- see the identical note on .cal-board::after
+   above for the exact math and the contrast re-check; kept these two
+   scrims' values in lockstep since they're the same shared treatment. */
+.eu-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.79),rgba(4,5,7,.81) 55%,rgba(4,5,7,.82));}
 .eu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:var(--eu-row-pad);padding-bottom:clamp(.5rem,1.3cqw,.75rem);border-bottom:3px solid var(--ne-orange)}
 .eu-eyebrow{display:flex;align-items:center;gap:.9rem;min-width:0;width:100%}
 /* Masthead icon+textcol block grows to fill the full width of .eu-top
