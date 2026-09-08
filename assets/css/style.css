@@ -1090,7 +1090,20 @@ body.home-page { background: transparent; }
    grid needs more room to breathe) to 6fr/5fr favoring the calendar,
    gaps/padding/type sizes bumped up throughout, and .cal-detail grows
    taller to match its own now-larger heading size. */
-.cal-wrap{display:grid;grid-template-columns:6fr 5fr;gap:1.6rem;align-items:start}
+/* 2026-09-08, per Eric: with the photo backgrounds gone (see .cal-board/
+   .cal-detail history above), align-items:start left a real, visible gap
+   of flat panel-color "grey" showing below the detail card any time it's
+   shorter than the calendar grid beside it (564px grid vs. a 440px-floor
+   card is a 124px gap) -- exactly the kind of leftover dead space that
+   used to hide better under a photo texture but reads as broken once the
+   panel is a flat color. Switched to align-items:stretch (grid's own
+   default, which the old :start was overriding) so the shorter column
+   always grows to match the taller one -- no more mismatched panel
+   bottoms. .cal-detail's own justify-content:center (below) then keeps
+   short content (e.g. "Reopens Tuesday...") vertically centered in
+   whatever taller height it's stretched to, rather than leaving all the
+   new space pooled at the bottom under top-aligned content. */
+.cal-wrap{display:grid;grid-template-columns:6fr 5fr;gap:1.6rem;align-items:stretch}
 @media(max-width:820px){.cal-wrap{grid-template-columns:1fr}}
 .cal{background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.4rem}
 .cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
@@ -1200,7 +1213,7 @@ body.home-page { background: transparent; }
    now that --cd-bg has nothing to paint) rather than ripped out, in case
    a future session wants the per-event photo back with a fixed flash bug
    instead of just removing the layer. */
-.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;min-height:440px;isolation:isolate;display:flex;flex-direction:column}
+.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;min-height:440px;isolation:isolate;display:flex;flex-direction:column;justify-content:center}
 .cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--bg-2)}
 .cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
 /* line-clamp removed from h3/cd-sub/cd-blurb below, 2026-09-08 per Eric
