@@ -262,6 +262,12 @@ Any custom interactive widget (not a plain link/button, which get this for free)
 - Arrow keys navigate within a grid/list the way a user would expect (Left/Right = adjacent item, Up/Down = a row/week away where that makes sense); Enter/Space activates, matching native button behavior.
 - A visible focus ring (`:focus-visible`, not a bare browser default that may be invisible against a dark theme) is required on anything focusable — check it's actually visible against this site's dark backgrounds, not just present in the CSS.
 
+## Standing terminology: "Preregister," not "Register"
+
+Settled 2026-09-08, after the site drifted into using both words for the exact same action (fill out the visitor form/waiver ahead of a visit to skip the line at check-in). The floating pin-node CTA on every page said "Register Now" while the "Plan your next visit" card, the whole `events.html` registration-explainer section, and its own aria-labels all said "Preregister" — two names for one action is exactly the kind of inconsistency a first-timer (Grace, in the Part 3 personas) trips on, wondering if they're different things.
+
+**"Preregister" is the standard, site-wide term** — it's the more accurate one: the action is optional and happens *before* arrival, ahead of at-the-door check-in/registration (a real, separate second step described in "How Registration Works"), and "Register" alone risks sounding like account creation, which conflicts with the site's own explicit "no account required" promise. All five `.pin-btn` floating buttons (`Register<br>Now` → `Preregister<br>Now`, aria-labels updated too) were brought in line with the body copy that already used it. Don't reintroduce "Register" for this specific action in new copy — "Register for workshops" (edu.html) is a different, correctly-named action (claiming an Academy cohort seat, not a venue check-in shortcut) and is unaffected by this rule.
+
 ## No fabrication of facts
 
 Never invent a specific date, statistic, quote, or capability that isn't confirmed real, even to fill an awkward content gap. If the real answer is "we don't have that yet" (a next-cohort date, a live data pipeline, admin-portal access), say so honestly and offer a real, working alternative instead — a waitlist/contact link, an honest "not yet scheduled," a roadmap note — rather than a plausible-looking placeholder that could get mistaken for real information later. This applies to marketing copy, example data, and roadmap claims alike.

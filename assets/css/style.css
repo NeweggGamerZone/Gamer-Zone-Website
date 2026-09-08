@@ -532,6 +532,13 @@ details.archive-month .grid { margin-top: 1rem; }
    not after. Needed on top of pointer-events:none: that alone stops clicks
    but a keyboard user could still Tab onto an invisible, dead focus target
    without it -- see CLAUDE.md "Keyboard accessibility". */
+/* 2026-09-08: mobile font-size trimmed further (see the max-width:560px
+   override below, .64rem->.56rem) after standardizing this button's
+   label on "Preregister" (see CLAUDE.md's "Preregister vs Register"
+   note) -- "Preregister" is 3 letters longer than "Register" and was
+   rendering right up against the circle's curved edge at 78px/mobile;
+   this base (92px/desktop+tablet) size already had enough room and is
+   unchanged. */
 .pin-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:92px;height:92px;border-radius:50%;background:linear-gradient(145deg,var(--ne-orange),var(--ne-orange-deep));color:#000;text-align:center;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.72rem;line-height:1.15;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18);cursor:grab;user-select:none;-webkit-user-select:none}
 .pin-btn:hover{filter:brightness(1.08)}
 .pin-btn:focus-visible{outline:none;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18),0 0 0 3px #fff}
@@ -542,7 +549,7 @@ details.archive-month .grid { margin-top: 1rem; }
 .pin-close{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;line-height:1;padding:0}
 .pin-close:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
 .pin-close:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
-@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{width:78px;height:78px;font-size:.64rem}}
+@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{width:78px;height:78px;font-size:.56rem}}
 @media (prefers-reduced-motion: reduce){.pin-node{transition:none}}
 
 .wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; }
@@ -1840,6 +1847,10 @@ html:not(.board-mode) .eu-board-inner{flex:1 1 auto;min-height:0}
    icon wasn't on the user's final "should be larger" list, so its size
    is reverted back to the original clamp(240px,37.5vw,400px) — only its
    position keeps moving down. */
+/* 2026-09-08: margin-top bumped alongside the icon's own size increase
+   above -- a bigger icon with the same fixed clearance from the row above
+   it started overlapping that row's text on a busy week (Party Games
+   Week, mobile) once it grew. */
 .eu-board-icon{display:flex;justify-content:center;margin-top:clamp(.7rem,1.7cqw,1.2rem);padding-bottom:clamp(.08rem,.25cqw,.15rem)}
 /* An explicit [hidden] override, same gotcha already documented on
    .host-card[hidden] above: the bare [hidden] attribute alone is not
@@ -1868,7 +1879,23 @@ html:not(.board-mode) .eu-board-inner{flex:1 1 auto;min-height:0}
    overrides .eu-board-icon's own fixed top margin above, which would
    otherwise add extra space on top of the centering and throw off the
    even top/bottom balance this is going for. */
-html:not(.board-mode) .eu-bottom-group{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:clamp(.8rem,2.4cqw,1.7rem)}
+/* 2026-09-08, per Eric ("weekly lineup graphic stretched too thin / make
+   the wand larger"): the plain justify-content:center above balances the
+   icon's gaps evenly on a light week (real leftover space to center
+   within), but on a busy week (Party Games Week: 3 events, long wrapping
+   titles) --eu-scale is already floored at 0.55 with no leftover space
+   left for .eu-bottom-group to grow into -- it collapses toward 0 height,
+   and centering an icon inside a collapsed box makes it spill upward AND
+   downward by half its own height, overlapping .eu-list's last row above
+   it (confirmed via getBoundingClientRect: the icon's vertical center
+   landed exactly on .eu-bottom-group's own top edge). `safe center` keeps
+   the light-week centering but falls back to start-alignment the moment
+   centering would push content past the safe area -- exactly this
+   collapse case -- so the icon only ever overflows downward into the
+   board's own overflow:hidden safety net, never upward into real content.
+   Unsupported browsers fall back to the property's initial value (~
+   flex-start), which is the correct safe behavior anyway, not a broken one. */
+html:not(.board-mode) .eu-bottom-group{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding-bottom:clamp(.8rem,2.4cqw,1.7rem)}
 html:not(.board-mode) .eu-board-icon{margin-top:0}
 /* Reverted: the square export's forced 1:1 height (weekcapture.js pads
    the box out to match its own width) left a lot of extra vertical space,
@@ -1902,7 +1929,22 @@ html:not(.board-mode) .eu-board-icon{margin-top:0}
    max-width) so the aspect-ratio-driven sizing above still holds: a
    portrait or near-square icon grows by the same proportion as a wide
    landscape one instead of one dimension outrunning the other. */
-.eu-board-icon img{width:auto;height:auto;max-width:min(74%,720px);max-height:min(52cqw,540px)}
+/* 2026-09-08, per Eric ("the weekly lineup graphic is stretched too thin
+   / make the wand larger"): the icon's own aspect ratio was never actually
+   distorted (width:auto/height:auto always preserved it, verified via
+   naturalWidth/naturalHeight vs rendered rect) -- the real complaint was
+   that on a busy week (e.g. Party Games Week, 3 events with wrapping
+   titles) fitBoard()'s content-fit --eu-scale floors at 0.55 on narrow
+   mobile widths, shrinking the whole masthead+rows+icon group uniformly,
+   which left the icon rendering at ~59x69px -- readable as "a tiny sliver"
+   even though it was never non-uniformly squished. Caps raised again
+   (52cqw -> 66cqw here, matching the max-width bump) so the icon claims
+   more of its own share of that already-scaled space; verified via
+   Puppeteer on both a light week (Sep 1-5 flag) and this exact busy week
+   at 390/800/1400px that this does NOT push a busy week past its scale
+   floor into new clipping -- if a future week is busier still, re-check
+   at 390px before assuming this cap is still safe. */
+.eu-board-icon img{width:auto;height:auto;max-width:min(80%,720px);max-height:min(66cqw,540px)}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
