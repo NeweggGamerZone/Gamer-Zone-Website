@@ -1811,7 +1811,34 @@ html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-cont
    justify-content:center (untouched, below) still centers deliberately for
    the actual screenshot-export layout -- this only affects the live #week
    top-aligned case. */
-.eu-board-inner{width:100%;display:flex;flex-direction:column;transform:scale(var(--eu-scale,1));transform-origin:top center}
+.eu-board-inner{width:100%;display:flex;flex-direction:column;transform-origin:top center}
+/* 2026-09-08: found and fixed a real bug where week-to-week board-mode
+   exports rendered at wildly inconsistent sizes (e.g. Party Games Week's
+   masthead/icon much smaller than Racing Games Week's) despite both
+   weeks' real content fitting comfortably -- root cause was NOT a content
+   difference. fitBoard() (event-update.js) computes --eu-scale for the
+   LIVE page's shrink-to-fit behavior only, and explicitly early-returns
+   under board-mode without recomputing -- but this rule was applying
+   transform:scale(var(--eu-scale,1)) UNSCOPED, so board-mode exports
+   inherited whatever stale --eu-scale value happened to be sitting on
+   the element already. capture-social-images.mjs reuses one Playwright
+   page/context across multiple weeks' captures and leaves the viewport
+   at the previous capture's square (700px) width after each week; the
+   next week's fresh page load runs fitBoard()'s initial refit() at that
+   stale narrow width, in live (non-board-mode) mode, BEFORE the
+   board-mode class gets added for the actual export -- producing a scale
+   value driven by irrelevant leftover viewport state (confirmed via
+   instrumented capture: Party Games Week measured --eu-scale:"0.55" this
+   way, vs Racing Games Week's "0.999..."). Fixed by scoping the scale
+   transform to the live page only and giving board-mode an explicit
+   transform:none, so every board-mode export now renders at its own true
+   1:1 scale regardless of capture order or prior viewport state. Verified:
+   consistent masthead/logo/icon sizing across all weeks in fresh exports,
+   zero new cropping (checked against the busiest week, Fighting Games
+   Week), and the live page's own shrink-to-fit behavior (the whole reason
+   --eu-scale exists) is fully unaffected. */
+html:not(.board-mode) .eu-board-inner{transform:scale(var(--eu-scale,1))}
+html.board-mode .eu-board-inner{transform:none}
 /* Live page only: .eu-board-inner otherwise shrink-wraps to its own
    content height, which left the .eu-bottom-group centering rule above
    with nothing to center within -- the leftover square space sat OUTSIDE
@@ -1825,7 +1852,7 @@ html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-cont
    + a fixed-height square, a different, already-tuned mechanism this
    isn't meant to touch. */
 html:not(.board-mode) .eu-board-inner{flex:1 1 auto;min-height:0}
-@media (prefers-reduced-motion: no-preference){.eu-board-inner{transition:transform .25s ease}}
+@media (prefers-reduced-motion: no-preference){html:not(.board-mode) .eu-board-inner{transition:transform .25s ease}}
 /* Pre-blurred asset, not a live filter — see the .cal-board::before comment
    above for why. */
 .eu-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/event-update-bg-week1-blurred.jpg'));background-size:cover;background-position:center}
