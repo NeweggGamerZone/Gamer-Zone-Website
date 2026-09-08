@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="assets/css/style.css?v=79">
 </head>
 <body class="home-page">
+<a class="skip-link" href="#main">Skip to main content</a>
 <div id="gz-veil" aria-hidden="true"></div>
 <div class="geo-bg" aria-hidden="true"></div>
 <div class="tech-bg" aria-hidden="true"></div>
@@ -30,7 +31,7 @@
   </div>
   <div class="announcement" id="announcement"></div>
 </header>
-<main class="container">
+<main class="container" id="main" tabindex="-1">
   <section class="hero-stage">
     <!-- 2026-09-03 (per Eric): a corner settings control, not part of the
          hero's own vertical flow -- top-right of the hero stage, out of
@@ -52,10 +53,16 @@
         <option value="city">City Lights</option>
       </select>
     </div>
-    <div class="hero-stack">
+    <!-- 2026-09-08, F-12 fix (scenes-not-specs audit: "no H1 anywhere on
+         the homepage -- the hero title is a SPAN"): same two-line visual
+         treatment, now a real <h1> wrapping the two styled spans instead
+         of a bare <div>. Every rule that touches .hero-stack/.hs-line is
+         scoped by class, not tag, so this is a semantics-only change --
+         nothing about the look moves. -->
+    <h1 class="hero-stack">
       <span class="hs-line solid hero-in" style="--d:.15s">Get in</span>
       <span class="hs-line outline hero-in" style="--d:.32s">The Zone</span>
-    </div>
+    </h1>
     <p class="lead hero-in" style="--d:.5s">Newegg's FREE High-End Gaming Lounge. Experience the latest PCs, virtual reality headsets, racing simulators, and gaming hardware for free!</p>
     <div class="btn-row hero-in" style="--d:.68s">
       <a class="btn" href="events.html#calendar">Plan your visit</a>

@@ -81,6 +81,25 @@ const OUT_DIR = process.env.OUT_DIR || path.join(__dirname, 'out');
     // failure for text that's actually fully invisible a moment later.
     await new Promise(r => setTimeout(r, 400));
 
+    // 2026-09-08: .skip-link (F-12 fix) is only ever visible to a sighted
+    // user once focused -- off-screen (top:-80px) at rest, the standard,
+    // correct skip-link pattern. Off-screen isn't display:none/
+    // visibility:hidden/opacity:0, so the checkVisibility() filter above
+    // doesn't (and shouldn't) exclude its text -- it's real, present
+    // content a keyboard user reaches. But without this focus() call, the
+    // walker below records its RESTING off-screen position, and the
+    // background screenshot samples pixels off in the black canvas above
+    // the page instead of the orange it actually sits on once focused --
+    // a false "black text on near-black" failure for a pairing no visitor
+    // ever actually sees. Focus it here so both the recorded rect and the
+    // background screenshot reflect the only state a sighted user is ever
+    // shown it in.
+    await page.evaluate(() => document.querySelector('.skip-link')?.focus());
+    // .skip-link's top:-80px -> top:1rem move on :focus runs on a .15s CSS
+    // transition -- without this wait, the rect/screenshot below can still
+    // catch it mid-transition instead of settled in its final, visible spot.
+    await new Promise(r => setTimeout(r, 250));
+
     // Collect every real text node's rect + computed style, in page (document) coordinates
     const items = await page.evaluate(() => {
       const results = [];

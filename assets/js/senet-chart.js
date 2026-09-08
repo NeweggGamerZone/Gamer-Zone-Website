@@ -41,20 +41,24 @@
   if (!rowsEl || !pieSvg) return;
 
   // Real "Total duration" (all-time hours played) snapshot from the Senet
-  // dashboard, captured 2026-08-25 (replaces the 2026-08-22 export -- every
+  // dashboard, captured 2026-09-08 (replaces the 2026-08-25 export -- every
   // title logged more hours in between, confirming this is a fresh pull,
-  // not a stale repeat). Hardcoded because there's still no live feed (see
-  // file header) -- replace wholesale the next time a fresh export comes
-  // in, rather than trying to merge/interpolate old and new.
+  // not a stale repeat; per Eric, given directly as a screenshot of the
+  // dashboard rather than a raw export this round). Hardcoded because
+  // there's still no live feed (see file header) -- replace wholesale the
+  // next time a fresh export comes in, rather than trying to merge/
+  // interpolate old and new. Counter-Strike 2 and Mecha Chameleon dropped
+  // out of this list entirely (no longer in the fresh top-8), replaced by
+  // Fanatec and Racing Control, both new entries in this export.
   const ALLTIME_REAL = [
-    { name: 'VALORANT', hours: 484 + 50 / 60 },
-    { name: 'League of Legends', hours: 432 + 50 / 60 },
-    { name: 'Fortnite', hours: 194 + 31 / 60 },
-    { name: 'Overwatch', hours: 175 + 40 / 60 },
-    { name: 'Marvel Rivals', hours: 143 + 4 / 60 },
-    { name: 'Fall Guys', hours: 131 + 14 / 60 },
-    { name: 'Counter-Strike 2', hours: 75 + 34 / 60 },
-    { name: 'Mecha Chameleon', hours: 55 + 8 / 60 },
+    { name: 'Valorant', hours: 542 + 58 / 60 },
+    { name: 'League of Legends', hours: 465 + 40 / 60 },
+    { name: 'Marvel Rivals', hours: 262 + 11 / 60 },
+    { name: 'Fanatec', hours: 249 + 3 / 60 },
+    { name: 'Fortnite', hours: 208 + 38 / 60 },
+    { name: 'Overwatch 2', hours: 180 + 49 / 60 },
+    { name: 'Racing Control', hours: 142 + 52 / 60 },
+    { name: 'Fall Guys', hours: 133 + 30 / 60 },
   ];
 
   const TOP_N = 6; // slices shown in the pie / rows below it
