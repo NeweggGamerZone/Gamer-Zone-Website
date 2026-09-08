@@ -893,7 +893,20 @@ body.home-page { background: transparent; }
    tunnel background show through underneath. Switched to the same solid,
    fully opaque --bg-2 fill used elsewhere on the site (e.g. .gz-search
    input) so these nodes read as solid cards, not a see-through overlay. */
-.stat { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; text-align: center; background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px; padding: .75rem .5rem; }
+/* 2026-09-08, per Eric: justify-content:center (see the history above)
+   only matched the OUTER bubble heights via grid's align-items:stretch --
+   it never actually top-aligned the NUMBERS across siblings. A stat whose
+   label wraps to two lines (e.g. Gaming PCs, once the GPU callout below
+   was added) still has its own content vertically centered WITHIN that
+   taller stretched box, so its big number sits higher than a
+   one-line-label neighbor's number, which centers within the same box
+   height around its own shorter content. Switched to justify-content:
+   flex-start so every number starts at the same fixed offset from the
+   card's own top edge regardless of how tall the box ends up -- the same
+   "reserve a shared start point, let content grow below it" principle as
+   .card h3's min-height elsewhere on this site, just via flex alignment
+   instead of a reserved height. */
+.stat { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: .3rem; text-align: center; background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px; padding: .75rem .5rem; }
 .stat b { display: block; font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #fff; }
 /* .stat-status's span (the live "Closes at 7:00 PM"-style detail) now
    inherits this exact same treatment as every other stat's label -- it
