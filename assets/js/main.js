@@ -37,6 +37,12 @@ const GZ_ICONS = {
   search: '<path fill-rule="evenodd" d="M10.5 3a7.5 7.5 0 015.9 12.1l4.75 4.75-1.4 1.4-4.75-4.75A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/>',
   close: '<path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/>'
 };
+// 2026-09-08, per Eric ("have their motion synced, so the positions are
+// relatively the same, even when pages are closed they are aligned"): a
+// single shared time origin for every GZ.marquee instance on the page,
+// captured once at script-parse time (i.e. page load), not per-instance.
+// See the animation-delay math in marquee() below for how this is used.
+const GZ_MARQUEE_EPOCH = performance.now();
 const GZ = {
   cfg: null,
   async config() {
@@ -155,9 +161,39 @@ const GZ = {
         const speed = opts.speed || 40; // px/second
         const dur = Math.max(12, halfWidth / speed);
         track.style.setProperty('--gz-marquee-dur', dur + 's');
+        track.dataset.gzDur = dur;
+        // 2026-09-08, per Eric: different galleries load their images (and
+        // so start "running") at slightly different real moments -- and
+        // any gallery that starts out inside a closed <details> doesn't
+        // get to run at all until it's opened, which used to mean it
+        // always restarted its loop from 0% the moment it appeared,
+        // completely out of step with every other open gallery. Instead
+        // of starting at 0%, jump straight to wherever this track WOULD
+        // be if it had been continuously running since the one shared
+        // GZ_MARQUEE_EPOCH (page load) -- a negative animation-delay seeks
+        // into the cycle without a restart. Every gallery using the same
+        // px/second speed then reads as one continuous, synchronized
+        // sweep even though each one's own loop length (and thus its own
+        // wrap point) differs with its photo count. GZ.resyncMarquee()
+        // below re-runs this same math any time a closed gallery reopens.
+        GZ.resyncMarquee(track);
         track.style.animationPlayState = 'running';
       });
     });
+  },
+  // Re-seeks a marquee track's animation-delay to match the shared
+  // GZ_MARQUEE_EPOCH clock -- called once when a track first starts (see
+  // above) and again by events.html's archive-month toggle listener every
+  // time a closed gallery is reopened, since a display:none element's CSS
+  // animation doesn't advance while hidden and would otherwise resume
+  // exactly where it was paused, out of sync with galleries that kept
+  // running the whole time.
+  resyncMarquee(track) {
+    const dur = parseFloat(track.dataset.gzDur);
+    if (!dur) return;
+    const elapsed = (performance.now() - GZ_MARQUEE_EPOCH) / 1000;
+    const phase = elapsed % dur;
+    track.style.animationDelay = `-${phase}s`;
   },
   // Real open/closed status computed from config.json's hoursSchedule --
   // 2026-08-28, built for the homepage hero redesign (see index.html's

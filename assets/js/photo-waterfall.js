@@ -61,4 +61,21 @@
   }
 
   document.querySelectorAll('[data-gallery]').forEach(initGallery);
+
+  // 2026-09-08, per Eric ("even when pages are closed they are aligned"):
+  // Past Events' three galleries now open by default (see events.html),
+  // but a visitor can still manually collapse one. A collapsed <details>
+  // is display:none, and a CSS animation doesn't advance time while its
+  // element isn't rendered -- so without this, reopening one would just
+  // resume the marquee exactly where it was paused, out of step with
+  // whatever the still-open galleries had scrolled to in the meantime.
+  // Re-run the same shared-clock seek GZ.marquee() does on first start
+  // (see main.js) every time a gallery's <details> reopens, so it always
+  // rejoins the other galleries' motion instead of restarting cold.
+  document.querySelectorAll('details.archive-month').forEach(details => {
+    details.addEventListener('toggle', () => {
+      if (!details.open) return;
+      details.querySelectorAll('.gz-marquee-track').forEach(track => GZ.resyncMarquee(track));
+    });
+  });
 })();

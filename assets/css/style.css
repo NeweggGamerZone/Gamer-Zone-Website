@@ -319,11 +319,16 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .reg-step-num { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, var(--ne-orange), #c96f10); color: #000; font-family: var(--head); font-weight: 800; font-size: 1.55rem; box-shadow: 0 0 0 4px rgba(250,157,40,.18), 0 6px 18px rgba(0,0,0,.4); }
 .reg-step h3 { text-align: center; }
 .reg-step p.dim { text-align: left; }
-/* Verkada callout: highlighted box calling out the Verkada guest pass as the
-   fastest way to check in, sitting right next to the preregister CTA. */
-.verkada-callout { display: flex; align-items: flex-start; gap: .8rem; background: rgba(250,157,40,.08); border-left: 4px solid var(--ne-orange); padding: .9rem 1.1rem; max-width: 720px; margin: 1.3rem 0 .8rem; }
-.verkada-callout .ic { flex: none; width: 26px; height: 26px; fill: var(--ne-orange); margin-top: .1rem; }
-.verkada-callout strong { color: var(--ne-orange); }
+/* 2026-09-08, per Eric: the separate "Fastest way to check in" callout box
+   (previously .verkada-callout, a highlighted aside next to the Preregister
+   CTA) was removed from the How Registration Works section as redundant
+   with the numbered steps above it. Its orange-bold treatment for
+   emphasized text lives on here, generalized to every <strong> in that
+   section (not just the removed callout) -- same --ne-orange color, same
+   idea of using color instead of a separate box to make the section's key
+   phrases ("emailed a Verkada guest pass," "free gaming account," etc.)
+   stand out at a glance. */
+#preregister strong { color: var(--ne-orange); }
 .event-card { border-left: 4px solid var(--ne-orange); }
 .event-card .meta { font-size: .85rem; color: var(--ink-dim); }
 .tag { display: inline-block; font-family: var(--head); font-size: .75rem; font-weight: 800; padding: .18rem .6rem; background: var(--ne-navy); color: #cfe0ff; text-transform: uppercase; letter-spacing: .08em; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
