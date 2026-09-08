@@ -2309,33 +2309,45 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
    the sizes of all the icons on the horizontal versions" -- re-verified via
    real capture that Party Games Week (the tightest real case) still shows
    zero cropped pixels at these larger sizes. */
-/* 2026-09-04 (v6), per Eric: two more changes to the 16:9 row --
-   (1) "raise the icons... so the margin at the bottom is a bit more
-   preserved": margin-top reduced further below (was clamp(1.17rem,
-   2.7cqw,1.8rem), now clamp(.9rem,2.1cqw,1.4rem)), pulling the row up
-   more, leaving more clearance before the crop line rather than less
-   (re-verified against Party Games Week below). (2) 2026-09-08, per
-   Eric: simplified back down from the 5-icon (outer+side+center+side+
-   outer) row to 3 -- .eu-board-icon-outer (markup in index.html/
-   events.html, and its sync in event-update.js) is no longer used, left
-   as dead CSS on purpose rather than force-editing markup again this
-   round; harmless since nothing renders it. The remaining 3 -- the two
-   .eu-board-icon-side copies and the center #eu-board-icon-img -- are
-   now sized identically (no more "side is smaller than center") and at
-   full opacity (Eric: "just have the images full size, full opacity"),
-   spaced across the row with justify-content:space-evenly instead of a
-   tight centered cluster + fixed gap, so three equal-sized, equal-
-   opacity icons read as a deliberate evenly-spaced row rather than one
-   emphasized center flanked by smaller dimmed copies. */
+/* 2026-09-04 (v6), per Eric: margin-top reduced further (was
+   clamp(1.17rem,2.7cqw,1.8rem), now clamp(.9rem,2.1cqw,1.4rem)), pulling
+   the row up, leaving more clearance before the crop line (re-verified
+   against Party Games Week below). 2026-09-08 (v7), per Eric: briefly
+   simplified down to 3 equal-size, full-opacity icons spaced with
+   justify-content:space-evenly. 2026-09-08 (v8), per Eric: reversed
+   again -- back to 5 icons (outer+side+center+side+outer), this time
+   deliberately OVERLAPPING with a "fan out" look instead of v6's evenly
+   spaced non-overlapping row: negative margins pull each icon into its
+   neighbor, increasing rotation per ring (side +-9deg, outer +-18deg)
+   fans them out from the upright center like a spread hand of cards, and
+   opacity steps down per ring (center 1 / side .8 / outer .55) so the
+   edges visibly recede rather than competing evenly with the center.
+   justify-content is back to center (space-evenly doesn't make sense
+   once icons intentionally overlap -- the negative margins do the
+   spacing work now). z-index is set explicitly (center 5 > side 4 >
+   outer 3) so the stacking order follows the ring, not DOM source order
+   (which would otherwise put the right-hand side/outer pair on top of
+   the center, since they come later in the markup). Sizes stay under
+   the same 130px ceiling already verified safe against the crop line
+   (side/outer are smaller still, 118px/100px), so this doesn't reopen
+   the cropping problem the v3/v4 rounds fixed -- re-verified via real
+   capture across all 4 weeks below. */
 @media (min-width:900px){
-  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:space-evenly;margin-top:clamp(.9rem,2.1cqw,1.4rem)}
+  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;margin-top:clamp(.9rem,2.1cqw,1.4rem)}
   /* #eu-board-icon-img (an id) always wins specificity over the plain
-     ".eu-board-icon-side" class rule below regardless of source order,
-     so the two can't fight over max-height the way two class-only rules
-     targeting the same <img> would -- both set to the same value here
-     since all three icons are now the same size. */
-  html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:130px;opacity:1}
-  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:130px;opacity:1}
+     ".eu-board-icon-side"/".eu-board-icon-outer" class rules below
+     regardless of source order, so they can't fight over max-height the
+     way two class-only rules targeting the same <img> would. */
+  html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:130px;opacity:1;position:relative;z-index:5}
+  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:118px;opacity:.8;margin:0 -18px;position:relative;z-index:4}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer{display:block;width:auto;max-width:none;height:auto;max-height:100px;opacity:.55;margin:0 -22px;position:relative;z-index:3}
+  /* Markup order (index.html/events.html) is fixed: outer, side, center,
+     side, outer -- so nth-child position tells left from right without
+     needing separate left/right classes. */
+  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(2){transform:rotate(-9deg)}
+  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(4){transform:rotate(9deg)}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(1){transform:rotate(-18deg)}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(5){transform:rotate(18deg)}
 }
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
