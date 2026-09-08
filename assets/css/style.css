@@ -2331,7 +2331,12 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
    the same 130px ceiling already verified safe against the crop line
    (side/outer are smaller still, 118px/100px), so this doesn't reopen
    the cropping problem the v3/v4 rounds fixed -- re-verified via real
-   capture across all 4 weeks below. */
+   capture across all 4 weeks below. 2026-09-08 (v9), per Eric: "don't
+   adjust the rotation, just make the second and outermost layers more
+   opaque" -- rotation/margin/size/z-index untouched, only the two
+   opacity values raised (side .8->.92, outer .55->.8) so the fan reads
+   less faded at the edges while the ring-based recede effect (center
+   still fully opaque, outer still dimmer than side) is preserved. */
 @media (min-width:900px){
   html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;margin-top:clamp(.9rem,2.1cqw,1.4rem)}
   /* #eu-board-icon-img (an id) always wins specificity over the plain
@@ -2339,8 +2344,8 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
      regardless of source order, so they can't fight over max-height the
      way two class-only rules targeting the same <img> would. */
   html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:130px;opacity:1;position:relative;z-index:5}
-  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:118px;opacity:.8;margin:0 -18px;position:relative;z-index:4}
-  html.board-mode .eu-board-icon img.eu-board-icon-outer{display:block;width:auto;max-width:none;height:auto;max-height:100px;opacity:.55;margin:0 -22px;position:relative;z-index:3}
+  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:118px;opacity:.92;margin:0 -18px;position:relative;z-index:4}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer{display:block;width:auto;max-width:none;height:auto;max-height:100px;opacity:.8;margin:0 -22px;position:relative;z-index:3}
   /* Markup order (index.html/events.html) is fixed: outer, side, center,
      side, outer -- so nth-child position tells left from right without
      needing separate left/right classes. */
