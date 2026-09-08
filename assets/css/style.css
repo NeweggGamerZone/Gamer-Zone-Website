@@ -2334,9 +2334,17 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
    capture across all 4 weeks below. 2026-09-08 (v9), per Eric: "don't
    adjust the rotation, just make the second and outermost layers more
    opaque" -- rotation/margin/size/z-index untouched, only the two
-   opacity values raised (side .8->.92, outer .55->.8) so the fan reads
-   less faded at the edges while the ring-based recede effect (center
-   still fully opaque, outer still dimmer than side) is preserved. */
+   opacity values raised (side .8->.92, outer .55->.8). 2026-09-08
+   (v10), per Eric: "they should not be fanned out, have it all flat and
+   reduce the opacities of the non center graphics, so the second tier
+   is faded and the outermost tier is the most faded" -- the four
+   nth-child rotate rules from v8 are removed entirely (all 5 icons now
+   sit upright, no transform), and both opacity values are lowered well
+   below their v9 highs -- side .92->.6, outer .8->.35 -- so the recede
+   effect reads clearly through fade alone (center 1 / side .6 / outer
+   .35) with no rotation doing any of the work. Overlap (the negative
+   margins), sizes, and z-index stacking are untouched -- still exactly
+   the same 5-icon row, just flat instead of splayed. */
 @media (min-width:900px){
   html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;margin-top:clamp(.9rem,2.1cqw,1.4rem)}
   /* #eu-board-icon-img (an id) always wins specificity over the plain
@@ -2344,15 +2352,8 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
      regardless of source order, so they can't fight over max-height the
      way two class-only rules targeting the same <img> would. */
   html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:130px;opacity:1;position:relative;z-index:5}
-  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:118px;opacity:.92;margin:0 -18px;position:relative;z-index:4}
-  html.board-mode .eu-board-icon img.eu-board-icon-outer{display:block;width:auto;max-width:none;height:auto;max-height:100px;opacity:.8;margin:0 -22px;position:relative;z-index:3}
-  /* Markup order (index.html/events.html) is fixed: outer, side, center,
-     side, outer -- so nth-child position tells left from right without
-     needing separate left/right classes. */
-  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(2){transform:rotate(-9deg)}
-  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(4){transform:rotate(9deg)}
-  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(1){transform:rotate(-18deg)}
-  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(5){transform:rotate(18deg)}
+  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:118px;opacity:.6;margin:0 -18px;position:relative;z-index:4}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer{display:block;width:auto;max-width:none;height:auto;max-height:100px;opacity:.35;margin:0 -22px;position:relative;z-index:3}
 }
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
