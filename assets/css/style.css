@@ -1051,7 +1051,19 @@ body.home-page { background: transparent; }
   --cal-closed:#9096A0; --cal-free:#4D95FF; --cal-theme:#5FD3E8;
   --cal-edu:#3FBF6B; --cal-amb:#EA68A6; --cal-major:var(--ne-orange);
 }
-.cal-board{position:relative;padding:clamp(1.4rem,3.6vw,2.2rem);overflow:hidden}
+/* 2026-09-08, per Eric (again -- see the 2026-09-04 history note below,
+   which only fixed the internal column split, not this): the calendar
+   still read narrower than every sibling section because THIS padding
+   (a photo-panel safety margin, same idea as .eu-board's own padding)
+   was insetting .cal-wrap's real content by ~35px per side beyond the
+   section's own shared edge -- Past Events and the registration-step
+   cards have no such inset. Cut way down (2.2rem max -> .9rem max)
+   since the actual text-bearing surfaces (.cal, .cal-detail) already
+   sit on their own semi-opaque panels, not directly on the raw photo --
+   this was framing margin, not real contrast protection, so it didn't
+   need to be nearly this big. Re-verified against the pixel-based WCAG
+   audit after the cut: still 0 contrast failures. */
+.cal-board{position:relative;padding:clamp(.5rem,1.4vw,.9rem);overflow:hidden}
 /* The blur/darken/desaturate treatment is baked into the -blurred.jpg
    assets themselves (see assets/calendar/BGAssets) rather than applied
    live via a CSS filter — a live blur filter on a background-size:cover
