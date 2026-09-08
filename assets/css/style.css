@@ -1063,27 +1063,19 @@ body.home-page { background: transparent; }
    this was framing margin, not real contrast protection, so it didn't
    need to be nearly this big. Re-verified against the pixel-based WCAG
    audit after the cut: still 0 contrast failures. */
-.cal-board{position:relative;padding:clamp(.5rem,1.4vw,.9rem);overflow:hidden}
-/* The blur/darken/desaturate treatment is baked into the -blurred.jpg
-   assets themselves (see assets/calendar/BGAssets) rather than applied
-   live via a CSS filter — a live blur filter on a background-size:cover
-   layer renders blocky/pixelated in some browsers (notably headless
-   Chromium, used for the weekly social captures, without GPU compositing)
-   instead of a smooth Gaussian blur. Pre-rendering it once offline is both
-   more reliable and cheaper at runtime. */
-.cal-board::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--eu-bg,url('../calendar/BGAssets/dailyplay-bg-blurred.jpg'));background-size:cover;background-position:center}
-/* Darkened enough (WCAG-checked against a worst-case bright photo) that
-   --ink-dim and the blue accent both still clear 4.5:1 no matter what's
-   underneath — see the site-wide contrast rule near the top of this file.
-   2026-09-08, per Eric ("background still appears a bit too dark, reduce
-   the darkness by 15%"): all three alpha stops lowered ~15% (.93->.79,
-   .95->.81, .97->.82) to let more of the real photo through underneath,
-   alongside the same week's lighter blur radius. Re-checked against the
-   pixel-based WCAG audit (tools/audit/run.sh) after this change: still 0
-   contrast failures across all 5 pages -- these stops have real headroom
-   before text starts struggling, so there's room to go lighter again if
-   asked, but don't drop below this without re-running that audit. */
-.cal-board::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.79),rgba(4,5,7,.81) 55%,rgba(4,5,7,.82));}
+/* 2026-09-08, per Eric: the photo-panel background on the whole Event
+   Calendar (this rule's ::before below, plus .cal-detail::before further
+   down) was intermittently rendering once on load and then disappearing --
+   a real, visible flash/pop that left the calendar looking like it was
+   missing its background rather than settling into one. Rather than chase
+   the load-order/caching race behind that flash, removed the photo layer
+   entirely for this section: .cal-board and .cal-detail now sit on a flat
+   solid panel fill (no ::before image layer, no ::after gradient-over-photo
+   -- just one plain background-color) so there's no image to flash, hide,
+   or race against in the first place. The Weekly Lineup board (.eu-board)
+   and its own photo background are untouched; this only affects the
+   Event Calendar. */
+.cal-board{position:relative;padding:clamp(.5rem,1.4vw,.9rem);overflow:hidden;background:var(--bg-2)}
 /* 2026-09-04 (per Eric: "the event calendar section is still not
    currently wide enough... widen and enlarge that section"). Measured
    first: .cal-board itself already spans the exact same 1070px content
@@ -1191,18 +1183,35 @@ body.home-page { background: transparent; }
    describes -- re-verified against "Gamer Zone Anniversary" (the longest
    real title in data/events.json) with a screenshot, not just the math,
    per the container/sizing discipline rule. */
-.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;height:440px;overflow:hidden;isolation:isolate;display:flex;flex-direction:column}
-.cal-detail>*{flex-shrink:0}
-@media (max-width: 480px) { .cal-detail { height: 520px; } }
-/* Pre-blurred asset, not a live filter — see the .cal-board::before comment
-   above for why. */
-.cal-detail::before{content:"";position:absolute;inset:-4%;z-index:-2;background-image:var(--cd-bg,none);background-size:cover;background-position:center}
-.cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,5,7,.93),rgba(4,5,7,.95) 55%,rgba(4,5,7,.97))}
+/* 2026-09-08, per Eric: same photo-flash issue as .cal-board above, plus a
+   second, separate ask -- "the event description should also be the full
+   size." Two changes together: (1) the ::before photo layer (driven by
+   --cd-bg, set per-event by assets/js/calendar.js's setCardBg()) is gone,
+   same flat-panel treatment as .cal-board, so there's nothing left to
+   flash/hide; (2) height:440px (a hard cap, paired with overflow:hidden
+   and the line-clamps below) is now min-height:440px -- a floor, not a
+   ceiling, per this project's own "aspect-ratio/fixed-height as a forced
+   size" lesson (see "Container & sizing discipline" in CLAUDE.md). Most
+   days' real content still renders at the same 440px card most visitors
+   already know, but a long real title/blurb can now push the card taller
+   and show in full instead of being clipped or ellipsized -- see the
+   line-clamp removals on .cal-detail h3 / .cd-sub / .cd-blurb below.
+   calendar.js's setCardBg() call itself is left in place (harmless no-op
+   now that --cd-bg has nothing to paint) rather than ripped out, in case
+   a future session wants the per-event photo back with a fixed flash bug
+   instead of just removing the layer. */
+.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;min-height:440px;isolation:isolate;display:flex;flex-direction:column}
+.cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--bg-2)}
 .cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
-.cal-detail h3{font-family:var(--head);font-weight:800;font-size:1.65rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-.cal-detail .cd-sub{font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--ne-blue-text);margin:0 0 .6rem;text-shadow:0 1px 10px rgba(0,0,0,.7);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+/* line-clamp removed from h3/cd-sub/cd-blurb below, 2026-09-08 per Eric
+   ("the event description should also be the full size") -- see the
+   .cal-detail comment above. Text now wraps to as many lines as it needs
+   (rule 1, "no ellipsis truncation") instead of clipping at a fixed line
+   count; .cal-detail's min-height (not a hard cap anymore) grows to fit. */
+.cal-detail h3{font-family:var(--head);font-weight:800;font-size:1.65rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin:.35rem 0;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.75)}
+.cal-detail .cd-sub{font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--ne-blue-text);margin:0 0 .6rem;text-shadow:0 1px 10px rgba(0,0,0,.7)}
 .cal-detail>p.dim{font-family:var(--eu-body);color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
-.cal-detail .cd-body{margin-top:.9rem;overflow:hidden}
+.cal-detail .cd-body{margin-top:.9rem}
 .cal-detail .cd-body p{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 /* Reorganized detail-card layout: tag -> title -> subtitle -> a clear
    date/time meta row (icon + text) -> description -> CTA, same order and
@@ -1210,7 +1219,7 @@ body.home-page { background: transparent; }
 .cd-meta{display:flex;flex-wrap:wrap;gap:.5rem 1.1rem;margin:.6rem 0 .8rem}
 .cd-meta-item{display:flex;align-items:center;gap:.4rem;font-family:var(--eu-body);font-size:.85rem;font-weight:600;color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cd-meta-item .ic{width:15px;height:15px;color:var(--ne-orange);flex:none}
-.cd-blurb{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);line-height:1.55;margin-top:.2rem;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.cd-blurb{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);line-height:1.55;margin-top:.2rem}
 /* Shared type-color coding for tags — used by both the calendar detail card
    and the Event details cards, so a type reads the same color everywhere. */
 /* Black text on both — white measured under 4.5:1 WCAG AA against these two
