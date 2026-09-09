@@ -423,6 +423,22 @@ Verified: full scripted QA pass (contrast/width/console) -- 0 failures across al
 
 **Preregister link added to the footer's Visit Us column,** directly under Call Us, on all 5 pages -- reuses the same shared `data-verkada` wiring every other Preregister link on the site already uses (`GZ.config()` fills in the real URL at runtime), not a new one-off link.
 
+## Part 2ae -- F-14 resolved: touch-target sizing site-wide, Verkada link re-verified/updated, F-08 status noted (2026-09-08, fifth same-day round)
+
+**F-14 resolved: every real standalone tap target site-wide now clears (or, in one documented case, comes very close to) the 44x44px WCAG 2.5.5 floor.** Measured first with a new Puppeteer script (`tools/audit/touch-targets.js`) rather than guessing from the original audit's examples alone -- walked all 5 pages at mobile/tablet/desktop and found the true list, screenshotting the worst offenders in context (`touch-target-context-shots.js`) before deciding fixes. Two fix patterns used depending on the element (see CLAUDE.md's new "Touch target sizing (F-14, WCAG 2.5.5)" section for the full writeup and reasoning):
+
+- **Invisible tap-zone pad, small visual bump:** `.zone-stack-dot` (9x9 -> 11px visual, 44x44 tap zone via `::before`), `.pin-close` (26x26 -> 32x32 visual, 44x44 tap zone).
+- **Direct grow, imperceptible at this size:** `.gz-mq-btn` and `.zone-stack-arrow` (38-40px -> 44px), `.cal-top` prev/next month buttons (40px -> 44px), `nav.main-nav a` (38.5px -> ~44px via padding), `.ftr-link` footer rows (19-30px tall -> ~44-49px via padding, icon/text visual size untouched), `.hero-lighting select` (30px -> ~44px via padding), `.pin-btn` (41px -> ~46px via padding).
+- **Honest partial fix:** `.cal-cell` (the Plan Your Visit day grid) only reaches ~41.7x41.7px at 390px, not the full 44px -- the grid has ~311px of real width to split across 7 columns after `.cal`'s own tuned padding, and even tightening `.cal-grid`'s gap to 4px on mobile only gets there. Clears WCAG's 24px AA floor comfortably; documented as a real constraint rather than claimed as fully resolved.
+
+Re-verified after the fix: the touch-target script's findings dropped from the original list down to only inline-prose text links (WCAG-exempt) and the one documented `.cal-cell` partial. Full scripted QA (`tools/audit/run-full-qa.sh`'s three checks, run separately due to sandbox timeout limits this session) came back clean: 0 contrast failures (725 text items checked), 0 container-width findings, 0 console errors across all 5 pages.
+
+**Verkada preregister link re-verified and updated for real.** The link flagged broken in Part 2ad (`token=444ef9bb-...`) turned out to be a separately-generated, since-expired token -- not the one on Eric's actual printed "Scan to Check In" QR sign. Eric provided the QR sign's real URL (`token=c74be545-...`), confirmed non-expiring for about a year; live-verified in browser (a real "Guest Registration" sign-in form, not a "Can't Check In" error) before writing it into `data/config.json`. `verkadaUrlExpires` set to **2027-08-17**, the actual date off Eric's printed sign (not a guessed one-year-from-today placeholder). One shared value read by `main.js` and applied to every `[data-verkada]` link site-wide (footer, floating pin-btn, calendar/registration CTAs across all 5 pages), so the single edit covers everywhere the link appears.
+
+**F-08 status noted, not closed.** Per Eric: F-08 ("the liveliness section can render as a void" on a quiet Weekly Lineup week) is content-ops-owned -- the fix is keeping weekly/Academy data populated, not a site-code change. Left open in the Part 4 roadmap with that note rather than closed out with a fabricated fallback.
+
+**Standing customer-facing copy QA rule added (CLAUDE.md step 1a).** Per Eric, after the Zone Stack's stale "auto-cycles every minute" subtitle was caught: every future pass that touches visible copy should actually read it the way a visitor would, checking both for leaked internal/technical phrasing and for copy that's gone stale after an unrelated change. A full scan of all 5 pages this round found no other instances beyond the one already fixed in Part 2ad.
+
 ---
 
 ## Part 3 — Simulated user feedback

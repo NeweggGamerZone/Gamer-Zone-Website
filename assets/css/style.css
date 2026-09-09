@@ -150,7 +150,10 @@ img { max-width: 100%; display: block; }
 .logo em { font-style: normal; color: var(--ne-navy-glow); }
 nav.main-nav { display: flex; gap: .2rem; flex-wrap: wrap; margin-left: auto; }
 /* Rounded/pill nav links, matching the CTA button shape. */
-nav.main-nav a { padding: .5rem 1.05rem; color: var(--ink-dim); font-size: .88rem; font-weight: 600; font-family: var(--head); letter-spacing: .03em; text-transform: uppercase; border-radius: 999px; }
+/* F-14 (2026-09-08): was 38.5px tall (padding .5rem top/bottom) -- one of
+   the audit's own named examples of a too-small target. Bumped to .7rem
+   to clear 44px; horizontal padding/everything else unchanged. */
+nav.main-nav a { padding: .7rem 1.05rem; color: var(--ink-dim); font-size: .88rem; font-weight: 600; font-family: var(--head); letter-spacing: .03em; text-transform: uppercase; border-radius: 999px; }
 nav.main-nav a:hover { color: var(--ink); background: var(--bg-3); text-decoration: none; }
 nav.main-nav a.active { color: #000; background: var(--ne-orange); }
 #nav-toggle, .nav-burger { display: none; }
@@ -559,10 +562,20 @@ details.archive-month .grid { margin-top: 1rem; }
    "Keyboard accessibility" in CLAUDE.md. Positioned relative to .pin-node's
    own box (which now matches .pin-btn's content-sized pill footprint), so
    it still sits at the top-right corner of the pill. */
-.pin-close{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+/* F-14 (2026-09-08, per Eric): was 26x26 -- the audit's smallest flagged
+   target. Grown to 32x32 (the "x" glyph is also easier to actually read at
+   this size, not just easier to hit) and given a 44x44 invisible tap zone
+   via the ::before below, same two-part pattern as .zone-stack-dot above.
+   Repositioned -8px (was -6px) so the larger circle still sits tucked at
+   the pill's top-right corner rather than creeping further off it. */
+.pin-close{position:absolute;top:-8px;right:-8px;width:32px;height:32px;border-radius:50%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;line-height:1;padding:0}
+.pin-close::before{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 .pin-close:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
 .pin-close:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
-@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{padding:.7rem 1.3rem;font-size:.72rem}}
+/* F-14 (2026-09-08): mobile .pin-btn measured 41px tall, 3px under the
+   44px floor -- padding bumped just enough to clear it (font-size and
+   everything else about the mobile pill stays the same). */
+@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{padding:.85rem 1.3rem;font-size:.72rem}}
 @media (prefers-reduced-motion: reduce){.pin-node{transition:none}}
 
 .wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; }
@@ -678,11 +691,24 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-card[data-pos="far-next"] .zone-card-code,
 .zone-card[data-pos="hidden"] .zone-card-code { display: none; }
 .zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
-.zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
+/* F-14 (2026-09-08): 40x40 -> 44x44, same "close enough that growing the
+   real button is imperceptible" call as .gz-mq-btn above. */
+.zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
 .zone-stack-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }
 .zone-stack-arrow .ic { width: 18px; height: 18px; fill: currentColor; }
 .zone-stack-dots { display: flex; gap: .5rem; }
-.zone-stack-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); border: none; padding: 0; cursor: pointer; }
+/* F-14 (2026-09-08, per Eric): these were a 9x9px visual dot AND a 9x9px
+   tap target -- both the audit's own example of a too-small touch target
+   and, separately, genuinely hard to see at a glance. Two independent
+   moves: the visible dot grows a little (9px -> 11px, still reads as a
+   minimal dot, not a real button) for legibility, and `position:relative`
+   plus the `::before` below gives each dot its own real 44x44 CSS px tap
+   zone via an invisible, absolutely-centered hit area -- the visual dot
+   never grows to match, per Eric's "generous tap zone, but the visible
+   icon doesn't have to match it 1:1" call. Screenshot-verified at 390px
+   (tools/audit/out/touch-targets) before landing on 11px + 44px. */
+.zone-stack-dot { position: relative; width: 11px; height: 11px; border-radius: 50%; background: var(--line); border: none; padding: 0; cursor: pointer; }
+.zone-stack-dot::before { content: ""; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
 .zone-stack-dot.active { background: var(--ne-orange); }
 @media (max-width: 480px) { .zone-stack { height: 500px; } }
 .console-systems { margin-bottom: .4rem; }
@@ -759,7 +785,14 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
    only affects the visual spacing between flex children, it can't split
    a link the way inserting a literal space/character between two
    separate elements might imply. */
-.ftr-link { display: flex; align-items: center; gap: 1.15rem; padding: .18rem 0; color: var(--ink); transition: color .15s ease; }
+/* F-14 (2026-09-08): rows measured 19-30px tall depending on page/link --
+   short of the 44px floor entirely because of low padding, not icon/text
+   size. Bumped vertical padding so the tappable row reaches 44px while
+   the icon and label keep their exact current visual size -- a pure
+   "grow the invisible tap zone" fix, same principle as .zone-stack-dot
+   and .pin-close above but via padding since this is a block-level row,
+   not a small isolated icon needing a pseudo-element. */
+.ftr-link { display: flex; align-items: center; gap: 1.15rem; padding: .8rem 0; color: var(--ink); transition: color .15s ease; }
 .ftr-link .ic { width: 18px; height: 18px; flex: none; fill: currentColor; transition: transform .15s ease; }
 .ftr-link:hover, .ftr-link:focus-visible { color: var(--ne-orange); }
 .ftr-link:hover .ic, .ftr-link:focus-visible .ic { transform: scale(1.18); }
@@ -870,7 +903,12 @@ body.home-page { background: transparent; }
    top-right of .hero-stage (which is position:relative -- see its rule
    above), out of the way of the headline/CTA/stats. */
 .hero-lighting { position: absolute; top: 1rem; right: var(--safe-x, 1.2rem); z-index: 2; }
-.hero-lighting select { background: var(--bg-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8e8ec' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right .7rem center/.85em; background-size: .85em; appearance: none; -webkit-appearance: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: .4rem 2.1rem .4rem .9rem; font-family: var(--eu-body); font-size: .78rem; cursor: pointer; }
+/* F-14 (2026-09-08): was 30px tall (padding .4rem top/bottom) -- bumped
+   vertical padding to clear the 44px floor. This is a native <select>, so
+   its own real box IS the tap target; there's no separate "invisible zone
+   vs. visible control" distinction to make here like the icon buttons
+   above. */
+.hero-lighting select { background: var(--bg-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8e8ec' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right .7rem center/.85em; background-size: .85em; appearance: none; -webkit-appearance: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: .9rem 2.1rem .9rem .9rem; font-family: var(--eu-body); font-size: .78rem; cursor: pointer; }
 .hero-lighting select:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 2px; }
 @media (max-width: 640px) { .hero-lighting { position: relative; top: auto; right: auto; display: flex; justify-content: center; margin: 1rem 0 0; } }
 
@@ -1179,10 +1217,23 @@ body.home-page { background: transparent; }
 @media(max-width:820px){.cal-wrap{grid-template-columns:1fr}}
 .cal{background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.4rem}
 .cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-.cal-top button{background:rgba(22,24,29,.6);border:1px solid rgba(242,244,248,.2);color:var(--ink);width:40px;height:40px;cursor:pointer;font-size:1.3rem;font-family:var(--head)}
+/* F-14 (2026-09-08): 40x40 -> 44x44, matching .gz-mq-btn/.zone-stack-arrow. */
+.cal-top button{background:rgba(22,24,29,.6);border:1px solid rgba(242,244,248,.2);color:var(--ink);width:44px;height:44px;cursor:pointer;font-size:1.3rem;font-family:var(--head)}
 .cal-top button:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
 .cal-month{font-family:var(--head);font-weight:800;font-size:1.15rem;text-transform:uppercase;letter-spacing:.03em}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+/* F-14 (2026-09-08): at 390px, .cal-grid only has ~311px to work with
+   (.cal's own 1.4rem padding -- tuned deliberately, not touched here --
+   already eats into the shared container width), so 7 columns at the
+   default 8px gap forced each square .cal-cell down to ~37.6x37.6px, one
+   of the audit's flagged sub-44px targets. Tightening the gap to 4px on
+   narrow screens is the only lever available without either cramming
+   .cal's padding or widening the grid past its container -- measured via
+   Puppeteer to land cells at ~41.7x41.7px. That's short of the full 44px
+   AAA target size but clears the 24px AA floor with real room to spare,
+   and is a real, verified improvement over 37.6px, not silently claimed
+   as "fixed" -- see CLAUDE.md's F-14 note for the honest tradeoff. */
+@media (max-width: 560px) { .cal-grid { gap: 4px; } }
 .cal-dow{font-family:var(--head);font-size:.7rem;color:var(--ink-dim);text-transform:uppercase;text-align:center;padding:.25rem 0}
 .cal-cell{position:relative;aspect-ratio:1;border:1px solid rgba(242,244,248,.14);background:rgba(22,24,29,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
@@ -1706,7 +1757,10 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    drives the actual play/pause/skip logic, not this visibility. */
 .gz-marquee-controls{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:0 .6rem;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s ease}
 .gz-marquee:hover .gz-marquee-controls,.gz-marquee:focus-within .gz-marquee-controls{opacity:1;pointer-events:auto}
-.gz-mq-btn{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:rgba(22,24,29,.75);border:1px solid rgba(242,244,248,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+/* F-14 (2026-09-08): 38x38 -> 44x44 -- close enough to the 44px floor that
+   growing the real button (not just an invisible pad) reads as no visible
+   change at all, confirmed by eye at 390px. */
+.gz-mq-btn{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:rgba(22,24,29,.75);border:1px solid rgba(242,244,248,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .gz-mq-btn:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
 .gz-mq-btn:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
 .gz-mq-btn .ic{width:18px;height:18px}
