@@ -27,6 +27,13 @@ never actually implemented in `main.js`/`calendar.js` — both read
 `verkadaUrl` directly — so those two fields were dead weight and have
 been removed from `data/config.json` (2026-08-28 cleanup).
 
+**Update 2026-09-08:** the link stored in `verkadaUrl` had gone stale (a
+separately-generated, since-expired token, not the one on the venue's
+printed QR sign) — refreshed to the token from Eric's current "Scan to
+Check In" QR sign, live-verified (real "Guest Registration" form, not a
+"Can't Check In" error) before writing it in. Expires **2027-08-17** per
+Eric, confirmed from the printed sign itself — refresh before that date.
+
 ## Current fields in `data/config.json`
 
 - `verkadaUrl` — the live guest self-registration link. This is what the
