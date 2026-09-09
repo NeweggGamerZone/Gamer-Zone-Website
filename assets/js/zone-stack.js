@@ -1,8 +1,13 @@
 /* About Gamer Zone "trading card" stack — cycles through the zone cards one
    at a time (front card + two peeking behind it, like a hand of cards),
-   auto-advancing every 60s, with prev/next buttons and dot nav for anyone
-   who wants to browse manually. Manual interaction resets the 60s timer so
-   it doesn't immediately auto-advance right after someone clicks. */
+   with prev/next buttons and dot nav for browsing manually.
+   2026-09-08, per Eric ("maybe zone stack should not auto scroll at all, so
+   there is no induced motion"): the previous 60s auto-advance timer is
+   removed entirely -- this carousel only ever moves in response to a real
+   click/tap now (prev/next, a dot, or a peeking card), never on its own.
+   This also means it no longer needs -- or gets -- the F-13 hover/pause
+   treatment the gz-marquee lanes elsewhere on the site need: there's no
+   auto-motion here to pause in the first place. */
 (function () {
   const stack = document.getElementById('zone-stack');
   if (!stack) return;
@@ -14,8 +19,6 @@
   if (!N) return;
 
   let current = 0;
-  let timer = null;
-  const AUTOCYCLE_MS = 60000;
 
   if (dotsWrap) {
     dotsWrap.innerHTML = cards.map((_, i) => `<button type="button" class="zone-stack-dot${i === 0 ? ' active' : ''}" data-i="${i}" aria-label="Show zone ${i + 1}"></button>`).join('');
@@ -50,19 +53,13 @@
     }
   }
 
-  function goTo(i, restart = true) {
+  function goTo(i) {
     current = ((i % N) + N) % N;
     render();
-    if (restart) resetTimer();
   }
 
   function next() { goTo(current + 1); }
   function prev() { goTo(current - 1); }
-
-  function resetTimer() {
-    if (timer) clearInterval(timer);
-    timer = setInterval(() => goTo(current + 1, false), AUTOCYCLE_MS);
-  }
 
   if (nextBtn) nextBtn.addEventListener('click', next);
   if (prevBtn) prevBtn.addEventListener('click', prev);
@@ -81,5 +78,4 @@
   });
 
   render();
-  resetTimer();
 })();

@@ -314,7 +314,11 @@ const GZ = {
         if (reached) {
           anim.currentTime = target;
           anim.playbackRate = 1;
-          if (track.dataset.gzHovering) anim.pause(); // stay paused if still under the overlay
+          // Resume normal playback after the skip completes, unless the
+          // visitor has this lane explicitly paused via the play/pause
+          // button (hovering alone no longer implies paused -- see enter()
+          // below).
+          if (track.dataset.gzHardPaused) anim.pause();
           delete track.dataset.gzSkipping;
           return;
         }
@@ -340,24 +344,32 @@ const GZ = {
       }
     });
 
-    // Hover/focus pause -- mouseenter/mouseleave for pointer users,
-    // focusin/focusout (which bubble, unlike focus/blur) for keyboard
-    // users tabbing onto the skip/play buttons. focusout fires when focus
-    // moves between the three buttons too, so it's guarded to only treat
-    // it as "left the lane" when focus actually lands outside `container`.
+    // Hover/focus reveals the control scheme -- mouseenter/mouseleave for
+    // pointer users, focusin/focusout (which bubble, unlike focus/blur)
+    // for keyboard users tabbing onto the skip/play buttons. focusout
+    // fires when focus moves between the three buttons too, so it's
+    // guarded to only treat it as "left the lane" when focus actually
+    // lands outside `container`.
+    // 2026-09-08, per Eric (correcting the first version of this): hovering
+    // does NOT auto-pause the motion anymore -- it only reveals the
+    // overlay/controls, with the real content still scrolling faintly
+    // behind it. Motion only stops when the visitor explicitly hits the
+    // center play/pause button. This also means the button's icon needs
+    // to reflect *actual* animation state on entry, not an assumed
+    // just-paused state -- see setPlayPauseIcon(anim.playState==='running')
+    // below instead of a hardcoded `false`.
     function enter() {
       track.dataset.gzHovering = '1';
       const anim = track.getAnimations()[0];
-      if (anim && track.dataset.gzDur) {
-        anim.pause();
-        setPlayPauseIcon(false);
-      }
+      if (anim && track.dataset.gzDur) setPlayPauseIcon(anim.playState === 'running');
     }
     function leave() {
       delete track.dataset.gzHovering;
-      // Per Eric's spec, leaving the lane always resumes automatic play --
-      // a manual pause is scoped to "while I'm looking at this," not a
-      // standing preference that survives the visitor moving on.
+      // Leaving the lane always resets to the default running state and
+      // hides the controls (via the :hover/:focus-within CSS, not JS) --
+      // per Eric's spec, a manual pause via the play/pause button is
+      // scoped to "while I'm looking at this," not a standing preference
+      // that survives the visitor moving on.
       delete track.dataset.gzHardPaused;
       const anim = track.getAnimations()[0];
       if (anim && track.dataset.gzDur) {

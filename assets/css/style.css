@@ -540,26 +540,29 @@ details.archive-month .grid { margin-top: 1rem; }
 /* 2026-09-08: converted from a circle to a pill/stadium shape, per Eric's
    go-ahead on the shape proposal ("circle feels kind of full" -- a circle
    forces both dimensions to match its widest line of text, wasting space
-   on the short axis; a pill only needs to be as tall as two lines of text
-   actually require, and as wide as "Preregister" needs, so it stops
-   feeling cramped without shrinking the type). Width/height are fixed
-   (not aspect-ratio) since the two-line label content is fixed and known,
-   consistent with this project's aspect-ratio-vs-min-height guidance --
-   a fixed pill size for fixed, short, known copy is fine; min-height is
-   only needed when content length is unpredictable. */
-.pin-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:128px;height:64px;border-radius:999px;background:linear-gradient(145deg,var(--ne-orange),var(--ne-orange-deep));color:#000;text-align:center;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.72rem;line-height:1.15;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18);cursor:grab;user-select:none;-webkit-user-select:none}
+   on the short axis).
+   2026-09-08, same-day follow-up: label shortened from two lines
+   ("Preregister"/"Now") to just "Preregister" per Eric, and the fixed
+   128x64px box that was sized for that two-line label is gone --
+   switched to padding-based sizing (like every other .btn on the site)
+   so this single-line pill hugs its own text and reads with the same
+   proportions as the rest of the site's buttons, instead of being an
+   oversized custom block shape. Padding is a touch more generous than
+   the base .btn (.85rem/1.6rem vs .72rem/1.6rem) since this is a floating,
+   always-visible CTA that should still read as a little more prominent. */
+.pin-btn{display:inline-flex;align-items:center;justify-content:center;padding:.85rem 1.6rem;border-radius:999px;background:linear-gradient(145deg,var(--ne-orange),var(--ne-orange-deep));color:#000;text-align:center;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.82rem;letter-spacing:.02em;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18);cursor:grab;user-select:none;-webkit-user-select:none}
 .pin-btn:hover{filter:brightness(1.08)}
 .pin-btn:focus-visible{outline:none;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18),0 0 0 3px #fff}
 .pin-node.is-dragging .pin-btn{cursor:grabbing}
 /* Close control: small, its own real button (not part of the link), so
    Tab/Enter/Space work on it independently of the main CTA -- see
    "Keyboard accessibility" in CLAUDE.md. Positioned relative to .pin-node's
-   own box (which now matches .pin-btn's pill footprint), so it still sits
-   at the top-right corner of the pill the same way it did on the circle. */
+   own box (which now matches .pin-btn's content-sized pill footprint), so
+   it still sits at the top-right corner of the pill. */
 .pin-close{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;line-height:1;padding:0}
 .pin-close:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
 .pin-close:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
-@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{width:104px;height:54px;font-size:.6rem}}
+@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{padding:.7rem 1.3rem;font-size:.72rem}}
 @media (prefers-reduced-motion: reduce){.pin-node{transition:none}}
 
 .wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; }
@@ -599,7 +602,12 @@ details.archive-month .grid { margin-top: 1rem; }
    (narrower viewports between 620px and 900px) from ending in a flat cut. */
 .zone-stack { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); }
 .zone-card { position: absolute; top: 0; left: 50%; width: min(340px, 78%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease; }
-.zone-card-code { position: absolute; top: .6rem; right: .8rem; z-index: 2; font-family: var(--head); font-weight: 800; font-size: .75rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
+/* 2026-09-08, per Eric: "ZONE 1"-"ZONE 5" badge moved from the top-right
+   corner to horizontally centered at the top of the card -- centered via
+   left:50%/translateX(-50%) rather than switching to a flex/grid layout,
+   since this is one small absolutely-positioned label on top of the
+   card's own photo/body content, not a layout change to the card itself. */
+.zone-card-code { position: absolute; top: .6rem; left: 50%; transform: translateX(-50%); z-index: 2; font-family: var(--head); font-weight: 800; font-size: .75rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
 .zone-card-art { position: relative; height: 56%; flex: none; background: #000; }
 .zone-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .zone-card-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, var(--bg-2) 100%); }
@@ -975,7 +983,13 @@ body.home-page { background: transparent; }
 .stat .stat-star-num { font-family: var(--head); font-weight: 800; font-size: 1.5rem; color: #ffd447; margin-right: .15em; vertical-align: middle; text-shadow: 0 0 10px rgba(255,212,71,.5); }
 .stat .stat-star-icon { font-size: 1.5rem; line-height: 1; color: #ffd447; text-shadow: 0 0 10px rgba(255,212,71,.5); vertical-align: middle; }
 
-.hero-proof-wrap { margin-top: 3.6rem; }
+/* width:100%;min-width:0 added 2026-09-08 alongside the identical fix on
+   .gz-marquee itself -- this wrap is the actual flex item inside
+   .hero-stage (align-items:center, no cross-axis stretch), so it's the
+   one that needs an explicit width down the whole chain, same pattern as
+   the Weekly Lineup eyebrow's nested-flex fix. See .gz-marquee's own
+   comment for the full bug writeup. */
+.hero-proof-wrap { margin-top: 3.6rem; width: 100%; min-width: 0; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
 /* 2026-09-03 (per Eric): sized up to match .photo-waterfall's own card
    treatment exactly (was a smaller 168px "peek" strip) and caption
@@ -1126,7 +1140,14 @@ body.home-page { background: transparent; }
    the two real panels (.cal, .cal-detail -- each with their own
    background already) sit directly at the section's shared edges with no
    grey showing anywhere around them. */
-.cal-board{position:relative;overflow:hidden}
+/* 2026-09-08, per Eric: the calendar board sat flush against the section's
+   subtitle paragraph right above it -- other sections on this page (e.g.
+   the registration grid) already give their first content block a
+   margin-top so it doesn't hug the subtitle; the calendar had lost that
+   spacing along with .cal-board's own padding when the grey frame was
+   removed earlier the same day. Matches this project's existing 1rem
+   subtitle-to-content convention. */
+.cal-board{position:relative;overflow:hidden;margin-top:1rem}
 /* 2026-09-04 (per Eric: "the event calendar section is still not
    currently wide enough... widen and enlarge that section"). Measured
    first: .cal-board itself already spans the exact same 1070px content
@@ -1526,10 +1547,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    off-screen, which was harder to reason about and is what let the
    previous version drift into looking like it fired more than once) — a
    clean, crisp white sweep with almost no feather (a tight 3.5%-wide hard
-   core, not the old soft 16%-wide blurred band) plus two small four-point
-   sparkle glints (a smoothly-concave 4-point star, matching the reference
-   shape provided) that twinkle on with the same flash rather than
-   sweeping themselves — fixed points, not moving.
+   core, not the old soft 16%-wide blurred band).
+
+   2026-09-08, per Eric ("remove the stars from the flash animation, so
+   its just the white flash going across"): the two four-point sparkle
+   glints that used to twinkle on with the flash are removed -- just the
+   single white sweep now. If a future request wants sparkle back, don't
+   reintroduce a bespoke version -- this comment's own history is the
+   place to look for the removed markup first.
 
    z-index:1 -- BELOW every real content element in .host-card/.mile,
    which are all explicitly z-index:2 (see the .host-card/.mile rules
@@ -1540,18 +1565,10 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mile.tier-diamond::after, .host-card.tier-diamond::after, .btn::after{
   content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
   opacity:0;
-  background-image:
-    linear-gradient(115deg,transparent 47%,#fff 49.3%,#fff 50.7%,transparent 53%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='white' d='M50 2C54 40 60 46 98 50C60 54 54 60 50 98C46 60 40 54 2 50C40 46 46 40 50 2Z'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='white' d='M50 2C54 40 60 46 98 50C60 54 54 60 50 98C46 60 40 54 2 50C40 46 46 40 50 2Z'/%3E%3C/svg%3E");
+  background-image:linear-gradient(115deg,transparent 47%,#fff 49.3%,#fff 50.7%,transparent 53%);
   background-repeat:no-repeat;
-  background-size:280% 100%, 11% 11%, 7% 7%;
-  /* Sparkle points sit close to the card's own corners (near the padding
-     edge, away from the centered text column) rather than near-center —
-     an earlier pass at 20/24% and 80/72% landed right in the middle of
-     card copy on the narrower .host-card layout, reading as clutter next
-     to/through the text instead of a clean corner glint. */
-  background-position:-160% 0, 10% 12%, 90% 88%;
+  background-size:280% 100%;
+  background-position:-160% 0;
   animation:gz-shine 60s ease-in-out infinite;
 }
 .host-card.tier-diamond:nth-child(4n+1)::after{animation-delay:0s}
@@ -1559,11 +1576,11 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .host-card.tier-diamond:nth-child(4n+3)::after{animation-delay:30s}
 .host-card.tier-diamond:nth-child(4n+4)::after{animation-delay:45s}
 @keyframes gz-shine{
-  0%{opacity:0;background-position:-160% 0, 10% 12%, 90% 88%}
-  1%{opacity:1;background-position:40% 0, 10% 12%, 90% 88%}
-  2%{opacity:1;background-position:220% 0, 10% 12%, 90% 88%}
+  0%{opacity:0;background-position:-160% 0}
+  1%{opacity:1;background-position:40% 0}
+  2%{opacity:1;background-position:220% 0}
   2.6%{opacity:0}
-  100%{opacity:0;background-position:220% 0, 10% 12%, 90% 88%}
+  100%{opacity:0;background-position:220% 0}
 }
 @media (prefers-reduced-motion: reduce){
   .mile.tier-diamond::after, .host-card.tier-diamond::after, .btn::after{animation:none;display:none}
@@ -1647,7 +1664,26 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    visible control scheme instead of just silently stopping, satisfying
    WCAG 2.2.2 (Pause, Stop, Hide) for every visitor rather than leaving it
    flagged-but-unresolved. */
-.gz-marquee{position:relative;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+/* width:100%;min-width:0 added 2026-09-08 after a real bug: a GZ.marquee
+   instance living inside a flex container whose cross-axis isn't
+   align-items:stretch (the hero's .hero-stage uses align-items:center)
+   has no width of its own to fall back on, so its flex item sized itself
+   to the UN-CLIPPED, duplicated .gz-marquee-track's full content width
+   (tens of thousands of px, once .hero-proof's 104-photo pool is
+   duplicated for the loop) instead of the hero's actual width --
+   overflow:hidden only clips paint, not the box's own layout size. That
+   silently pushed the new hover-controls' skip buttons (positioned via
+   this box's own edges) far off-screen, even though they were technically
+   still opacity:1 and present in the DOM -- exactly the "missing left and
+   right buttons" Eric reported on .hero-proof ("a real look inside the
+   Zone"). min-width:0 removes the pathological content-based lower bound
+   a flex item gets by default; width:100% then lets it actually fill its
+   container's real width like a normal block would anywhere else on the
+   site. Fixed on the shared class (not just .hero-proof) since any future
+   marquee dropped into a similar non-stretch flex context would hit the
+   identical bug -- see the nested-flex overflow gotcha already documented
+   under "One shared container width" for the same root cause elsewhere. */
+.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 .gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
 .gz-marquee-track.rev{animation-direction:reverse}
 @keyframes gz-marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
