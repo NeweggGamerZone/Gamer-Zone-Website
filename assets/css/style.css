@@ -537,24 +537,29 @@ details.archive-month .grid { margin-top: 1rem; }
    not after. Needed on top of pointer-events:none: that alone stops clicks
    but a keyboard user could still Tab onto an invisible, dead focus target
    without it -- see CLAUDE.md "Keyboard accessibility". */
-/* 2026-09-08: mobile font-size trimmed further (see the max-width:560px
-   override below, .64rem->.56rem) after standardizing this button's
-   label on "Preregister" (see CLAUDE.md's "Preregister vs Register"
-   note) -- "Preregister" is 3 letters longer than "Register" and was
-   rendering right up against the circle's curved edge at 78px/mobile;
-   this base (92px/desktop+tablet) size already had enough room and is
-   unchanged. */
-.pin-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:92px;height:92px;border-radius:50%;background:linear-gradient(145deg,var(--ne-orange),var(--ne-orange-deep));color:#000;text-align:center;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.72rem;line-height:1.15;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18);cursor:grab;user-select:none;-webkit-user-select:none}
+/* 2026-09-08: converted from a circle to a pill/stadium shape, per Eric's
+   go-ahead on the shape proposal ("circle feels kind of full" -- a circle
+   forces both dimensions to match its widest line of text, wasting space
+   on the short axis; a pill only needs to be as tall as two lines of text
+   actually require, and as wide as "Preregister" needs, so it stops
+   feeling cramped without shrinking the type). Width/height are fixed
+   (not aspect-ratio) since the two-line label content is fixed and known,
+   consistent with this project's aspect-ratio-vs-min-height guidance --
+   a fixed pill size for fixed, short, known copy is fine; min-height is
+   only needed when content length is unpredictable. */
+.pin-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:128px;height:64px;border-radius:999px;background:linear-gradient(145deg,var(--ne-orange),var(--ne-orange-deep));color:#000;text-align:center;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.72rem;line-height:1.15;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18);cursor:grab;user-select:none;-webkit-user-select:none}
 .pin-btn:hover{filter:brightness(1.08)}
 .pin-btn:focus-visible{outline:none;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18),0 0 0 3px #fff}
 .pin-node.is-dragging .pin-btn{cursor:grabbing}
 /* Close control: small, its own real button (not part of the link), so
    Tab/Enter/Space work on it independently of the main CTA -- see
-   "Keyboard accessibility" in CLAUDE.md. */
+   "Keyboard accessibility" in CLAUDE.md. Positioned relative to .pin-node's
+   own box (which now matches .pin-btn's pill footprint), so it still sits
+   at the top-right corner of the pill the same way it did on the circle. */
 .pin-close{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;line-height:1;padding:0}
 .pin-close:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
 .pin-close:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
-@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{width:78px;height:78px;font-size:.56rem}}
+@media (max-width:560px){.pin-node{right:.8rem;bottom:.8rem}.pin-btn{width:104px;height:54px;font-size:.6rem}}
 @media (prefers-reduced-motion: reduce){.pin-node{transition:none}}
 
 .wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; }
@@ -1109,7 +1114,19 @@ body.home-page { background: transparent; }
    or race against in the first place. The Weekly Lineup board (.eu-board)
    and its own photo background are untouched; this only affects the
    Event Calendar. */
-.cal-board{position:relative;padding:clamp(.5rem,1.4vw,.9rem);overflow:hidden;background:var(--bg-2)}
+/* 2026-09-08, per Eric (same day, follow-up): that flat solid fill still
+   showed as a plain grey frame around .cal/.cal-detail (the small
+   clamp(.5rem,1.4vw,.9rem) padding ring below), which read as leftover
+   background rather than intentional framing now that there's no photo
+   underneath it to justify a safety margin. .cal-board no longer paints
+   or pads anything of its own -- .cal-wrap's 6fr/5fr grid (below) already
+   spans .cal-board's full measured width on its own (see the 2026-09-04
+   note below confirming that width already matches every sibling
+   section), so dropping the wrapper's own background+padding just lets
+   the two real panels (.cal, .cal-detail -- each with their own
+   background already) sit directly at the section's shared edges with no
+   grey showing anywhere around them. */
+.cal-board{position:relative;overflow:hidden}
 /* 2026-09-04 (per Eric: "the event calendar section is still not
    currently wide enough... widen and enlarge that section"). Measured
    first: .cal-board itself already spans the exact same 1070px content
@@ -1247,7 +1264,18 @@ body.home-page { background: transparent; }
    now that --cd-bg has nothing to paint) rather than ripped out, in case
    a future session wants the per-event photo back with a fixed flash bug
    instead of just removing the layer. */
-.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;min-height:440px;isolation:isolate;display:flex;flex-direction:column;justify-content:center}
+/* 2026-09-08, per Eric: justify-content:center meant every day's content
+   started at a different Y position depending on how much text that day
+   actually has -- a short "Reopens Tuesday" message sat vertically
+   centered in the (now taller, since .cal-wrap stretches this to match
+   the calendar grid's height) card, while a long event description
+   started near the top, so consecutive days felt inconsistent rather
+   than like one steady reading position. Same root cause and same fix as
+   the homepage hero stat-row's top-alignment bug (see .stat's own
+   comment): flex-start pins every day's content to the same top offset;
+   shorter content just leaves its own blank space below, the same way a
+   real second line would have. */
+.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;min-height:440px;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-start}
 .cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--bg-2)}
 .cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
 /* line-clamp removed from h3/cd-sub/cd-blurb below, 2026-09-08 per Eric
@@ -1605,25 +1633,50 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    never writing a second bespoke version of an effect that already
    exists. The mask-image edge fade keeps cards from looking like they're
    cutting off hard at the section's edge.
-   2026-09-03 (per Eric, explicit override): the previous
-   animation-play-state:paused on hover/focus-within was removed --
-   waterfalls should keep scrolling under the cursor, full stop, on every
-   gallery this drives (photos and reviews alike). This trades away the
-   site's own "pause control on all auto-motion" non-negotiable for this
-   one component; flagged here rather than silently dropped in case a
-   future accessibility pass wants a different pause mechanism (e.g. a
-   real pause button) instead of hover/focus. */
+   2026-09-03 (per Eric, explicit override, SUPERSEDED 2026-09-08 -- see
+   below): the previous animation-play-state:paused on hover/focus-within
+   was removed -- waterfalls kept scrolling under the cursor, full stop,
+   trading away the site's own "pause control on all auto-motion"
+   non-negotiable for this one component. Flagged here at the time in case
+   a future accessibility pass wanted a different pause mechanism instead
+   of a bare hover-freeze.
+   2026-09-08, F-13 fix: that future pass is this one. A real pause
+   mechanism (not just a hover-freeze) now exists -- see
+   ".gz-marquee-controls" below and GZ.buildMarqueeControls() in main.js.
+   Hover/focus once again pauses the motion, but now with an actual
+   visible control scheme instead of just silently stopping, satisfying
+   WCAG 2.2.2 (Pause, Stop, Hide) for every visitor rather than leaving it
+   flagged-but-unresolved. */
 .gz-marquee{position:relative;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 .gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
 .gz-marquee-track.rev{animation-direction:reverse}
 @keyframes gz-marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 /* Reduced motion: GZ.marquee renders only the real (non-duplicated) set of
    cards in this case, so no animation + wrapping is the correct static
-   fallback, not a frozen mid-loop duplicate. */
+   fallback, not a frozen mid-loop duplicate -- and no hover-controls
+   overlay is built in this branch either, since there's no motion to
+   pause/skip (see GZ.marquee in main.js). */
 @media (prefers-reduced-motion: reduce){
   .gz-marquee{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
   .gz-marquee-track{animation:none;flex-wrap:wrap;width:auto}
 }
+/* Hover/focus pause+skip overlay (GZ.buildMarqueeControls in main.js).
+   Covers the full lane -- rgba(0,0,0,.6) is dark enough to clearly read
+   as "paused" but still lets the real photos/cards show through faintly
+   per Eric's spec ("they should be able to faintly see it behind the
+   blacked out button control section"). Shown via :hover/:focus-within so
+   it's driven by real browser hover/focus state, not a JS-toggled class
+   -- the JS side (mouseenter/focusin/mouseleave/focusout in main.js) only
+   drives the actual play/pause/skip logic, not this visibility. */
+.gz-marquee-controls{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:0 .6rem;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s ease}
+.gz-marquee:hover .gz-marquee-controls,.gz-marquee:focus-within .gz-marquee-controls{opacity:1;pointer-events:auto}
+.gz-mq-btn{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:rgba(22,24,29,.75);border:1px solid rgba(242,244,248,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.gz-mq-btn:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
+.gz-mq-btn:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
+.gz-mq-btn .ic{width:18px;height:18px}
+.gz-mq-playpause{width:46px;height:46px}
+.gz-mq-playpause .ic{width:20px;height:20px}
+@media (prefers-reduced-motion: reduce){.gz-marquee-controls{display:none}}
 
 /* ===== Past Events photo waterfall ===== */
 /* 2026-08-26 redesign: all 11 real photos from the recap's pool, in a
@@ -1640,12 +1693,12 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    <img> for screen readers -- see photo-waterfall.js) -- no visible
    label on any photo in this gallery anymore. */
 .photo-waterfall .pw-item{position:relative;flex:0 0 auto;width:450px;aspect-ratio:16/9;overflow:hidden;border-radius:2px;border:1px solid var(--line);background:var(--bg-3)}
-.photo-waterfall .pw-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease, filter .3s ease}
-.photo-waterfall .pw-item:hover img{transform:scale(1.04);filter:brightness(1.06)}
+/* 2026-09-08, per Eric ("No hover effect for the photos on the past
+   events sections"): the zoom/brighten-on-hover rule that used to live
+   here is removed -- photos render at rest only, no transform/filter
+   transition needed either. */
+.photo-waterfall .pw-item img{width:100%;height:100%;object-fit:cover;display:block}
 @media (max-width:560px){.photo-waterfall .pw-item{width:330px}}
-@media (prefers-reduced-motion: reduce){
-  .photo-waterfall .pw-item img{transition:none}
-}
 
 /* ===== Ambassador Featured Hosts placeholder cards ===== */
 /* Every card sizes to its own content (no fixed height/clipping) — CSS

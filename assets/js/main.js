@@ -35,7 +35,11 @@ const GZ_ICONS = {
   sword: '<path d="M12 1l2.5 14h-5zM7 15h10v2H7zm4 2h2v5h-2zm-1 5h4v1.5h-4z"/>',
   bow: '<path d="M9 2c-4 4-4 16 0 20-2-4-2-16 0-20z"/><path d="M8.3 2h1.1v20h-1.1z"/><path d="M4.5 11h10l-2.8-2.8 1.4-1.4L18.5 12l-5.4 5.2-1.4-1.4L14.5 13h-10z"/>',
   search: '<path fill-rule="evenodd" d="M10.5 3a7.5 7.5 0 015.9 12.1l4.75 4.75-1.4 1.4-4.75-4.75A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/>',
-  close: '<path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/>'
+  close: '<path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/>',
+  // 2026-09-08: added for the shared marquee hover-controls (GZ.marquee's
+  // pause/skip overlay, see below) -- no play/pause glyph existed before.
+  play: '<path d="M8 5v14l11-7z"/>',
+  pause: '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
 };
 // 2026-09-08, per Eric ("have their motion synced, so the positions are
 // relatively the same, even when pages are closed they are aligned"): a
@@ -93,7 +97,10 @@ const GZ = {
       // No animation at all -- render the single real set once and let it
       // wrap naturally (see .gz-marquee-track under the reduced-motion
       // media query in style.css), rather than showing the duplicated
-      // set statically, which would just look like a broken repeat.
+      // set statically, which would just look like a broken repeat. No
+      // hover-controls overlay either -- there's no motion here to
+      // pause/skip, and WCAG 2.2.2 doesn't apply to content that never
+      // auto-animated in the first place.
       container.classList.add('static');
       track.innerHTML = items.join('');
       container.appendChild(track);
@@ -130,6 +137,14 @@ const GZ = {
     // known, then start it -- so it only ever plays at its correct,
     // final-form speed and the loop math is right from frame one.
     track.style.animationPlayState = 'paused';
+    // 2026-09-08, F-13 fix: build the shared hover/focus pause+skip
+    // control overlay now, while the track is still guaranteed paused --
+    // see GZ.buildMarqueeControls below for the full behavior spec. Built
+    // once per container, same DOM element for the lifetime of the page,
+    // so it survives a Past Events <details> gallery being closed and
+    // reopened (that only toggles display:none on an ancestor -- it never
+    // removes or rebuilds this node).
+    GZ.buildMarqueeControls(container, track);
     // 2026-09-04 fix (per Eric: photos on the hero's expanded 104-photo
     // reel "do not render until they cross the halfway point threshold"):
     // the animation used to start (see the paused->running flip below) as
@@ -162,6 +177,7 @@ const GZ = {
         const dur = Math.max(12, halfWidth / speed);
         track.style.setProperty('--gz-marquee-dur', dur + 's');
         track.dataset.gzDur = dur;
+        track.dataset.gzReady = '1';
         // 2026-09-08, per Eric: different galleries load their images (and
         // so start "running") at slightly different real moments -- and
         // any gallery that starts out inside a closed <details> doesn't
@@ -170,30 +186,192 @@ const GZ = {
         // completely out of step with every other open gallery. Instead
         // of starting at 0%, jump straight to wherever this track WOULD
         // be if it had been continuously running since the one shared
-        // GZ_MARQUEE_EPOCH (page load) -- a negative animation-delay seeks
-        // into the cycle without a restart. Every gallery using the same
+        // GZ_MARQUEE_EPOCH (page load). Every gallery using the same
         // px/second speed then reads as one continuous, synchronized
         // sweep even though each one's own loop length (and thus its own
         // wrap point) differs with its photo count. GZ.resyncMarquee()
-        // below re-runs this same math any time a closed gallery reopens.
+        // below re-runs this same math any time a closed gallery reopens
+        // (see photo-waterfall.js's archive-month toggle listener) --
+        // unless the visitor has it manually paused right now, in which
+        // case a reopen shouldn't yank it back into motion out from under
+        // them (see the `hardPaused` check inside resyncMarquee).
         GZ.resyncMarquee(track);
-        track.style.animationPlayState = 'running';
       });
     });
   },
-  // Re-seeks a marquee track's animation-delay to match the shared
-  // GZ_MARQUEE_EPOCH clock -- called once when a track first starts (see
+  // Re-seeks a marquee track to match the shared GZ_MARQUEE_EPOCH clock and
+  // (re)starts it playing -- called once when a track first starts (see
   // above) and again by events.html's archive-month toggle listener every
   // time a closed gallery is reopened, since a display:none element's CSS
   // animation doesn't advance while hidden and would otherwise resume
   // exactly where it was paused, out of sync with galleries that kept
   // running the whole time.
+  //
+  // 2026-09-08 rewrite (real bug found via direct reproduction, not just
+  // reasoning about the CSS): the previous version compensated for the
+  // hidden-tracking gap with a relative `animation-delay: -${phase}s`,
+  // built on the assumption that a CSS animation's internal timeline
+  // resets to zero the moment its element goes display:none. It doesn't --
+  // the browser keeps advancing (or at minimum doesn't rewind) that
+  // timeline while hidden, so stacking a second negative-delay adjustment
+  // on top of a clock that never stopped double-counted the elapsed time.
+  // Confirmed with a live Puppeteer repro: closing a Past Events gallery
+  // for ~3s and reopening it landed its track at roughly 2x the position
+  // of a sibling gallery that had stayed open the whole time -- exactly
+  // the "misaligned, acting at different times" symptom Eric flagged.
+  // Fix: use the Web Animations API's `Animation.currentTime`, an
+  // ABSOLUTE value (ms since the animation's own start), not a relative
+  // offset layered on top of whatever the browser did in the background.
+  // Setting it directly overrides the internal clock outright instead of
+  // trying to out-math it, which is also the same mechanism the new
+  // play/pause/skip controls below use -- one shared way of moving this
+  // animation around, not two different ones for two different features.
   resyncMarquee(track) {
     const dur = parseFloat(track.dataset.gzDur);
     if (!dur) return;
+    const anim = track.getAnimations()[0];
+    if (!anim) return;
     const elapsed = (performance.now() - GZ_MARQUEE_EPOCH) / 1000;
     const phase = elapsed % dur;
-    track.style.animationDelay = `-${phase}s`;
+    anim.currentTime = phase * 1000; // Animation.currentTime is in ms
+    anim.playbackRate = 1;
+    // A visitor who manually paused this gallery (center play/pause
+    // button) shouldn't have it silently resume just because they closed
+    // and reopened the accordion it lives in -- re-seek the position so
+    // it's still correctly in-step with every other gallery, but leave it
+    // paused exactly like they left it.
+    if (!track.dataset.gzHardPaused) anim.play();
+  },
+  // 2026-09-08, F-13 fix (scenes-not-specs audit + Eric's explicit spec):
+  // shared hover/focus-triggered pause+skip overlay for every GZ.marquee
+  // instance site-wide (Reviews, both Past Events photo waterfalls, the
+  // homepage hero photo strip) -- one implementation, reused everywhere,
+  // same "gz-shine"/"one shared marquee" philosophy as the rest of this
+  // file. Satisfies WCAG 2.2.2 (Pause, Stop, Hide) for real, for every
+  // visitor, not just ones with prefers-reduced-motion set: hovering (or
+  // keyboard-focusing into) the lane greys it out, stops the motion, and
+  // reveals prev/next skip buttons plus a play/pause toggle; leaving it
+  // resumes automatic play and hides the controls again -- and a visitor
+  // who explicitly hits pause stays paused until they explicitly resume,
+  // even across the Past Events accordion being closed and reopened (see
+  // the `gzHardPaused` check in resyncMarquee above).
+  buildMarqueeControls(container, track) {
+    const wrap = document.createElement('div');
+    wrap.className = 'gz-marquee-controls';
+    wrap.innerHTML = `
+      <button type="button" class="gz-mq-btn gz-mq-prev" aria-label="Show previous">${GZ.icon('arrow', 'ic')}</button>
+      <button type="button" class="gz-mq-btn gz-mq-playpause" aria-label="Pause">${GZ.icon('pause', 'ic')}</button>
+      <button type="button" class="gz-mq-btn gz-mq-next" aria-label="Show next">${GZ.icon('arrow', 'ic')}</button>
+    `;
+    container.appendChild(wrap);
+    const prevBtn = wrap.querySelector('.gz-mq-prev');
+    const nextBtn = wrap.querySelector('.gz-mq-next');
+    const ppBtn = wrap.querySelector('.gz-mq-playpause');
+    prevBtn.querySelector('.ic').style.transform = 'scaleX(-1)';
+
+    function setPlayPauseIcon(isPlaying) {
+      ppBtn.innerHTML = GZ.icon(isPlaying ? 'pause' : 'play', 'ic');
+      ppBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+    }
+
+    // Moving one card over: measured from the real gap between the first
+    // two real items in the track (not a guessed fixed width), so this
+    // works correctly whether it's a 300px review card, a 450px event
+    // photo, or a 330px mobile photo -- one shared skip function, no
+    // per-instance tuning.
+    function stepMs() {
+      const dur = parseFloat(track.dataset.gzDur);
+      if (!dur) return 0;
+      const a = track.children[0], b = track.children[1];
+      if (!a || !b) return 0;
+      const stepDist = b.getBoundingClientRect().left - a.getBoundingClientRect().left;
+      const totalDist = track.scrollWidth / 2;
+      if (!totalDist) return 0;
+      return (stepDist / totalDist) * dur * 1000;
+    }
+
+    // Skips one card smoothly (per Eric: "skip back and skip forward an
+    // image smoothly", not an instant cut) by temporarily boosting
+    // Animation.playbackRate in the requested direction and polling with
+    // requestAnimationFrame until currentTime reaches the target, then
+    // snapping exactly to it and resetting the rate. currentTime on an
+    // infinitely-looping animation counts up without ever wrapping back
+    // to 0 internally (the wrap is purely a visual effect of the
+    // keyframes), so target math never needs a modulo or to handle
+    // crossing the loop seam as a special case.
+    function skip(dir) {
+      const anim = track.getAnimations()[0];
+      const step = stepMs();
+      if (!anim || !step || track.dataset.gzSkipping) return;
+      track.dataset.gzSkipping = '1';
+      const target = (anim.currentTime || 0) + dir * step;
+      const rate = dir * 8;
+      anim.playbackRate = rate;
+      anim.play();
+      function tick() {
+        const ct = anim.currentTime || 0;
+        const reached = dir > 0 ? ct >= target : ct <= target;
+        if (reached) {
+          anim.currentTime = target;
+          anim.playbackRate = 1;
+          if (track.dataset.gzHovering) anim.pause(); // stay paused if still under the overlay
+          delete track.dataset.gzSkipping;
+          return;
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    prevBtn.addEventListener('click', () => skip(-1));
+    nextBtn.addEventListener('click', () => skip(1));
+    ppBtn.addEventListener('click', () => {
+      const anim = track.getAnimations()[0];
+      if (!anim || !track.dataset.gzDur) return;
+      if (anim.playState === 'running') {
+        anim.pause();
+        track.dataset.gzHardPaused = '1';
+        setPlayPauseIcon(false);
+      } else {
+        anim.playbackRate = 1;
+        anim.play();
+        delete track.dataset.gzHardPaused;
+        setPlayPauseIcon(true);
+      }
+    });
+
+    // Hover/focus pause -- mouseenter/mouseleave for pointer users,
+    // focusin/focusout (which bubble, unlike focus/blur) for keyboard
+    // users tabbing onto the skip/play buttons. focusout fires when focus
+    // moves between the three buttons too, so it's guarded to only treat
+    // it as "left the lane" when focus actually lands outside `container`.
+    function enter() {
+      track.dataset.gzHovering = '1';
+      const anim = track.getAnimations()[0];
+      if (anim && track.dataset.gzDur) {
+        anim.pause();
+        setPlayPauseIcon(false);
+      }
+    }
+    function leave() {
+      delete track.dataset.gzHovering;
+      // Per Eric's spec, leaving the lane always resumes automatic play --
+      // a manual pause is scoped to "while I'm looking at this," not a
+      // standing preference that survives the visitor moving on.
+      delete track.dataset.gzHardPaused;
+      const anim = track.getAnimations()[0];
+      if (anim && track.dataset.gzDur) {
+        anim.playbackRate = 1;
+        anim.play();
+        setPlayPauseIcon(true);
+      }
+    }
+    container.addEventListener('mouseenter', enter);
+    container.addEventListener('mouseleave', leave);
+    container.addEventListener('focusin', enter);
+    container.addEventListener('focusout', e => {
+      if (!container.contains(e.relatedTarget)) leave();
+    });
   },
   // Real open/closed status computed from config.json's hoursSchedule --
   // 2026-08-28, built for the homepage hero redesign (see index.html's
@@ -290,8 +468,17 @@ GZ.initFullTextTooltips = function initFullTextTooltips(root = document) {
   els.forEach(el => {
     if (el.dataset.gzTooltipBound) return;
     el.dataset.gzTooltipBound = '1';
-    el.addEventListener('mouseenter', () => show(el));
-    el.addEventListener('mouseleave', hide);
+    // 2026-09-08, per Eric ("No hover effect for the what gamers are
+    // saying section"): review cards no longer show this tooltip on
+    // mouse hover -- only real interactions elsewhere on the site (the
+    // Games list's truncated titles) still use it that way. Focus/blur
+    // stay wired for every trigger so keyboard/tap users (who have no
+    // :hover at all) still reach the full text -- reviews.js's own
+    // click-to-focus handler is what gets a mouse/touch user there now.
+    if (!el.closest('.review-waterfall')) {
+      el.addEventListener('mouseenter', () => show(el));
+      el.addEventListener('mouseleave', hide);
+    }
     el.addEventListener('focus', () => show(el));
     el.addEventListener('blur', hide);
   });
