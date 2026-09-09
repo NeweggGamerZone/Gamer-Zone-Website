@@ -84,7 +84,12 @@
            which only sets the word now; the label text is static markup). -->
       <div class="stat stat-status">
         <b id="hero-status-word" aria-live="polite"><span id="hero-status-value">&nbsp;</span></b>
-        <span id="hero-status-detail">Live Status</span>
+        <!-- 2026-09-08, per Eric: second line added under "Live Status" --
+             today's real date (MM-DD), computed the same local-date way as
+             GZ.todayISO() elsewhere (main.js sets #hero-status-date on
+             every load, so it always reflects the real current date, never
+             a hardcoded value). -->
+        <span id="hero-status-detail">Live Status<br><span id="hero-status-date"></span></span>
       </div>
       <!-- 2026-09-04 (per Eric: "5 Stars looks awkward"): one large yellow
            star glyph replaces the text, same big-number slot/size as its

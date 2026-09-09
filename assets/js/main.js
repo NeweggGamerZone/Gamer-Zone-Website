@@ -371,6 +371,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // here now; nothing fabricated, just not displayed in this spot anymore.
   const heroStatusWordEl = document.getElementById('hero-status-word');
   const heroStatusValueEl = document.getElementById('hero-status-value');
+  const heroStatusDateEl = document.getElementById('hero-status-date');
+  // 2026-09-08, per Eric ("Live Status... will have the current date"): a
+  // real MM-DD, from the same local-date logic as GZ.todayISO() (device
+  // clock, not UTC -- see that function's own comment for why), computed
+  // fresh on every page load so it always reflects today, never a
+  // hardcoded value.
+  if (heroStatusDateEl) {
+    const [, mm, dd] = GZ.todayISO().split('-');
+    heroStatusDateEl.textContent = `${mm}-${dd}`;
+  }
   if (heroStatusWordEl && heroStatusValueEl) {
     const status = GZ.openStatus(cfg);
     if (status) {
