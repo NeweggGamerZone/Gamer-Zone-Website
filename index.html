@@ -62,7 +62,18 @@
          free), just repositioned; two new profiles added (Meteor, City
          Lights -- see techno-hero.js's colorState()). Label is visually
          hidden (.sr-only) since the corner placement doesn't have room
-         for it, but stays in the DOM for screen readers. -->
+         for it, but stays in the DOM for screen readers.
+
+         2026-09-10 (per Eric: "push the patterns... several unique
+         profiles that feel like they pulse at different rates or even
+         have multi pulses"): three more profiles added -- Heartbeat (a
+         slow two-beat pulse), Rapid Pulse (the same pulse language at
+         roughly double the rate), and Multi-Pulse (several independently-
+         paced pulses layered across the tunnel's depth at once). All
+         three stay under 3 beats/sec (WCAG 2.3.1's photosensitive-seizure
+         flash threshold) and use soft Gaussian brightness bumps rather
+         than a hard on/off flash -- see colorState()'s pulse/rapidpulse/
+         multipulse cases. -->
     <div class="hero-lighting">
       <label for="hero-lighting-select" class="sr-only">Background lighting</label>
       <select id="hero-lighting-select">
@@ -73,6 +84,9 @@
         <option value="wave">Wave</option>
         <option value="meteor">Meteor</option>
         <option value="city">City Lights</option>
+        <option value="pulse">Heartbeat</option>
+        <option value="rapidpulse">Rapid Pulse</option>
+        <option value="multipulse">Multi-Pulse</option>
       </select>
     </div>
     <!-- 2026-09-08, F-12 fix (scenes-not-specs audit: "no H1 anywhere on
@@ -260,6 +274,22 @@
       </div>
     </div>
   </section>
+
+  <!-- 2026-09-10, per Eric: "a solid edge shape that matches the changing
+       background shapes... fades into solid black, but is constantly
+       changing." Rather than the hero just dimming out over a tall scroll
+       range (the pre-existing applyTechFade() in main.js, still in place
+       above), this draws one explicit, shaped cut line right where the
+       hero ends -- a horizontal "skyline" unrolled from the exact same
+       morphing ring shape/timing driving the tunnel above it (see
+       drawBoundary() in techno-hero.js), so the line is a smooth flat
+       plane on a Circle beat and a sharp zigzag on a Star beat, always in
+       lockstep with the tunnel, never a static decorative shape of its
+       own. Solid black below the line, transparent above it (revealing
+       whatever the fixed tunnel layers are currently faded to), so the
+       edge itself is the signal that the hero is over, not just a dimmer
+       reading. aria-hidden: purely decorative, no content of its own. -->
+  <div class="hero-boundary" aria-hidden="true"><canvas id="hero-boundary-canvas"></canvas></div>
 
   <section class="reveal eu-section" id="week">
     <h2>Weekly lineup</h2>

@@ -145,3 +145,54 @@ function pickDiamondFlare(stableId, table = DIAMOND_FLARES) {
   input.addEventListener('keydown', e => { if (e.key === 'Escape' && input.value) { input.value = ''; apply(); } });
   if (clearBtn) clearBtn.addEventListener('click', () => { input.value = ''; apply(); input.focus(); });
 })();
+
+/* Expandable Featured Ambassador cards (2026-09-10, per Eric: "add the
+   expandable profile cards to the featured ambassador cards is a good
+   upgrade"). Each .host-card gets one real, dedicated .host-expand-btn
+   that toggles a .is-expanded class on its own card -- style.css then
+   reflows that same card's existing .host-photo/.host-body into a
+   side-by-side layout and reveals its .host-cta; no separate detail panel
+   or duplicated content exists to fall out of sync (see the HTML comment
+   above #host-grid in ambassador.html). One-open-at-a-time accordion
+   behavior (opening a card closes whichever one was already open) keeps
+   the wall from turning into a tall stack of simultaneously-expanded
+   cards once real Ambassadors are added. Escape closes whichever card is
+   currently expanded and returns focus to its own toggle button, matching
+   the close-on-Escape pattern this page's application modal should
+   eventually get too (see the note on amb-modal's own open()/close()). */
+(function () {
+  const grid = document.getElementById('host-grid');
+  if (!grid) return;
+  const cards = Array.from(grid.querySelectorAll('.host-card'));
+  if (!cards.length) return;
+
+  function collapse(card) {
+    card.classList.remove('is-expanded');
+    const btn = card.querySelector('.host-expand-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+  function expand(card) {
+    cards.forEach(c => { if (c !== card) collapse(c); });
+    card.classList.add('is-expanded');
+    const btn = card.querySelector('.host-expand-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  }
+
+  cards.forEach(card => {
+    const btn = card.querySelector('.host-expand-btn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      if (card.classList.contains('is-expanded')) collapse(card);
+      else expand(card);
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const openCard = cards.find(c => c.classList.contains('is-expanded'));
+    if (!openCard) return;
+    collapse(openCard);
+    const btn = openCard.querySelector('.host-expand-btn');
+    if (btn) btn.focus();
+  });
+})();

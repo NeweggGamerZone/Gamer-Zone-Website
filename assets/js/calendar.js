@@ -102,7 +102,22 @@
       // handler below for Arrow-key navigation between cells and
       // Enter/Space activation, matching standard date-grid conventions.
       const label = closed ? `${pretty(dt)}, Closed` : `${pretty(dt)}${e ? ', ' + (TYPE[e.type] || e.type) : ', Free Play'}`;
-      html += `<div class="${cls.join(' ')}" data-d="${dt}" tabindex="-1" role="button" aria-label="${label}"${title}><span class="dn">${d}</span></div>`;
+      // 2026-09-10, per Eric ("make the changes to event calendar as you
+      // see fit," after Watermelon UI's Subscription Calendar research):
+      // a quick-peek tooltip right at the cursor/focus point, wired below
+      // via the shared GZ.initFullTextTooltips() component (the exact same
+      // one the Games list and reviews already use -- see main.js), plus a
+      // small pulsing dot (a real, non-color-dependent signal, not just
+      // decoration -- see the .cal-dot comment in style.css) on any day
+      // that has a specific named event. Both are additive to the
+      // existing full .cal-detail panel below, which still updates on
+      // hover/click/keyboard exactly as before.
+      const preview = closed
+        ? 'Closed'
+        : (e ? `${TYPE[e.type] || e.type}: ${e.title}${e.time ? ' — ' + e.time : ''}` : 'Free Play — 10am to 7pm');
+      const hasEventDot = !closed && e && TYPE_COLOR[e.type];
+      const dot = hasEventDot ? '<span class="cal-dot" aria-hidden="true"></span>' : '';
+      html += `<div class="${cls.join(' ')}" data-d="${dt}" data-full="${GZ.esc(preview)}" tabindex="-1" role="button" aria-label="${label}"${title}><span class="dn">${d}</span>${dot}</div>`;
     }
     grid.innerHTML = html;
     // Exactly one cell in the grid is a Tab stop at a time (today's, or
@@ -111,6 +126,7 @@
     // stepping through every single day cell first.
     const rovingTarget = grid.querySelector(`[data-d="${today}"]`) || grid.querySelector('[data-d]');
     if (rovingTarget) rovingTarget.tabIndex = 0;
+    GZ.initFullTextTooltips(grid);
   }
 
   function show(dt) {

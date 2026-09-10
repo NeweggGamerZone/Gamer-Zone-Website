@@ -518,6 +518,50 @@ than one reasonable direction.
 
 ---
 
+## Part 2aj -- Interaction upgrade round: hero boundary, nav pill, Zone Stack drag, RGB pulse profiles, expandable Ambassador cards, calendar hover/dots (2026-09-10, same-day follow-up)
+
+Resolves the "still open" item above. Per Eric's request, this session researched specific
+reference sites (Watermelon UI's Expandable Profile Card, Subscription Calendar, Continuous/
+Fluid Tabs, and Card Swipe/Carousel Slider components; Proofmode.org's hero-to-next-section
+transition on godly.design) and presented screenshots + a proposed integration point for each,
+per the standing "open-ended issues get proposed before implemented" rule. Eric gave explicit,
+specific go-ahead on all six, so all six were implemented directly rather than re-proposed (per
+that same rule's carve-out for fully-specified instructions):
+
+1. **Hero boundary strip** -- a shape-matched divider between the hero and Weekly Lineup that
+   fades to solid black using the tunnel's own live morphing shape, not a static gradient.
+2. **Nav "continuous tabs" pill** -- a sliding active/hover indicator behind the main nav links.
+3. **Zone Stack drag/swipe** -- real pointer-based drag added to the existing flat, non-rotated
+   peek-card carousel (kept flat/non-rotated per Eric's explicit ask).
+4. **Three new RGB lighting profiles** -- Heartbeat, Rapid Pulse, and Multi-Pulse, each a
+   distinct pulse rate/pattern per Eric's "profiles that pulse at different rates or even have
+   multi pulses" request.
+5. **Expandable Featured Ambassador cards** -- click-to-expand into a side-by-side photo/bio
+   layout with a real "Apply to become an Ambassador" CTA.
+6. **Event Calendar hover/focus tooltip + event-day dots** -- a Subscription-Calendar-style
+   quick-peek layer added on top of the existing full-detail-panel calendar.
+
+Full technical detail on each (what was reused vs. newly built, and the real bugs caught while
+verifying) is in CLAUDE.md's "Site-wide interaction upgrade round" section -- not duplicated
+here. Two real, load-bearing bugs were caught during verification, not just polish notes: (a) a
+`url()`-in-inline-custom-property class of bug recurred in spirit -- this time `main.js`'s
+`injectIcons()` was found to deliberately drop the `class` attribute when swapping a placeholder
+`<i data-ic>` for its real `<svg>`, silently breaking the Ambassador card's rotating chevron
+until the class moved to a wrapping element; (b) the Zone Stack's touch-drag needed `touch-
+action: pan-y` to stop the browser's native vertical-scroll gesture from racing against JS's own
+horizontal-drag detection on touch devices.
+
+Every item was verified with real simulated input over real time via Puppeteer (drag/swipe
+sequences via `Input.dispatchTouchEvent`, a full drag → click → keyboard → Escape sweep on the
+Ambassador card, canvas pixel-brightness sampling across ~2.5s per new RGB profile, hover *and*
+keyboard-focus tooltip checks on the calendar) rather than static screenshots or an absence of
+console errors alone, per core rule 7. Screenshots at mobile/tablet/desktop for all six live in
+`tools/audit/out/redesign-round/`. Full scripted QA re-run clean afterward: 709 text items
+across 5 pages / 0 contrast failures (`analyze.py`), 0 container-width findings
+(`width-check.js`), 0 console errors on any of the 5 pages (`console-check.js`).
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.

@@ -148,14 +148,45 @@ img { max-width: 100%; display: block; }
 .logo img.logo-img { height: 76px; width: auto; display: block; }
 .logo span { color: var(--ne-blue-text); }
 .logo em { font-style: normal; color: var(--ne-navy-glow); }
-nav.main-nav { display: flex; gap: .2rem; flex-wrap: wrap; margin-left: auto; }
+nav.main-nav { position: relative; display: flex; gap: .2rem; flex-wrap: wrap; margin-left: auto; }
 /* Rounded/pill nav links, matching the CTA button shape. */
 /* F-14 (2026-09-08): was 38.5px tall (padding .5rem top/bottom) -- one of
    the audit's own named examples of a too-small target. Bumped to .7rem
    to clear 44px; horizontal padding/everything else unchanged. */
-nav.main-nav a { padding: .7rem 1.05rem; color: var(--ink-dim); font-size: .88rem; font-weight: 600; font-family: var(--head); letter-spacing: .03em; text-transform: uppercase; border-radius: 999px; }
-nav.main-nav a:hover { color: var(--ink); background: var(--bg-3); text-decoration: none; }
-nav.main-nav a.active { color: #000; background: var(--ne-orange); }
+nav.main-nav a { position: relative; z-index: 1; padding: .7rem 1.05rem; color: var(--ink-dim); font-size: .88rem; font-weight: 600; font-family: var(--head); letter-spacing: .03em; text-transform: uppercase; border-radius: 999px; }
+nav.main-nav a:hover { color: var(--ink); text-decoration: none; }
+/* .active no longer paints its own flat background -- that's now
+   .nav-pill below, a single real element that slides between links
+   instead of a color just appearing under whichever link happens to
+   carry the class. Text color still flips to black here since the pill
+   sits underneath it at the same rounded shape/size. */
+nav.main-nav a.active { color: #000; }
+
+/* Continuous-tabs sliding pill (2026-09-10, per Eric: "do the continuous
+   tab style... give that fluid feel", referencing Watermelon UI's
+   Continuous Tabs). Built and positioned by main.js (GZ.initNavPill),
+   not hand-placed in HTML, since its left/width depend on the active
+   link's real rendered box -- the same reason .gz-marquee-controls etc.
+   are built in JS rather than authored per-instance. This is a real
+   multi-page site, not a client-side tab switcher, so there's no
+   "previous tab" position to slide from on a fresh page load; the pill
+   instead pops/settles into place once (see .nav-pill.settle-in below)
+   and then slides on hover/keyboard-focus to preview whichever link the
+   visitor is currently on, sliding back to the true active link when
+   focus/hover leaves the nav entirely -- the same "continuous" feel
+   Watermelon's demo has, adapted for real page navigation instead of an
+   in-page tab swap. Purely decorative (aria-hidden, pointer-events:none)
+   -- every nav link underneath is a real, already keyboard-operable <a>,
+   so this never needs its own keyboard handling. */
+/* top/height (not just left/width) are JS-driven too -- the mobile menu
+   stacks nav links into a column (see the max-width media query below),
+   so the pill needs its full rect repositioned, not just a horizontal
+   slide, to still land under the right link once the layout changes. */
+.nav-pill { position: absolute; top: 0; left: 0; height: 0; width: 0; border-radius: 999px; background: linear-gradient(145deg, var(--ne-orange), var(--ne-orange-deep)); z-index: 0; pointer-events: none; opacity: 0; transition: left .32s cubic-bezier(.22,.9,.3,1), width .32s cubic-bezier(.22,.9,.3,1), top .32s cubic-bezier(.22,.9,.3,1), height .32s cubic-bezier(.22,.9,.3,1), opacity .25s ease; }
+.nav-pill.settle-in { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill { transition: opacity .25s ease; }
+}
 #nav-toggle, .nav-burger { display: none; }
 .announcement { background: var(--ne-navy); color: #fff; text-align: center; padding: .45rem 1rem; font-weight: 600; font-size: .9rem; }
 .announcement:empty { display: none; }
@@ -616,7 +647,7 @@ details.archive-month .grid { margin-top: 1rem; }
    this just gives the peeking prev/next cards more room to clear the
    center card's edge cleanly (see the comment on [data-pos="prev"] below)
    and more of the section's own background to show through at the sides. */
-.zone-stack { position: relative; width: 100%; height: 560px; overflow: hidden; }
+.zone-stack { position: relative; width: 100%; height: 560px; overflow: hidden; touch-action: pan-y; }
 /* At the old 620px width, the prev/next cards' own far edge (rounded
    corner + orange border) sat off in the clipped-away zone -- with the
    card fixed at 340px wide and the peek offset a fixed 82% of that (in
@@ -654,7 +685,7 @@ details.archive-month .grid { margin-top: 1rem; }
    peek in from either edge of .zone-stack (clipped by its overflow:hidden);
    everything else is parked invisible in the center spot, ready to slide
    in next. */
-.zone-card[data-pos="center"] { transform: translateX(-50%) scale(1); opacity: 1; z-index: 5; }
+.zone-card[data-pos="center"] { transform: translateX(calc(-50% + var(--zs-drag, 0px))) scale(1); opacity: 1; z-index: 5; }
 /* Peeking cards were pointer-events:none, so zone-stack.js's "click a
    peeking card to bring it to front" handler could never actually fire
    from a direct click on the card — only the prev/next buttons and dot
@@ -669,8 +700,8 @@ details.archive-month .grid { margin-top: 1rem; }
    out-of-focus background depth, the same visual cue a camera's depth-of-
    field blur gives a background subject, rather than draining their color
    entirely. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82%)) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82%)) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
 /* Second, further-out peek layer -- per Eric's "another layer of cards
    on the outermost left and right of center" ask for About Gamer Zone.
    These are real zone cards from the same rotation (not decorative
@@ -680,9 +711,23 @@ details.archive-month .grid { margin-top: 1rem; }
    by real content instead of just being a wide empty wrapper around one
    centered card. Lower z-index than the near peek layer so they sit
    visually behind it. */
-.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154%)) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
-.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154%)) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154% + var(--zs-drag, 0px))) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154% + var(--zs-drag, 0px))) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
+/* Drag/swipe (2026-09-10, per Eric: "do the swipe and drag animation as
+   well"). --zs-drag is a live px offset zone-stack.js writes to #zone-stack
+   (a custom property, so it inherits down to every .zone-card above without
+   each position needing its own JS-computed transform string) while a
+   pointer drag is active, added into each position's existing translateX so
+   the whole stack -- center card AND both peek layers -- tracks the
+   pointer together, preserving the flat/non-rotated trading-card look and
+   the "see cards behind it" depth cue Eric asked to keep. .dragging kills
+   the normal .55s transition so the stack follows the pointer 1:1 with no
+   lag; removing that class on release (in the same JS tick as resetting
+   --zs-drag and/or advancing data-pos) lets the existing transition animate
+   the snap-back or the advance-to-next/prev, so both cases use the one
+   shared easing curve instead of a separate bespoke animation. */
+.zone-stack.dragging .zone-card { transition: none; }
 /* Only a sliver of a prev/next card is actually visible (mostly hidden by
    .zone-stack's own overflow:hidden). Both the paragraph AND the centered
    h3 title read as broken/cut-off content when shown through that sliver
@@ -895,6 +940,21 @@ body.home-page { background: transparent; }
 .tech-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; }
 .tech-scan { position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: radial-gradient(circle at 50% 46%, rgba(4,5,7,.35) 0%, rgba(4,5,7,.55) 55%, rgba(4,5,7,.94) 100%); }
+
+/* Hero -> Weekly Lineup boundary (2026-09-10, per Eric). A full-bleed
+   strip sitting between the two sections -- transparent itself (so the
+   fixed tech-tunnel layers above still show through it at whatever
+   opacity applyTechFade() has already faded them to), with its own canvas
+   drawing one shaped cut line: solid var(--bg) below the line, nothing
+   painted above it. techno-hero.js renders this canvas in the exact same
+   rAF loop/elapsed clock as the tunnel rings, so the line is always the
+   current morph shape unrolled into a horizontal profile -- never a
+   separate, independently-timed decoration. Height is deliberately
+   modest (this is a transition beat, not a new hero) and, like
+   .hero-stage, breaks out to full viewport width since it's finishing a
+   full-bleed background effect, not laying out content of its own. */
+.hero-boundary { position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); height: clamp(64px, 9vw, 130px); overflow: hidden; }
+.hero-boundary canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
 .hero-in { opacity: 0; transform: translateY(22px); animation: hero-rise .85s cubic-bezier(.2,.7,.3,1) forwards; animation-delay: var(--d, 0s); }
 @keyframes hero-rise { to { opacity: 1; transform: none; } }
@@ -1306,7 +1366,7 @@ body.home-page { background: transparent; }
    as "fixed" -- see CLAUDE.md's F-14 note for the honest tradeoff. */
 @media (max-width: 560px) { .cal-grid { gap: 4px; } }
 .cal-dow{font-family:var(--head);font-size:.7rem;color:var(--ink-dim);text-transform:uppercase;text-align:center;padding:.25rem 0}
-.cal-cell{position:relative;aspect-ratio:1;border:1px solid rgba(242,244,248,.14);background:rgba(22,24,29,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden}
+.cal-cell{position:relative;aspect-ratio:1;border:1px solid rgba(242,244,248,.14);background:rgba(22,24,29,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s,transform .18s ease,box-shadow .18s ease;overflow:visible}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
 .cal-cell.cal-closed{background:rgba(124,131,143,.32);border-color:var(--cal-closed);color:var(--ink-dim);cursor:default}
 /* X-mark overlay for closed days, sat behind the day number (z-index:1 on
@@ -1344,20 +1404,48 @@ body.home-page { background: transparent; }
 .cal-cell.cal-edu{background:rgba(63,191,107,.26);border-color:var(--cal-edu)}
 .cal-cell.cal-amb{background:rgba(232,93,160,.26);border-color:var(--cal-amb)}
 .cal-cell.cal-major{background:rgba(250,157,40,.3);border-color:var(--cal-major)}
-.cal-cell:not(.empty):not(.cal-closed):hover{filter:brightness(1.25)}
+/* 2026-09-10, per Eric ("make the changes to event calendar as you see
+   fit," after looking at Watermelon UI's Subscription Calendar): a real
+   hover/focus lift (not just the old flat brightness bump) so a day reads
+   as a genuinely pressable tile, plus a quick-peek tooltip (see
+   calendar.js's data-full wiring via the shared GZ.initFullTextTooltips()
+   -- the same component the Games list and reviews already use, not a
+   new bespoke tooltip) that surfaces a day's event right at the cursor/
+   focus point instead of requiring a glance down at .cal-detail every
+   time. transform+z-index are additive on top of the existing hover/
+   focus-visible rules below, not a replacement -- the keyboard focus
+   ring and closed-day exclusions are unchanged. */
+.cal-cell:not(.empty):not(.cal-closed):hover{filter:brightness(1.25);transform:translateY(-2px) scale(1.05);box-shadow:0 10px 20px -8px rgba(0,0,0,.65);z-index:2}
 /* Keyboard focus ring -- .cal-cell previously had no tabindex or focus
    style at all (mouse/hover only), so Tab couldn't reach a day and there
    was nothing to show which one was focused even if it could. Matches
    .today's own inset-ring treatment so a focused day reads clearly
    without fighting the per-type background colors. :focus-visible so a
    mouse click doesn't also show the keyboard ring. */
-.cal-cell:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff,0 0 0 3px rgba(255,255,255,.35)}
+.cal-cell:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff,0 0 0 3px rgba(255,255,255,.35);transform:translateY(-2px) scale(1.05);z-index:2}
+@media (prefers-reduced-motion: reduce){
+  .cal-cell:not(.empty):not(.cal-closed):hover,.cal-cell:focus-visible{transform:none}
+}
 .cal-cell.today{box-shadow:inset 0 0 0 2px #fff}
 .cal-cell.today::after{content:"";position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;animation:cal-today-flash 15s ease-in-out infinite}
 @keyframes cal-today-flash{0%,4%,100%{opacity:0}1.6%,2.4%{opacity:.55}}
 @media (prefers-reduced-motion: reduce){.cal-cell.today::after{animation:none;display:none}}
 .cal-cell.sel{box-shadow:inset 0 0 0 3px #fff}
 .cal-cell .dn{font-family:var(--head);font-weight:700;font-size:1.3rem;color:var(--ink);position:relative;z-index:1}
+/* Redundant, non-color-dependent signal (WCAG 1.4.1, "use of color") that
+   a day has a specific named event, not just the generic Free Play/Closed
+   background -- a small pulsing dot below the date number, colored to
+   match that day's own existing type color (no new color decisions).
+   Only rendered by calendar.js for theme/edu/amb/major days, never for
+   Free Play or Closed, which are the calendar's own default backdrop. */
+.cal-dot{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;z-index:1;animation:cal-dot-pulse 2.4s ease-in-out infinite}
+.cal-cell.cal-theme .cal-dot{background:var(--cal-theme)}
+.cal-cell.cal-edu .cal-dot{background:var(--cal-edu)}
+.cal-cell.cal-amb .cal-dot{background:var(--cal-amb)}
+.cal-cell.cal-major .cal-dot{background:var(--cal-major)}
+@keyframes cal-dot-pulse{0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.4)}}
+@media (prefers-reduced-motion: reduce){.cal-dot{animation:none;opacity:.9}}
+@media (max-width:560px){.cal-dot{bottom:3px;width:4px;height:4px}}
 .cal-legend{display:flex;gap:.9rem;margin-top:.9rem;font-size:.75rem;color:var(--ink-dim);flex-wrap:wrap}
 .cal-legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}
 .cal-legend i.lg-closed{background:var(--cal-closed)}
@@ -1895,7 +1983,17 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 /* Inset, not poking above like .mile's — the card clips overflow to keep
    its fixed height, so the rank pill sits inside the top-left corner. */
 .host-card .node{position:absolute;left:.7rem;top:.7rem;z-index:2}
-.host-avatar{width:56px;height:56px;border-radius:50%;background:var(--ne-navy);color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:1.05rem;margin:.6rem auto .7rem;flex-shrink:0;position:relative;z-index:2}
+/* .host-photo (badge + avatar) and .host-body (name/bio/social/count/CTA)
+   -- added 2026-09-10 for the expandable-card upgrade below. In the
+   default (collapsed) state .host-card is still flex-direction:column,
+   so these two wrappers just stack full-width exactly like their loose
+   children used to; .host-body gets flex:1 so .host-count's own
+   margin-top:auto still pushes it to the bottom of the available space,
+   same visual result as before the wrap. See ".host-card.is-expanded"
+   further down for what changes when a card expands. */
+.host-photo{display:flex;flex-direction:column;align-items:center;flex-shrink:0;position:relative;z-index:2}
+.host-body{display:flex;flex-direction:column;flex:1;width:100%;min-width:0;position:relative;z-index:2}
+.host-avatar{width:56px;height:56px;border-radius:50%;background:var(--ne-navy);color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:1.05rem;margin:.6rem auto .7rem;flex-shrink:0;position:relative;z-index:2;transition:width .3s ease,height .3s ease,font-size .3s ease}
 .host-card h3{white-space:normal;flex-shrink:0;position:relative;z-index:2}
 .host-cat{font-size:.85rem;margin-top:.5rem;color:var(--ink);flex-shrink:0;position:relative;z-index:2}
 .host-social{display:flex;justify-content:center;gap:.55rem;margin-top:.6rem;flex-shrink:0;position:relative;z-index:2}
@@ -1904,6 +2002,57 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .host-social a .ic{width:15px;height:15px}
 .host-count{margin-top:auto;padding-top:.6rem;font-family:var(--head);text-transform:uppercase;font-size:.74rem;letter-spacing:.03em;color:var(--ink-dim);flex-shrink:0;position:relative;z-index:2}
 .host-count b{color:var(--ne-orange);font-size:1.05rem}
+/* Real CTA in the expanded state only -- reuses the exact "Apply to
+   become an Ambassador" action already on this page (data-amb-open,
+   wired in ambassador.js) rather than inventing new content for the
+   expanded view, per the no-fabrication rule this whole section already
+   follows (see the F-04 comment above the grid). */
+.host-cta{display:none;margin-top:.9rem;flex-shrink:0}
+.host-card.is-expanded .host-cta{display:inline-flex}
+
+/* Expandable profile cards (2026-09-10, per Eric: "add the expandable
+   profile cards to the featured ambassador cards is a good upgrade" --
+   the Watermelon-UI-style pattern researched/proposed earlier this
+   session). .host-expand-btn is the one real, dedicated control for
+   opening/closing a card -- not the whole card made clickable -- so it
+   never nests one interactive element inside another (.host-social's own
+   links live in the same card and need their own independent focus
+   stop). Toggled by assets/js/ambassador.js's expand-card IIFE, which
+   also runs the one-open-at-a-time accordion behavior and Escape-to-
+   close. */
+.host-expand-btn{margin:.75rem auto 0;display:flex;align-items:center;gap:.35rem;background:none;border:none;color:var(--ink-dim);font-family:var(--head);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;padding:.6rem .5rem;position:relative;z-index:2;flex-shrink:0}
+.host-expand-btn::before{content:"";position:absolute;top:50%;left:50%;width:100%;height:44px;min-width:44px;transform:translate(-50%,-50%)}
+.host-expand-btn:hover,.host-expand-btn:focus-visible{color:var(--ne-orange)}
+.host-expand-ic{width:14px;height:14px;display:inline-flex;transform:rotate(90deg);transition:transform .3s ease}
+.host-expand-ic .ic{width:14px;height:14px;fill:currentColor}
+.host-expand-label-close{display:none}
+.host-card.is-expanded .host-expand-label-close{display:inline}
+.host-card.is-expanded .host-expand-label:not(.host-expand-label-close){display:none}
+.host-card.is-expanded .host-expand-ic{transform:rotate(-90deg)}
+
+/* The expanded state itself: the card spans the full grid row
+   (grid-column:1/-1 -- #host-grid:has() below lifts the grid's own
+   max-width cap so there's actually room to use) and switches from a
+   stacked column to a side-by-side row -- .host-photo and .host-body are
+   the exact same elements as the collapsed state, just reflowed by this
+   rule, so there is nothing to keep in sync between two copies of the
+   same content. */
+.host-card.is-expanded{grid-column:1/-1;flex-direction:row;align-items:flex-start;text-align:left;gap:1.7rem;padding:1.5rem 1.6rem}
+.host-card.is-expanded .host-photo{align-self:center}
+.host-card.is-expanded .host-avatar{width:120px;height:120px;font-size:1.9rem;margin:.4rem auto}
+.host-card.is-expanded .host-body{text-align:left;padding-top:.3rem}
+.host-card.is-expanded .host-social{justify-content:flex-start}
+.host-card.is-expanded .host-expand-btn{align-self:flex-start;margin:.3rem 0 0}
+#host-grid:has(.host-card.is-expanded){max-width:none;width:100%}
+@media (max-width:640px){
+  /* Not enough width for a real side-by-side split on a phone -- keep the
+     expanded card stacked (photo above body) but still visibly "opened"
+     via the now-visible CTA and the close-labeled toggle. */
+  .host-card.is-expanded{flex-direction:column;align-items:center;text-align:center;gap:0}
+  .host-card.is-expanded .host-body{text-align:center}
+  .host-card.is-expanded .host-social{justify-content:center}
+  .host-card.is-expanded .host-expand-btn{align-self:center}
+}
 
 /* Pillar tag (top-right corner): what kind of Ambassador this is --
    Community Organizer / Esports Team / Content Creator / Organization.

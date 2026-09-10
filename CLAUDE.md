@@ -369,6 +369,139 @@ edge (near-black at x=0 rising to full brightness by roughly the 16% mark) that 
 a genuine gradient and not just a hard crop, plus a full-page screenshot of `events.html` to
 confirm the wider fade didn't visually break the other two consumers.
 
+## Site-wide interaction upgrade round (2026-09-10): hero boundary, nav pill, Zone Stack drag, RGB pulse profiles, expandable Ambassador cards, calendar hover/dots
+
+Per Eric's go-ahead after reviewing a research pass on Watermelon UI's animated
+components and Proofmode.org's hero transition, six interaction upgrades
+shipped together in one round. Each reuses an existing shared mechanism where
+one already existed, rather than introducing a parallel one-off — the point
+of this section is to record what those mechanisms are so a future session
+extends them instead of re-deriving or duplicating them.
+
+**Hero-to-next-section boundary (`.hero-boundary`, `drawBoundary()` in
+`techno-hero.js`).** A second, small canvas directly below the hero tunnel
+that unrolls the tunnel's own current per-frame morphed shape points (`pts`,
+the exact array `frame()` already computed for that frame's rings) into a
+horizontal skyline, fills solid black below the line, and strokes the line
+itself tinted with the active RGB profile's current hue. Deliberately reuses
+the tunnel's own live shape/timing state instead of building a second,
+independent shape system — a calmer shape (near-circle) reveals more of the
+strip; a spikier shape (star) pushes more black up unevenly. Read `BG_COLOR`
+from the real `--bg` CSS variable rather than a hardcoded hex duplicate.
+
+**Nav "continuous tabs" pill (`initNavPill()` in `main.js`, `.nav-pill` in
+`style.css`).** A single absolutely-positioned pill element, repositioned via
+`getBoundingClientRect()` math and animated via a CSS `transition` on
+`left/top/width/height/opacity` — not four separately-`background`-styled
+`<a>` states. A literal cross-page slide is impossible on a real multi-page
+site (no shared state between loads), so on load the pill "pops/settles"
+onto the active link instead of faking a slide from somewhere; hovering or
+focusing another link previews a real slide to it, and it reverts to the
+active link on mouseleave/focusout. `top`/`height` are JS-driven (not just
+`left`/`width`) specifically so this also works on the mobile stacked-column
+nav layout, not just the desktop horizontal bar — a nav-pill implementation
+that only tracks `left`/`width` will silently break the first time a future
+nav layout stacks its links vertically.
+
+**Zone Stack drag/swipe (`assets/js/zone-stack.js`, `--zs-drag` custom
+property in `style.css`).** Real pointer-based drag (mouse, touch, and pen
+all via the Pointer Events API, not separate mouse/touch handlers) on top of
+the existing click/keyboard/dot-nav carousel — the flat, non-rotated
+peek-card visual language Eric asked to keep is untouched; the only gap
+being filled was that there was no way to drag/swipe the stack at all.
+`--zs-drag` is written to `#zone-stack` and inherits down into every
+`.zone-card`'s own `translateX(...)` via `calc(... + var(--zs-drag, 0px))`,
+so one JS-set custom property moves the center card and both peek layers
+together without a bespoke per-position transform string. `.zone-stack.
+dragging` kills the cards' normal `.55s` transition so the drag tracks the
+pointer 1:1 with no lag; removing that class on release (in the same tick as
+resetting `--zs-drag` and/or calling `next()`/`prev()`) lets the existing
+transition animate the snap-back or the advance, so dragging and clicking
+share one easing curve rather than two separate animations. `touch-action:
+pan-y` on `.zone-stack` hands horizontal gesture detection to JS while still
+letting a mostly-vertical touch scroll the page natively, instead of the two
+racing. A `dragMoved` flag suppresses the existing "click a peek card"
+handler immediately after a real drag, so releasing a drag on top of a peek
+card doesn't also fire a second, conflicting `goTo()`.
+
+**RGB lighting: three new pulse profiles (`pulse`/`rapidpulse`/`multipulse`
+in `techno-hero.js`'s `colorState()`, "Heartbeat"/"Rapid Pulse"/"Multi-Pulse"
+in `#hero-lighting-select`).** All three are built from soft Gaussian
+brightness bumps, never a hard on/off flash, and all stay under 3 beats/sec
+— WCAG 2.3.1's photosensitive-seizure flash threshold — a real constraint
+this project should keep respecting for any future lighting profile, not
+just these three. Pulse and Rapid Pulse are the same "lub-dub" heartbeat
+shape at two different single rates (1.8s vs. 0.85s) with two different
+hues; Multi-Pulse assigns each ring to one of three channels (by index),
+each with its own independent period/width/hue via the existing shared
+`travelSpike()` helper, so several distinct pulses read as genuinely
+layered across the tunnel's depth rather than one synchronized wash. Adding
+a profile is still just: extend `PROFILES`, add a `case` to `colorState()`
+returning `{hue, breatheMul, ringHue, ringAlpha}`, add one `<option>`.
+
+**Ambassador expandable profile cards (`.host-card.is-expanded` in
+`style.css`, the expand-card IIFE in `ambassador.js`).** A card expands in
+place into a side-by-side photo/bio layout via one real `<button
+class="host-expand-btn">` per card (never the whole card made clickable,
+since `.host-social`'s own links live in the same card and need their own
+independent focus stop). `.host-photo` and `.host-body` are the *same*
+elements in both the collapsed and expanded state, just reflowed by
+`grid-column:1/-1` + `flex-direction:row` on `.host-card.is-expanded` — there
+is no second, duplicated "detail panel" copy of the card's text that could
+ever drift out of sync with the first (the exact failure mode the
+`screenshot-monthly-calendar.html` drift bug, documented earlier in this
+file, warns about). The one genuinely new element, `.host-cta`, reuses the
+page's existing real "Apply to become an Ambassador" action
+(`data-amb-open`) rather than inventing new placeholder content for the
+expanded state, consistent with this section's own no-fabrication framing
+(see the F-04 comment above `#host-grid` in `ambassador.html`). One-open-
+at-a-time accordion behavior and Escape-to-close (returning focus to the
+card's own toggle button) are handled by the same IIFE. **A real bug caught
+while building this:** `main.js`'s `injectIcons()` deliberately does NOT
+carry a `class` attribute from a placeholder `<i data-ic="...">` onto the
+`<svg>` it gets replaced with (see that function's own comment — it computes
+the SVG's class itself). A class meant to control that icon (here, the
+toggle button's rotating chevron) has to live on a wrapping element instead
+of the `<i data-ic>` itself, or it silently vanishes the moment the icon
+loads — confirmed by a `getComputedStyle().transform` check via Puppeteer
+that returned `none` until the class moved to a wrapper `<span>`. Any future
+icon that needs a *toggleable* class-driven style (not a fixed inline
+`style=` attribute, which does get carried over — see the zone-prev arrow's
+`scaleX(-1)`) needs the same wrapper treatment.
+
+**Event Calendar hover/focus tooltip + event dots (`calendar.js`,
+`.cal-dot` in `style.css`).** Two additive layers on top of the existing
+`.cal-cell` grid, neither replacing anything that was already working: (1)
+every cell gets a `data-full` attribute (a one-line preview: event type +
+title + time, or "Free Play"/"Closed") and `GZ.initFullTextTooltips(grid)`
+is called after every `render()` — this is the *exact same* shared tooltip
+component the Games list and Reviews already use (`main.js`, `.gz-tooltip`
+in `style.css`), not a new bespoke calendar tooltip, so it inherits that
+component's positioning/contrast/reduced-motion handling for free and shows
+on both hover *and* keyboard focus. (2) a small pulsing `.cal-dot` renders
+only on days with a specific named event (theme/edu/amb/major, never Free
+Play or Closed), colored to match that day's own existing type color — a
+deliberate, non-color-dependent redundant signal (WCAG 1.4.1, "use of
+color") that a day has something specific happening, on top of the color
+coding that was already there. The existing full `.cal-detail` panel below
+the grid, its hover/click/keyboard update logic, and the closed-day
+exclusions are all unchanged. `.cal-cell`'s hover/focus-visible states also
+gained a real lift (`transform:translateY(-2px) scale(1.05)` plus a soft
+drop shadow) in place of the old flat `filter:brightness(1.25))`-only
+feedback, disabled under `prefers-reduced-motion: reduce` alongside every
+other transform-based hover effect on this page.
+
+All six were verified via Puppeteer with real simulated input over real
+time (drag/swipe sequences via `Input.dispatchTouchEvent`, a full drag/click/
+keyboard/Escape sweep on the Ambassador card, canvas pixel-brightness
+sampling across ~2.5s for each new RGB profile, hover+focus tooltip checks
+on the calendar) rather than static screenshots or absence-of-console-errors
+alone — see this round's own screenshots in `tools/audit/out/redesign-round/`
+for the visual record at mobile/tablet/desktop. Full scripted QA
+(`tools/audit/run-full-qa.sh`) re-run clean after all six: 709 text items
+across 5 pages / 0 contrast failures, 0 container-width findings, 0 console
+errors on any page.
+
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
 `GZ.openStatus(cfg)` in `assets/js/main.js`, added 2026-08-28 for the homepage hero's `.hero-status` line, is the reference example for what core rule 4 ("never fabricate a specific fact") looks like applied to something that changes by the minute rather than something static. It computes real open/closed state from `data/config.json`'s `hoursSchedule` (structured days/open/close/timeZone, added alongside the existing plain-text `hours` string so both stay in sync from one source rather than drifting), evaluated in the **venue's** timezone (`America/Los_Angeles`), not the visitor's — a visitor in a different timezone should see whether Diamond Bar is actually open right now, not a status computed against their own local clock. If `hoursSchedule` is ever missing, `.hero-status` removes itself entirely rather than showing nothing-in-particular or a stale guess. Any future "right now" claim on the site (a live queue length, a "X spots left" count, anything time- or state-sensitive) should follow this same pattern: compute it for real from real data at render time, and have it disappear rather than lie if that data isn't available.
@@ -379,7 +512,7 @@ confirm the wider fade didn't visually break the other two consumers.
 
 ## Testing interactive features (calendar and anything like it)
 
-**2026-09-03: the hero mini-game is gone.** Per Eric's call (working through the `scenes-not-specs.html` external audit's F-02), the old "Hero Runner" playable game in `assets/js/techno-hero.js` — a character dodging hazards around the tunnel's morphing ground shape — was removed entirely rather than made more discoverable; it had become a bigger source of brand dissonance than the discoverability problem it originally had. `techno-hero.js` is now purely the decorative morphing tunnel background, plus a new, non-game feature: a selectable RGB-lighting-style color profile (Cycle/Static/Breathe/Flame/Wave) for the tunnel's hue, via a plain `<select>` (`#hero-lighting-select` in `index.html`), persisted in `localStorage`. Any reference elsewhere in this file or the roadmap doc to "the hero mini-game" predates this change.
+**2026-09-03: the hero mini-game is gone.** Per Eric's call (working through the `scenes-not-specs.html` external audit's F-02), the old "Hero Runner" playable game in `assets/js/techno-hero.js` — a character dodging hazards around the tunnel's morphing ground shape — was removed entirely rather than made more discoverable; it had become a bigger source of brand dissonance than the discoverability problem it originally had. `techno-hero.js` is now purely the decorative morphing tunnel background, plus a new, non-game feature: a selectable RGB-lighting-style color profile (Cycle/Static/Breathe/Flame/Wave/Meteor/City Lights/Heartbeat/Rapid Pulse/Multi-Pulse — the last three added 2026-09-10, see this file's "Site-wide interaction upgrade round" section) for the tunnel's hue, via a plain `<select>` (`#hero-lighting-select` in `index.html`), persisted in `localStorage`. Any reference elsewhere in this file or the roadmap doc to "the hero mini-game" predates this change.
 
 Checking for the absence of console errors is not the same as verifying a game or interactive widget actually feels functional, and isn't sufficient on its own. When testing anything playable or operable (the Plan-Your-Visit calendar in `assets/js/calendar.js`, the hero lighting picker, or any future one), actually drive it: simulate the real input sequence (keydown/keyup over time, not just a single dispatched event, or held-key movement, not a single tap), let it run for several real seconds, and confirm the loop/interaction behaves as intended — a select's value actually changes and persists, focus moves to the right element, nothing freezes or drifts — rather than only confirming it initializes without throwing.
 

@@ -71,11 +71,103 @@
     });
   }
   // Clicking a peeking (non-front) card brings it to the front too.
+  // dragMoved (set by the drag handlers below) suppresses this when a real
+  // drag/swipe just ended -- otherwise releasing a drag on top of a peek
+  // card would both animate the swipe AND immediately re-fire goTo() from
+  // this click, double-advancing.
+  let dragMoved = false;
   stack.addEventListener('click', e => {
+    if (dragMoved) { dragMoved = false; return; }
     const card = e.target.closest('.zone-card');
     if (!card || card.dataset.pos === 'center') return;
     goTo(cards.indexOf(card));
   });
+
+  // Pointer-based drag/swipe (2026-09-10, per Eric: "do the swipe and drag
+  // animation as well," on top of the existing flat/non-rotated peek-card
+  // carousel). Single pointer-event set (works for touch, mouse, and pen
+  // alike) rather than separate touch/mouse listeners. The stack's own
+  // width is the drag "unit" -- a card only has to travel a modest fraction
+  // of the section before it commits to advancing, matching how the peek
+  // cards already sit fairly close to the center card.
+  const DRAG_COMMIT_PX = 70;      // distance threshold to commit to a swipe
+  const DRAG_COMMIT_VELOCITY = .5; // px/ms -- a fast flick commits even short
+  const CLICK_SUPPRESS_PX = 6;     // below this, treat it as a click/tap, not a drag
+  let dragging = false;
+  let dragPointerId = null;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragX = 0;
+  let dragAxisLocked = null; // 'x' | 'y' | null (undecided)
+  let lastMoveX = 0;
+  let lastMoveT = 0;
+  let velocity = 0;
+
+  function setDragOffset(px) {
+    stack.style.setProperty('--zs-drag', px + 'px');
+  }
+
+  function onPointerDown(e) {
+    if (e.button !== undefined && e.button !== 0) return; // left-click/primary touch only
+    dragging = true;
+    dragAxisLocked = null;
+    dragPointerId = e.pointerId;
+    dragStartX = lastMoveX = e.clientX;
+    dragStartY = e.clientY;
+    lastMoveT = e.timeStamp;
+    velocity = 0;
+    dragX = 0;
+  }
+
+  function onPointerMove(e) {
+    if (!dragging || e.pointerId !== dragPointerId) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (dragAxisLocked === null) {
+      // Wait for a real, deliberate move before committing to an axis, so a
+      // near-vertical touch (a visitor trying to scroll the page over this
+      // section) isn't hijacked into a horizontal drag.
+      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      dragAxisLocked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if (dragAxisLocked === 'x') {
+        stack.classList.add('dragging');
+        try { stack.setPointerCapture(dragPointerId); } catch (err) { /* no-op */ }
+      }
+    }
+    if (dragAxisLocked !== 'x') return; // vertical intent -- let the page scroll normally
+    e.preventDefault();
+    const dt = e.timeStamp - lastMoveT;
+    if (dt > 0) velocity = (e.clientX - lastMoveX) / dt;
+    lastMoveX = e.clientX;
+    lastMoveT = e.timeStamp;
+    dragX = dx;
+    setDragOffset(dragX);
+  }
+
+  function endDrag(e) {
+    if (!dragging || (e && e.pointerId !== undefined && e.pointerId !== dragPointerId)) return;
+    dragging = false;
+    const wasHorizontalDrag = dragAxisLocked === 'x';
+    stack.classList.remove('dragging');
+    if (wasHorizontalDrag && Math.abs(dragX) > CLICK_SUPPRESS_PX) dragMoved = true;
+    if (wasHorizontalDrag && (Math.abs(dragX) > DRAG_COMMIT_PX || Math.abs(velocity) > DRAG_COMMIT_VELOCITY)) {
+      // Dragging the card leftward (negative dx) reveals what's coming from
+      // the right -- i.e. advances to "next" -- and vice versa.
+      if (dragX < 0) next(); else prev();
+    }
+    setDragOffset(0);
+    dragAxisLocked = null;
+    dragPointerId = null;
+  }
+
+  stack.addEventListener('pointerdown', onPointerDown);
+  stack.addEventListener('pointermove', onPointerMove);
+  stack.addEventListener('pointerup', endDrag);
+  stack.addEventListener('pointercancel', endDrag);
+  // A pointer that leaves the stack entirely (dragged off the section) while
+  // still down should resolve the same as a release, not leave the stack
+  // stuck mid-drag with no way to complete the gesture.
+  stack.addEventListener('pointerleave', e => { if (e.pointerId === dragPointerId) endDrag(e); });
 
   render();
 })();

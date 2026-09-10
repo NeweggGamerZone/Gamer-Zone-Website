@@ -607,6 +607,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (a.getAttribute('href') === page) a.classList.add('active');
   });
 
+  // Continuous-tabs sliding pill (2026-09-10, per Eric) -- see the
+  // .nav-pill comment in style.css for the full reasoning on why this is
+  // JS-positioned rather than hand-placed, and why hover/focus "preview"
+  // the pill instead of trying to fake a cross-page slide.
+  (function initNavPill() {
+    const nav = document.querySelector('nav.main-nav');
+    const activeLink = nav ? nav.querySelector('a.active') : null;
+    if (!nav || !activeLink) return; // e.g. a page with no matching top-nav entry
+    const pill = document.createElement('span');
+    pill.className = 'nav-pill';
+    pill.setAttribute('aria-hidden', 'true');
+    nav.prepend(pill);
+
+    function moveTo(link) {
+      const navR = nav.getBoundingClientRect();
+      const r = link.getBoundingClientRect();
+      // Full rect, not just left/width -- the mobile menu stacks links
+      // into a column (nav.main-nav flex-direction:column below 720px),
+      // so the pill needs to move vertically between rows there, not
+      // just slide horizontally the way the desktop single-row nav does.
+      pill.style.left = (r.left - navR.left) + 'px';
+      pill.style.top = (r.top - navR.top) + 'px';
+      pill.style.width = r.width + 'px';
+      pill.style.height = r.height + 'px';
+    }
+    function toActive() { moveTo(activeLink); }
+
+    // Initial placement happens with the settle-in transition suppressed
+    // (no left/width to animate FROM yet), then the very next frame turns
+    // opacity on -- a pop/settle into place rather than a slide, since a
+    // fresh page load has no real "previous tab" position to slide from.
+    pill.style.transition = 'none';
+    toActive();
+    requestAnimationFrame(() => {
+      pill.style.transition = '';
+      pill.classList.add('settle-in');
+    });
+
+    // Hover and keyboard-focus both preview the pill sliding to whatever
+    // link is currently under the pointer/focus (focusin/focusout bubble,
+    // same reason GZ.buildMarqueeControls uses them over focus/blur), and
+    // it slides back to the true active link once the pointer/focus
+    // leaves the nav entirely -- not per-link, so moving directly from
+    // one link to the next slides pill-to-pill without a snap-back blip
+    // in between.
+    nav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('mouseenter', () => moveTo(a));
+      a.addEventListener('focus', () => moveTo(a));
+    });
+    nav.addEventListener('mouseleave', toActive);
+    nav.addEventListener('focusout', e => {
+      if (!nav.contains(e.relatedTarget)) toActive();
+    });
+
+    window.addEventListener('resize', toActive);
+
+    // Opening/closing the mobile menu (#nav-toggle, a plain checkbox hack)
+    // takes the nav from display:none to a real stacked column or back --
+    // its links' rects don't exist until that toggle fires, so reposition
+    // right after rather than leaving the pill wherever it last was.
+    const navToggle = document.getElementById('nav-toggle');
+    if (navToggle) navToggle.addEventListener('change', () => requestAnimationFrame(toActive));
+  })();
+
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { threshold: 0.12 });

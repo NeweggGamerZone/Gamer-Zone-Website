@@ -177,20 +177,51 @@
          roadmap #1's event-log backend can identify real Diamond
          Ambassadors -- see pickDiamondFlare() in ambassador.js. -->
     <p class="dim">Reaching Diamond earns a spot on this wall. Real Ambassador profiles aren't live yet, so here's an illustrative example of what a Featured Ambassador card looks like.</p>
+    <!-- 2026-09-10, per Eric ("add the expandable profile cards to the
+         featured ambassador cards"): each .host-card can now expand in
+         place into a side-by-side photo/bio layout via .host-expand-btn,
+         instead of duplicating content into a separate hidden panel --
+         .host-photo and .host-body are the SAME real elements in both
+         states, just rearranged by CSS (see .host-card.is-expanded rules
+         in style.css) -- so there's no second copy of this card's text
+         that could ever drift out of sync with the first. The one new
+         element, .host-cta, reuses the exact real "Apply to become an
+         Ambassador" action already on this page (data-amb-open, wired in
+         ambassador.js) rather than inventing new placeholder content for
+         the expanded state -- consistent with the no-fabrication rule
+         this section's own copy above already follows. See
+         assets/js/ambassador.js's expand-card IIFE for the toggle/
+         accordion/Escape-to-close behavior. -->
     <div class="grid cols-3" id="host-grid">
-      <div class="card host-card tier-diamond host-card-example" data-flare="sapphire">
+      <article class="card host-card tier-diamond host-card-example" data-flare="sapphire">
         <span class="node">Diamond</span>
-        <span class="host-example-badge">Example</span>
         <span class="host-tag">Content Creator</span>
-        <div class="host-avatar" aria-hidden="true">EX</div>
-        <h3>Example Ambassador</h3>
-        <p class="host-cat">This is what a real profile will show: name, pillar, focus games, social links, and events hosted -- once Ambassadors start reaching Diamond.</p>
-        <div class="host-social">
-          <a href="#" aria-label="Twitch" tabindex="-1" aria-disabled="true"><i data-ic="twitch"></i></a>
-          <a href="#" aria-label="YouTube" tabindex="-1" aria-disabled="true"><i data-ic="youtube"></i></a>
+        <div class="host-photo">
+          <span class="host-example-badge">Example</span>
+          <div class="host-avatar" aria-hidden="true">EX</div>
         </div>
-        <p class="host-count"><b>&mdash;</b> events hosted</p>
-      </div>
+        <div class="host-body">
+          <h3>Example Ambassador</h3>
+          <p class="host-cat">This is what a real profile will show: name, pillar, focus games, social links, and events hosted -- once Ambassadors start reaching Diamond.</p>
+          <div class="host-social">
+            <a href="#" aria-label="Twitch" tabindex="-1" aria-disabled="true"><i data-ic="twitch"></i></a>
+            <a href="#" aria-label="YouTube" tabindex="-1" aria-disabled="true"><i data-ic="youtube"></i></a>
+          </div>
+          <p class="host-count"><b>&mdash;</b> events hosted</p>
+          <a class="btn host-cta" href="#" data-amb-open>Apply to become an Ambassador</a>
+        </div>
+        <button type="button" class="host-expand-btn" aria-expanded="false">
+          <span class="host-expand-label">View full profile</span>
+          <span class="host-expand-label host-expand-label-close">Close profile</span>
+          <!-- Rotation lives on this wrapping span, not the <i data-ic>
+               itself: main.js's injectIcons() replaces that <i> with an
+               inline <svg> and deliberately does NOT carry its `class`
+               attribute over (GZ.icon() computes the svg's class itself --
+               see injectIcons()'s own comment), so a class placed directly
+               on the <i> would silently vanish the moment the icon loads. -->
+          <span class="host-expand-ic" aria-hidden="true"><i data-ic="arrow" class="ic"></i></span>
+        </button>
+      </article>
     </div>
   </section>
 </main>
