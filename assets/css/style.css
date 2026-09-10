@@ -1060,10 +1060,16 @@ body.home-page { background: transparent; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
 /* 2026-09-03 (per Eric): sized up to match .photo-waterfall's own card
    treatment exactly (was a smaller 168px "peek" strip) and caption
-   overlay removed (alt text stays on the <img> for screen readers). */
-.hero-proof .pw-item { position: relative; flex: 0 0 auto; width: 300px; aspect-ratio: 16/9; overflow: hidden; border-radius: 2px; border: 1px solid var(--line); background: var(--bg-3); }
+   overlay removed (alt text stays on the <img> for screen readers).
+   2026-09-10 (per Eric, "enlarge the home page's photo reel... to make it
+   look more heroic"): sized up again, 300px -> 400px (mobile 220px ->
+   280px) -- still deliberately short of the Past Events waterfall's full
+   450px (that page's photo grid is a primary section in its own right;
+   this is still a supporting element inside the hero), but a real,
+   noticeable size bump rather than a token one. */
+.hero-proof .pw-item { position: relative; flex: 0 0 auto; width: 400px; aspect-ratio: 16/9; overflow: hidden; border-radius: 2px; border: 1px solid var(--line); background: var(--bg-3); }
 .hero-proof .pw-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@media (max-width: 560px) { .hero-proof .pw-item { width: 220px; } }
+@media (max-width: 560px) { .hero-proof .pw-item { width: 280px; } }
 
 /* ---- bulletin photo posts (polaroid) ---- */
 .sticky.has-photo { padding-bottom: 1rem; }
@@ -1112,45 +1118,81 @@ body.home-page { background: transparent; }
 .sg-gold .sg-badge::before { background-image:url('../calendar/BGAssets/majorevent2-bg-blurred.jpg'); }
 .sg-gold .sg-unlock { color:var(--ne-orange); }
 
-.visit-cta-note { font-size:.78rem; color:var(--ink-dim); margin-top:.4rem; }
+.visit-cta-note { font-size:.78rem; color:var(--ink-dim); margin-top:.55rem; }
 
-/* Homepage "Become a Gamer Zone Ambassador" teaser: previously a single
-   flat card of paragraph text + a button, which read as an afterthought
-   next to the game's other gamified sections. Echoes the visual language
-   of the full Ambassador Journey tier ladder on ambassador.html (numbered
-   circle badge, card framing) but as a plain 3-step Apply/Host/Unlock
-   walkthrough rather than the actual 4-tier progression -- this is a
-   teaser for that page, not a duplicate of it, so it stays generic and
-   doesn't reuse the tier-specific colors/labels. */
-.amb-teaser-steps { display:flex; align-items:flex-start; gap:0; margin-top:1.3rem; }
-.amb-teaser-step { flex:1; min-width:0; background:var(--bg-2); border:1px solid var(--line); border-top:3px solid var(--ne-orange); padding:1.1rem 1.2rem 1.3rem; }
-.amb-teaser-num { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:var(--bg-3); border:2px solid var(--ne-orange); color:var(--ne-orange); font-family:var(--head); font-weight:800; font-size:1.05rem; }
+/* 2026-09-10, per Eric: a homepage scroll-journey review found "Reviews"
+   through "Stay in the Loop" reading as four consecutive flat dark-card
+   sections with no photography or motion, right after a hero and About
+   Gamer Zone carousel that both use real venue photography -- a visible
+   energy drop, not just a style nitpick. Shared fix for "Plan your next
+   visit" and "Become a Gamer Zone Ambassador" below: a real-photo
+   background band (the exact bg-image+scrim technique `.eu-board`
+   already established -- ::before for the image layer at z-index:-2,
+   ::after for a dark gradient scrim at z-index:-1, real content sits in
+   normal flow above both) instead of another flat card grid. One shared
+   implementation, not two bespoke ones, per this file's own "before
+   adding a new visual effect, check for an existing one" rule. The image
+   itself is set per-instance via a modifier class below (see that
+   comment for why this ISN'T a `--gz-band-bg` custom property, unlike
+   `.eu-board`'s own `--eu-bg`), using real reel photography already in
+   rotation elsewhere on the page -- not a new/fabricated asset. Scrim is
+   a touch darker than `.eu-board`'s (rgba(4,5,7,.88) at
+   its darkest vs .82) since this band carries body text down to .84rem,
+   smaller than the board's big date/title text, and needs the fuller 7:1
+   AAA floor rather than the board's large-text 4.5:1 allowance --
+   re-verified via the pixel-verified contrast audit after building. */
+.gz-photo-band { position:relative; isolation:isolate; overflow:hidden; border:1px solid var(--line); border-radius:2px; padding:clamp(2rem,5vw,3.2rem) clamp(1.4rem,4vw,2.6rem); }
+.gz-photo-band::before { content:""; position:absolute; inset:0; z-index:-2; background-size:cover; background-position:center; }
+.gz-photo-band::after { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(4,5,7,.72),rgba(4,5,7,.85) 55%,rgba(4,5,7,.88)); }
+.gz-photo-band h2 { text-align:center; }
+.gz-photo-band > p.dim { max-width:640px; margin:0 auto; text-align:center; }
+/* Per-band background image is set here (path relative to this file, in
+   assets/css/), not as an inline `style="--gz-band-bg:url(...)"` custom
+   property on the element. A url() token inside a custom property's value
+   resolves against the base URL of the STYLESHEET where var() is actually
+   substituted in (this file), not the HTML document that declared the
+   property -- so an inline `--gz-band-bg:url('assets/img/reel/...')` was
+   silently resolving to assets/css/assets/img/reel/... (a 404) and the
+   band rendered as flat black with no visible photo at all, caught only
+   by comparing a rendered screenshot's total black against the source
+   photo's actual bright colors. Fixed by giving each real instance its
+   own modifier class here instead, the same relative-to-this-file `../`
+   pattern already used by .sg-badge/.rank-badge tier art above. */
+.gz-band-visit::before { background-image:url('../img/reel/2026-07-25-15-jpg.jpg'); }
+.gz-band-ambassador::before { background-image:url('../img/reel/2026-06-20-10-png.jpg'); }
 
-/* F-09 fix (2026-09-04, external audit "the best copy on the site is
-   hidden at the bottom"): the homepage's closing Discord/community
-   section used to be one dense run-on sentence naming four separate
-   perks (game nights, LFG, tech help/clips, Zone Points) with nothing
-   visualized. This turns those four into a labeled icon-badge row a
-   skimmer can read at a glance, without fabricating any live activity
-   count -- that's Roadmap #1/#2 territory once a real event-log exists.
-   Position stays as the last section on the page; the audit's complaint
-   was that the copy is flat, not that its position alone is disqualifying. */
-.community-card { padding: 1.6rem 1.8rem; }
-.perk-row { display: flex; flex-wrap: wrap; gap: 1.4rem; margin-top: 1.2rem; }
-.perk { display: flex; align-items: center; gap: .6rem; flex: 1 1 190px; min-width: 0; }
-.perk-ic { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; background: var(--bg-3); border: 2px solid var(--ne-orange); color: var(--ne-orange); }
-.perk-ic .ic { width: 20px; height: 20px; }
-.perk-label { font-family: var(--head); font-weight: 800; font-size: .86rem; text-transform: uppercase; letter-spacing: .02em; color: var(--ink); line-height: 1.25; }
-.amb-teaser-step h3 { font-family:var(--head); font-weight:800; text-transform:uppercase; letter-spacing:.03em; font-size:1.02rem; margin:.7rem 0 .35rem; }
-.amb-teaser-step p { font-size:.86rem; line-height:1.45; margin:0; }
-/* A short horizontal rule between steps rather than a full connecting
-   line through the badges (like the tier ladder's own connector) --
-   simpler to keep aligned across 3 equal-width steps, and reads as "next
-   step" without implying these 3 are its own separate tier stack. */
-.amb-teaser-connector { flex:none; align-self:center; width:1.6rem; height:2px; background:var(--line); margin-top:19px; }
-@media (max-width: 720px) {
-  .amb-teaser-steps { flex-direction:column; gap:.9rem; }
-  .amb-teaser-connector { display:none; }
+/* "Plan your next visit": previously a 3-card grid (About / Visit Us /
+   Preregister) where the "About" card's three links (corporate page,
+   Google page, Yelp page) duplicated the Reviews section's own
+   Google/Yelp buttons one scroll above it -- cut as real, disclosed
+   redundancy, not silent information loss. What's left is the one truly
+   non-duplicate job this section does: hours/address (not repeated
+   verbatim anywhere else on this page) and the Preregister CTA. */
+.visit-band-grid { display:flex; flex-wrap:wrap; gap:1.6rem 2.4rem; align-items:center; justify-content:center; margin-top:1.3rem; }
+.visit-band-info { flex:1 1 280px; min-width:0; }
+.visit-band-info p { margin:.35rem 0; }
+.visit-band-cta { flex:1 1 240px; min-width:0; text-align:center; }
+
+/* "Become a Gamer Zone Ambassador": previously a plain Apply/Host/Unlock
+   3-step walkthrough (kept below, now folded into shorter body copy)
+   with nothing visual. Per Eric ("the classes are the cooler part of
+   it"), the teaser now leads with the same three Ambassador classes
+   ambassador.html's own "Choose Your Class" section defines (Community
+   Leader/Esports Host/Event Organizer -- copy trimmed from that page's
+   own real sentences, not reworded from scratch), using real emoji at a
+   large size as the "bigger emoji or image" Eric asked for. No real
+   photo/logo asset for a specific collegiate org (e.g. a USC-affiliated
+   club) exists anywhere in this repo or the connected uploads -- searched
+   both before building this -- so this uses Eric's own stated fallback
+   rather than inventing or guessing at one. */
+.amb-class-teaser { display:flex; gap:1.2rem; margin-top:1.5rem; flex-wrap:wrap; }
+.amb-class-teaser-card { flex:1 1 220px; min-width:0; text-align:center; background:rgba(4,5,7,.5); border:1px solid rgba(255,255,255,.16); border-radius:2px; padding:1.5rem 1.1rem 1.3rem; }
+.amb-class-teaser-emoji { display:block; font-size:3.1rem; line-height:1; margin-bottom:.55rem; filter:drop-shadow(0 2px 8px rgba(0,0,0,.55)); }
+.amb-class-teaser-card h3 { font-family:var(--head); font-weight:800; text-transform:uppercase; letter-spacing:.03em; font-size:1rem; margin:.2rem 0 .4rem; }
+.amb-class-teaser-card p { font-size:.84rem; line-height:1.45; margin:0; }
+@media (max-width:720px) {
+  .amb-class-teaser { flex-direction:column; }
+  .visit-band-grid { text-align:center; justify-content:center; }
 }
 
 /* rolling partner banner (home bottom) */
@@ -1763,7 +1805,16 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    marquee dropped into a similar non-stretch flex context would hit the
    identical bug -- see the nested-flex overflow gotcha already documented
    under "One shared container width" for the same root cause elsewhere. */
-.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+/* 2026-09-10, per Eric ("have it fade closer to the edges, to make it
+   look more heroic"): fade zone widened 6%/94% -> 16%/84% -- the old
+   values were narrow enough to read as a near-hard crop at typical
+   viewport widths rather than a visible fade. Shared class, so this
+   reaches every gz-marquee instance site-wide (hero-proof, the Past
+   Events waterfall, the Reviews waterfall) deliberately, not just the
+   homepage -- re-screenshotted all three after the change to confirm
+   none of them now fades so early that a card near the edge reads as
+   half-erased rather than gently dissolving. */
+.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent)}
 .gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
 .gz-marquee-track.rev{animation-direction:reverse}
 @keyframes gz-marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}

@@ -480,6 +480,42 @@ Triggered by a deeper homepage scroll-journey review this session: real Puppetee
 
 **Still open, proposed but not yet implemented (per Eric's explicit ask to review before touching more sections):** folding "Plan Your Next Visit," "Become a Gamer Zone Ambassador," and "Stay in the Loop" into fewer, denser sections with real venue photography worked in, rather than three more consecutive flat-card blocks; shipping the already-built (unused) "Most Dedicated Gamers" leaderboard was explicitly deferred by Eric as too much manual upkeep right now; promoting Discord into the primary nav was explicitly declined by Eric -- in-person visits are the priority draw, not the Discord community, so nav real estate shouldn't imply otherwise.
 
+## Part 2ai -- Homepage bottom-half consolidation shipped; hero photo reel enlarged (2026-09-10)
+
+Eric's go-ahead on the "still open" item above: **"Plan Your Next Visit"** and **"Become a
+Gamer Zone Ambassador"** are no longer flat card grids -- both are now real-photo-backed
+`.gz-photo-band` sections (see CLAUDE.md's new section of the same name), and **"Stay in the
+Loop"** as a standalone section is gone entirely, folded into a new "Newsletter" link at the
+top of the footer's existing Connect column (alongside Instagram, Discord, Email) rather than
+kept as its own bottom-of-page block. The Ambassador band's three class cards use large emoji
+(shield/swords/bow) instead of small SVG icons or a real USC/collegiate photo -- Eric asked to
+try pulling a real collegiate image first; a repo-wide search turned up none, so the emoji
+fallback he explicitly offered as a backup was used instead, disclosed rather than silently
+substituted. The "Most Dedicated Gamers" leaderboard idea stays deferred (Eric: too much
+manual upkeep to quantify right now) and Discord stays out of primary nav (Eric: in-person
+visits are the priority draw) -- both unchanged from the "still open" note above, now resolved
+as intentionally-not-done rather than pending.
+
+Separately, per Eric's "make the photo reels look more heroic" ask: the homepage hero's
+`.hero-proof` real-photo marquee strip grew (`300px`→`400px` desktop, `220px`→`280px` mobile),
+and the shared `.gz-marquee` edge-fade mask widened (`6%/94%`→`16%/84%` of each marquee's own
+width) -- reaching hero-proof, the Reviews waterfall, and the Past Events waterfall on
+`events.html` simultaneously, since it's one shared class.
+
+**A real bug was caught and fixed during verification, not just a design polish item:** both
+new photo bands initially rendered as solid black with no photo visible at all, due to a
+`url()`-in-inline-custom-property resolving against the wrong base URL (full root-cause and
+fix in CLAUDE.md's "gz-photo-band" section). Re-verified via the full pixel-verified contrast
+audit (708 text items across all 5 pages, 0 failures), the container-width check (0 findings),
+the console/error smoke test (0 errors across all 5 pages), and full-page screenshots at
+mobile/tablet/desktop confirming both new bands render with real, readable photography and
+that the Ambassador band's third card wraps cleanly (centered on its own row) at tablet width.
+
+**Still open:** the site-wide "how do we look less vibecoded" analysis Eric asked for next is
+a separate, explicitly-sequenced follow-up -- not started as of this entry, per the standing
+"open-ended issues get proposed, not implemented" rule, since it spans every page and has more
+than one reasonable direction.
+
 ---
 
 ## Part 3 — Simulated user feedback

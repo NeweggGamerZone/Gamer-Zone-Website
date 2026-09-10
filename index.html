@@ -369,70 +369,47 @@
   </section>
 
   <section id="visit" class="reveal">
-    <h2>Plan your next visit</h2>
-    <div class="grid cols-3">
-      <div class="card tilt">
-        <i data-ic="globe" data-lg></i><h3>About</h3>
-        <p class="dim">Read more about us, see photos, and check out what other gamers are saying.</p>
-        <p style="margin-top:.6rem"><a data-cfg-href="gamerZoneUrl" href="#">Newegg Gamer Zone</a></p>
-        <p style="margin-top:.3rem"><a data-cfg-href="googlePageUrl" href="#">Our Google page</a></p>
-        <p style="margin-top:.3rem"><a data-cfg-href="yelpUrl" href="#">Reviews on Yelp</a></p>
-      </div>
-      <div class="card tilt">
-        <i data-ic="clock" data-lg></i><h3>Visit Us</h3>
-        <p data-cfg="hours"></p>
-        <p style="margin-top:.4rem"><a data-cfg="phone" data-cfg-href-tel href="#"></a></p>
-        <p style="margin-top:.6rem"><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a></p>
-        <p class="dim">Inside Newegg HQ. Free parking. Tap the address for directions.</p>
-      </div>
-      <div class="card tilt">
-        <i data-ic="run" data-lg></i><h3>Preregister Now</h3>
-        <p class="dim" data-verkada-note>Preregister below for a faster check-in.</p>
-        <p style="margin-top:.7rem"><a class="btn" data-verkada href="#">PREREGISTER</a></p>
-        <p class="visit-cta-note">Walk-ins always welcome — free to play, no purchase or account required.</p>
+    <div class="gz-photo-band gz-band-visit">
+      <h2>Plan your next visit</h2>
+      <div class="visit-band-grid">
+        <div class="visit-band-info">
+          <p data-cfg="hours"></p>
+          <p><a data-cfg="phone" data-cfg-href-tel href="#"></a></p>
+          <p><a data-cfg="address" data-cfg-href="mapsUrl" href="#"></a></p>
+          <p class="dim">Inside Newegg HQ. Free parking. Tap the address for directions.</p>
+        </div>
+        <div class="visit-band-cta">
+          <p class="dim" data-verkada-note>Preregister below for a faster check-in.</p>
+          <p style="margin-top:.7rem"><a class="btn" data-verkada href="#">PREREGISTER</a></p>
+          <p class="visit-cta-note">Walk-ins always welcome — free to play, no purchase or account required.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="reveal">
-    <h2>Become a Gamer Zone Ambassador</h2>
-    <p class="dim">Community leaders, esports teams, event organizers, and influencers: we're giving you the power to bring your community to the Zone. Host recurring events with us and unlock more with every one you run.</p>
-    <div class="amb-teaser-steps">
-      <div class="amb-teaser-step">
-        <span class="amb-teaser-num">1</span>
-        <h3>Apply</h3>
-        <p class="dim">Tell us your event type, community, and expected attendance.</p>
+  <section id="amb-teaser" class="reveal">
+    <div class="gz-photo-band gz-band-ambassador">
+      <h2>Become a Gamer Zone Ambassador</h2>
+      <p class="dim">Host recurring events with us and unlock more with every one you run — pick the class that fits how your community plays.</p>
+      <div class="amb-class-teaser">
+        <div class="amb-class-teaser-card">
+          <span class="amb-class-teaser-emoji" aria-hidden="true">🛡️</span>
+          <h3>Community Leader</h3>
+          <p class="dim">Community organizers and content creators who rally gamers and fans for meetups and LAN sessions.</p>
+        </div>
+        <div class="amb-class-teaser-card">
+          <span class="amb-class-teaser-emoji" aria-hidden="true">⚔️</span>
+          <h3>Esports Host</h3>
+          <p class="dim">Collegiate teams, clubs and leagues that want a home venue for scrims, tryouts, and tournaments.</p>
+        </div>
+        <div class="amb-class-teaser-card">
+          <span class="amb-class-teaser-emoji" aria-hidden="true">🏹</span>
+          <h3>Event Organizer</h3>
+          <p class="dim">Creators, vendors, and local businesses who run showcases, watch parties, and competitions.</p>
+        </div>
       </div>
-      <div class="amb-teaser-connector" aria-hidden="true"></div>
-      <div class="amb-teaser-step">
-        <span class="amb-teaser-num">2</span>
-        <h3>Host</h3>
-        <p class="dim">Run your event at the Zone, free, on your own schedule.</p>
-      </div>
-      <div class="amb-teaser-connector" aria-hidden="true"></div>
-      <div class="amb-teaser-step">
-        <span class="amb-teaser-num">3</span>
-        <h3>Unlock</h3>
-        <p class="dim">Climb the tiers and earn gift cards, catered meals, and more.</p>
-      </div>
-    </div>
-    <p style="margin-top:1.3rem;text-align:center"><a class="btn" href="ambassador.html">Explore the Ambassador program</a></p>
-  </section>
-
-  <section class="reveal">
-    <h2>Stay in the loop</h2>
-    <div class="card community-card">
-      <p>Never miss out on a Gamer Zone event or giveaway! Special giveaways, game nights, tournaments, and exclusive events, straight to your inbox.</p>
-      <div class="perk-row">
-        <div class="perk"><span class="perk-ic"><i data-ic="coin"></i></span><span class="perk-label">Special Giveaways</span></div>
-        <div class="perk"><span class="perk-ic"><i data-ic="gamepad"></i></span><span class="perk-label">Game Nights</span></div>
-        <div class="perk"><span class="perk-ic"><i data-ic="trophy"></i></span><span class="perk-label">Tournaments</span></div>
-        <div class="perk"><span class="perk-ic"><i data-ic="ticket"></i></span><span class="perk-label">Exclusive Events</span></div>
-      </div>
-      <div class="btn-row" style="margin-top:1.1rem;justify-content:center">
-        <a class="btn navy" data-cfg-href="newsletterEmailUrl" href="#">Sign up for our Newsletter</a>
-        <a class="btn ghost" data-cfg-href="instagramUrl" href="#">Follow our Instagram</a>
-      </div>
+      <p class="dim" style="margin-top:1.1rem;text-align:center">Apply, host free at the Zone, then climb the tiers to unlock gift cards, catered meals, and more.</p>
+      <p style="margin-top:.9rem;text-align:center"><a class="btn" href="ambassador.html">Explore the Ambassador program</a></p>
     </div>
   </section>
 </main>
@@ -498,6 +475,15 @@
       </div>
       <div>
         <h4>Connect</h4>
+        <!-- 2026-09-10: "Stay in the Loop" (its own standalone homepage
+             section -- giveaways/game-nights/tournaments/exclusive-events
+             icon badges, a newsletter button, an Instagram button) was
+             the thinnest section on the page: no supporting proof, just
+             claims, and its one non-duplicate link (newsletter signup) is
+             a single footer-row's worth of content, not a full section's
+             worth of scroll. Instagram was already a footer link above;
+             only the newsletter signup was genuinely new here. -->
+        <a class="ftr-link" data-cfg-href="newsletterEmailUrl" href="#"><i data-ic="mail"></i><span>Newsletter</span></a>
         <a class="ftr-link" data-cfg-href="instagramUrl" href="#"><i data-ic="instagram"></i><span>Instagram</span></a>
         <a class="ftr-link" data-cfg-href="discordUrl" href="#"><i data-ic="gamepad"></i><span>Discord</span></a>
         <a class="ftr-link" href="#" data-mailto><i data-ic="mail"></i><span>Email</span></a>

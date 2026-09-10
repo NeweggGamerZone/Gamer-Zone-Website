@@ -306,6 +306,69 @@ A second shared implementation under that same broader rule, added 2026-08-26 fo
 
 **Hover/focus pause+skip controls (`GZ.buildMarqueeControls()` in main.js, `.gz-marquee-controls` in style.css), added 2026-09-08 as the F-13 (WCAG 2.2.2, "Pause, Stop, Hide") fix.** Built once per `GZ.marquee()` container in the same non-reduced-motion branch that starts the animation — a real, persistent DOM element for the container's lifetime, so it needs no extra wiring to survive a Past Events `<details>` gallery being closed and reopened. Hovering or keyboard-focusing (`focusin`/`focusout`, which bubble, not `focus`/`blur`) the lane reveals a `rgba(0,0,0,.6)` overlay (dark enough to read clearly, translucent enough that the real content still shows through) with far-left/far-right skip buttons and a center play/pause toggle — the motion itself keeps running underneath the overlay; hovering only surfaces the controls, it does not pause anything on its own (corrected 2026-09-08 same day, per Eric: the first version auto-paused on hover, which he explicitly did not want). Motion only stops when the visitor clicks the play/pause button. Leaving the lane always resets to the default running state and hides the controls, regardless of whatever the play/pause button was set to while hovered — a manual pause is scoped to "while I'm looking at this," not a standing preference that should survive the visitor moving on (or survive a Past Events accordion being closed and reopened — see the `gzHardPaused` dataset flag's handling in `resyncMarquee`). Skipping one card is a smooth animated motion (a temporary `playbackRate` boost polled via `requestAnimationFrame` to an exact target `Animation.currentTime`), not an instant jump, per Eric's explicit spec; a skip completes into "playing" unless the lane was already manually paused (`gzHardPaused`). Not built at all in the `prefers-reduced-motion: reduce` branch — that variant is already fully static with no motion to pause, so WCAG 2.2.2 doesn't apply there. Any future "many items scrolling past" component built on `GZ.marquee()` gets this control scheme automatically, for free — that's the point of it living here instead of per-instance. **Important:** any `GZ.marquee()` instance living inside a flex container whose cross-axis isn't `align-items:stretch` (e.g. `.hero-stage`'s `align-items:center`) needs its container/wrapper explicitly width-constrained (`width:100%;min-width:0`) — see the "One shared container width" section's nested-flex gotcha and the `.hero-proof-wrap` bug fixed the same day this control scheme shipped, where the un-clipped, duplicated `.gz-marquee-track` content (tens of thousands of px wide) blew the flex item's intrinsic width out to match, silently pushing the skip buttons far off-screen even though they were technically still `opacity:1` and in the DOM.
 
+## Shared photo-backed section ("gz-photo-band") and a real url()-in-custom-property bug
+
+Added 2026-09-10, per Eric's go-ahead to fold the homepage's "boring bottom half" into
+denser, more heroic sections: `.gz-photo-band` in `style.css` (search "gz-photo-band") is
+now the one shared implementation for "a section with real body text sitting on top of a
+dimmed real photo," reusing the exact `::before`(image)/`::after`(scrim) two-pseudo-element
+pattern `.eu-board` already established, per the standing "one shared implementation, not
+several near-identical ones" rule. Two live instances exist so far on `index.html`: the
+"Plan your next visit" section (`#visit`, modifier class `.gz-band-visit`) and "Become a
+Gamer Zone Ambassador" (`#amb-teaser`, modifier class `.gz-band-ambassador`), replacing what
+used to be a plain 3-card grid and a 3-step numbered teaser respectively. The Ambassador
+band's three class cards (Community Leader/Esports Host/Event Organizer) use large emoji
+(🛡️⚔️🏹, `font-size:3.1rem`) rather than the small SVG glyphs `ambassador.html` uses for the
+same classes — a deliberate, disclosed fallback: Eric asked for "bigger emojis or images,"
+and a repo-wide search (html/js/json/md, uploads folder, filenames) turned up no real
+USC/collegiate photo or logo asset to use instead. If one is ever supplied, swap it in
+directly per the no-fabrication rule's honest-alternative principle — the emoji fallback
+isn't meant to be permanent, just the honest option given what actually existed.
+
+**A real bug, not just a screenshot artifact, was caught and fixed while verifying this:**
+the first version set each band's photo via an inline `style="--gz-band-bg:url('assets/img/
+reel/...')"` custom property, with `.gz-photo-band::before` doing `background-image:var(
+--gz-band-bg)`. Both bands rendered as **solid black with the scrim but no photo at all** —
+caught by comparing a rendered screenshot's total black against the source photo's own
+actual bright colors (a neon-lit gaming photo and a colorful event photo, neither remotely
+black), the same "don't trust the CSS on paper, render it" discipline the sizing rules
+already require. Root cause: a `url()` token inside a CSS custom property's *value* resolves
+against the base URL of the **stylesheet where `var()` is actually substituted in** (this
+project's `style.css`, which lives in `assets/css/`), not the HTML document that declared the
+property on the element. So `--gz-band-bg:url('assets/img/reel/2026-07-25-15-jpg.jpg')`,
+declared inline on an `index.html` element but consumed inside `style.css`, was silently
+resolving to `assets/css/assets/img/reel/2026-07-25-15-jpg.jpg` — a 404, confirmed via a
+Puppeteer network-request check, not just inspection. **Fixed by dropping the inline custom
+property entirely** in favor of two real modifier classes (`.gz-band-visit`,
+`.gz-band-ambassador`) that each set `background-image` directly inside `style.css` itself,
+using the exact same relative-to-this-file `../img/reel/...` pattern the `.sg-badge`/
+`.rank-badge` tier-art rules already use a few hundred lines up — consistent with the site's
+existing convention (confirmed by grepping every other `background-image:url(...)` in the
+file) rather than a one-off fix. **Lesson for next time:** never set a `url()`-valued custom
+property inline on an HTML element for a value that's consumed inside an external
+stylesheet — give the real instance its own class in the stylesheet instead, the same way
+every other per-variant background-image on this site already works.
+
+Both bands' scrim (`rgba(4,5,7,.72)` to `.85` to `.88`, slightly darker than `.eu-board`'s
+own `.82` peak) was re-verified via the full pixel-verified contrast audit after the fix —
+708 real text items across all 5 pages, 0 failures — since this was the first time real
+body copy (not just a big date/title) sat directly on top of a real photo rather than a
+flat/gradient background.
+
+## Homepage photo reel and shared marquee edge-fade, widened 2026-09-10
+
+Per Eric's "enlarge the photo reels, make it look more heroic" request: `.hero-proof .pw-item`
+(the homepage hero's real-photo marquee strip) grew from `300px`→`400px` desktop and
+`220px`→`280px` mobile — the same `GZ.marquee()`/`photo-waterfall.js` mechanism as before,
+just a bigger card size, no new component. Separately, `.gz-marquee`'s shared `mask-image`
+edge fade widened from `6%/94%` to `16%/84%` of each marquee's own box width — this reaches
+**every** `.gz-marquee` consumer site-wide at once (hero-proof, the Reviews waterfall, and
+the Past Events waterfall on `events.html`), which is the point of it being one shared class;
+verified via real screenshots and a direct pixel sample across the hero-proof strip's left
+edge (near-black at x=0 rising to full brightness by roughly the 16% mark) that the fade is
+a genuine gradient and not just a hard crop, plus a full-page screenshot of `events.html` to
+confirm the wider fade didn't visually break the other two consumers.
+
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
 `GZ.openStatus(cfg)` in `assets/js/main.js`, added 2026-08-28 for the homepage hero's `.hero-status` line, is the reference example for what core rule 4 ("never fabricate a specific fact") looks like applied to something that changes by the minute rather than something static. It computes real open/closed state from `data/config.json`'s `hoursSchedule` (structured days/open/close/timeZone, added alongside the existing plain-text `hours` string so both stay in sync from one source rather than drifting), evaluated in the **venue's** timezone (`America/Los_Angeles`), not the visitor's — a visitor in a different timezone should see whether Diamond Bar is actually open right now, not a status computed against their own local clock. If `hoursSchedule` is ever missing, `.hero-status` removes itself entirely rather than showing nothing-in-particular or a stale guess. Any future "right now" claim on the site (a live queue length, a "X spots left" count, anything time- or state-sensitive) should follow this same pattern: compute it for real from real data at render time, and have it disappear rather than lie if that data isn't available.
