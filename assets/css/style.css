@@ -204,8 +204,24 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 
 /* Newegg CTA button standard: pill shape, Open Sans, sentence case (only
    the first letter capitalized — no forced uppercase/title-case). */
-.btn { position: relative; overflow: hidden; display: inline-block; background: var(--ne-orange); color: #000; font-family: var(--eu-body); font-weight: 700; text-transform: none; letter-spacing: normal; padding: .72rem 1.6rem; border: none; cursor: pointer; font-size: .95rem; border-radius: 999px; }
-.btn:hover { background: #ffb54d; text-decoration: none; }
+/* 2026-09-09, per Eric ("consistify the look of all buttons... the dark
+   orange outline like the 1-2-3 and the preregister"): every primary CTA
+   button now uses the same two-tone orange gradient `.reg-step-num` and
+   `.pin-btn` already used — background:var(--ne-orange) alone read
+   flatter/less "finished" next to those two. Gradient dark end is
+   `var(--ne-orange-deep)`, NOT `.reg-step-num`'s old hardcoded `#c96f10`
+   (that value is darker and was only proven safe for `.reg-step-num`'s
+   large 24.8px bold text, which only needs 4.5:1 -- `.btn` text is
+   smaller and needs the full 7:1 AAA floor). `var(--ne-orange-deep)` is
+   the value already used by `.pin-btn`, whose own text is just as small
+   and bold as `.btn`'s and has passed every full contrast audit this
+   project has run -- so it's the one gradient dark-end proven safe at
+   this text size, and `.reg-step-num` was brought onto it too (see its
+   own rule below) so there's exactly one gradient definition site-wide,
+   not two similar-but-different ones. Hover swapped from a flat color
+   swap to `.pin-btn`'s brightness-filter treatment for the same reason. */
+.btn { position: relative; overflow: hidden; display: inline-block; background: linear-gradient(145deg, var(--ne-orange), var(--ne-orange-deep)); color: #000; font-family: var(--eu-body); font-weight: 700; text-transform: none; letter-spacing: normal; padding: .72rem 1.6rem; border: none; cursor: pointer; font-size: .95rem; border-radius: 999px; }
+.btn:hover { filter: brightness(1.08); text-decoration: none; }
 .btn.ghost { background: transparent; color: var(--ne-orange); box-shadow: inset 0 0 0 2px var(--ne-orange); }
 .btn.navy { background: var(--ne-navy-glow); color: #fff; }
 .btn-row { display: flex; gap: .8rem; flex-wrap: wrap; }
@@ -315,11 +331,17 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    uses (.btn, .tag.orange, .chip.active, .node, .pin-btn, etc). White
    measured 2.12:1 at the gradient's light end and 3.64:1 at its dark
    end -- both well under WCAG AAA's 4.5:1 large-text minimum. Black
-   clears 9.92:1 / 5.76:1 at the same two points -- still not a full
-   7:1 at the darkest corner, but this text is 24.8px bold (>=24px
+   clears 9.92:1 at the light end; this text is 24.8px bold (>=24px
    counts as "large text" under AAA, whose bar there is 4.5:1, not
-   7:1), so it's a comfortable pass throughout the gradient. */
-.reg-step-num { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, var(--ne-orange), #c96f10); color: #000; font-family: var(--head); font-weight: 800; font-size: 1.55rem; box-shadow: 0 0 0 4px rgba(250,157,40,.18), 0 6px 18px rgba(0,0,0,.4); }
+   7:1), so it's a comfortable pass throughout the gradient.
+   2026-09-09: gradient dark end changed from a hardcoded `#c96f10` to
+   `var(--ne-orange-deep)` -- same token `.btn` and `.pin-btn` now both
+   use (see `.btn`'s own comment above), so there's exactly one orange
+   gradient definition site-wide instead of two near-identical ones that
+   could drift apart. `--ne-orange-deep` (#E07C00) is lighter than the
+   old `#c96f10`, so this only *improves* black-text contrast here, never
+   worsens it. */
+.reg-step-num { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, var(--ne-orange), var(--ne-orange-deep)); color: #000; font-family: var(--head); font-weight: 800; font-size: 1.55rem; box-shadow: 0 0 0 4px rgba(250,157,40,.18), 0 6px 18px rgba(0,0,0,.4); }
 .reg-step h3 { text-align: center; }
 .reg-step p.dim { text-align: left; }
 /* 2026-09-08, per Eric: the separate "Fastest way to check in" callout box
@@ -752,7 +774,7 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 .site-footer { border-top: 2px solid var(--ne-navy); background: var(--bg-2); margin-top: 3rem; }
 .site-footer .container { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); padding: 2rem var(--safe-x); }
 .site-footer h4 { font-family: var(--head); color: var(--ne-orange); margin-bottom: .5rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
-.site-footer p, .site-footer a { font-size: .9rem; color: var(--ink); display: block; overflow-wrap: anywhere; }
+.site-footer p, .site-footer a { font-size: 1rem; color: var(--ink); display: block; overflow-wrap: anywhere; }
 /* Logo + permanent address/hours stack vertically underneath it (not just a
    bare centered image) so visitors can see where/when to visit without
    clicking anything. Sits leftmost, next to the link columns — the footer is
@@ -787,13 +809,20 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
    separate elements might imply. */
 /* F-14 (2026-09-08): rows measured 19-30px tall depending on page/link --
    short of the 44px floor entirely because of low padding, not icon/text
-   size. Bumped vertical padding so the tappable row reaches 44px while
-   the icon and label keep their exact current visual size -- a pure
-   "grow the invisible tap zone" fix, same principle as .zone-stack-dot
-   and .pin-close above but via padding since this is a block-level row,
-   not a small isolated icon needing a pseudo-element. */
-.ftr-link { display: flex; align-items: center; gap: 1.15rem; padding: .8rem 0; color: var(--ink); transition: color .15s ease; }
-.ftr-link .ic { width: 18px; height: 18px; flex: none; fill: currentColor; transition: transform .15s ease; }
+   size. First fix bumped vertical padding alone (.18rem -> .8rem) to
+   reach 44px with the icon/label untouched, but that read as too much
+   dead space stacked down a column on desktop (2026-09-09, per Eric:
+   "why does the footer have so much space in between... make the footer
+   buttons a bit larger" -- i.e. grow the real content, don't just pad
+   around it). Rebalanced: padding pulled back to .6rem and the icon/text
+   grown instead (icon 18px -> 20px; the shared `.site-footer p, a` font
+   bump to 1rem above covers the label) -- row height lands around the
+   same ~44px floor, but more of that height is real visible
+   icon+label instead of empty padding, so a column of several links
+   reads tighter on desktop while still hitting the touch-target size on
+   mobile. */
+.ftr-link { display: flex; align-items: center; gap: 1.15rem; padding: .6rem 0; color: var(--ink); transition: color .15s ease; }
+.ftr-link .ic { width: 20px; height: 20px; flex: none; fill: currentColor; transition: transform .15s ease; }
 .ftr-link:hover, .ftr-link:focus-visible { color: var(--ne-orange); }
 .ftr-link:hover .ic, .ftr-link:focus-visible .ic { transform: scale(1.18); }
 .legal { max-width: 860px; margin: 0 auto; padding: .4rem var(--safe-x) 1rem; text-align: center; color: var(--ink-dim); font-size: .74rem; line-height: 1.55; }
