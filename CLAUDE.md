@@ -215,6 +215,64 @@ specifically, scope the selector to that board's id explicitly — a bare
 `.eu-board` rule silently reaches every board on the site, including ones
 whose JS never runs to protect against it.
 
+## Weekly Lineup: the live board dropped the forced 1:1 square (2026-09-09)
+
+Supersedes this file's own "top-aligned square" framing above for the
+**live homepage board specifically** — `#month`/`screenshot-monthly-
+calendar.html` and the closure-line/monthly-drift lessons above are
+unaffected. Per Eric: on a normal (1-2 event) week the forced square left
+roughly half the box as dead black space below the content, right after
+the hero's own high-energy scroll — the opposite of the "wowed" soft
+goal. `html:not(.board-mode) #week .eu-board`'s `aspect-ratio:1/1` was
+dropped entirely; the box now sizes to its own real content again (the
+same min-height-as-floor-not-forced-height principle the container &
+sizing rules above already use everywhere else), reading as a short,
+dense horizontal banner on a normal week instead of a half-empty square.
+
+**Why this was safe to do without touching `fitBoard()`:** that function
+(`assets/js/event-update.js`) reads `board.clientHeight` vs
+`inner.scrollHeight` generically — it has never cared whether
+`clientHeight` came from a forced aspect-ratio or natural content flow,
+so a genuinely busy week still gets exactly the same shrink-to-fit safety
+net as before, unchanged. **Why this was safe re: the social exports:**
+`scripts/capture-social-images.mjs`'s `board-mode` capture pipeline
+computes its own height independently (its own `justify-content:center`
++ margin/padding overrides, all still scoped to `html.board-mode`) and
+crops externally via `sharp` afterward — it was never reading this
+element's live-page height in the first place, confirmed by tracing the
+script before touching anything.
+
+**The icon needed its own cap, separately.** The live page's `.eu-board-
+icon img` sizing (`max-height:min(66cqw,540px)`) was tuned specifically
+to fill a square's leftover space — once that space no longer exists,
+the icon alone was still consuming ~500px and the box barely got shorter
+at all after dropping the square. Capped down to `min(30cqw,200px)` for
+the live board only (`html:not(.board-mode) #week .eu-board-icon img`),
+roughly the same visual weight the icon already uses in the 16:9
+social-export capture (`html.board-mode`'s own 340px cap) — kept as a
+real decorative touch, not hidden outright, since a themed week's icon is
+still a genuine "wow" flourish worth keeping in a compact banner.
+
+**Real, disclosed tradeoff at mobile width:** desktop dropped from
+~1124px tall to ~769px (32% shorter) and tablet from ~825px to ~634px —
+both read as an intentional, dense banner now (verified via real
+Puppeteer screenshots at 1400/800/390px, current live data, per core
+rule 5). At 390px, height stayed roughly flat (~960-1055px either way)
+because a long event title genuinely needs 3-4 wrapped lines at that
+width regardless of box shape — that's a pre-existing font-size/wrapping
+reality, not something this change created. The real difference at
+mobile: before, that same wrapped content was being forced into a hard
+358×358 square via `transform:scale()`, whose documented 0.55 floor
+means a week needing more shrinkage than that gets its overflow
+silently clipped by the square's `overflow:hidden` rather than shown —
+a real, pre-existing risk for a content-heavy week at narrow widths.
+Natural height removes that risk entirely (nothing to clip against) at
+the cost of a longer mobile scroll on weeks with long titles. Re-verify
+this specific tradeoff if a future week's content is unusually dense.
+
+Re-ran the full pixel-verified contrast audit after this change: 727
+text items across 5 pages, 0 failures.
+
 ## Sep 1-5 Riot Games Week uses the flag icon on a light week
 
 `weeklyThemes[].icon` (`data/events.json`) already existed as a per-week

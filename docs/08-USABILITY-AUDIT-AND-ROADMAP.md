@@ -472,6 +472,16 @@ Continuation of a prior session whose sandbox died before these already-decided 
 
 ---
 
+## Part 2ah -- Weekly Lineup live board: dropped the forced square in favor of a horizontal banner (2026-09-09)
+
+Triggered by a deeper homepage scroll-journey review this session: real Puppeteer screenshots of the full live homepage (hero through footer) confirmed two separate problems Eric had flagged from memory -- the Weekly Lineup board reading as roughly half dead black space on a normal (1-2 event) week, and everything from "What gamers are saying" onward reading as four consecutive sections in the same flat dark-card treatment with no photography or motion beyond the generic scroll-fade every section already gets.
+
+**Weekly Lineup fix, shipped this round:** `html:not(.board-mode) #week .eu-board`'s forced `aspect-ratio:1/1` (added 2026-08-26, see CLAUDE.md's own history on it) was dropped entirely for the live homepage board -- it now sizes to its real content again, the same min-height-as-floor principle the container/sizing rules already use everywhere else. Paired with a new, smaller icon cap scoped to the live board only (`min(30cqw,200px)`, matching the visual weight the icon already uses in the 16:9 social-export capture, rather than the square-era `540px` cap that was still consuming ~500px on its own). Real measurements: desktop 1124px -> 769px (32% shorter), tablet 825px -> 634px (23% shorter); mobile stayed roughly flat (~960-1055px either way) because a long event title genuinely needs several wrapped lines at 390px regardless of box shape -- a pre-existing font-size/wrapping reality, not something this change introduced. The real difference at mobile: the old forced square's `fitBoard()` safety net has a documented 0.55 shrink floor, meaning a content-heavy week needing more shrinkage than that would have its overflow silently clipped rather than shown -- natural height removes that risk entirely. Full reasoning, and why this was safe to ship without touching `fitBoard()` or the `scripts/capture-social-images.mjs` export pipeline (both confirmed independent of this element's live-page height), is in CLAUDE.md's new "Weekly Lineup: the live board dropped the forced 1:1 square" section. Verified via the pixel-verified contrast audit (727 items, 0 failures) and the console/width scripted checks (0 findings) after the change.
+
+**Still open, proposed but not yet implemented (per Eric's explicit ask to review before touching more sections):** folding "Plan Your Next Visit," "Become a Gamer Zone Ambassador," and "Stay in the Loop" into fewer, denser sections with real venue photography worked in, rather than three more consecutive flat-card blocks; shipping the already-built (unused) "Most Dedicated Gamers" leaderboard was explicitly deferred by Eric as too much manual upkeep right now; promoting Discord into the primary nav was explicitly declined by Eric -- in-person visits are the priority draw, not the Discord community, so nav real estate shouldn't imply otherwise.
+
+---
+
 ## Part 3 — Simulated user feedback
 
 Fictional personas, built to stress-test the site from different angles. Not real visitors or real quotes — a planning aid, standing in for the round of real testing Eric is about to run himself. Tightened to one change apiece: if this persona could change exactly one thing, what would it be.

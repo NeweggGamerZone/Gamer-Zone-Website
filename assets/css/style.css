@@ -2038,7 +2038,28 @@ a.btn:hover{box-shadow:0 6px 20px rgba(250,157,40,.25)}
    opened it plain. #month's own file-header comment already says this
    layout "intentionally differs" from the square design -- scoping this
    rule to #week restores that intent instead of fighting it. */
-html:not(.board-mode) #week .eu-board{aspect-ratio:1/1;min-height:0;justify-content:flex-start}
+/* 2026-09-09, per Eric: reverted the forced 1:1 square on the LIVE
+   homepage board specifically -- a normal (1-2 event) week only fills
+   about half that square, leaving a large dead-black gap between the
+   last row/icon and the box's own bottom edge, right after the hero's
+   high-energy scroll. Dropping `aspect-ratio:1/1` lets the box size to
+   its own real content again (masthead + rows + icon), the same
+   min-height-as-floor-not-forced-height principle this file's container
+   & sizing rules already use everywhere else -- so a light week reads as
+   a short, dense "horizontal graphic"-style banner (closer to the
+   16:9 social-export's own look, which is really just a top-anchored
+   crop of this same natural-height content -- see
+   scripts/capture-social-images.mjs) instead of a half-empty square, and
+   a genuinely busy week still just grows taller/relies on fitBoard()'s
+   existing --eu-scale safety net exactly as before (that function reads
+   clientHeight vs scrollHeight generically -- it doesn't care whether
+   clientHeight came from a forced square or natural content flow, so no
+   JS changes were needed). board-mode's own export pipeline is completely
+   untouched -- it already computes its own height independently of this
+   rule (its own justify-content:center + margin/padding overrides further
+   down), and capture-social-images.mjs crops externally via sharp
+   afterward regardless of what this element's live-page height is. */
+html:not(.board-mode) #week .eu-board{min-height:0;justify-content:flex-start}
 /* .eu-board-inner takes over .eu-board's own former flex-column role for
    its children (.board-logo's align-self:center, .eu-bottom-group's
    board-mode margin-top:auto, etc. all still assume a flex-column
@@ -2224,6 +2245,20 @@ html:not(.board-mode) .eu-board-icon{margin-top:0}
    floor into new clipping -- if a future week is busier still, re-check
    at 390px before assuming this cap is still safe. */
 .eu-board-icon img{width:auto;height:auto;max-width:min(80%,720px);max-height:min(66cqw,540px)}
+/* 2026-09-09, per Eric: now that the live #week board above sizes to its
+   real content instead of a forced square, the 540px cap above -- tuned
+   specifically to fill a square's leftover vertical space -- is wildly
+   oversized for a short banner and was the main reason the board stayed
+   almost as tall as before even after the square was dropped (the icon
+   alone was consuming ~500px). Capped down to roughly the same visual
+   weight as the icon already uses in the 16:9 social-export capture
+   (html.board-mode's own 340px cap, a size already proven to read as a
+   real decorative flourish rather than a tiny sliver -- see that rule
+   below), not hidden outright, since a themed week's icon is still a
+   real "wow" touch worth keeping in a compact banner. board-mode's own
+   icon sizing (340px cap) is untouched -- this only scopes the live
+   homepage board. */
+html:not(.board-mode) #week .eu-board-icon img{max-height:min(30cqw,200px)}
 /* Board-mode only: pin the icon+address group to the very bottom of the
    capture instead of the whole board's content centering as one block —
    .eu-board's justify-content:center still governs everything above this
