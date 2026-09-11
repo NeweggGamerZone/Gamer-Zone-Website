@@ -350,6 +350,32 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    to get past this section) while still making the popup reachable by
    click/tap focus on touch devices with no :hover. */
 @media (max-width: 560px) { .review-waterfall .review-card { width: 250px; } }
+/* Featured Gear marquee -- 2026-09-11, per Eric ("have a cycling section
+   that can tie into our website, some products we feature in the gamer
+   zone"), directly addressing the senior-designer audit's "Newegg the
+   retailer is nearly invisible past the homepage" finding. Reuses the same
+   shared GZ.marquee() lane as Reviews/Past Events (see featured-gear.js +
+   the .gz-marquee block below) rather than a new carousel -- one shared
+   implementation, not a bespoke one-off. Each card is a real Newegg
+   product photo on its own white well (these are studio product photos
+   shot on white, so a white card matches the source image honestly rather
+   than looking like a design choice fighting the photo) plus a real name,
+   spec line, price, and outbound link to that exact product's live
+   Newegg.com page. `.card`'s shared clip-path/border/background apply here
+   too (`class="card gear-item"` in the markup) -- only the internal layout
+   is overridden. Flex's own default `align-items:stretch` inside
+   `.gz-marquee-track` equalizes every card in the lane to the tallest
+   one's height automatically (the same reason review cards in the
+   waterfall above line up despite very different quote lengths), so a
+   longer product name naturally sets the row height rather than needing a
+   bespoke min-height override here. */
+.gear-item { position: relative; flex: 0 0 auto; width: 230px; padding: 1rem; }
+.gear-item-img { width: 100%; aspect-ratio: 1/1; background: #fff; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.gear-item-img img { width: 100%; height: 100%; object-fit: contain; padding: .6rem; display: block; }
+.gear-item .gear-item-spec { font-size: .8rem; }
+.gear-item-price { font-family: var(--head); font-weight: 800; color: var(--ne-orange); font-size: 1.05rem; margin: .3rem 0 .7rem; }
+.gear-item .btn { padding: .5rem 1.1rem; font-size: .8rem; }
+@media (max-width: 560px) { .gear-item { width: 190px; } }
 /* Registration steps: the step number is the most emphasized element (big,
    orange, bold) — matching the reference "AI mode" step pattern — while the
    step's icon becomes a small, white, secondary accent instead of the large

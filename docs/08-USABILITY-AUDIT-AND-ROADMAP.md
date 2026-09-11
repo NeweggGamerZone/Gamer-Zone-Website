@@ -560,6 +560,36 @@ console errors alone, per core rule 7. Screenshots at mobile/tablet/desktop for 
 across 5 pages / 0 contrast failures (`analyze.py`), 0 container-width findings
 (`width-check.js`), 0 console errors on any of the 5 pages (`console-check.js`).
 
+## Part 2ak -- Senior-designer wow/design audit + Featured Gear marquee, Phase 1 of the resulting plan shipped (2026-09-11)
+
+Per Eric's explicit request ("Do one more core analysis of the website, this time through the
+lens of a senior designer for Newegg, figuring out what we should correct, change, alter, or
+improve based on the wow factor and design"), a findings-only design audit was conducted across
+all 5 pages (per core rule 15, report first, implement only after go-ahead). Findings: a two-tier
+wow gap (homepage/Events strong, Games/Academy/Ambassador flat with no real photography),
+identical hero treatment reused verbatim on all 4 interior pages, the medal icon reused 7x as
+Ambassador's only tier-art differentiator, Newegg-the-retailer nearly invisible past the
+homepage, plus smaller items (secondary button styling, the RGB picker underselling itself,
+generic review cards). Eric confirmed the overall direction and asked for a scoped, phased plan,
+then supplied 14 real Newegg.com product links and asked for "a cycling section that can tie
+into our website, some products we feature in the gamer zone."
+
+That became **Phase 1: the Featured Gear marquee**, shipped this session -- see CLAUDE.md's own
+"Featured Gear marquee" section for full technical detail (data provenance, the `loading="lazy"`
+bug caught and fixed, why product photos sit on a white well). In short: `#featured-gear` on
+`index.html`, a `GZ.marquee()` lane of all 14 real products (name, price, one real spec line,
+photo, live outbound link to the actual Newegg.com product page), with copy reading "We feature
+similar products in our Gamer Zone" per Eric's exact framing -- deliberately not claiming these
+are the precise floor units, consistent with core rule 4. Verified via a live Puppeteer check
+(track duplication, animation running, all 28 rendered images actually loaded, real external
+links with `target="_blank" rel="noopener"`) rather than a static screenshot alone, plus the full
+scripted QA suite across all 5 pages (0 contrast failures, 0 container-width findings, 0 console
+errors).
+
+**Phases 2-5 are scoped and queued, not yet implemented** -- see Part 4 item #9 for the phase
+breakdown. Per core rule 15, each still needs its own explicit go-ahead before any file is
+touched, the same as Phase 1 did before this session started it.
+
 ---
 
 ## Part 3 — Simulated user feedback
@@ -637,6 +667,13 @@ Using the same daily Verkada-link automation that already exists for check-in, s
 
 **8. "Who's here" pulse (split out from archived item #2, 2026-09-08).**
 The one sub-idea from the now-archived "Live at the Zone" hub that never actually depended on the removed hero mini-game — it's built entirely from real SENET/Verkada check-in data, not game runs. A simple aggregate readout on Home ("14 people checked in today," or a lightweight recent-activity ticker) delivers "this place is alive right now" using data that already exists. Worth scoping on its own rather than staying lost inside an archived item.
+
+**9. Senior-designer wow/design audit follow-through, phased (2026-09-11).**
+From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phases 2-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
+  - *Phase 2 — Interior page hero differentiation.* Games, Academy, and Ambassador currently reuse the homepage's hero treatment verbatim. Keep the shared hero mechanism, but vary content per page — real page-specific photography, or at minimum a distinct default RGB profile per page — so the four pages stop reading as copies of one template.
+  - *Phase 3 — Real photography on Games/Academy/Ambassador.* These three pages are the flat, generic-feeling ones from the audit. Source and place real Gamer Zone photography (tournaments, Academy sessions, ambassador content) the way `events.html` and the homepage hero-proof strip already do, instead of icon/emoji-only sections.
+  - *Phase 4 — Ambassador page polish.* The medal icon is reused 7x as the only visual differentiator between tiers — propose distinct tier art (or at minimum tier-colored variants of distinct shapes). Bundle in a secondary-button styling pass and a generic-review-card refresh while touching this page.
+  - *Phase 5 — RGB picker discoverability.* The lighting picker undersells itself as a plain `<select>`. Propose a small live-preview swatch or label treatment so visitors realize it's a real customization feature, not decoration.
 
 ---
 

@@ -502,6 +502,60 @@ for the visual record at mobile/tablet/desktop. Full scripted QA
 across 5 pages / 0 contrast failures, 0 container-width findings, 0 console
 errors on any page.
 
+## Featured Gear marquee (2026-09-11): real Newegg products tied back to the retailer
+
+Per Eric, following a senior-designer wow/design audit that flagged "Newegg
+the retailer is nearly invisible past the homepage" as a real gap: a new
+`#featured-gear` section on `index.html`, between About Gamer Zone and
+Reviews, showcasing real Newegg products in a `GZ.marquee()` lane
+(`assets/js/featured-gear.js`, `.gear-item`/`.gear-item-img`/etc. in
+`style.css`) — the same shared marquee mechanism as Reviews and the Past
+Events/hero-proof photo waterfalls, not a new carousel. This is Phase 1 of
+a larger scoped plan from that audit; Phases 2-5 (interior-page hero
+differentiation, real photography on Games/Academy/Ambassador, Ambassador
+tier-art variety, RGB-picker discoverability) are queued in the roadmap
+doc's Part 4 and still need Eric's go-ahead before any of them are touched,
+per core rule 15.
+
+**Data provenance.** All 14 products (name, price, spec line, real product
+photo URL, live outbound link) were hand-verified against their actual
+Newegg.com product pages on 2026-09-11 — see `featured-gear.js`'s own
+header comment for the full no-fabrication note. Per Eric, these are
+described as gear *similar to* what's running in the Gamer Zone, not
+claimed as the exact serial-numbered floor units — the section's own copy
+("We feature similar products in our Gamer Zone...") says exactly that,
+deliberately, per core rule 4. Prices are a snapshot from that date and
+will drift from Newegg's live price over time; this section is a
+browse-and-buy pointer to the real product page (which always shows the
+live price), not a live price feed — re-verify the pool against Newegg.com
+again before treating these prices as current. Product names are
+deliberately shortened from Newegg's full SEO-stuffed listing titles (e.g.
+"MSI MPG 271QRX QD-OLED Monitor" rather than the ~30-word full title) —
+this is accurate, concise real naming, not truncation or fabrication; the
+brand/model are unchanged.
+
+**A real bug caught and fixed while building this:** the first version set
+`loading="lazy"` on each card's `<img>`, the opposite of what
+`photo-waterfall.js`'s own header comment explicitly warns against for
+exactly this shape of component — every card in a `GZ.marquee()` track
+(both the real set and the duplicated copy) is already sitting in the DOM
+from render, just visually clipped by the track's `overflow:hidden` until
+the scroll brings it into view, not actually absent from the page.
+Lazy-loading confirmed via a live Puppeteer check (`naturalWidth === 0` on
+a real fraction of the 28 rendered `<img>` elements — 14 real + 14
+duplicated) before the fix, `naturalWidth > 0` on all 28 after removing
+`loading="lazy"`. Any future `GZ.marquee()` card type should follow this
+same "everything eager-loads, the track's own overflow does the visual
+hiding" rule rather than reaching for `loading="lazy"` out of habit.
+
+Product photos sit on a white card well (`.gear-item-img{background:#fff}`)
+rather than the site's dark card background — these are real studio product
+photos shot on white, so a white well matches the source image honestly
+instead of looking like an arbitrary design choice fighting the photo.
+Verified via the full pixel-verified contrast audit (342 text items on
+`index.html`, 0 failures) and the full scripted QA suite across all 5
+pages (0 contrast failures, 0 container-width findings, 0 console errors).
+
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
 `GZ.openStatus(cfg)` in `assets/js/main.js`, added 2026-08-28 for the homepage hero's `.hero-status` line, is the reference example for what core rule 4 ("never fabricate a specific fact") looks like applied to something that changes by the minute rather than something static. It computes real open/closed state from `data/config.json`'s `hoursSchedule` (structured days/open/close/timeZone, added alongside the existing plain-text `hours` string so both stay in sync from one source rather than drifting), evaluated in the **venue's** timezone (`America/Los_Angeles`), not the visitor's — a visitor in a different timezone should see whether Diamond Bar is actually open right now, not a status computed against their own local clock. If `hoursSchedule` is ever missing, `.hero-status` removes itself entirely rather than showing nothing-in-particular or a stale guess. Any future "right now" claim on the site (a live queue length, a "X spots left" count, anything time- or state-sensitive) should follow this same pattern: compute it for real from real data at render time, and have it disappear rather than lie if that data isn't available.
