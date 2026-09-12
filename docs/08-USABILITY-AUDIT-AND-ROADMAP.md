@@ -590,6 +590,17 @@ errors).
 breakdown. Per core rule 15, each still needs its own explicit go-ahead before any file is
 touched, the same as Phase 1 did before this session started it.
 
+## Part 2al -- Phase 2 shipped: interior-page hero icon badges (2026-09-11, same-day follow-up)
+
+Per Eric's "Move to phase 2." A small circular icon badge now sits next to the kicker on each
+of the 4 interior-page heroes (`events.html`/`games.html`/`edu.html`/`ambassador.html`) -- one
+real icon per page from the existing shared icon set (cal/gamepad/grad/shield), reusing the
+`.amb-class-icon` badge treatment rather than a new shape. See CLAUDE.md's "Interior-page hero
+icon badges" section for full detail. Verified via the full scripted QA suite (826 text items
+across 5 pages, 0 contrast failures, 0 container-width findings, 0 console errors) plus
+mobile/tablet/desktop screenshots of all 4 changed pages. Real photography for these same pages
+(Phase 3) is intentionally out of scope here -- see Part 4 item #9.
+
 ---
 
 ## Part 3 — Simulated user feedback
@@ -669,8 +680,8 @@ Using the same daily Verkada-link automation that already exists for check-in, s
 The one sub-idea from the now-archived "Live at the Zone" hub that never actually depended on the removed hero mini-game — it's built entirely from real SENET/Verkada check-in data, not game runs. A simple aggregate readout on Home ("14 people checked in today," or a lightweight recent-activity ticker) delivers "this place is alive right now" using data that already exists. Worth scoping on its own rather than staying lost inside an archived item.
 
 **9. Senior-designer wow/design audit follow-through, phased (2026-09-11).**
-From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phases 2-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
-  - *Phase 2 — Interior page hero differentiation.* Games, Academy, and Ambassador currently reuse the homepage's hero treatment verbatim. Keep the shared hero mechanism, but vary content per page — real page-specific photography, or at minimum a distinct default RGB profile per page — so the four pages stop reading as copies of one template.
+From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phase 2 shipped the same day (see Part 2al). Phases 3-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
+  - *Phase 2 — [SHIPPED 2026-09-11] Interior page hero differentiation.* Events/Games/Academy/Ambassador shared the exact same `.hero` markup with no visual cue for which page you were on. Shipped as a per-page icon badge (real icons from the existing shared set, one per page) next to each hero's kicker — see Part 2al and CLAUDE.md's "Interior-page hero icon badges" section. Real page-specific photography (originally floated as an alternative for this item) was deliberately deferred to Phase 3 instead, since it needs real photo assets sourced per page rather than just markup/CSS.
   - *Phase 3 — Real photography on Games/Academy/Ambassador.* These three pages are the flat, generic-feeling ones from the audit. Source and place real Gamer Zone photography (tournaments, Academy sessions, ambassador content) the way `events.html` and the homepage hero-proof strip already do, instead of icon/emoji-only sections.
   - *Phase 4 — Ambassador page polish.* The medal icon is reused 7x as the only visual differentiator between tiers — propose distinct tier art (or at minimum tier-colored variants of distinct shapes). Bundle in a secondary-button styling pass and a generic-review-card refresh while touching this page.
   - *Phase 5 — RGB picker discoverability.* The lighting picker undersells itself as a plain `<select>`. Propose a small live-preview swatch or label treatment so visitors realize it's a real customization feature, not decoration.

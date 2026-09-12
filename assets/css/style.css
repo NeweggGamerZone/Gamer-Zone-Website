@@ -211,6 +211,23 @@ h1 .accent, h2 .accent { color: var(--ne-blue-text); }
    harmless when there's a wide gutter, but real horizontal overflow once
    the viewport narrows enough that the gutter shrinks past that bleed. */
 .hero { position: relative; padding: 4rem 0 2.5rem; overflow: hidden; }
+/* Interior-page hero icon badge -- 2026-09-11, Phase 2 of the design-audit
+   follow-through (Phase 1 was the Featured Gear marquee). The audit's
+   finding: events/games/edu/ambassador all share the exact same .hero
+   markup (kicker, h1, lead, one faint stripe) with nothing visually
+   distinguishing which page you're on beyond the words themselves. Fix:
+   one real icon per page from the existing shared icon set (events=cal,
+   games=gamepad, edu=grad, ambassador=shield -- no new asset, no
+   fabricated imagery), in a circular badge reusing the exact
+   `.amb-class-icon` treatment (same size ratio, same --ne-orange
+   border/fill pattern) rather than inventing a new badge shape -- the
+   same "one shared implementation" rule `gz-shine`/`gz-marquee` already
+   established. `.hero-stage` (the homepage's own techno-canvas hero) is
+   untouched -- it never used `.kicker`/`.hero-decor` the same way and
+   already has its own distinct treatment. */
+.hero-top { display: flex; align-items: center; gap: .8rem; margin-bottom: .3rem; }
+.hero-icon-badge { flex: none; display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: var(--bg-3); border: 2px solid var(--ne-orange); }
+.hero-icon-badge .ic { width: 26px; height: 26px; color: var(--ne-orange); }
 /* No max-width here: this .lead sits under each sub-page's <h1> and should
    follow the shared .container/page-width, same as the rest of the page's
    content — a fixed 640px cap made it visibly narrower than everything else

@@ -556,6 +556,32 @@ Verified via the full pixel-verified contrast audit (342 text items on
 `index.html`, 0 failures) and the full scripted QA suite across all 5
 pages (0 contrast failures, 0 container-width findings, 0 console errors).
 
+## Interior-page hero icon badges (Phase 2, 2026-09-11)
+
+Second phase of the design-audit follow-through (Phase 1 was the Featured Gear marquee, see
+above). The audit's finding: `events.html`/`games.html`/`edu.html`/`ambassador.html` all share
+the exact same `.hero` markup (kicker, h1, lead, one faint diagonal stripe) with nothing
+visually distinguishing which page you're on beyond the copy itself — a real "brand
+dissonance"/flat-page issue, not a hypothetical one.
+
+**Fix:** a small circular icon badge (`.hero-top`/`.hero-icon-badge` in `style.css`) sits next to
+each page's kicker line, one real icon per page from the *existing* shared icon set in
+`main.js` — `events.html` → `cal`, `games.html` → `gamepad`, `edu.html` → `grad`,
+`ambassador.html` → `shield`. No new icon asset was drawn; this reuses the exact badge
+treatment `.amb-class-icon` already established (circle, `--ne-orange` border/fill, centered
+`.ic`) rather than inventing a new shape, per the "one shared implementation" rule. `.hero-stage`
+(the homepage's own techno-canvas hero) is untouched — it never used `.kicker`/`.hero-decor`
+the same way and already has its own distinct treatment, so this phase only touches the 4
+interior pages the audit actually flagged.
+
+**Scope note:** this is the hero-only piece of the audit's "interior pages read identical"
+finding. Real page-specific photography (the audit's other ask for these same 3-4 pages) is
+Phase 3, not this phase — deliberately kept separate since it needs real photo assets sourced
+per page, not just a markup/CSS change with existing resources. Verified via the full scripted
+QA suite across all 5 pages (826 text items, 0 contrast failures, 0 container-width findings, 0
+console errors) plus mobile/tablet/desktop screenshots confirming the badge doesn't wrap/clip
+against the kicker at any width.
+
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
 `GZ.openStatus(cfg)` in `assets/js/main.js`, added 2026-08-28 for the homepage hero's `.hero-status` line, is the reference example for what core rule 4 ("never fabricate a specific fact") looks like applied to something that changes by the minute rather than something static. It computes real open/closed state from `data/config.json`'s `hoursSchedule` (structured days/open/close/timeZone, added alongside the existing plain-text `hours` string so both stay in sync from one source rather than drifting), evaluated in the **venue's** timezone (`America/Los_Angeles`), not the visitor's — a visitor in a different timezone should see whether Diamond Bar is actually open right now, not a status computed against their own local clock. If `hoursSchedule` is ever missing, `.hero-status` removes itself entirely rather than showing nothing-in-particular or a stale guess. Any future "right now" claim on the site (a live queue length, a "X spots left" count, anything time- or state-sensitive) should follow this same pattern: compute it for real from real data at render time, and have it disappear rather than lie if that data isn't available.
