@@ -24,7 +24,7 @@
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=81">
+<link rel="stylesheet" href="assets/css/style.css?v=82">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -63,6 +63,24 @@
   <section class="reveal">
     <h2>How it works</h2>
     <p class="dim">With a minimum requirement of 20 attendees, we're inviting visitors to host their communities at the Newegg Gamer Zone! Apply below: tell us your event type, how many events you can host, and your expected attendance. Host at your own pace and climb the tiers as you go, hitting bigger numbers at any single event to stack an attendance bonus on top. Questions? Ask us on <a data-cfg-href="discordUrl" href="#">Discord</a>, <a data-cfg-href="instagramUrl" href="#">Instagram</a>, or <a data-cfg-href="ambassadorEmailUrl" href="#">Email</a>.</p>
+  </section>
+
+  <section class="reveal">
+    <h2>Ambassador events at the Zone</h2>
+    <p class="dim">A couple of the real events Ambassadors have run here: Evil Geniuses' VALORANT Collegiate Cup, and a UGREEN x WD hands-on tech session.</p>
+    <!-- Real recap photos scroll through one continuous marquee lane
+         (assets/js/photo-waterfall.js + GZ.marquee in main.js), the same
+         shared gallery mechanism as the Past Events waterfall on
+         events.html and the new Academy schools gallery on edu.html --
+         add or remove <img> entries in the <template> below to change
+         the pool, no JS edit needed. -->
+    <div class="photo-waterfall" id="photo-waterfall-ambassador" data-gallery style="margin-top:1rem">
+      <template>
+        <img src="assets/img/AmbassadorSpotlight/eg-valorant-01.jpg" alt="Evil Geniuses VALORANT Collegiate Cup 1st place check presentation at the Gamer Zone">
+        <img src="assets/img/AmbassadorSpotlight/eg-valorant-02.jpg" alt="Evil Geniuses VALORANT Collegiate Cup group photo at the Gamer Zone">
+        <img src="assets/img/AmbassadorSpotlight/ugreen-x-wd-01.jpg" alt="UGREEN x WD hands-on tech session at the Gamer Zone">
+      </template>
+    </div>
   </section>
 
   <section class="reveal">
@@ -297,8 +315,9 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=81" defer></script>
-<script src="assets/js/preregister-node.js?v=81" defer></script>
-<script src="assets/js/ambassador.js?v=81" defer></script>
+<script src="assets/js/main.js?v=82" defer></script>
+<script src="assets/js/preregister-node.js?v=82" defer></script>
+<script src="assets/js/photo-waterfall.js?v=82" defer></script>
+<script src="assets/js/ambassador.js?v=82" defer></script>
 </body>
 </html>

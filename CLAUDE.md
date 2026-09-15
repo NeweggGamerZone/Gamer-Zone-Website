@@ -582,6 +582,64 @@ QA suite across all 5 pages (826 text items, 0 contrast failures, 0 container-wi
 console errors) plus mobile/tablet/desktop screenshots confirming the badge doesn't wrap/clip
 against the kicker at any width.
 
+## Real photography on Academy + Ambassador (Phase 3, 2026-09-15)
+
+Third phase of the design-audit follow-through (Phase 1: Featured Gear marquee; Phase 2:
+interior hero icon badges — both above). The audit's other ask for the interior pages was
+real, page-specific photography, deliberately deferred out of Phase 2 since it needed real
+photo assets sourced per page rather than just a markup/CSS change with existing resources.
+
+**Sourcing, per Eric's direct instruction:** for `edu.html`, Diamond Bar High School, Bosco
+Tech, and Lorbeer Middle School; for `ambassador.html`, "collegiate images with USC or the EG
+valorant tournament images and Ugreen x WD." A repo-wide search of `assets/calendar/BGAssets/
+PhotoReel/` (the same real-photo pool the homepage/events marquees already draw from) found
+real, correctly-labeled photos for every source **except** USC — no USC-branded or collegiate
+photo exists anywhere in the repo (consistent with the existing Ambassador emoji-fallback note
+above, which already documents this same earlier search coming up empty). Per the no-
+fabrication rule, USC was left out rather than substituted with a generic stock photo; the two
+real EG_Newegg-labeled photos turned out to actually be from an **Evil Geniuses VALORANT
+Collegiate Cup** 1st-place check presentation (confirmed by reading the check itself in the
+photo) — genuinely collegiate esports content, just not USC-specific, so it covers the spirit
+of Eric's "collegiate" ask honestly without overclaiming a school affiliation that isn't there.
+
+**Implementation:** two new real-photo galleries using the exact same shared `[data-gallery]`/
+`<template>`/`photo-waterfall.js` mechanism as the Past Events waterfall on `events.html` —
+not a new component. `edu.html` gained a "Schools we've hosted" section (6 photos: 2 each of
+Diamond Bar, Bosco Tech, Lorbeer) right after the existing "Schools & groups" section.
+`ambassador.html` gained an "Ambassador events at the Zone" section (3 photos: 2 Evil Geniuses
+VALORANT Collegiate Cup, 1 UGREEN x WD) right after "How it works." Both pages needed
+`photo-waterfall.js` added to their script tags for the first time (previously only
+`events.html`/`index.html` used this gallery pattern). Source photos came from
+`assets/calendar/BGAssets/PhotoReel/` (full-resolution originals, 3.4-9.3MB each) and were
+resized to 1008px-wide JPEGs (`assets/img/AcademyPartnerSchools/`, `assets/img/
+AmbassadorSpotlight/`) matching the existing web-optimized convention every other
+`photo-waterfall` gallery on the site already uses (`assets/img/FantastechParty-06-20/` etc.
+are all 1008x567 JPEGs, not the raw multi-MB originals) — confirmed by checking that
+convention before resizing, not assumed.
+
+**Games page copyright question, answered but not acted on:** Eric separately asked whether
+using game images (box art, screenshots, logos) on `games.html` carries copyright/liability
+risk. Answer: yes, real risk — those assets are generally copyrighted by their publishers, and
+displaying them without a license on a corporate-branded commercial site is a genuine exposure,
+not a hypothetical one. No specific real photo source was given for Games (unlike Academy/
+Ambassador above), so per core rule 15 this is an open design question, not a fully-specified
+instruction — proposed to Eric rather than implemented: either source real, licensed press-kit
+assets per title, use real Gamer Zone photography instead (people playing on the floor, not
+per-game copyrighted art), or leave the existing icon/text-based game list as-is. `games.html`
+itself was not touched photographically this round.
+
+**Site-wide cache-busting version bump:** `?v=81` → `?v=82` across all `<link>`/`<script>` tags
+in all 6 HTML files, per the shared-version convention (see "Cache-busting convention" note
+elsewhere in this file) — needed regardless of page since `photo-waterfall.js` is now a new
+dependency on two pages that didn't reference it before.
+
+Verified via the full scripted QA suite across all 5 pages (828 text items, 0 contrast
+failures, 0 container-width findings, 0 console errors) plus a live DOM check confirming both
+new galleries' marquee tracks build correctly (12 `<img>`s on Academy's gallery — 6 real + 6
+duplicated for the loop — and 6 on Ambassador's, all with real `naturalWidth`, no
+`loading="lazy"` per the established `GZ.marquee()` eager-load rule) and mobile/tablet/desktop
+screenshots confirming no clipping against the shared container.
+
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
 `GZ.openStatus(cfg)` in `assets/js/main.js`, added 2026-08-28 for the homepage hero's `.hero-status` line, is the reference example for what core rule 4 ("never fabricate a specific fact") looks like applied to something that changes by the minute rather than something static. It computes real open/closed state from `data/config.json`'s `hoursSchedule` (structured days/open/close/timeZone, added alongside the existing plain-text `hours` string so both stay in sync from one source rather than drifting), evaluated in the **venue's** timezone (`America/Los_Angeles`), not the visitor's — a visitor in a different timezone should see whether Diamond Bar is actually open right now, not a status computed against their own local clock. If `hoursSchedule` is ever missing, `.hero-status` removes itself entirely rather than showing nothing-in-particular or a stale guess. Any future "right now" claim on the site (a live queue length, a "X spots left" count, anything time- or state-sensitive) should follow this same pattern: compute it for real from real data at render time, and have it disappear rather than lie if that data isn't available.

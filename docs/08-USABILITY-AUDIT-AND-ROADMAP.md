@@ -601,6 +601,29 @@ across 5 pages, 0 contrast failures, 0 container-width findings, 0 console error
 mobile/tablet/desktop screenshots of all 4 changed pages. Real photography for these same pages
 (Phase 3) is intentionally out of scope here -- see Part 4 item #9.
 
+## Part 2am -- Phase 3 shipped: real photography on Academy + Ambassador (2026-09-15)
+
+Per Eric's photo-source instructions ("the diamond bar highschool, bosco, and lorbeer middle
+school" for Academy; "collegiate images with USC or the EG valorant tournament images and
+Ugreen x WD" for Ambassador) and go-ahead ("Move onto phase 3 with these added images"). Real
+photos for Diamond Bar High School, Bosco Tech, and Lorbeer Middle School were found in
+`assets/calendar/BGAssets/PhotoReel/` and added to a new "Schools we've hosted" gallery on
+`edu.html`; real photos of an Evil Geniuses VALORANT Collegiate Cup and a UGREEN x WD session
+were added to a new "Ambassador events at the Zone" gallery on `ambassador.html`. No USC-
+specific photo exists anywhere in the repo -- confirmed via a full repo search -- so per the
+no-fabrication rule it was left out rather than faked; the EG Valorant photos are genuinely
+collegiate esports content (a 1st-place check reads "VALORANT Collegiate Cup"), which honestly
+covers the spirit of the ask without claiming a USC affiliation that isn't real. Both galleries
+reuse the exact `[data-gallery]`/`photo-waterfall.js` mechanism `events.html` already uses --
+no new component. Separately, Eric's copyright/liability question about game images on
+`games.html` was answered (yes, real risk without a license) but not acted on -- no specific
+photo source was given for Games, so per core rule 15 it's proposed as an open question rather
+than implemented; see CLAUDE.md's "Real photography on Academy + Ambassador (Phase 3)" section
+for the full writeup and the three proposed options. Verified via the full scripted QA suite
+(828 text items across 5 pages, 0 contrast failures, 0 container-width findings, 0 console
+errors) plus a live check that both galleries' marquees build correctly and mobile/tablet/
+desktop screenshots showing no clipping.
+
 ---
 
 ## Part 3 — Simulated user feedback
@@ -680,9 +703,9 @@ Using the same daily Verkada-link automation that already exists for check-in, s
 The one sub-idea from the now-archived "Live at the Zone" hub that never actually depended on the removed hero mini-game — it's built entirely from real SENET/Verkada check-in data, not game runs. A simple aggregate readout on Home ("14 people checked in today," or a lightweight recent-activity ticker) delivers "this place is alive right now" using data that already exists. Worth scoping on its own rather than staying lost inside an archived item.
 
 **9. Senior-designer wow/design audit follow-through, phased (2026-09-11).**
-From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phase 2 shipped the same day (see Part 2al). Phases 3-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
+From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phase 2 shipped the same day (see Part 2al). Phase 3 shipped 2026-09-15 (see Part 2am). Phases 4-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
   - *Phase 2 — [SHIPPED 2026-09-11] Interior page hero differentiation.* Events/Games/Academy/Ambassador shared the exact same `.hero` markup with no visual cue for which page you were on. Shipped as a per-page icon badge (real icons from the existing shared set, one per page) next to each hero's kicker — see Part 2al and CLAUDE.md's "Interior-page hero icon badges" section. Real page-specific photography (originally floated as an alternative for this item) was deliberately deferred to Phase 3 instead, since it needs real photo assets sourced per page rather than just markup/CSS.
-  - *Phase 3 — Real photography on Games/Academy/Ambassador.* These three pages are the flat, generic-feeling ones from the audit. Source and place real Gamer Zone photography (tournaments, Academy sessions, ambassador content) the way `events.html` and the homepage hero-proof strip already do, instead of icon/emoji-only sections.
+  - *Phase 3 — [SHIPPED 2026-09-15] Real photography on Academy + Ambassador.* Shipped as two new `photo-waterfall.js`-driven galleries: "Schools we've hosted" on `edu.html` (Diamond Bar High School, Bosco Tech, Lorbeer Middle School) and "Ambassador events at the Zone" on `ambassador.html` (an Evil Geniuses VALORANT Collegiate Cup, a UGREEN x WD session) — see Part 2am and CLAUDE.md's "Real photography on Academy + Ambassador (Phase 3)" section. Games was intentionally **not** touched: no specific real photo source was given for it, and a separate copyright question Eric raised about game box art/screenshots was answered (real risk without a license) but left as an open, proposed-not-implemented question per core rule 15 — three options are written up in CLAUDE.md (licensed press-kit assets, real Gamer Zone floor photography instead of per-game art, or leave the current icon/text list as-is). No USC-specific photo exists anywhere in the repo (confirmed via full search) so it was honestly left out rather than faked, consistent with the no-fabrication rule.
   - *Phase 4 — Ambassador page polish.* The medal icon is reused 7x as the only visual differentiator between tiers — propose distinct tier art (or at minimum tier-colored variants of distinct shapes). Bundle in a secondary-button styling pass and a generic-review-card refresh while touching this page.
   - *Phase 5 — RGB picker discoverability.* The lighting picker undersells itself as a plain `<select>`. Propose a small live-preview swatch or label treatment so visitors realize it's a real customization feature, not decoration.
 
