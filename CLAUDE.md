@@ -317,13 +317,25 @@ several near-identical ones" rule. Two live instances exist so far on `index.htm
 "Plan your next visit" section (`#visit`, modifier class `.gz-band-visit`) and "Become a
 Gamer Zone Ambassador" (`#amb-teaser`, modifier class `.gz-band-ambassador`), replacing what
 used to be a plain 3-card grid and a 3-step numbered teaser respectively. The Ambassador
-band's three class cards (Community Leader/Esports Host/Event Organizer) use large emoji
-(🛡️⚔️🏹, `font-size:3.1rem`) rather than the small SVG glyphs `ambassador.html` uses for the
-same classes — a deliberate, disclosed fallback: Eric asked for "bigger emojis or images,"
-and a repo-wide search (html/js/json/md, uploads folder, filenames) turned up no real
-USC/collegiate photo or logo asset to use instead. If one is ever supplied, swap it in
-directly per the no-fabrication rule's honest-alternative principle — the emoji fallback
-isn't meant to be permanent, just the honest option given what actually existed.
+band's three track cards (renamed Collegiate/Influencer/Organization 2026-09-15 — see "Ambassador
+redesign" below) use large emoji (🎓🎥🏪, `font-size:3.1rem`) rather than the small SVG glyphs
+`ambassador.html` uses for the same tracks — a deliberate, disclosed fallback: Eric asked for
+"bigger emojis or images," and a repo-wide search (html/js/json/md, uploads folder, filenames)
+turned up no real USC/collegiate photo or logo asset to use instead.
+
+**Correction, 2026-09-15:** that "no USC asset exists" conclusion turned out to be an
+artifact of the *search method*, not the actual facts — a filename/metadata-only search
+missed real USC Games club branding that's visible *inside* several `EG_Newegg-*.jpg` photos
+in `assets/calendar/BGAssets/PhotoReel/` (a jersey reading "USC Games," confirmed by actually
+opening and looking at the photos, not just grepping filenames). Those real photos are now
+used in `ambassador.html`'s own Ambassador events gallery — see "Ambassador redesign" below.
+This teaser band's emoji fallback was *not* swapped for a photo in that same pass (out of
+scope for what was asked), but the reasoning above is now stale and shouldn't be read as "no
+such photo exists" going forward — a future session revisiting this band should check the
+Ambassador gallery's real photos first, not repeat the filename-only search that missed them
+the first time. If one is ever supplied, swap it in directly per the no-fabrication rule's
+honest-alternative principle — the emoji fallback isn't meant to be permanent, just the honest
+option given what was actually known to exist at the time.
 
 **A real bug, not just a screenshot artifact, was caught and fixed while verifying this:**
 the first version set each band's photo via an inline `style="--gz-band-bg:url('assets/img/
@@ -628,6 +640,19 @@ assets per title, use real Gamer Zone photography instead (people playing on the
 per-game copyrighted art), or leave the existing icon/text-based game list as-is. `games.html`
 itself was not touched photographically this round.
 
+**Correction, same day, later in the session:** "no USC-branded or collegiate photo exists
+anywhere in the repo" above was wrong — it was a filename/metadata-only search, and the real
+USC content was sitting in plain sight *inside* photos whose filenames didn't mention USC at
+all. Eric flagged more `EG_Newegg-*.jpg` photos to check, and opening them (not just grepping
+names) turned up several showing a real "USC Games" club jersey competing at the same Evil
+Geniuses VALORANT Collegiate Cup — genuine USC collegiate content. Three of those
+(`eg-valorant-03-usc.jpg`, `-04-usc.jpg`, `-05-handshake.jpg`) were added to the Ambassador
+gallery in the same-day "Ambassador redesign" round below. **Lesson for next time:** a
+"does X photo exist" search across this repo's real event photography needs to include
+actually opening and looking at a representative sample of candidate photos, not just
+filename/keyword matching — brand/team identity in these photos usually lives on a jersey,
+banner, or check in the shot, not in the file's own name.
+
 **Site-wide cache-busting version bump:** `?v=81` → `?v=82` across all `<link>`/`<script>` tags
 in all 6 HTML files, per the shared-version convention (see "Cache-busting convention" note
 elsewhere in this file) — needed regardless of page since `photo-waterfall.js` is now a new
@@ -639,6 +664,89 @@ new galleries' marquee tracks build correctly (12 `<img>`s on Academy's gallery 
 duplicated for the loop — and 6 on Ambassador's, all with real `naturalWidth`, no
 `loading="lazy"` per the established `GZ.marquee()` eager-load rule) and mobile/tablet/desktop
 screenshots confirming no clipping against the shared container.
+
+## Ambassador redesign: 3 tracks + vertical pillar tiers (2026-09-15, same-day follow-up)
+
+Per Eric, right after Phase 3 above: the three Ambassador classes (Community Leader/Esports
+Host/Event Organizer) were renamed to **Collegiate/Influencer/Organization** with real,
+distinct application flows, and the "Your Ambassador Journey" tier ladder was rebuilt from a
+cascading horizontal bar stack into **4 vertical pillars**. Both changes shipped together
+since the new track copy and the tier redesign touch the same page and were approved in one
+go-ahead.
+
+**Three tracks, real definitions from Eric (not invented):** Collegiate covers school clubs
+and officers — on-campus brand representation, can host at the Zone but with a more thorough
+application (real on-site content shooting, a club sponsorship agreement), and can also cover
+a sponsored Newegg event out at the student's own campus. Influencer covers individual
+creators who bring their own community here. Organization covers clubs, vendors, and local
+businesses — explicitly including small shops like TCG, game, and tech stores, per Eric's own
+addition, not a generic "vendors" catch-all. Only Influencer and Organization are purely
+here-at-the-Zone tracks; Collegiate is the one with a genuine offsite/sponsorship dimension.
+The CSS modifier classes were renamed to match (`class-shield/class-sword/class-bow` ->
+`class-collegiate/class-influencer/class-org`) — same three accent colors as before (blue/
+pink/green), only the names changed, so nothing needed re-deriving. The homepage's
+`#amb-teaser` band (`.amb-class-teaser`, part of `gz-photo-band` above) was updated to match
+the same three names/copy/icons (🎓🎥🏪) so the site doesn't have two different sets of track
+names in two places — see that section's own correction note re: the emoji-vs-real-photo
+question.
+
+**Per-track "Apply as X" CTAs, and a real form field to back them.** Previously there was one
+generic "Apply to become an Ambassador" button and visitors had no way to say which track they
+were applying for except free-text. Each of the three track cards now has its own
+`.btn.ghost` CTA (`data-amb-open data-track="Collegiate|Influencer|Organization"`), and the
+modal's real Formspree form (`#amb-form`) gained an actual required `<select name="track">`
+field. `ambassador.js`'s `open(track)` sets that field on open — **and resets it to blank when
+no track is given** (the hero and Featured-Ambassador-card CTAs still carry no `data-track`).
+That reset is a real bug fix, not a preemptive one: the first version only set the field when
+a track was passed, so opening via a track-specific CTA, closing without submitting, then
+reopening via the generic hero CTA left the previous track silently still selected — confirmed
+via a live Puppeteer click-through (open Influencer's CTA -> close -> open the hero's generic
+CTA -> check the select's value) before and after the fix.
+
+**Tier ladder: 4 vertical pillars, not a cascading bar stack.** Per Eric ("instead of left to
+right, just have 4 pillars of increasing amount of events, so 4 vertical pillars"): `.tl`
+(a flex column of 4 bars, each a bit wider/more indented than the last) is now
+`.tier-pillars` (a CSS grid, 4 equal columns side by side, `align-items:start` so each column
+keeps its own independent height instead of stretching to match the tallest). All the actual
+tier content (`.mile`, `.mile-head`, `.mile-count`, `.rank-badge`, the perks `<ul>`, the
+tier-color rules, the Diamond `gz-shine`) is unchanged and still works exactly as before —
+only the outer container changed from a flex column to a grid row, and `.mile-head` gets a
+scoped `flex-direction:column` override inside `.tier-pillars` (badge on top, then count, then
+unlock name, all centered) since a 4-column layout doesn't have the ~800px of width the old
+single-wide-bar design assumed.
+
+**The "increasing pillar" effect comes from a real min-height floor per tier, tuned against
+actual rendered content, not guessed round numbers.** First pass used naive +40px steps
+(420/460/500/540) and looked wrong: Silver's own real content (4 perks) already renders at
+463px, taller than Gold's naive 460px floor, so the two nearly matched instead of escalating.
+Measured all 4 tiers' real rendered heights via Puppeteer (`getBoundingClientRect`) before
+landing on the final values — silver 420 (Silver's real content wins at ~463px regardless),
+gold 505, platinum 545, diamond 585 — which produces a clean, real 42px step at every tier
+once you account for what Silver's content actually forces. This is the same
+min-height-as-a-floor-not-a-forced-height principle "Container & sizing discipline" already
+establishes elsewhere in this file, just tuned against measured reality instead of assumed
+symmetry. At tablet width (@820px) the grid collapses to 2x2 (still reads as "pillars," two
+rows of two) and at phone width (@560px) to a single column with min-heights dropped entirely
+— once every tier is stacked full-width rather than compared side by side, a height floor
+stops doing any real visual work and just adds dead scroll.
+
+**Medal icon reused 7x, now differentiated (this was Part 4 roadmap item "Phase 4" and got
+folded into this same round since Eric asked for it directly).** Every `.rank-badge` (the 4
+tier pillars) and every `.sg-badge` (the 3 attendance-bonus badges) used the exact same
+`medal` glyph — visually identical icon at every rank, no differentiation beyond the
+background-photo tint and border color. Reused existing icons from the shared `GZ_ICONS` set
+(`main.js`) rather than drawing new ones: Silver -> `shield` (a starting-tier baseline),
+Gold -> `coin` (literally the gift-card perk), Platinum -> `chip` (the product-prize perk),
+Diamond -> `trophy` (the top tier). Attendance bonuses: 20+ -> `note` (the social spotlight
+post), 40+ -> `coin` (gift card prizing), 60+ -> `chip` (product prizing). The Diamond perk
+list's own `medal` bullet icon ("Featured professional profile...") was left alone — that's a
+perk-list bullet, not a rank-identifying badge, and "medal" still reads correctly there.
+
+Verified via the full scripted QA suite across all 5 pages (831 text items, 0 contrast
+failures, 0 container-width findings, 0 console errors), a live Puppeteer measurement of all 4
+pillar heights confirming the real escalation (463/505/545/585px), mobile/tablet/desktop
+screenshots of the new pillar grid and track cards confirming no clipping and clean 2x2/1-col
+collapse, and the click-through test above confirming the per-track CTA + form-reset behavior.
 
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 

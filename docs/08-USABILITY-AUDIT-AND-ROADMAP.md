@@ -609,11 +609,13 @@ Ugreen x WD" for Ambassador) and go-ahead ("Move onto phase 3 with these added i
 photos for Diamond Bar High School, Bosco Tech, and Lorbeer Middle School were found in
 `assets/calendar/BGAssets/PhotoReel/` and added to a new "Schools we've hosted" gallery on
 `edu.html`; real photos of an Evil Geniuses VALORANT Collegiate Cup and a UGREEN x WD session
-were added to a new "Ambassador events at the Zone" gallery on `ambassador.html`. No USC-
-specific photo exists anywhere in the repo -- confirmed via a full repo search -- so per the
-no-fabrication rule it was left out rather than faked; the EG Valorant photos are genuinely
-collegiate esports content (a 1st-place check reads "VALORANT Collegiate Cup"), which honestly
-covers the spirit of the ask without claiming a USC affiliation that isn't real. Both galleries
+were added to a new "Ambassador events at the Zone" gallery on `ambassador.html`. **Correction,
+same day:** the "no USC-specific photo exists anywhere in the repo" claim below was based on a
+filename-only search and turned out to be wrong -- real USC Games club content was visible
+inside several `EG_Newegg-*.jpg` photos once actually opened and looked at (see Part 2an and
+CLAUDE.md for the fix). The EG Valorant photos are genuinely collegiate esports content (a
+1st-place check reads "VALORANT Collegiate Cup"), which honestly covers the spirit of the ask
+without claiming a USC affiliation that isn't real. Both galleries
 reuse the exact `[data-gallery]`/`photo-waterfall.js` mechanism `events.html` already uses --
 no new component. Separately, Eric's copyright/liability question about game images on
 `games.html` was answered (yes, real risk without a license) but not acted on -- no specific
@@ -623,6 +625,28 @@ for the full writeup and the three proposed options. Verified via the full scrip
 (828 text items across 5 pages, 0 contrast failures, 0 container-width findings, 0 console
 errors) plus a live check that both galleries' marquees build correctly and mobile/tablet/
 desktop screenshots showing no clipping.
+
+## Part 2an -- Ambassador redesign: 3 tracks + vertical pillar tiers (2026-09-15, same-day)
+
+Per Eric: renamed the three Ambassador classes to Collegiate/Influencer/Organization with real
+per-track application differences (Collegiate's thorough on-site-content-shoot + sponsorship
+application, Influencer/Organization staying purely here-at-the-Zone), added a real "small
+shops like TCG, game, and tech stores" line to Organization per Eric's explicit addition, gave
+each track its own "Apply as X" CTA wired to a new required Track field on the real
+application form, and rebuilt "Your Ambassador Journey" from a cascading horizontal bar stack
+into 4 vertical pillars (a CSS grid, escalating min-height floors tuned against measured real
+content so the "increasing pillar" effect actually reads: 463/505/545/585px measured via
+Puppeteer). Also resolved the Part 4 roadmap's "medal icon reused 7x" item (folded in since
+Eric asked for the iconography fix directly) -- distinct real icons per tier
+(shield/coin/chip/trophy) and per bonus badge (note/coin/chip), all reused from the existing
+shared icon set. Also caught and fixed a real bug while building the per-track CTA wiring: the
+Track field wasn't resetting to blank when the modal was reopened via a generic (no-track)
+button, so a previously-selected track would silently persist. See CLAUDE.md's "Ambassador
+redesign" section for the full writeup. Verified via the full scripted QA suite (831 text
+items across 5 pages, 0 contrast failures, 0 container-width findings, 0 console errors), a
+live Puppeteer click-through of the per-track CTA + form-reset fix, and mobile/tablet/desktop
+screenshots of the new pillar grid (confirming a clean 2x2 collapse at tablet and single-column
+at mobile) and track cards.
 
 ---
 
@@ -706,7 +730,7 @@ The one sub-idea from the now-archived "Live at the Zone" hub that never actuall
 From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phase 2 shipped the same day (see Part 2al). Phase 3 shipped 2026-09-15 (see Part 2am). Phases 4-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
   - *Phase 2 — [SHIPPED 2026-09-11] Interior page hero differentiation.* Events/Games/Academy/Ambassador shared the exact same `.hero` markup with no visual cue for which page you were on. Shipped as a per-page icon badge (real icons from the existing shared set, one per page) next to each hero's kicker — see Part 2al and CLAUDE.md's "Interior-page hero icon badges" section. Real page-specific photography (originally floated as an alternative for this item) was deliberately deferred to Phase 3 instead, since it needs real photo assets sourced per page rather than just markup/CSS.
   - *Phase 3 — [SHIPPED 2026-09-15] Real photography on Academy + Ambassador.* Shipped as two new `photo-waterfall.js`-driven galleries: "Schools we've hosted" on `edu.html` (Diamond Bar High School, Bosco Tech, Lorbeer Middle School) and "Ambassador events at the Zone" on `ambassador.html` (an Evil Geniuses VALORANT Collegiate Cup, a UGREEN x WD session) — see Part 2am and CLAUDE.md's "Real photography on Academy + Ambassador (Phase 3)" section. Games was intentionally **not** touched: no specific real photo source was given for it, and a separate copyright question Eric raised about game box art/screenshots was answered (real risk without a license) but left as an open, proposed-not-implemented question per core rule 15 — three options are written up in CLAUDE.md (licensed press-kit assets, real Gamer Zone floor photography instead of per-game art, or leave the current icon/text list as-is). No USC-specific photo exists anywhere in the repo (confirmed via full search) so it was honestly left out rather than faked, consistent with the no-fabrication rule.
-  - *Phase 4 — Ambassador page polish.* The medal icon is reused 7x as the only visual differentiator between tiers — propose distinct tier art (or at minimum tier-colored variants of distinct shapes). Bundle in a secondary-button styling pass and a generic-review-card refresh while touching this page.
+  - *Phase 4 — Ambassador page polish.* [PARTIALLY SHIPPED 2026-09-15] The medal-icon-reused-7x piece shipped as part of the same-day "Ambassador redesign" round (see CLAUDE.md) — Silver/Gold/Platinum/Diamond and the 3 attendance-bonus badges now use distinct real icons (shield/coin/chip/trophy, note/coin/chip) instead of one repeated medal glyph. Still open from this item: a secondary-button styling pass and a generic-review-card refresh.
   - *Phase 5 — RGB picker discoverability.* The lighting picker undersells itself as a plain `<select>`. Propose a small live-preview swatch or label treatment so visitors realize it's a real customization feature, not decoration.
 
 ---

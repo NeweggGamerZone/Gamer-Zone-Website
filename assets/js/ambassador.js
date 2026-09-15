@@ -7,15 +7,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!bg) return;
   const cfg = await GZ.config();
   const to = cfg.ambassadorEmail || cfg.contactEmail || 'gamerzone@newegg.com';
-  const open = () => bg.classList.add('open');
-  const close = () => bg.classList.remove('open');
-  document.querySelectorAll('[data-amb-open]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(); }));
-  bg.addEventListener('click', e => { if (e.target === bg) close(); });
-  document.getElementById('amb-close').addEventListener('click', close);
-
   const form = document.getElementById('amb-form');
   const sentNote = document.getElementById('amb-sent');
   const errorNote = document.getElementById('amb-error');
+
+  /* 2026-09-15, per Eric's Ambassador redesign: each of the 3 track cards
+     (Collegiate/Influencer/Organization) gets its own real "Apply as X"
+     CTA rather than one generic top-of-page button visitors had to guess
+     applied to all three. Presetting the modal's own Track <select> here
+     (rather than, say, opening three separate forms) means there's still
+     exactly one real form and one Formspree endpoint to maintain -- a
+     visitor who opens the modal from a track card just lands with that
+     track already chosen, and can still change it if they clicked the
+     wrong one. The hero/Featured-Ambassador-card CTAs carry no data-track,
+     so those still open with the field blank, requiring a conscious pick. */
+  const open = (track) => {
+    bg.classList.add('open');
+    // Always set the field explicitly (to the preset track, or back to
+    // blank) rather than only setting it when a track is given -- without
+    // the else branch, opening via a track-specific CTA then closing
+    // without submitting and reopening via the generic hero/Featured-
+    // Ambassador-card CTA would leave the previous track still selected,
+    // silently misrepresenting a visitor's actual choice on this visit.
+    if (form.elements['track']) form.elements['track'].value = track || '';
+  };
+  const close = () => bg.classList.remove('open');
+  document.querySelectorAll('[data-amb-open]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(b.dataset.track || ''); }));
+  bg.addEventListener('click', e => { if (e.target === bg) close(); });
+  document.getElementById('amb-close').addEventListener('click', close);
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
@@ -50,7 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         '',
         `Name: ${g('name')}`,
         `Email: ${g('email')}`,
-        `Organization / team: ${g('org')}`,
+        `Ambassador track: ${g('track')}`,
+        `Organization / team / school: ${g('org')}`,
         '',
         `Events you can host over the next 6 months: ${g('events')}`,
         `Expected attendees per event: ${g('attendees')}`,
