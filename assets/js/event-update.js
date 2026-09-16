@@ -140,6 +140,14 @@
   function row(ev, { closure = false } = {}) {
     const { mon, day } = monthDate(ev.date);
     const isMajor = !closure && (ev.type === 'major' || ev.featured);
+    // Optional one-off callout banner (data/events.json's `banner` field on
+    // a specific event, e.g. "Newegg Mario Kart Cup" on the Sep 19 Mario
+    // Kart World Tournament) — real, specific marketing copy tied to ONE
+    // event, not a generic per-week mechanism like the theme icon above, so
+    // it's opt-in per event rather than always rendered. See .eu-cup-banner
+    // in style.css for the styling and the "no fabrication" note on why
+    // this only ever comes from real data instead of being hardcoded here.
+    const bannerHtml = ev.banner ? `<div class="eu-cup-banner">${GZ.esc(ev.banner)}</div>` : '';
     // boardTitle is an optional shorter stand-in for this one spot only —
     // the calendar, event detail card, etc. all keep reading ev.title as
     // usual. Normally unused now that fitBoardTitles() below auto-shrinks
@@ -160,7 +168,7 @@
     // closure has no time subtagline to justify keeping that structure.
     if (closure) {
       const strippedName = name.replace(/^Closed\s*[:—-]\s*/, '');
-      return `<div class="eu-row eu-closure eu-closure-line">
+      return `${bannerHtml}<div class="eu-row eu-closure eu-closure-line">
         <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(mon.toUpperCase())} ${day}: Closed for ${GZ.esc(strippedName)}</div>
       </div>${descHtml}`;
     }
@@ -186,7 +194,7 @@
     // .eu-name element means every wrapped line of that title uses the
     // row's FULL width, the same way the closure line always has --
     // no more starved first line, no more surprise over-shrink.
-    return `<div class="eu-row eu-line${isMajor ? ' eu-major' : ''}">
+    return `${bannerHtml}<div class="eu-row eu-line${isMajor ? ' eu-major' : ''}">
       <div class="eu-name"${ev.boardNoShrink ? ' data-noshrink="1"' : ''}>${GZ.esc(mon.toUpperCase())} ${day}: ${GZ.esc(name)}</div>
       ${ev.time ? `<div class="eu-meta">${GZ.esc(ev.time)}</div>` : ''}
     </div>${descHtml}`;

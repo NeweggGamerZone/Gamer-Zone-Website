@@ -394,12 +394,23 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    waterfall above line up despite very different quote lengths), so a
    longer product name naturally sets the row height rather than needing a
    bespoke min-height override here. */
-.gear-item { position: relative; flex: 0 0 auto; width: 230px; padding: 1rem; }
+/* 2026-09-15, per Eric ("the View on Newegg button should be exactly the
+   same height across the cards"): .gear-item is now a flex column with
+   its .btn pushed to `margin-top:auto` -- every card in the same row
+   already stretches to the tallest sibling's height (the marquee/grid
+   track's default flex align-items:stretch, unchanged), so the button
+   always sits flush against the bottom of that shared height regardless
+   of how many lines a given card's spec text wrapped to, instead of its Y
+   position (and the whitespace above/below it) drifting card to card.
+   align-self:flex-start keeps the button its own natural content width
+   rather than stretching to the card's full width, matching how it always
+   looked before this fix. */
+.gear-item { position: relative; flex: 0 0 auto; width: 230px; padding: 1rem; display: flex; flex-direction: column; }
 .gear-item-img { width: 100%; aspect-ratio: 1/1; background: #fff; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .gear-item-img img { width: 100%; height: 100%; object-fit: contain; padding: .6rem; display: block; }
 .gear-item .gear-item-spec { font-size: .8rem; }
 .gear-item-price { font-family: var(--head); font-weight: 800; color: var(--ne-orange); font-size: 1.05rem; margin: .3rem 0 .7rem; }
-.gear-item .btn { padding: .5rem 1.1rem; font-size: .8rem; }
+.gear-item .btn { padding: .5rem 1.1rem; font-size: .8rem; margin-top: auto; align-self: flex-start; }
 @media (max-width: 560px) { .gear-item { width: 190px; } }
 /* Registration steps: the step number is the most emphasized element (big,
    orange, bold) — matching the reference "AI mode" step pattern — while the
@@ -992,20 +1003,18 @@ body.home-page { background: transparent; }
 .tech-scan { position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: radial-gradient(circle at 50% 46%, rgba(4,5,7,.35) 0%, rgba(4,5,7,.55) 55%, rgba(4,5,7,.94) 100%); }
 
-/* Hero -> Weekly Lineup boundary (2026-09-10, per Eric). A full-bleed
-   strip sitting between the two sections -- transparent itself (so the
-   fixed tech-tunnel layers above still show through it at whatever
-   opacity applyTechFade() has already faded them to), with its own canvas
-   drawing one shaped cut line: solid var(--bg) below the line, nothing
-   painted above it. techno-hero.js renders this canvas in the exact same
-   rAF loop/elapsed clock as the tunnel rings, so the line is always the
-   current morph shape unrolled into a horizontal profile -- never a
-   separate, independently-timed decoration. Height is deliberately
-   modest (this is a transition beat, not a new hero) and, like
-   .hero-stage, breaks out to full viewport width since it's finishing a
-   full-bleed background effect, not laying out content of its own. */
-.hero-boundary { position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); height: clamp(64px, 9vw, 130px); overflow: hidden; }
-.hero-boundary canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Hero -> Weekly Lineup boundary. Was a shape-matched canvas "skyline" line
+   (2026-09-10) unrolled from the tunnel's own current morph shape -- per
+   Eric 2026-09-15, that read as not aligned with anything, so it's gone.
+   Now a plain full-bleed gradient strip: transparent at the top (so the
+   fixed tech-tunnel layers above still show through at whatever opacity
+   applyTechFade() -- main.js -- has already faded them to) fading to solid
+   var(--bg) at the bottom, so the background simply reads as fading to
+   black on the way down rather than being cut by any shape. Height/full-
+   bleed-width unchanged from the original (a transition beat, not a new
+   hero; breaks out to full viewport width like .hero-stage since it's
+   finishing a full-bleed background effect, not laying out content). */
+.hero-boundary { position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); height: clamp(64px, 9vw, 130px); background: linear-gradient(180deg, transparent 0%, var(--bg) 100%); }
 
 .hero-in { opacity: 0; transform: translateY(22px); animation: hero-rise .85s cubic-bezier(.2,.7,.3,1) forwards; animation-delay: var(--d, 0s); }
 @keyframes hero-rise { to { opacity: 1; transform: none; } }
@@ -1254,7 +1263,11 @@ body.home-page { background: transparent; }
    re-verified via the pixel-verified contrast audit after building. */
 .gz-photo-band { position:relative; isolation:isolate; overflow:hidden; border:1px solid var(--line); border-radius:2px; padding:clamp(2rem,5vw,3.2rem) clamp(1.4rem,4vw,2.6rem); }
 .gz-photo-band::before { content:""; position:absolute; inset:0; z-index:-2; background-size:cover; background-position:center; }
-.gz-photo-band::after { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(4,5,7,.72),rgba(4,5,7,.85) 55%,rgba(4,5,7,.88)); }
+/* Scrim darkened 2026-09-15 (per Eric: "make those sections more readable
+   and darken the background more") from .72/.85/.88 to .84/.92/.95 -- re-
+   verified via the full pixel-verified contrast audit afterward, same as
+   every prior scrim-opacity change on this file. */
+.gz-photo-band::after { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(4,5,7,.84),rgba(4,5,7,.92) 55%,rgba(4,5,7,.95)); }
 .gz-photo-band h2 { text-align:center; }
 .gz-photo-band > p.dim { max-width:640px; margin:0 auto; text-align:center; }
 /* Per-band background image is set here (path relative to this file, in
@@ -1269,8 +1282,17 @@ body.home-page { background: transparent; }
    photo's actual bright colors. Fixed by giving each real instance its
    own modifier class here instead, the same relative-to-this-file `../`
    pattern already used by .sg-badge/.rank-badge tier art above. */
-.gz-band-visit::before { background-image:url('../img/reel/2026-07-25-15-jpg.jpg'); }
-.gz-band-ambassador::before { background-image:url('../img/reel/2026-06-20-10-png.jpg'); }
+/* Swapped 2026-09-15 (per Eric: "use more HD photos") from the 640x360
+   assets/img/reel/ copies (sized for the hero's small photo-strip cards,
+   not a full-width band) to these two bands' own 1008x567 copies in
+   assets/img/PhotoBands/ -- the same real photos, just each band's own
+   real full-resolution source (assets/calendar/BGAssets/PhotoReel/2026-07-
+   25 (15).jpg and 2026-06-20 (10).png respectively) instead of a small
+   thumbnail meant for a ~300px hero card, cutting the browser's upscale
+   factor at this band's ~1140px container width from ~1.8x down to
+   ~1.13x. */
+.gz-band-visit::before { background-image:url('../img/PhotoBands/visit-band.jpg'); }
+.gz-band-ambassador::before { background-image:url('../img/PhotoBands/ambassador-band.jpg'); }
 
 /* "Plan your next visit": previously a 3-card grid (About / Visit Us /
    Preregister) where the "About" card's three links (corporate page,
@@ -1287,18 +1309,18 @@ body.home-page { background: transparent; }
 /* "Become a Gamer Zone Ambassador": previously a plain Apply/Host/Unlock
    3-step walkthrough (kept below, now folded into shorter body copy)
    with nothing visual. Per Eric ("the classes are the cooler part of
-   it"), the teaser now leads with the same three Ambassador classes
-   ambassador.html's own "Choose Your Class" section defines (Community
-   Leader/Esports Host/Event Organizer -- copy trimmed from that page's
-   own real sentences, not reworded from scratch), using real emoji at a
-   large size as the "bigger emoji or image" Eric asked for. No real
-   photo/logo asset for a specific collegiate org (e.g. a USC-affiliated
-   club) exists anywhere in this repo or the connected uploads -- searched
-   both before building this -- so this uses Eric's own stated fallback
-   rather than inventing or guessing at one. */
+   it"), the teaser leads with the same three Ambassador tracks
+   ambassador.html's own "Choose Your Track" section defines (copy trimmed
+   from that page's own real sentences, not reworded from scratch).
+   2026-09-15 (per Eric: "use the same class symbols as on the ambassador
+   page"): the large-emoji fallback (🎓🎥🏪) used here since no real
+   photo/logo asset for a specific collegiate org existed at the time is
+   now replaced with the same real .amb-class-icon badge + grad/sword/bow
+   icons ambassador.html's own track cards use -- see the .class-
+   collegiate/.class-influencer/.class-org color-override rules above,
+   now extended to also match .amb-class-teaser-card. */
 .amb-class-teaser { display:flex; gap:1.2rem; margin-top:1.5rem; flex-wrap:wrap; }
 .amb-class-teaser-card { flex:1 1 220px; min-width:0; text-align:center; background:rgba(4,5,7,.5); border:1px solid rgba(255,255,255,.16); border-radius:2px; padding:1.5rem 1.1rem 1.3rem; }
-.amb-class-teaser-emoji { display:block; font-size:3.1rem; line-height:1; margin-bottom:.55rem; filter:drop-shadow(0 2px 8px rgba(0,0,0,.55)); }
 .amb-class-teaser-card h3 { font-family:var(--head); font-weight:800; text-transform:uppercase; letter-spacing:.03em; font-size:1rem; margin:.2rem 0 .4rem; }
 .amb-class-teaser-card p { font-size:.84rem; line-height:1.45; margin:0; }
 @media (max-width:720px) {
@@ -1629,17 +1651,35 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    variable here means this can never drift back out of sync with that
    fix. */
 .amb-type.class-collegiate{border-top-color:var(--ne-blue-text)}
-.amb-type.class-collegiate .amb-class-icon{border-color:var(--ne-blue-text)}
-.amb-type.class-collegiate .amb-class-icon .ic{color:var(--ne-blue-text)}
-.amb-type.class-collegiate .amb-class-tag, .amb-type.class-collegiate h3{color:var(--ne-blue-text)}
+.amb-type.class-collegiate .amb-class-icon,
+.amb-class-teaser-card.class-collegiate .amb-class-icon{border-color:var(--ne-blue-text)}
+.amb-type.class-collegiate .amb-class-icon .ic,
+.amb-class-teaser-card.class-collegiate .amb-class-icon .ic{color:var(--ne-blue-text)}
+.amb-type.class-collegiate .amb-class-tag, .amb-type.class-collegiate h3,
+.amb-class-teaser-card.class-collegiate h3{color:var(--ne-blue-text)}
 .amb-type.class-influencer{border-top-color:#ED7FB4}
-.amb-type.class-influencer .amb-class-icon{border-color:#ED7FB4}
-.amb-type.class-influencer .amb-class-icon .ic{color:#ED7FB4}
-.amb-type.class-influencer .amb-class-tag, .amb-type.class-influencer h3{color:#ED7FB4}
+.amb-type.class-influencer .amb-class-icon,
+.amb-class-teaser-card.class-influencer .amb-class-icon{border-color:#ED7FB4}
+.amb-type.class-influencer .amb-class-icon .ic,
+.amb-class-teaser-card.class-influencer .amb-class-icon .ic{color:#ED7FB4}
+.amb-type.class-influencer .amb-class-tag, .amb-type.class-influencer h3,
+.amb-class-teaser-card.class-influencer h3{color:#ED7FB4}
 .amb-type.class-org{border-top-color:#3FBF6B}
-.amb-type.class-org .amb-class-icon{border-color:#3FBF6B}
-.amb-type.class-org .amb-class-icon .ic{color:#3FBF6B}
-.amb-type.class-org .amb-class-tag, .amb-type.class-org h3{color:#3FBF6B}
+.amb-type.class-org .amb-class-icon,
+.amb-class-teaser-card.class-org .amb-class-icon{border-color:#3FBF6B}
+.amb-type.class-org .amb-class-icon .ic,
+.amb-class-teaser-card.class-org .amb-class-icon .ic{color:#3FBF6B}
+.amb-type.class-org .amb-class-tag, .amb-type.class-org h3,
+.amb-class-teaser-card.class-org h3{color:#3FBF6B}
+/* 2026-09-15, per Eric ("use the same class symbols as on the ambassador
+   page on the home ambassador section"): the homepage teaser cards above
+   now reuse .amb-class-icon as-is (the exact circular icon-badge
+   ambassador.html already established -- its base rule isn't scoped to
+   .amb-type, so no extra CSS is needed here beyond the color-override
+   selectors just above) with the same real grad/sword/bow icons per
+   track, replacing the earlier large-emoji fallback -- see gz-photo-
+   band's own CLAUDE.md section for that fallback's original reasoning
+   and this correction. */
 /* Per-track "Apply as X" CTA on each class card (2026-09-15) -- a ghost
    button so it doesn't visually compete with the hero's primary "Apply to
    become an Ambassador" button, but still a real, separately-clickable
@@ -2004,6 +2044,15 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
   .gz-marquee{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
   .gz-marquee-track{animation:none;flex-wrap:wrap;width:auto}
 }
+/* .static (2026-09-15, per Eric on Featured Gear): the exact same rules as
+   the reduced-motion fallback above, just unconditional -- for a lane that
+   opts out of auto-scrolling outright (GZ.marquee's opts.static), not only
+   for visitors with the OS-level reduced-motion preference set. See
+   featured-gear.js's own comment for why this section specifically needs
+   it (its cards have a real click target the hover-controls overlay was
+   blocking). */
+.gz-marquee.static{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+.gz-marquee.static .gz-marquee-track{animation:none;flex-wrap:wrap;width:auto}
 /* Hover/focus pause+skip overlay (GZ.buildMarqueeControls in main.js).
    Covers the full lane -- rgba(0,0,0,.6) is dark enough to clearly read
    as "paused" but still lets the real photos/cards show through faintly
@@ -2990,15 +3039,91 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
    .35) with no rotation doing any of the work. Overlap (the negative
    margins), sizes, and z-index stacking are untouched -- still exactly
    the same 5-icon row, just flat instead of splayed. */
+/* 2026-09-16, per Eric: a separate, different treatment for the 1:1
+   export specifically (everything above/below this block is scoped to
+   min-width:900px -- the 16:9 export only; the square export had stayed
+   the single full-size centered icon this whole time). Instead of a
+   horizontal fan, stack the same 4 extra copies almost directly BEHIND
+   the center icon, each nudged only a little further right and faded a
+   little more than the last -- reads as a motion trail, like the icon
+   drove/flew onto the board from off-frame. Tried first as a flex row
+   with increasing negative margins (same technique as the 16:9 fan
+   above), but that couldn't guarantee "almost directly underneath" --
+   each layer's own rendered width (which varies per icon asset) changes
+   how much a given margin actually pulls it under its neighbor. Switched
+   to absolute positioning instead: every layer anchors to the exact same
+   point (left/top:50% + translate(-50%,-50%)) so the ONLY thing that
+   differs layer to layer is an explicit translateX offset -- guarantees
+   identical overlap regardless of asset size/aspect ratio, and keeps the
+   center icon exactly where the plain single-icon layout already
+   centered it. Verified via real capture against Racing Games Week
+   (Sep 15-19, Mario Kart icon, the case this was designed against) --
+   see also .eu-cup-banner below, added the same day for that same week's
+   real tournament branding. */
+@media (max-width:899.98px){
+  html.board-mode .eu-board-icon{position:relative;display:block;height:min(40cqw,340px);width:100%}
+  html.board-mode .eu-board-icon-side,html.board-mode .eu-board-icon-outer{display:block}
+  html.board-mode .eu-board-icon img{position:absolute;left:50%;top:50%;margin:0}
+  html.board-mode #eu-board-icon-img{transform:translate(-50%,-50%);opacity:1;z-index:5}
+  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(2){transform:translate(calc(-50% + 20px),-50%);opacity:.4;z-index:4;max-width:min(68%,585px);max-height:min(38cqw,320px)}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% + 38px),-50%);opacity:.24;z-index:3;max-width:min(64%,550px);max-height:min(36cqw,300px)}
+  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(4){transform:translate(calc(-50% + 54px),-50%);opacity:.12;z-index:2;max-width:min(60%,515px);max-height:min(34cqw,280px)}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(5){transform:translate(calc(-50% + 68px),-50%);opacity:.05;z-index:1;max-width:min(56%,480px);max-height:min(32cqw,260px)}
+}
+/* Special one-off callout banner: rendered above a Special Events row
+   when that specific event has a `banner` field in data/events.json (see
+   row() in event-update.js). Added 2026-09-16 for the real "Newegg Mario
+   Kart Cup" branding on the Sep 19 Mario Kart World Tournament -- a real,
+   specific piece of marketing copy Eric asked for by name, not a generic
+   per-week mechanism (unlike the trail effect above, which every week's
+   icon gets automatically) -- so it's opt-in per event via that one JSON
+   field rather than always-on. Sized well above --eu-date-size/--eu-
+   name-size (the row text below it) so it reads as a distinct callout,
+   not just a bigger row.
+   First attempt used a `background-clip:text` gradient (white -> orange)
+   for extra "wow," but the pixel-based contrast audit (tools/audit/) flagged
+   a real methodology gap, not a false alarm: the audit's background-only
+   pass nulls `color` and `-webkit-text-fill-color` to isolate whatever's
+   behind the text, but doesn't (and structurally can't easily) null a
+   `background` that's itself being clipped to the text shape -- so the
+   gradient rendered as if it WERE the background, got sampled as the
+   "backdrop," and compared against the element's plain `color:#fff`
+   fallback for a nonsense 1.44:1 reading. Rather than special-case the
+   audit tool for one banner, switched to a flat solid color (the site's
+   existing orange, already verified AAA-safe everywhere else it's used
+   for major/featured event text) -- simpler, matches an already-proven
+   pattern instead of introducing a new one the audit can't yet see
+   through, and re-confirmed clean via tools/audit/run.sh after the swap. */
+.eu-cup-banner{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(1.6rem,6.2cqw,2.7rem);line-height:1.05;margin:clamp(.4rem,1.4cqw,.9rem) 0 clamp(.15rem,.6cqw,.35rem) 0;color:var(--ne-orange);text-shadow:0 0 18px rgba(250,157,40,.45)}
+/* 2026-09-16 (v11), per Eric: "do this ghost copies version on the live
+   site weekly lineup as well, for the horizontal version" -- right after
+   building the same trail effect for the 1:1 export (see the square-only
+   @media(max-width:899.98px) block above this one, and its long comment
+   for why absolute-position + translateX beats the flex+negative-margin
+   technique v6-v10 below used). Same swap here: every layer now anchors
+   to the exact same center point instead of being laid out in flex flow,
+   so "almost directly underneath, shifted right" holds regardless of
+   each copy's own rendered width. Sizes (130/118/100px) and the
+   center's margin-top are carried over unchanged from v9/v10 -- both
+   already re-verified safe against the crop line on every real week, and
+   nothing about switching HOW the copies are positioned changes how
+   much vertical room any one of them needs. Offsets/opacities scaled up
+   a little from the square version's (20/38/54/68px, .4/.24/.12/.05)
+   since this export has more real width to work with (1150px vs 700px)
+   -- kept proportionally similar, not copy-pasted 1:1. */
 @media (min-width:900px){
-  html.board-mode .eu-board-icon{display:flex;align-items:center;justify-content:center;margin-top:clamp(.9rem,2.1cqw,1.4rem)}
+  html.board-mode .eu-board-icon{position:relative;display:block;height:130px;margin-top:clamp(.9rem,2.1cqw,1.4rem)}
+  html.board-mode .eu-board-icon-side,html.board-mode .eu-board-icon-outer{display:block}
+  html.board-mode .eu-board-icon img{position:absolute;left:50%;top:50%;margin:0;width:auto;max-width:none;height:auto}
   /* #eu-board-icon-img (an id) always wins specificity over the plain
      ".eu-board-icon-side"/".eu-board-icon-outer" class rules below
      regardless of source order, so they can't fight over max-height the
      way two class-only rules targeting the same <img> would. */
-  html.board-mode #eu-board-icon-img{width:auto;max-width:none;height:auto;max-height:130px;opacity:1;position:relative;z-index:5}
-  html.board-mode .eu-board-icon img.eu-board-icon-side{display:block;width:auto;max-width:none;height:auto;max-height:118px;opacity:.6;margin:0 -18px;position:relative;z-index:4}
-  html.board-mode .eu-board-icon img.eu-board-icon-outer{display:block;width:auto;max-width:none;height:auto;max-height:100px;opacity:.35;margin:0 -22px;position:relative;z-index:3}
+  html.board-mode #eu-board-icon-img{transform:translate(-50%,-50%);max-height:130px;opacity:1;z-index:5}
+  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(2){transform:translate(calc(-50% + 26px),-50%);max-height:118px;opacity:.4;z-index:4}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% + 48px),-50%);max-height:100px;opacity:.24;z-index:3}
+  html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(4){transform:translate(calc(-50% + 68px),-50%);max-height:88px;opacity:.12;z-index:2}
+  html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(5){transform:translate(calc(-50% + 86px),-50%);max-height:76px;opacity:.05;z-index:1}
 }
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal
