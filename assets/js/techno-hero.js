@@ -242,7 +242,11 @@
   // whose hue never settles on a single value, so it gets an honest
   // rainbow-conic swatch (`.is-cycle` in style.css) instead of a fixed
   // color that would misrepresent it as a single hue.
-  const SWATCH_HUE = { static: 205, breathe: 28, flame: 24, wave: 200, meteor: 195, city: 210, pulse: 342, rapidpulse: 178, multipulse: 200 };
+  // 2026-09-16: kept in lockstep with colorState()'s own updated base hues
+  // above (static/breathe/flame/wave/meteor/multipulse all moved to spread
+  // further apart around the wheel) -- still the exact same values
+  // colorState() actually renders, not a second independently-guessed set.
+  const SWATCH_HUE = { static: 220, breathe: 45, flame: 10, wave: 150, meteor: 265, city: 210, pulse: 342, rapidpulse: 178, multipulse: 95 };
   const swatchEl = document.getElementById('hero-lighting-swatch');
   function updateSwatch() {
     if (!swatchEl) return;
@@ -283,45 +287,61 @@
   function colorState(elapsed) {
     switch (profile) {
       case 'static':
+        // 2026-09-16 (per Eric: "make the RGB patterns more intense... so
+        // they are each unique"): hue shifted 205->220 (a deeper blue) so it
+        // reads clearly apart from Wave's now-green base and Meteor's now-
+        // violet base -- the three used to sit within ~15deg of each other
+        // in the same blue/cyan band. Amplitude raised across the board.
         return {
-          hue: 205, breatheMul: 1, ringHue: () => 205,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.0, 240, 0.42, 2.0),
+          hue: 220, breatheMul: 1, ringHue: () => 220,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.0, 240, 0.48, 2.6),
         };
       case 'breathe': {
-        const mul = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(elapsed * 1.1));
+        // Hue moved 28->45 (a brighter amber/gold) to sit clearly apart
+        // from Flame's now-narrower deep-red-orange range; breathe range
+        // widened (deeper dip, higher peak) for a more dramatic inhale/exhale.
+        const mul = 0.28 + 0.87 * (0.5 + 0.5 * Math.sin(elapsed * 1.1));
         return {
-          hue: 28, breatheMul: mul, ringHue: () => 28,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 4.2, 300, 0.5, 1.7),
+          hue: 45, breatheMul: mul, ringHue: () => 45,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 4.2, 300, 0.5, 2.2),
         };
       }
       case 'flame': {
-        const flicker = 0.72 + 0.28 * Math.sin(elapsed * 9 + Math.sin(elapsed * 3.7) * 2.2);
-        const h = 18 + Math.sin(elapsed * 2.3) * 14 + Math.sin(elapsed * 5.1) * 6; // wanders across red-orange-yellow
+        // Flicker range and hue wander both widened for a more dramatic,
+        // less even flame; hue center pulled down to a deeper red (was
+        // wandering into the same amber territory Breathe now owns).
+        const flicker = 0.6 + 0.45 * Math.sin(elapsed * 9 + Math.sin(elapsed * 3.7) * 2.2);
+        const h = 10 + Math.sin(elapsed * 2.3) * 18 + Math.sin(elapsed * 5.1) * 8; // wanders deep red -> orange
         return {
           hue: h, breatheMul: flicker, ringHue: i => h + i * 2,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.2, 200, 0.48, 2.1),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.2, 200, 0.5, 2.7),
         };
       }
       case 'wave':
+        // Base hue moved from blue (200) to green (150) -- Wave used to
+        // sit almost on top of Static/Meteor's old blue-cyan cluster.
         return {
-          hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + i * 34 + elapsed * 52) % 360,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.8, 260, 0.5, 1.9),
+          hue: (150 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (150 + i * 34 + elapsed * 52) % 360,
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 2.8, 260, 0.52, 2.4),
         };
       case 'meteor': {
         // A single bright streak races from the vanishing point toward the
         // viewer once every METEOR_PERIOD seconds; every ring outside its
         // glow stays dim, so the tunnel reads as mostly-dark with one
         // traveling flash — a comet/meteor scene, not a synchronized wash.
+        // Hue moved 195 (cyan, overlapping Rapid Pulse) -> 265 (violet);
+        // background dimmed and the streak itself brightened for more
+        // contrast between "resting" and "flash" moments.
         const t = (elapsed % METEOR_PERIOD) / METEOR_PERIOD;
         const meteorZ = Z_FAR - t * (Z_FAR - Z_NEAR);
         const width = 220;
         return {
-          hue: 195,
+          hue: 265,
           breatheMul: 1,
-          ringHue: () => 195,
+          ringHue: () => 265,
           ringAlpha: (i, z) => {
             const spike = Math.max(0, 1 - Math.abs(z - meteorZ) / width);
-            return 0.12 + spike * spike * 4.2;
+            return 0.09 + spike * spike * 5.2;
           },
         };
       }
@@ -330,6 +350,8 @@
         // owns its own fixed hue drift speed and twinkle phase (CITY_SEEDS
         // above) instead of the whole tunnel sharing one hue, the Govee-
         // style "multicolor twinkle" scene rather than a single-color mode.
+        // Twinkle range widened (dimmer troughs, brighter peaks) for more
+        // contrast between lights as they twinkle in and out.
         return {
           hue: 210,
           breatheMul: 1,
@@ -339,7 +361,7 @@
           },
           ringAlpha: i => {
             const s = CITY_SEEDS[i % CITY_SEEDS.length];
-            return 0.32 + 1.35 * (0.5 + 0.5 * Math.sin(elapsed * s.tSpeed + s.tPhase));
+            return 0.26 + 1.75 * (0.5 + 0.5 * Math.sin(elapsed * s.tSpeed + s.tPhase));
           },
         };
       }
@@ -351,15 +373,17 @@
         // on/off flash) so it reads as a pulse, not a strobe. The same
         // period also drives ringAlpha's travelSpike, so each heartbeat
         // visibly sends its own bright band traveling down the tunnel.
+        // Baseline dimmed and beat amplitude raised for a punchier contrast
+        // between "resting" and "beat" moments.
         const T = 1.8;
         const tt = (elapsed % T) / T;
         const lub = Math.exp(-Math.pow((tt - 0.08) * 15, 2));
         const dub = 0.55 * Math.exp(-Math.pow((tt - 0.26) * 17, 2));
-        const mul = 0.38 + (lub + dub) * 1.15;
+        const mul = 0.3 + (lub + dub) * 1.5;
         const h = 342; // warm red-pink -- reads as a literal "pulse," distinct from Flame's orange
         return {
           hue: h, breatheMul: mul, ringHue: () => h,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, T, 220, 0.4, 1.7),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, T, 220, 0.42, 2.2),
         };
       }
       case 'rapidpulse': {
@@ -371,11 +395,11 @@
         const T = 0.85;
         const tt = (elapsed % T) / T;
         const beat = Math.exp(-Math.pow((tt - 0.1) * 13, 2));
-        const mul = 0.42 + beat * 1.05;
+        const mul = 0.34 + beat * 1.4;
         const h = 178; // cyan -- distinct from Pulse's warm red-pink
         return {
           hue: h, breatheMul: mul, ringHue: () => h,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, T, 200, 0.42, 1.6),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, T, 200, 0.44, 2.1),
         };
       }
       case 'multipulse': {
@@ -384,11 +408,13 @@
         // Each ring is assigned one of three channels by index, and each
         // channel travels/pulses at its own period, width, and hue, so the
         // tunnel reads as multiple distinct heartbeats overlapping rather
-        // than one synchronized profile.
+        // than one synchronized profile. Channel 1 moved from blue (200,
+        // overlapping Static/Wave) to yellow-green (95) for a cleaner
+        // 3-way spread against channels 2/3; amplitude raised on all three.
         const CH = [
-          { period: 1.5, width: 170, hue: 200 },
+          { period: 1.5, width: 170, hue: 95 },
           { period: 2.4, width: 210, hue: 300 },
-          { period: 3.6, width: 250, hue: 46 },
+          { period: 3.6, width: 250, hue: 20 },
         ];
         return {
           hue: CH[0].hue,
@@ -396,7 +422,7 @@
           ringHue: i => CH[i % CH.length].hue,
           ringAlpha: (i, z) => {
             const c = CH[i % CH.length];
-            return travelSpike(elapsed, z, c.period, c.width, 0.4, 2.0);
+            return travelSpike(elapsed, z, c.period, c.width, 0.42, 2.6);
           },
         };
       }
@@ -404,7 +430,7 @@
       default:
         return {
           hue: (200 + elapsed * 6) % 360, breatheMul: 1, ringHue: i => (200 + elapsed * 6 + i * 12) % 360,
-          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.4, 260, 0.48, 1.8),
+          ringAlpha: (i, z) => travelSpike(elapsed, z, 3.4, 260, 0.5, 2.3),
         };
     }
   }
@@ -484,15 +510,20 @@
     // real shadowBlur glow kicks in once a ring is meaningfully above its
     // resting brightness (am > 1.05), reset after stroke() so it never
     // bleeds into whatever draws next.
+    // 2026-09-16 (per Eric: "make the RGB patterns more intense"): the same
+    // brightness-driven saturation/lightness/glow scaling as before, just
+    // steeper -- a profile's bright traveling moment now pushes further
+    // toward full saturation and a bigger, brighter glow than the 2026-09-04
+    // pass did, on top of that same pass's per-profile amplitude increases.
     const bright = Math.max(0, am - 1);
-    const sat = Math.min(100, 70 + bright * 12);
-    const light = Math.min(74, 60 + bright * 6);
+    const sat = Math.min(100, 75 + bright * 18);
+    const light = Math.min(78, 62 + bright * 10);
     const alpha = Math.min(1, 0.5 * f * am);
     ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, ${alpha})`;
-    ctx.lineWidth = 1.8 + bright * 1.5;
+    ctx.lineWidth = 1.8 + bright * 2.2;
     if (bright > 0.05) {
-      ctx.shadowColor = `hsla(${hue}, 95%, 68%, ${Math.min(1, alpha * 1.2)})`;
-      ctx.shadowBlur = Math.min(30, bright * 15);
+      ctx.shadowColor = `hsla(${hue}, 95%, 68%, ${Math.min(1, alpha * 1.3)})`;
+      ctx.shadowBlur = Math.min(38, bright * 20);
     }
     const n = unitPts.length;
     const pts = new Array(n);

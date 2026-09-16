@@ -1955,6 +1955,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    reintroduce a bespoke version -- this comment's own history is the
    place to look for the removed markup first.
 
+   2026-09-16, per Eric ("make the shine effect less intense"): peak
+   opacity dropped from a fully-opaque 1 to 0.5 -- the sweep is now a
+   dimmer, half-strength flash rather than a full white-out, while the
+   hard 3.5%-wide core / 60s cadence spec above (both explicit, separate
+   asks from Eric) are left untouched. Re-verified against the pixel-
+   verified contrast audit afterward since this sits directly behind real
+   button/card text -- see this file's own QA history for the run.
+
    z-index:1 -- BELOW every real content element in .host-card/.mile,
    which are all explicitly z-index:2 (see the .host-card/.mile rules
    above) -- so the flash can never wash out text sitting on top of it,
@@ -1976,8 +1984,8 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .host-card.tier-diamond:nth-child(4n+4)::after{animation-delay:45s}
 @keyframes gz-shine{
   0%{opacity:0;background-position:-160% 0}
-  1%{opacity:1;background-position:40% 0}
-  2%{opacity:1;background-position:220% 0}
+  1%{opacity:0.5;background-position:40% 0}
+  2%{opacity:0.5;background-position:220% 0}
   2.6%{opacity:0}
   100%{opacity:0;background-position:220% 0}
 }

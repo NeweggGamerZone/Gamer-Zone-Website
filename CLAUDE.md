@@ -322,7 +322,7 @@ rule elsewhere in this file.
 
 ## Unified metallic shine effect ("gz-shine")
 
-There is exactly one metallic shine/flash effect on this site — the `.mile.tier-diamond::after, .host-card.tier-diamond::after, .btn::after` rule block in `assets/css/style.css` (search "Unified metallic shine"), driven by the `gz-shine` keyframe. Do not write a new bespoke shine animation for a future component — extend that selector list to include the new element instead, so there's one cadence and one look site-wide. Spec: exactly one flash every 60s (no idle mid-cycle resting state — rest is `opacity:0`, not a parked-off-screen gradient), a crisp white sweep with minimal feather (no soft blur), plus two small fixed four-point sparkle glints that twinkle on with the flash. Keep sparkle `background-position` placement near a component's corners/margins, not its center — the center is usually where the real text sits.
+There is exactly one metallic shine/flash effect on this site — the `.mile.tier-diamond::after, .host-card.tier-diamond::after, .btn::after` rule block in `assets/css/style.css` (search "Unified metallic shine"), driven by the `gz-shine` keyframe. Do not write a new bespoke shine animation for a future component — extend that selector list to include the new element instead, so there's one cadence and one look site-wide. Current spec (as of 2026-09-16 — see that section below for the most recent change): exactly one flash every 60s (no idle mid-cycle resting state — rest is `opacity:0`, not a parked-off-screen gradient), a crisp white sweep with minimal feather (no soft blur) peaking at half-opacity (`0.5`, dimmed from a fully-opaque `1` per Eric's "make the shine effect less intense" call). The sparkle glints this paragraph used to describe were removed 2026-09-08 — see "Unified metallic shine" in `style.css` itself for that history; it's just the white sweep now.
 
 This is a specific case of a broader rule: **before adding any new visual/interactive effect, check whether an existing shared implementation already does the job.** One effect used everywhere beats five near-identical ones that quietly drift apart.
 
@@ -1022,6 +1022,65 @@ Verified via a live Puppeteer check: a real `page.select()` interaction (not a m
 set) correctly updates the swatch's background/glow, and the selection plus swatch color both
 correctly persist through a full page reload (the existing `localStorage`-backed
 `loadProfile()`/`saveProfile()` mechanism, unchanged).
+
+## Shine dimmed, RGB profiles pushed further + spread apart (2026-09-16)
+
+Per Eric, right after the RGB picker swatch above: "make the shine effect less intense, make
+the RGB patterns more intense, so they are each unique." Two independent tuning passes, both
+direct instructions (not open-ended design questions) so implemented straight through per core
+rule 15, then verified with real pixel sampling rather than eyeballed.
+
+**Shine, less intense.** `gz-shine`'s `@keyframes` (see "Unified metallic shine" above) had its
+peak `opacity` dropped from a fully-opaque `1` to `0.5` — the sweep is now a dimmer, half-
+strength flash rather than a full white-out. The hard 3.5%-wide core and the 60s cadence (both
+separate, earlier explicit specs from Eric) were left untouched — only the one lever the request
+actually asked for moved. Re-verified against the full pixel-verified contrast audit afterward
+since this sits directly behind real button/card text: 915 text items across all 5 pages, 0
+failures.
+
+**RGB profiles, more intense and more distinct from each other.** Two separate problems existed
+before this round: several profiles' base hues clustered within ~15deg of each other in the same
+blue/cyan band (`static`=205, `wave`'s base=200, `meteor`=195, `multipulse`'s first channel=200),
+and every profile's brightness amplitude was tuned in the 2026-09-04 "push the RGB effects" round
+using values that read as comparatively tame once judged against Eric's new "more intense" bar.
+Fixed both in `techno-hero.js`'s `colorState()`:
+
+- **Hue reassignment**, keeping each profile's own thematic logic (Breathe stays warm, Flame
+  stays red-orange, Pulse stays pink, etc.) but spreading the 9 named profiles' base hues out
+  across the wheel instead of letting several sit in the same narrow band: `static` 205->220,
+  `breathe` 28->45, `flame`'s wander-center 18->10, `wave`'s base 200->150, `meteor` 195->265,
+  `multipulse` channel 1 200->95. `city` (already a genuinely multi-hue profile via `CITY_SEEDS`)
+  and `pulse`/`rapidpulse` (342/178, already well-separated) were left alone.
+- **Amplitude raised across every profile's own `ringAlpha`/`breatheMul` math** (roughly +25-40%
+  per profile, baseline dimmed slightly at the same time so the *range* between resting and peak
+  brightness grew, not just the peak) — see each `case` in `colorState()` for the exact before/
+  after numbers, left in the switch statement's own comments.
+- **The shared rendering pipeline itself pushed further too** (`drawRing()`'s brightness-driven
+  saturation/lightness/glow scaling, raised again on top of the 2026-09-04 pass's own increase) —
+  this affects every profile at once since they all funnel through the same draw call, consistent
+  with the "one shared implementation" rule.
+- `SWATCH_HUE` (the RGB-picker discoverability swatch added earlier this same day, see above) was
+  updated in lockstep with the real `colorState()` hues it mirrors, so the swatch never shows a
+  color the tunnel doesn't actually render.
+
+**Verified with real pixel sampling, not eyeballing.** A live Puppeteer script sampled the
+`#techno-canvas` element's actual rendered pixel data (not a screenshot guess) across each
+profile for several real seconds post-load-fade-in: `pulse`/`rapidpulse` (the fastest-cycling
+profiles) showed a genuine min/max brightness swing of roughly 15-70 out of 255 per channel-sum
+sample, and `meteor`/`city` (the punchiest profiles) peaked at 148/116 respectively — confirming
+the amplitude increases are real, not just numbers that look bigger on paper. Separately,
+because a brighter tunnel sits directly behind the hero's white `<h1>` text, real WCAG contrast
+was computed from actual rendered pixels (not assumed): captured the tunnel at its brightest
+sampled moment for `meteor`, `city`, and `rapidpulse`, then re-screenshotted the exact same hero
+title region with text forced transparent (the same "hide the text, sample the real background"
+method the site-wide contrast audit already uses) and computed contrast against the h1's real
+white text color. Worst observed case (`city`, a stray bright-orange pixel from a twinkling
+light passing directly behind the title) was **7.71:1** — still clearing the 7:1 AAA floor with
+real room to spare, thanks to the h1's existing heavy `text-shadow` treatment (`.hs-line.solid`,
+a near-opaque black shadow already tuned for exactly this kind of dynamic background); `meteor`
+and `rapidpulse` came in around 16-20:1. The full scripted QA suite was also re-run clean (915
+text items / 5 pages / 0 contrast failures, 0 container-width findings, 0 console errors) since
+`gz-shine`'s change reaches every `.btn` site-wide.
 
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
