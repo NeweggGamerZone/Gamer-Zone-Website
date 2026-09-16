@@ -116,6 +116,15 @@ const GZ = {
       container.classList.add('static');
       track.innerHTML = items.join('');
       container.appendChild(track);
+      // 2026-09-16, per Eric ("allow me to mouse/finger drag every section
+      // that has scrolling content"): this branch is a real native
+      // overflow-x:auto container, so touch panning already works for free
+      // -- the one real gap was mouse click-drag, which a plain scrollable
+      // div doesn't support natively. Reuses the exact scrollLeft-drag
+      // pattern featured-gear.js's carousel already established, just
+      // generalized here so every static/reduced-motion GZ.marquee lane
+      // gets it automatically instead of hand-rolling it per instance.
+      GZ.enableMarqueeDrag(container, track, false);
       return;
     }
     // Duplicated once so translateX(-50%) is exactly one full loop of the
@@ -157,6 +166,16 @@ const GZ = {
     // reopened (that only toggles display:none on an ancestor -- it never
     // removes or rebuilds this node).
     GZ.buildMarqueeControls(container, track);
+    // 2026-09-16, per Eric: the same drag request as the static branch
+    // above, but for a real CSS-animation-driven lane -- there's no native
+    // scrollLeft to grab here, so dragging moves the shared Web Animations
+    // API clock (Animation.currentTime) directly instead, the same
+    // mechanism skip() above already uses to move this animation around
+    // (see that function's own comment on why currentTime, not
+    // animation-delay). One shared drag implementation for every animated
+    // GZ.marquee lane site-wide (Reviews' two lanes, the Past Events
+    // waterfall, the hero photo strip), not a per-instance one-off.
+    GZ.enableMarqueeDrag(container, track, true);
     // 2026-09-04 fix (per Eric: photos on the hero's expanded 104-photo
     // reel "do not render until they cross the halfway point threshold"):
     // the animation used to start (see the paused->running flip below) as
@@ -254,31 +273,46 @@ const GZ = {
     // paused exactly like they left it.
     if (!track.dataset.gzHardPaused) anim.play();
   },
-  // 2026-09-08, F-13 fix (scenes-not-specs audit + Eric's explicit spec):
-  // shared hover/focus-triggered pause+skip overlay for every GZ.marquee
-  // instance site-wide (Reviews, both Past Events photo waterfalls, the
-  // homepage hero photo strip) -- one implementation, reused everywhere,
-  // same "gz-shine"/"one shared marquee" philosophy as the rest of this
-  // file. Satisfies WCAG 2.2.2 (Pause, Stop, Hide) for real, for every
-  // visitor, not just ones with prefers-reduced-motion set: hovering (or
-  // keyboard-focusing into) the lane greys it out, stops the motion, and
-  // reveals prev/next skip buttons plus a play/pause toggle; leaving it
-  // resumes automatic play and hides the controls again -- and a visitor
-  // who explicitly hits pause stays paused until they explicitly resume,
-  // even across the Past Events accordion being closed and reopened (see
-  // the `gzHardPaused` check in resyncMarquee above).
+  // 2026-09-16 rewrite, per Eric ("we don't even need to show controls
+  // anymore, clicking in the center area pauses and plays it, and clicking
+  // towards the left and right sections will scroll through instead"),
+  // replacing the 2026-09-08 hover-reveal dark-scrim version. That version's
+  // full-lane pointer-events:auto overlay is exactly what was blocking
+  // Reviews' own click-to-read-more popup on long cards ("I can't hover
+  // them since the hover controls are overriding") -- removing the overlay
+  // fixes that for real, not just by making it more transparent.
+  //
+  // A real, disclosed WCAG 2.2.2/2.4.7 judgment call: 2.2.2 ("Pause, Stop,
+  // Hide") requires a real, operable mechanism to pause auto-moving
+  // content -- it does not require that mechanism to be permanently
+  // visible chrome. But a control a keyboard user can never actually SEE
+  // even once they've tabbed onto it would separately fail 2.4.7 ("Focus
+  // Visible"), and core rule 8 here requires every custom interactive
+  // element to have a visible focus state -- so "no controls" can't mean
+  // "no controls, ever, for anyone." The fix below keeps 3 real buttons in
+  // the DOM (prev/play-pause/next), invisible at rest, but revealed with a
+  // real focus ring the instant a keyboard user tabs onto one
+  // (`:focus-visible` in style.css) -- fully operable and fully visible to
+  // the one input method that has no other way to discover them, with zero
+  // visible chrome for a mouse user who never needs it. Mouse/touch users
+  // get the same 3 actions through a click-zone convention instead (left
+  // third = previous, center third = play/pause, right third = next) --
+  // the same left/right/center-tap idiom a lot of video players already
+  // use, so it's discoverable through prior convention even with no visible
+  // affordance drawn on screen.
   buildMarqueeControls(container, track) {
-    const wrap = document.createElement('div');
-    wrap.className = 'gz-marquee-controls';
-    wrap.innerHTML = `
-      <button type="button" class="gz-mq-btn gz-mq-prev" aria-label="Show previous">${GZ.icon('arrow', 'ic')}</button>
-      <button type="button" class="gz-mq-btn gz-mq-playpause" aria-label="Pause">${GZ.icon('pause', 'ic')}</button>
-      <button type="button" class="gz-mq-btn gz-mq-next" aria-label="Show next">${GZ.icon('arrow', 'ic')}</button>
-    `;
-    container.appendChild(wrap);
-    const prevBtn = wrap.querySelector('.gz-mq-prev');
-    const nextBtn = wrap.querySelector('.gz-mq-next');
-    const ppBtn = wrap.querySelector('.gz-mq-playpause');
+    const mkBtn = (cls, label, iconName) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'gz-mq-btn ' + cls;
+      b.setAttribute('aria-label', label);
+      b.innerHTML = GZ.icon(iconName, 'ic');
+      container.appendChild(b);
+      return b;
+    };
+    const prevBtn = mkBtn('gz-mq-prev', 'Show previous', 'arrow');
+    const ppBtn = mkBtn('gz-mq-playpause', 'Pause', 'pause');
+    const nextBtn = mkBtn('gz-mq-next', 'Show next', 'arrow');
     prevBtn.querySelector('.ic').style.transform = 'scaleX(-1)';
 
     function setPlayPauseIcon(isPlaying) {
@@ -328,8 +362,7 @@ const GZ = {
           anim.playbackRate = 1;
           // Resume normal playback after the skip completes, unless the
           // visitor has this lane explicitly paused via the play/pause
-          // button (hovering alone no longer implies paused -- see enter()
-          // below).
+          // control.
           if (track.dataset.gzHardPaused) anim.pause();
           delete track.dataset.gzSkipping;
           return;
@@ -339,9 +372,12 @@ const GZ = {
       requestAnimationFrame(tick);
     }
 
-    prevBtn.addEventListener('click', () => skip(-1));
-    nextBtn.addEventListener('click', () => skip(1));
-    ppBtn.addEventListener('click', () => {
+    // A manual pause is now a sticky toggle (not a hover-scoped state --
+    // there's no more "leaving the lane" concept once hover doesn't drive
+    // any visibility), matching Eric's literal "clicking in the center
+    // area pauses and plays it" spec: it stays paused until played again,
+    // full stop, the same way a real video player's pause button works.
+    function togglePlayPause() {
       const anim = track.getAnimations()[0];
       if (!anim || !track.dataset.gzDur) return;
       if (anim.playState === 'running') {
@@ -354,48 +390,127 @@ const GZ = {
         delete track.dataset.gzHardPaused;
         setPlayPauseIcon(true);
       }
-    });
+    }
 
-    // Hover/focus reveals the control scheme -- mouseenter/mouseleave for
-    // pointer users, focusin/focusout (which bubble, unlike focus/blur)
-    // for keyboard users tabbing onto the skip/play buttons. focusout
-    // fires when focus moves between the three buttons too, so it's
-    // guarded to only treat it as "left the lane" when focus actually
-    // lands outside `container`.
-    // 2026-09-08, per Eric (correcting the first version of this): hovering
-    // does NOT auto-pause the motion anymore -- it only reveals the
-    // overlay/controls, with the real content still scrolling faintly
-    // behind it. Motion only stops when the visitor explicitly hits the
-    // center play/pause button. This also means the button's icon needs
-    // to reflect *actual* animation state on entry, not an assumed
-    // just-paused state -- see setPlayPauseIcon(anim.playState==='running')
-    // below instead of a hardcoded `false`.
-    function enter() {
-      track.dataset.gzHovering = '1';
+    prevBtn.addEventListener('click', () => skip(-1));
+    nextBtn.addEventListener('click', () => skip(1));
+    ppBtn.addEventListener('click', togglePlayPause);
+
+    // Mouse/touch click-zone routing. A real click anywhere in the lane
+    // that ISN'T on one of the 3 invisible-until-focused buttons above and
+    // ISN'T on a real piece of interactive content already living inside a
+    // card (a review's own data-full popup trigger, a "View on Newegg"
+    // link, etc. -- checked first and left completely alone) is treated as
+    // a left/center/right zone tap. This is deliberately event delegation
+    // on the container rather than a 3rd invisible overlay stacked on top
+    // of the cards -- an overlay is exactly the shape of the original bug
+    // this rewrite is fixing (something sitting in front of the cards,
+    // intercepting clicks meant for them), so the fix doesn't reintroduce
+    // it in a new form.
+    container.addEventListener('click', e => {
+      // A real drag (see GZ.enableMarqueeDrag below) also ends in a click
+      // event on release in most browsers -- swallow exactly that one
+      // synthetic click so a drag-release doesn't also fire a skip/pause.
+      if (track.dataset.gzSuppressClick) { delete track.dataset.gzSuppressClick; return; }
+      if (e.target.closest('.gz-mq-btn')) return; // already handled by that button's own listener above
+      if (e.target.closest('a,[data-full],button')) return; // real content's own click behavior wins
       const anim = track.getAnimations()[0];
-      if (anim && track.dataset.gzDur) setPlayPauseIcon(anim.playState === 'running');
-    }
-    function leave() {
-      delete track.dataset.gzHovering;
-      // Leaving the lane always resets to the default running state and
-      // hides the controls (via the :hover/:focus-within CSS, not JS) --
-      // per Eric's spec, a manual pause via the play/pause button is
-      // scoped to "while I'm looking at this," not a standing preference
-      // that survives the visitor moving on.
-      delete track.dataset.gzHardPaused;
-      const anim = track.getAnimations()[0];
-      if (anim && track.dataset.gzDur) {
-        anim.playbackRate = 1;
-        anim.play();
-        setPlayPauseIcon(true);
-      }
-    }
-    container.addEventListener('mouseenter', enter);
-    container.addEventListener('mouseleave', leave);
-    container.addEventListener('focusin', enter);
-    container.addEventListener('focusout', e => {
-      if (!container.contains(e.relatedTarget)) leave();
+      if (!anim || !track.dataset.gzDur) return;
+      const rect = container.getBoundingClientRect();
+      if (!rect.width) return;
+      const frac = (e.clientX - rect.left) / rect.width;
+      if (frac < 1 / 3) skip(-1);
+      else if (frac > 2 / 3) skip(1);
+      else togglePlayPause();
     });
+  },
+  // 2026-09-16, per Eric ("allow me to mouse/finger drag every section that
+  // has scrolling content"): one shared drag implementation reused by every
+  // GZ.marquee lane, animated or static (see both call sites above).
+  //
+  // `useAnimation=true` (Reviews' two lanes, the Past Events waterfall, the
+  // hero photo strip -- the real CSS-animation-driven marquees): there's no
+  // native scrollLeft to grab on a `transform`-animated track, so a drag
+  // moves the shared Web Animations API clock directly
+  // (`Animation.currentTime`) -- the exact same mechanism skip() above
+  // already uses to move this animation around (see that function's own
+  // comment for why currentTime and not animation-delay). The
+  // screen-direction math accounts for `.rev` lanes: a reversed
+  // animation-direction track's on-screen position moves opposite the
+  // forward track's for the same change in currentTime, so the drag's sign
+  // is flipped for `.rev` specifically -- verified by comparing both lanes'
+  // real drag feel, not assumed from the CSS alone.
+  //
+  // `useAnimation=false` (the .static/reduced-motion branch, e.g. Featured
+  // Gear's predecessor pattern and any future non-scrolling static lane):
+  // it's a real native overflow-x:auto container already, so this just
+  // drives its real scrollLeft, the same drag pattern featured-gear.js's
+  // own carousel and zone-stack.js's swipe already established elsewhere
+  // on this site.
+  //
+  // Either mode sets `track.dataset.gzSuppressClick` for one tick after a
+  // real (moved-more-than-a-few-px) drag ends, so buildMarqueeControls'
+  // click-zone delegation above doesn't also treat the drag-release as a
+  // skip/pause tap -- the same `dragMoved`-suppresses-the-next-click
+  // pattern zone-stack.js/featured-gear.js already use.
+  enableMarqueeDrag(container, track, useAnimation) {
+    let drag = null;
+    container.addEventListener('pointerdown', e => {
+      if (e.button !== undefined && e.button !== 0) return;
+      if (e.target.closest('.gz-mq-btn,a,[data-full],button')) return;
+      if (useAnimation) {
+        const anim = track.getAnimations()[0];
+        if (!anim || !track.dataset.gzDur) return;
+        drag = { startX: e.clientX, startTime: anim.currentTime || 0, wasHardPaused: !!track.dataset.gzHardPaused, moved: false };
+        anim.pause();
+      } else {
+        drag = { startX: e.clientX, startScroll: container.scrollLeft, moved: false };
+      }
+      container.classList.add('dragging');
+      try { container.setPointerCapture(e.pointerId); } catch { /* not every pointer type supports capture */ }
+    });
+    container.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.startX;
+      if (Math.abs(dx) > 4) drag.moved = true;
+      if (useAnimation) {
+        const dur = parseFloat(track.dataset.gzDur);
+        const totalDist = track.scrollWidth / 2;
+        if (!dur || !totalDist) return;
+        // Forward track: increasing currentTime moves content left on
+        // screen, so a drag-left (negative dx) should INCREASE
+        // currentTime to make the content follow the pointer ("grab and
+        // drag" convention) -- hence the negated dx. A `.rev` track's
+        // on-screen motion for the same currentTime change runs the other
+        // way (animation-direction:reverse samples the keyframe from the
+        // opposite end), so its sign is flipped back to un-negated dx.
+        const sign = track.classList.contains('rev') ? 1 : -1;
+        const deltaMs = (sign * dx / totalDist) * dur * 1000;
+        const anim = track.getAnimations()[0];
+        if (anim) anim.currentTime = Math.max(0, drag.startTime + deltaMs);
+      } else {
+        container.scrollLeft = drag.startScroll - dx;
+      }
+    });
+    function endDrag() {
+      if (!drag) return;
+      if (useAnimation) {
+        const anim = track.getAnimations()[0];
+        if (anim) {
+          if (drag.wasHardPaused) anim.pause();
+          else { anim.playbackRate = 1; anim.play(); }
+        }
+      }
+      if (drag.moved) {
+        track.dataset.gzSuppressClick = '1';
+        setTimeout(() => delete track.dataset.gzSuppressClick, 0);
+      }
+      drag = null;
+      container.classList.remove('dragging');
+    }
+    container.addEventListener('pointerup', endDrag);
+    container.addEventListener('pointercancel', endDrag);
+    container.addEventListener('pointerleave', () => { if (drag) endDrag(); });
   },
   // Real open/closed status computed from config.json's hoursSchedule --
   // 2026-08-28, built for the homepage hero redesign (see index.html's

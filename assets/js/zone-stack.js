@@ -140,7 +140,16 @@
     if (dt > 0) velocity = (e.clientX - lastMoveX) / dt;
     lastMoveX = e.clientX;
     lastMoveT = e.timeStamp;
-    dragX = dx;
+    // 2026-09-16, per Eric ("don't let me drag so far that we are past the
+    // section width"): dx was previously applied to --zs-drag with no
+    // ceiling at all, so a fast/long real-world drag (or a held touch
+    // dragged well past the stack's own edge) could push the center card
+    // visibly past .zone-stack's own bounds before the pointer was ever
+    // released. Clamped to the stack's own real measured width -- read
+    // fresh on every move rather than cached once, so a resize mid-drag
+    // (a rotated phone, say) can't leave a stale, wrong ceiling in place.
+    const maxDrag = stack.getBoundingClientRect().width;
+    dragX = Math.max(-maxDrag, Math.min(maxDrag, dx));
     setDragOffset(dragX);
   }
 

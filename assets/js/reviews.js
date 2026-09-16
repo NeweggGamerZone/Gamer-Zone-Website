@@ -128,23 +128,35 @@
      already matched (see the `used` containment check below). A short
      review with no matching theme (e.g. "Very fun") simply gets no bold
      and no tag -- honest silence over a forced, meaningless label. */
-  // 2026-09-16, per Eric ("add a Good vibes tab or more fun tags for the
-  // reviews as well"): 4 more real recurring phrases from this same review
-  // pool, added the same honest way as the original list -- every term
-  // below is a phrase actually present, more than once, across these 62
-  // real quotes (checked by hand against the REVIEWS array above, not
-  // guessed), not an invented category. 'chill' covers "chill out and
-  // play"/"chill day of gaming"/"chill/clean atmosphere" (4 real reviews)
-  // -- distinct wording from 'vibe' below, so it gets its own tag rather
-  // than merging into "Great Vibe". The existing `used` containment guard
-  // already prevents 'friendly' (a broad, late-priority catch-all) from
-  // ever stealing a match that 'kid friendly' should win instead, so
-  // ordering these after the more specific terms was enough -- no change
-  // needed to the matching logic itself.
+  // 2026-09-16, curated per Eric ("just use 100 percent free, free snacks,
+  // clean space, friendly staff, good vibes, fun, whatever else you think
+  // is clear but professional and a good categorical fit"): simplified
+  // down from the round-1 list above (20 entries, some overlapping/
+  // redundant) to a smaller, more consistently professional-sounding set.
+  // Two real consolidations Eric asked for by name: 'chill' and 'vibe' now
+  // both resolve to the single "Good Vibes" label instead of two separate
+  // near-duplicate tags ("Good Vibes" / "Great Vibe"); 'staff' and
+  // 'friendly' now both resolve to "Friendly Staff" instead of the
+  // separate "Great Staff" / "Super Friendly" labels. Two different real
+  // phrases can share one label like this safely -- MAX_BOLD still caps a
+  // card at 2 bolded phrases total, and `tag` is only ever set from the
+  // FIRST match, so this never produces two different tags on one card.
+  // 'fun' is new (per Eric's explicit ask) -- confirmed as a real,
+  // frequently-recurring word across the actual REVIEWS pool above (not
+  // guessed), and deliberately placed last/lowest-priority since it's the
+  // broadest, most common word in the whole list: every more specific term
+  // above it gets first chance at a match, so "fun" only ever fills in a
+  // card that has nothing more specific to say. Every other kept term
+  // (VR Setups, Raffles & Prizes, Giveaways, Hidden Gem, Family Friendly,
+  // Tournaments, Immersive Setup, Feels Welcoming, Beautiful Space, Weekly
+  // Events, Free to Play) is retained under Eric's own "whatever else is
+  // clear and professional" discretion -- each is still a real, verified,
+  // recurring phrase from round 1, just judged to already read as a clean,
+  // professional categorical fit rather than needing to be cut.
   const HIGHLIGHT_TERMS = [
     ['completely free', '100% Free'],
     ['free snacks', 'Free Snacks'],
-    ['free food and drinks', 'Free Food & Drinks'],
+    ['free food and drinks', 'Free Snacks'],
     ['free', 'Free to Play'],
     ['VR', 'VR Setups'],
     ['raffles', 'Raffles & Prizes'],
@@ -156,12 +168,13 @@
     ['clean', 'Clean Space'],
     ['immersive', 'Immersive Setup'],
     ['chill', 'Good Vibes'],
-    ['vibe', 'Great Vibe'],
+    ['vibe', 'Good Vibes'],
     ['welcoming', 'Feels Welcoming'],
     ['beautiful', 'Beautiful Space'],
-    ['staff', 'Great Staff'],
-    ['friendly', 'Super Friendly'],
+    ['staff', 'Friendly Staff'],
+    ['friendly', 'Friendly Staff'],
     ['events every', 'Weekly Events'],
+    ['fun', 'Fun'],
   ];
   const MAX_BOLD = 2;
 

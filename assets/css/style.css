@@ -749,7 +749,11 @@ details.archive-month .grid { margin-top: 1rem; }
    this just gives the peeking prev/next cards more room to clear the
    center card's edge cleanly (see the comment on [data-pos="prev"] below)
    and more of the section's own background to show through at the sides. */
-.zone-stack { position: relative; width: 100%; height: 560px; overflow: hidden; touch-action: pan-y; }
+/* 2026-09-16, per Eric ("show three, make the cards a little shorter and
+   wider so three cards can fit the section width"): height dropped from
+   560px/500px(mobile) to 420px/360px -- see .zone-card's own width bump
+   just below for the matching "wider" half of this. */
+.zone-stack { position: relative; width: 100%; height: 420px; overflow: hidden; touch-action: pan-y; }
 /* At the old 620px width, the prev/next cards' own far edge (rounded
    corner + orange border) sat off in the clipped-away zone -- with the
    card fixed at 340px wide and the peek offset a fixed 82% of that (in
@@ -769,7 +773,12 @@ details.archive-month .grid { margin-top: 1rem; }
    area (see above), but keeps anything still touching the boundary
    (narrower viewports between 620px and 900px) from ending in a flat cut. */
 .zone-stack { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); }
-.zone-card { position: absolute; top: 0; left: 50%; width: min(340px, 78%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease; -webkit-user-select: none; user-select: none; }
+/* 2026-09-16: widened from min(340px,78%) to min(460px,60%) -- the other
+   half of "shorter and wider" above -- so a fixed card is bigger on
+   typical desktop widths while the % cap still shrinks it correctly on
+   narrow viewports rather than ever forcing an oversized card into a
+   small section. */
+.zone-card { position: absolute; top: 0; left: 50%; width: min(460px, 60%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease, filter .55s ease; -webkit-user-select: none; user-select: none; }
 /* 2026-09-08, per Eric: "ZONE 1"-"ZONE 5" badge moved from the top-right
    corner to horizontally centered at the top of the card -- centered via
    left:50%/translateX(-50%) rather than switching to a flex/grid layout,
@@ -811,24 +820,26 @@ details.archive-month .grid { margin-top: 1rem; }
    out-of-focus background depth, the same visual cue a camera's depth-of-
    field blur gives a background subject, rather than draining their color
    entirely. */
-/* 2026-09-16, per Eric ("I don't know if I like the half faded side
-   cards, maybe we can adjust so those edge ones aren't shown"): the near
-   peek layer's blur+brightness treatment above is now hidden outright
-   (opacity:0, pointer-events:none) rather than shown dimmed -- only the
-   centered card is visible. Position/transform math is left untouched
-   (still real translateX/scale values, not deleted) so this is a one-line
-   toggle to revert if the fully-hidden look doesn't land either; the
-   real navigation (prev/next arrows, dot nav, and drag/swipe) all still
-   work exactly the same, they just no longer have a visible target to
-   click on directly. Note: this reopens the "full section width" reasoning
-   the far-peek layer above was originally built to satisfy (see that
-   layer's own comment) -- .zone-stack's outer width/mask are left as-is,
-   so the section still occupies its full container width, it now just has
-   visibly empty space on either side of the center card instead of a
-   composed multi-card scene filling it. Worth a look if the section reads
-   too narrow again per the container-width rule in CLAUDE.md. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82% + var(--zs-drag, 0px))) scale(.9); opacity: 0; pointer-events: none; z-index: 4; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82% + var(--zs-drag, 0px))) scale(.9); opacity: 0; pointer-events: none; z-index: 4; }
+/* 2026-09-16, round 2 (per Eric, reversing the round above): "show three,
+   make the cards a little shorter and wider so three cards can fit the
+   section width, with the side cards slightly hiding behind the center
+   card." Back to visible + clickable, but the offset dropped from 82% to
+   72% of the (now-wider) card's own width, so the near peek layer
+   genuinely overlaps behind the center card's edge (~28% of the peek
+   card's own width hidden) instead of sitting almost fully separate from
+   it the way 82% did -- at this card width that lands the combined
+   3-card span at roughly 1122px, a few px shy of .zone-stack's own
+   ~1140px container width on a typical desktop viewport (checked via the
+   real translateX math, not just assumed from the percentages alone),
+   i.e. "fits the section width" without overflowing it or leaving a lot
+   of dead space at the edges either.
+   Restored the exact pre-2026-09-16-round-1 blur+brightness(.8)
+   depth-of-field treatment (see this file's git history / CLAUDE.md) for
+   the visible portion of each peek card, so the ones "hiding behind" the
+   center card read as out-of-focus background depth, not just a second
+   copy at full clarity. */
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 72% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 72% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
 /* Second, further-out peek layer -- per Eric's "another layer of cards
    on the outermost left and right of center" ask for About Gamer Zone.
    These are real zone cards from the same rotation (not decorative
@@ -904,7 +915,7 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-stack-dot { position: relative; width: 11px; height: 11px; border-radius: 50%; background: var(--line); border: none; padding: 0; cursor: pointer; }
 .zone-stack-dot::before { content: ""; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
 .zone-stack-dot.active { background: var(--ne-orange); }
-@media (max-width: 480px) { .zone-stack { height: 500px; } }
+@media (max-width: 480px) { .zone-stack { height: 360px; } }
 
 /* Games page category cards ("game-cat-*"), added 2026-09-15 per Eric
    ("scan our current photography and add those as core images for each
@@ -1427,7 +1438,16 @@ body.home-page { background: transparent; }
    collegiate/.class-influencer/.class-org color-override rules above,
    now extended to also match .amb-class-teaser-card. */
 .amb-class-teaser { display:flex; gap:1.2rem; margin-top:1.5rem; flex-wrap:wrap; }
-.amb-class-teaser-card { flex:1 1 220px; min-width:0; text-align:center; background:rgba(4,5,7,.5); border:1px solid rgba(255,255,255,.16); border-radius:2px; padding:1.5rem 1.1rem 1.3rem; }
+/* 2026-09-16, per Eric ("make the background behind collegiate,
+   influencer, and organization have higher opacity so it blocks
+   background better"): these 3 cards sit on top of #amb-teaser's own
+   .gz-photo-band photo (see that section's own history below) -- .5 was
+   translucent enough that the busy photo behind still competed with the
+   card's own icon/title/copy. Raised to .82, in line with this project's
+   other photo-backed scrim treatments (.gz-photo-band::after itself runs
+   .84/.92/.95 -- see that section), so the card reads as a solid card
+   again rather than a half-see-through panel. */
+.amb-class-teaser-card { flex:1 1 220px; min-width:0; text-align:center; background:rgba(4,5,7,.82); border:1px solid rgba(255,255,255,.16); border-radius:2px; padding:1.5rem 1.1rem 1.3rem; }
 .amb-class-teaser-card h3 { font-family:var(--head); font-weight:800; text-transform:uppercase; letter-spacing:.03em; font-size:1rem; margin:.2rem 0 .4rem; }
 .amb-class-teaser-card p { font-size:.84rem; line-height:1.45; margin:0; }
 @media (max-width:720px) {
@@ -2148,7 +2168,16 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    homepage -- re-screenshotted all three after the change to confirm
    none of them now fades so early that a card near the edge reads as
    half-erased rather than gently dissolving. */
-.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent)}
+/* 2026-09-16, per Eric ("fade out closer to the ideal section width"):
+   widened again from 16%/84% to 9%/91% -- narrower fade bands mean more of
+   the lane's own real width shows at full brightness before the mask
+   starts dissolving it, so content reads all the way out closer to the
+   section's actual edges instead of a wide soft border eating into it.
+   Still a real gradient, not a hard crop -- re-screenshotted hero-proof,
+   Reviews, and the Past Events waterfall after the change to confirm none
+   of the three now clips a card's edge abruptly. */
+.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;cursor:grab;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+.gz-marquee.dragging{cursor:grabbing}
 .gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
 .gz-marquee-track.rev{animation-direction:reverse}
 @keyframes gz-marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -2168,35 +2197,30 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    featured-gear.js's own comment for why this section specifically needs
    it (its cards have a real click target the hover-controls overlay was
    blocking). */
-.gz-marquee.static{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+.gz-marquee.static{overflow-x:auto;-webkit-mask-image:none;mask-image:none;cursor:grab}
+.gz-marquee.static.dragging{cursor:grabbing}
 .gz-marquee.static .gz-marquee-track{animation:none;flex-wrap:wrap;width:auto}
-/* Hover/focus pause+skip overlay (GZ.buildMarqueeControls in main.js).
-   Covers the full lane -- rgba(0,0,0,.6) is dark enough to clearly read
-   as "paused" but still lets the real photos/cards show through faintly
-   per Eric's spec ("they should be able to faintly see it behind the
-   blacked out button control section"). Shown via :hover/:focus-within so
-   it's driven by real browser hover/focus state, not a JS-toggled class
-   -- the JS side (mouseenter/focusin/mouseleave/focusout in main.js) only
-   drives the actual play/pause/skip logic, not this visibility. */
-/* 2026-09-16, per Eric ("make the edge controls next to the play/pause
-   button"): prev/play-pause/next used to spread edge-to-edge via
-   justify-content:space-between (skip buttons pinned to the lane's far
-   left/right corners, independent of the play/pause button sitting alone
-   in the center). Grouped into one center cluster instead -- still the
-   same 3 buttons/same DOM order/same click behavior, just visually one
-   control unit rather than three independently-placed ones. */
-.gz-marquee-controls{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;gap:.9rem;padding:0 .6rem;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s ease}
-.gz-marquee:hover .gz-marquee-controls,.gz-marquee:focus-within .gz-marquee-controls{opacity:1;pointer-events:auto}
-/* F-14 (2026-09-08): 38x38 -> 44x44 -- close enough to the 44px floor that
-   growing the real button (not just an invisible pad) reads as no visible
-   change at all, confirmed by eye at 390px. */
-.gz-mq-btn{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:rgba(22,24,29,.75);border:1px solid rgba(242,244,248,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
-.gz-mq-btn:hover{border-color:var(--ne-orange);color:var(--ne-orange)}
-.gz-mq-btn:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
+/* 2026-09-16 rewrite, per Eric ("we don't even need to show controls
+   anymore... clicking towards the left and right sections will scroll
+   through instead") -- see GZ.buildMarqueeControls in main.js for the
+   full reasoning (the WCAG 2.2.2/2.4.7 tradeoff this makes, and why the
+   old always-there-on-hover dark scrim is what was blocking Reviews'
+   own card popups in the first place). Every button here is invisible at
+   rest and only appears for a keyboard user who has actually tabbed onto
+   it -- :focus-visible is a real, WCAG-safe "visually hidden until
+   needed" pattern, not a corner being cut. Mouse/touch users get the same
+   3 actions via a click-zone convention (see the container 'click'
+   listener in main.js), not this button chrome, which is why these have
+   no :hover treatment at all -- a hover state would imply a mouse user is
+   meant to find and click the button itself, which isn't the model here. */
+.gz-mq-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border-radius:50%;background:rgba(22,24,29,.85);border:1px solid rgba(242,244,248,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:0;pointer-events:none}
+.gz-mq-btn:focus-visible{opacity:1;pointer-events:auto;outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
+.gz-mq-prev{left:.5rem}
+.gz-mq-next{right:.5rem}
+.gz-mq-playpause{left:50%;transform:translate(-50%,-50%);width:46px;height:46px}
 .gz-mq-btn .ic{width:18px;height:18px}
-.gz-mq-playpause{width:46px;height:46px}
 .gz-mq-playpause .ic{width:20px;height:20px}
-@media (prefers-reduced-motion: reduce){.gz-marquee-controls{display:none}}
+@media (prefers-reduced-motion: reduce){.gz-mq-btn{display:none}}
 
 /* ===== Past Events photo waterfall ===== */
 /* 2026-08-26 redesign: all 11 real photos from the recap's pool, in a
