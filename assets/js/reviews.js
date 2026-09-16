@@ -114,6 +114,85 @@
     { q: "went with my boyfriend, had a little trouble finding the entrance but once you get in the building there are arrows pointing to the room. the nice ladies at the counter were helpful with setting up an account for our first time. they have different gaming devices, some still being set up and free snacks as well. liked the cleanliness & service, would take more people back!", n: "jas" },
   ];
 
+  /* 2026-09-15, per Eric ("make the reviews section feel less
+     placeholdery -- maybe word emphasis and highlights"): rather than
+     hand-editing any of the 62 real quotes, one small shared pass over
+     every card's *own* text bolds real recurring themes that are already
+     in that customer's actual words, and derives one small tag badge from
+     the same match -- no invented copy, no cherry-picked "best" review,
+     just emphasis applied the same uniform way to every card (same
+     "one shared implementation" principle as gz-shine/gz-marquee
+     elsewhere in this file). Ordered longest/most-specific phrase first
+     so e.g. "free snacks" wins over the bare "free" it contains, and a
+     card is skipped from a shorter/broader term once a more specific one
+     already matched (see the `used` containment check below). A short
+     review with no matching theme (e.g. "Very fun") simply gets no bold
+     and no tag -- honest silence over a forced, meaningless label. */
+  const HIGHLIGHT_TERMS = [
+    ['completely free', '100% Free'],
+    ['free snacks', 'Free Snacks'],
+    ['free food and drinks', 'Free Food & Drinks'],
+    ['free', 'Free to Play'],
+    ['VR', 'VR Setups'],
+    ['raffles', 'Raffles & Prizes'],
+    ['giveaways', 'Giveaways'],
+    ['hidden gem', 'Hidden Gem'],
+    ['kid friendly', 'Family Friendly'],
+    ['tournaments', 'Tournaments'],
+    ['tournament', 'Tournaments'],
+    ['clean', 'Clean Space'],
+    ['immersive', 'Immersive Setup'],
+    ['vibe', 'Great Vibe'],
+    ['staff', 'Great Staff'],
+    ['events every', 'Weekly Events'],
+  ];
+  const MAX_BOLD = 2;
+
+  // Returns { html: quote markup with <=2 real phrases bolded, tag: a
+  // short derived label or null }. Operates on the raw (unescaped) text
+  // first, splitting it into plain/highlighted segments, then escapes
+  // each segment individually -- safer than regexing already-escaped
+  // HTML, since it never has to reason about matching across tag
+  // boundaries.
+  function deriveHighlights(rawText) {
+    let segments = [{ text: rawText, hl: false }];
+    let hits = 0;
+    const used = [];
+    let tag = null;
+    for (const [term, label] of HIGHLIGHT_TERMS) {
+      if (hits >= MAX_BOLD) break;
+      const norm = term.toLowerCase();
+      if (used.some(u => u.includes(norm) || norm.includes(u))) continue;
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(`(^|[^a-zA-Z0-9])(${escapedTerm})(?![a-zA-Z0-9])`, 'i');
+      let matched = false;
+      segments = segments.flatMap(seg => {
+        if (seg.hl || matched) return [seg];
+        const m = seg.text.match(re);
+        if (!m) return [seg];
+        matched = true;
+        const idx = m.index + m[1].length;
+        const before = seg.text.slice(0, idx);
+        const word = m[2];
+        const after = seg.text.slice(idx + word.length);
+        const out = [];
+        if (before) out.push({ text: before, hl: false });
+        out.push({ text: word, hl: true });
+        if (after) out.push({ text: after, hl: false });
+        return out;
+      });
+      if (matched) {
+        used.push(norm);
+        hits++;
+        if (!tag) tag = label;
+      }
+    }
+    const html = segments
+      .map(s => (s.hl ? `<strong class="rv-hl">${GZ.esc(s.text)}</strong>` : GZ.esc(s.text)))
+      .join('');
+    return { html, tag };
+  }
+
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -131,9 +210,12 @@
   // touch devices, which have no :hover.
   function cardHTML(r) {
     const full = GZ.esc(`“${r.q}” — ${r.n}`);
+    const { html: quoteHTML, tag } = deriveHighlights(r.q);
+    const tagHTML = tag ? `<span class="rv-tag">${GZ.esc(tag)}</span>` : '';
     return `<div class="card review-card" tabindex="-1" data-full="${full}">
       <div class="review-stars" aria-hidden="true">★★★★★</div>
-      <p class="review-quote">${GZ.esc(r.q)}</p>
+      ${tagHTML}
+      <p class="review-quote">${quoteHTML}</p>
       <p class="review-source dim">${GZ.esc(r.n)}</p>
     </div>`;
   }

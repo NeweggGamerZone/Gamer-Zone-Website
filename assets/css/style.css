@@ -328,6 +328,14 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .review-stars { color: var(--ne-orange); font-size: 1rem; letter-spacing: .1em; }
 .review-quote { font-style: italic; color: var(--ink); }
 .review-source { font-size: .8rem; margin-top: .2rem; }
+/* 2026-09-15 (per Eric, reviews.js's own header comment has the full
+   reasoning): a real recurring phrase from that specific review's own
+   text, bolded and set upright (not italic, so it visually separates from
+   the surrounding quote) in the same --ne-orange already used for stars/
+   accents elsewhere -- reuses an existing, already-contrast-checked color
+   rather than introducing a new one. */
+.review-quote strong.rv-hl { color: var(--ne-orange); font-weight: 700; font-style: normal; }
+.rv-tag { align-self: flex-start; font-family: var(--head); font-weight: 800; font-size: .64rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ne-orange); background: rgba(250,157,40,.12); border: 1px solid rgba(250,157,40,.35); border-radius: 999px; padding: .15rem .55rem; }
 /* Aggregate rating line above the carousel. The review count (86) still
    covers the 23 reviewers who left 5 stars with no written text — they're
    just no longer named individually below (see reviews.js). */

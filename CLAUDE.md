@@ -748,6 +748,38 @@ pillar heights confirming the real escalation (463/505/545/585px), mobile/tablet
 screenshots of the new pillar grid and track cards confirming no clipping and clean 2x2/1-col
 collapse, and the click-through test above confirming the per-track CTA + form-reset behavior.
 
+## Reviews section: real-content word emphasis + derived highlight tags (2026-09-15)
+
+Per Eric, following up on the audit's still-open "generic review cards" item (Part 4 #9,
+Phase 4): the Reviews waterfall's cards were functionally fine but all looked identical --
+five stars, italic quote, name -- with nothing to catch the eye card-to-card, which read as
+placeholder-feeling even though every quote is a real Google review. Rather than hand-editing
+any of the 62 real reviews (or, worse, writing new "highlight" copy that isn't actually in the
+review), `reviews.js` now runs one small shared pass over each card's own real text:
+
+- **`HIGHLIGHT_TERMS`** (`reviews.js`) is an ordered list of real recurring phrases already
+  present across this specific review pool (`free`/`completely free`/`free snacks`, `VR`,
+  `raffles`, `giveaways`, `hidden gem`, `kid friendly`, `tournaments`, `clean`, `immersive`,
+  `vibe`, `staff`, `events every`), longest/most-specific phrase first so e.g. "free snacks"
+  wins over the bare "free" it contains (see the `used` containment check in
+  `deriveHighlights()`).
+- **`deriveHighlights(rawText)`** bolds up to 2 real matches per card in the actual quote text
+  (`.rv-hl`, styled upright + `--ne-orange` -- an existing, already-contrast-checked color, not
+  a new one) and returns the *first*-priority match as a small pill tag (`.rv-tag`) rendered
+  above the quote (e.g. "Free to Play," "Great Vibe," "Raffles & Prizes"). A short review with
+  no matching theme (e.g. "Very fun," "Impressive work") gets no bold and no tag at all --
+  honest silence over a forced, meaningless label, consistent with the no-fabrication rule.
+- This is the same "one shared implementation" principle as `gz-shine`/`gz-marquee` elsewhere
+  in this file: one pass, applied uniformly to every card, rather than manually tagging 62
+  reviews by hand (which would also silently go stale the next time the pool is edited).
+
+Verified via a live Puppeteer check across both marquee lanes (48 rendered cards -- 24 real +
+24 duplicated for the loop -- 26 got a real tag, 22 got none) and the full scripted QA suite
+(945 text items across 5 pages, 0 contrast failures, 0 container-width findings, 0 console
+errors), plus a mobile-width (250px card) check confirming no `.rv-tag` overflows its card at
+any of the 26 tagged cards. This addresses the "generic-review-card refresh" half of Part 4
+#9's still-open Phase 4 item; the secondary-button styling pass is still open.
+
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
 `GZ.openStatus(cfg)` in `assets/js/main.js`, added 2026-08-28 for the homepage hero's `.hero-status` line, is the reference example for what core rule 4 ("never fabricate a specific fact") looks like applied to something that changes by the minute rather than something static. It computes real open/closed state from `data/config.json`'s `hoursSchedule` (structured days/open/close/timeZone, added alongside the existing plain-text `hours` string so both stay in sync from one source rather than drifting), evaluated in the **venue's** timezone (`America/Los_Angeles`), not the visitor's — a visitor in a different timezone should see whether Diamond Bar is actually open right now, not a status computed against their own local clock. If `hoursSchedule` is ever missing, `.hero-status` removes itself entirely rather than showing nothing-in-particular or a stale guess. Any future "right now" claim on the site (a live queue length, a "X spots left" count, anything time- or state-sensitive) should follow this same pattern: compute it for real from real data at render time, and have it disappear rather than lie if that data isn't available.
