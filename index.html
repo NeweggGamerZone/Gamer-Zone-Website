@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=85">
+<link rel="stylesheet" href="assets/css/style.css?v=86">
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -75,6 +75,15 @@
          than a hard on/off flash -- see colorState()'s pulse/rapidpulse/
          multipulse cases. -->
     <div class="hero-lighting">
+      <!-- 2026-09-16, Phase 5 discoverability fix (per Eric's go-ahead --
+           see CLAUDE.md/roadmap): a small color swatch showing the
+           selected profile's real representative hue (computed in
+           techno-hero.js from the exact same colorState() values driving
+           the tunnel, not a second guessed color) so this reads as a real
+           customization control at a glance, not decorative text.
+           aria-hidden: purely a visual echo of the <select>'s own value,
+           which already has its own accessible label below. -->
+      <span class="hero-lighting-swatch" id="hero-lighting-swatch" aria-hidden="true"></span>
       <label for="hero-lighting-select" class="sr-only">Background lighting</label>
       <select id="hero-lighting-select">
         <option value="cycle">Color Cycle</option>
@@ -288,6 +297,24 @@
 
   <section class="reveal eu-section" id="week">
     <h2>Weekly lineup</h2>
+    <!-- 2026-09-16, per Eric (roadmap #8, "who's here" pulse -- reframed:
+         see CLAUDE.md for the reasoning): a real, dynamically-computed
+         count of this week's real events, not a fabricated live check-in
+         number (no such live data source exists -- see CLAUDE.md's note
+         on this). event-update.js already computes exactly this week's
+         real event slate (weekAll) to build the board below; this line
+         reads that same array rather than a second, independently-derived
+         count, so the two can never drift out of sync. Home-page only
+         (not events.html, which already shows the full slate in detail
+         right below its own copy of this heading -- a summary line there
+         would just repeat what's already on screen). Hidden entirely on a
+         genuinely quiet week (0 real events) rather than showing a
+         deflating "0 events" line -- same disappear-rather-than-lie
+         pattern as .hero-status when hoursSchedule is missing. -->
+    <p class="dim eu-week-pulse" id="eu-week-pulse">
+      <span class="eu-pulse-dot" aria-hidden="true"></span>
+      <span id="eu-week-pulse-text"></span>
+    </p>
     <div class="eu-board">
       <!-- .eu-board-inner wraps everything that used to be .eu-board's
            direct flex children -- event-update.js's fitBoard() applies a
@@ -378,7 +405,7 @@
     <p class="dim">We feature similar products in our Gamer Zone — real Newegg gear you can browse, and buy, right now.</p>
     <div class="gear-waterfall" id="gear-waterfall"></div>
     <p style="margin-top:1.2rem;text-align:center">
-      <a class="btn ghost" href="https://www.newegg.com/gamerzone" target="_blank" rel="noopener">Shop All Gaming Gear on Newegg</a>
+      <a class="btn" href="https://www.newegg.com/gamerzone" target="_blank" rel="noopener">Shop All Gaming Gear on Newegg</a>
     </p>
   </section>
 
@@ -542,14 +569,14 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=85" defer></script>
-<script src="assets/js/preregister-node.js?v=85" defer></script>
-<script src="assets/js/techno-hero.js?v=85" defer></script>
-<script src="assets/js/photo-waterfall.js?v=85" defer></script>
-<script src="assets/js/events.js?v=85" defer></script>
-<script src="assets/js/event-update.js?v=85" defer></script>
-<script src="assets/js/zone-stack.js?v=85" defer></script>
-<script src="assets/js/featured-gear.js?v=85" defer></script>
-<script src="assets/js/reviews.js?v=85" defer></script>
+<script src="assets/js/main.js?v=86" defer></script>
+<script src="assets/js/preregister-node.js?v=86" defer></script>
+<script src="assets/js/techno-hero.js?v=86" defer></script>
+<script src="assets/js/photo-waterfall.js?v=86" defer></script>
+<script src="assets/js/events.js?v=86" defer></script>
+<script src="assets/js/event-update.js?v=86" defer></script>
+<script src="assets/js/zone-stack.js?v=86" defer></script>
+<script src="assets/js/featured-gear.js?v=86" defer></script>
+<script src="assets/js/reviews.js?v=86" defer></script>
 </body>
 </html>

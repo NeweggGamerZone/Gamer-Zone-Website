@@ -204,6 +204,16 @@ h2 .ic { color: var(--ne-orange); }
 h1 .accent, h2 .accent { color: var(--ne-blue-text); }
 .kicker { color: var(--ne-blue-text); font-family: var(--head); font-weight: 700; text-transform: uppercase; letter-spacing: .16em; font-size: .76rem; }
 .dim { color: var(--ink-dim); }
+/* Weekly-lineup "who's here" pulse line (2026-09-16, per Eric -- see
+   index.html/event-update.js's own comments for the full reasoning).
+   `.eu-pulse-dot` reuses the exact `cal-dot-pulse` keyframe the Plan Your
+   Visit calendar's `.cal-dot` already established, rather than a second,
+   near-identical pulsing-dot animation -- same "one shared implementation"
+   rule as gz-shine/gz-marquee elsewhere on this site. */
+.eu-week-pulse { display: flex; align-items: center; gap: .5rem; margin: -.3rem 0 1rem; font-size: .88rem; }
+.eu-week-pulse b { color: var(--ne-orange); font-family: var(--head); font-weight: 800; }
+.eu-pulse-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ne-orange); animation: cal-dot-pulse 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .eu-pulse-dot { animation: none; opacity: .9; } }
 .updated-stamp { font-size: .78rem; color: var(--ink-dim); }
 
 /* overflow:hidden clips .hero-decor's stripes, which intentionally bleed a
@@ -270,7 +280,21 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    swap to `.pin-btn`'s brightness-filter treatment for the same reason. */
 .btn { position: relative; overflow: hidden; display: inline-block; background: linear-gradient(145deg, var(--ne-orange), var(--ne-orange-deep)); color: #000; font-family: var(--eu-body); font-weight: 700; text-transform: none; letter-spacing: normal; padding: .72rem 1.6rem; border: none; cursor: pointer; font-size: .95rem; border-radius: 999px; }
 .btn:hover { filter: brightness(1.08); text-decoration: none; }
-.btn.ghost { background: transparent; color: var(--ne-orange); box-shadow: inset 0 0 0 2px var(--ne-orange); }
+/* .btn.ghost retired 2026-09-16, per Eric ("secondary-button styling pass" --
+   Phase 4 leftover, see CLAUDE.md/roadmap). The transparent/bordered ghost
+   style put the shared gz-shine sweep (.btn::after, "Unified metallic shine"
+   below) on a mostly-see-through background, where the flash read as
+   disproportionately intense -- the same problem the Esports Training button
+   on edu.html was pulled off ghost for back on 2026-09-04, but that one-off
+   fix was never generalized. Rather than give ghost its own toned-down shine
+   (a second near-duplicate effect, against the "one shared implementation"
+   rule), every CTA that used to be ghost (Ambassador's 3 "Apply as X" track
+   buttons, Featured Gear's "View on Newegg", the homepage's "Shop All Gaming
+   Gear on Newegg", gz-referrals.html's "Reload saved") is now a plain solid
+   .btn -- one consistent CTA look site-wide, matching Esports Training's own
+   precedent instead of contradicting it. If a future component genuinely
+   needs a lower-emphasis secondary action, don't resurrect .ghost as-is --
+   design it to specifically exclude .btn::after's shine selector instead. */
 .btn.navy { background: var(--ne-navy-glow); color: #fff; }
 .btn-row { display: flex; gap: .8rem; flex-wrap: wrap; }
 
@@ -1084,7 +1108,17 @@ body.home-page { background: transparent; }
 /* 2026-09-03: moved from the hero's inline flow to a fixed corner spot --
    top-right of .hero-stage (which is position:relative -- see its rule
    above), out of the way of the headline/CTA/stats. */
-.hero-lighting { position: absolute; top: 1rem; right: var(--safe-x, 1.2rem); z-index: 2; }
+.hero-lighting { position: absolute; top: 1rem; right: var(--safe-x, 1.2rem); z-index: 2; display: flex; align-items: center; gap: .55rem; }
+/* Discoverability swatch (2026-09-16, Phase 5) -- a small real-color circle
+   set inline by techno-hero.js to the selected profile's own representative
+   hue. A soft outer ring (box-shadow, not a hard border) reads as a little
+   glowing indicator light rather than a flat dot, echoing the RGB-lighting
+   theme it's previewing. `.is-cycle` (also set by techno-hero.js) swaps in
+   a conic rainbow gradient instead of a solid color -- Cycle is the one
+   profile whose hue never settles on a single value, so a fixed color
+   swatch would misrepresent it. */
+.hero-lighting-swatch { flex: none; width: 16px; height: 16px; border-radius: 50%; box-shadow: 0 0 0 2px var(--line), 0 0 8px 1px currentColor; transition: background .2s ease; }
+.hero-lighting-swatch.is-cycle { background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); box-shadow: 0 0 0 2px var(--line); }
 /* F-14 (2026-09-08): was 30px tall (padding .4rem top/bottom) -- bumped
    vertical padding to clear the 44px floor. This is a native <select>, so
    its own real box IS the tap target; there's no separate "invisible zone
@@ -1644,9 +1678,11 @@ body.home-page { background: transparent; }
 .tag.cal-major{background:var(--cal-major);color:#000}
 
 /* ===== v6: flat square corners (no chopped/rounded) ===== */
-/* .btn / .btn.ghost / nav.main-nav a intentionally excluded — CTA buttons
-   and the header nav both use the pill shape per Newegg design guidelines
-   instead (see the .btn and nav.main-nav a rules above). */
+/* .btn / nav.main-nav a intentionally excluded — CTA buttons and the header
+   nav both use the pill shape per Newegg design guidelines instead (see the
+   .btn and nav.main-nav a rules above). (.btn.ghost, formerly listed here
+   too, was retired 2026-09-16 -- see the .btn.ghost retirement comment near
+   the .btn rule above.) */
 .card,.hud,.tag,.chip,.cal,.cal-detail,.calendar-empty,.flyer-card,
 .session-pill,.pending-item,.flyer img,.calendar-img,.cal-cell,
 .track-badge,.event-card,.lightbox img,.score-guide .sg,.game-list-panel,

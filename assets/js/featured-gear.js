@@ -57,7 +57,7 @@
       <h3>${GZ.esc(g.name)}</h3>
       <p class="dim gear-item-spec">${GZ.esc(g.spec)}</p>
       <p class="gear-item-price">${GZ.esc(g.price)}</p>
-      <a class="btn ghost" href="${GZ.esc(g.url)}" target="_blank" rel="noopener" aria-label="${label}">View on Newegg</a>
+      <a class="btn" href="${GZ.esc(g.url)}" target="_blank" rel="noopener" aria-label="${label}">View on Newegg</a>
     </div>`;
   }
 

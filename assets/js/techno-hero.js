@@ -228,12 +228,47 @@
   }
   let profile = loadProfile();
 
+  // RGB-picker discoverability swatch (2026-09-16, Phase 5 of the design-
+  // audit follow-through -- per Eric's go-ahead). The lighting picker was a
+  // plain <select> with no visual hint that it's a real customization
+  // feature rather than decorative text. Each profile's own representative
+  // hue (the same base hue colorState() above already returns for that
+  // profile -- not a second, independently-guessed color) now fills a small
+  // circular swatch next to the control, updated once on load and once per
+  // real selection change -- NOT every animation frame, per this file's own
+  // "don't force a layout recalculation every frame" rule (writing a style
+  // property is cheap, but there's no reason to do it 60x/sec for a value
+  // that only actually changes on user input). `cycle` is the one profile
+  // whose hue never settles on a single value, so it gets an honest
+  // rainbow-conic swatch (`.is-cycle` in style.css) instead of a fixed
+  // color that would misrepresent it as a single hue.
+  const SWATCH_HUE = { static: 205, breathe: 28, flame: 24, wave: 200, meteor: 195, city: 210, pulse: 342, rapidpulse: 178, multipulse: 200 };
+  const swatchEl = document.getElementById('hero-lighting-swatch');
+  function updateSwatch() {
+    if (!swatchEl) return;
+    if (profile === 'cycle') {
+      swatchEl.classList.add('is-cycle');
+      swatchEl.style.background = '';
+      swatchEl.style.color = '';
+    } else {
+      swatchEl.classList.remove('is-cycle');
+      const color = `hsl(${SWATCH_HUE[profile] ?? 205}, 85%, 55%)`;
+      swatchEl.style.background = color;
+      // .hero-lighting-swatch's glow ring reads this via currentColor (see
+      // style.css) so the glow always matches the fill exactly, one real
+      // color set once rather than two independently-guessed values.
+      swatchEl.style.color = color;
+    }
+  }
+
   const lightingSelect = document.getElementById('hero-lighting-select');
   if (lightingSelect) {
     lightingSelect.value = profile;
+    updateSwatch();
     lightingSelect.addEventListener('change', () => {
       profile = PROFILES.includes(lightingSelect.value) ? lightingSelect.value : 'cycle';
       saveProfile(profile);
+      updateSwatch();
     });
   }
 

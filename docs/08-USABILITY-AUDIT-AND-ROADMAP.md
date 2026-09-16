@@ -676,6 +676,38 @@ Gear links now genuinely clickable; Games category cards driven by both real mou
 keyboard-only Tab+Enter, with a confirmed-visible `:focus-visible` ring), and mobile/tablet/
 desktop screenshots of every changed section.
 
+## Part 2ap -- Weekly activity pulse, ghost-button retirement, RGB picker discoverability (2026-09-16)
+
+Three items picked from a "what's next" check-in: roadmap #8 ("who's here" pulse, reframed
+after real-data investigation found no live check-in source exists -- see item #8 above for
+the full reasoning) and Phase 4/5 of the design-audit follow-through (item #9 above). Also
+recorded, but not implemented this round: Eric's scope simplification for item #1 (Ambassador
+backend) -- see that item's own updated entry above.
+
+**Weekly activity pulse:** a real, dynamically-computed count of this week's actual events
+("1 real event happening at the Zone this week") now sits under the Weekly Lineup heading on
+`index.html` only, built from `event-update.js`'s own `weekAll` array (the exact data that
+already builds the board below it) rather than a second, independently-derived count. Hides
+entirely on a 0-event week rather than showing a deflating number.
+
+**Ghost buttons retired:** `.btn.ghost` is gone. Its transparent background made the shared
+`gz-shine` sweep look disproportionately intense -- the same issue the Esports Training button
+was pulled off ghost for on 2026-09-04, never generalized. Every remaining ghost CTA (3
+Ambassador track buttons, 14 Featured Gear "View on Newegg" links, the homepage's "Shop All
+Gaming Gear," and an internal admin tool's "Reload saved") is now a plain solid `.btn`.
+
+**RGB picker discoverability:** a small circular swatch next to `#hero-lighting-select` now
+shows each profile's real representative hue (reusing `colorState()`'s own base-hue values,
+not a second guessed color), updated on selection change and persisted across reloads. Cycle
+gets an honest rainbow conic-gradient rather than a fixed color, since its hue never settles.
+
+Verified via the full pixel-verified contrast audit (883 text items across 5 pages, 0
+failures), a 5-page console-error smoke test (0 errors), live Puppeteer checks (a real
+`page.select()` interaction updating the swatch and persisting through reload; the pulse
+line's real event count and singular/plural wording confirmed against the live `data/
+events.json`), and mobile/tablet/desktop screenshots of all three changes. Full writeups in
+CLAUDE.md's three matching dated sections.
+
 ---
 
 ## Part 3 — Simulated user feedback
@@ -698,6 +730,8 @@ The Community Activations doc's original ideas (GZ Passport, a standalone Discor
 
 **1. Ambassador program backend (tier tracking + status page).**
 Directly answers the tracking-system question above. A lightweight event-log (staff logs each hosted event per ambassador — reuses the same lightweight-admin pattern already used for referral tracking) feeds automatic tier computation, flags anyone who's just crossed Diamond for a staff-reviewed featuring decision, and gives each ambassador their own progress lookup (SENET-ID-style lookup, no account/login system needed) so "how close am I" stops being an email question. This turns the Ambassador page from a static pitch into an operating program. **Now also directly blocks Featured Ambassadors (see F-04, Part 2m below):** the wall is down to a single labeled "Example" card until this backend exists — bringing back real cards and the live search UI is this item's job, not a separate task.
+
+**Scope simplified, 2026-09-16, per Eric:** the full tier-tracking/status-page backend above is more than what Featured Ambassadors actually needs to unblock. Eric's direct call: a real ambassador's card should simply appear on the Featured Ambassadors wall once they've hosted 4 or more events with the Zone — a threshold check, not a full tier-computation engine, live progress lookup, or Diamond-featuring workflow. The event-log half of this item (staff logs each hosted event per ambassador) is still the real prerequisite — there's no way to know who's crossed 4 events without it — but everything past "count events, check >= 4" (automatic tier math, the SENET-ID-style self-serve lookup, the staff-reviewed Diamond decision) is no longer required to ship real Featured Ambassador cards. A future session scoping this should design the lightest version that satisfies the 4-event threshold first, and treat the fuller tier/status-page vision as a separate, later enhancement rather than a blocking prerequisite.
 
 **2. [ARCHIVED 2026-09-08] "Live at the Zone" hub — the graffiti wall's actual goal, rebuilt for a static site.**
 Archived because its central mechanic — the hero mini-game's `localStorage` "BEST" score — no longer exists: the hero mini-game itself was removed site-wide 2026-09-03 (see CLAUDE.md's "Testing interactive features" section) in favor of the RGB-lighting color-profile picker, which has no score/run concept to leaderboard, pulse, or mosaic. The underlying *goal* this item was chasing — making a visitor feel like other people are here, right now, in a live space — is still real and still worth pursuing; it just needs a mechanic that doesn't depend on the removed game. Original text kept below for history/reference, not as an active plan:
@@ -751,15 +785,15 @@ Using the same daily Verkada-link automation that already exists for check-in, s
 
 </details>
 
-**8. "Who's here" pulse (split out from archived item #2, 2026-09-08).**
-The one sub-idea from the now-archived "Live at the Zone" hub that never actually depended on the removed hero mini-game — it's built entirely from real SENET/Verkada check-in data, not game runs. A simple aggregate readout on Home ("14 people checked in today," or a lightweight recent-activity ticker) delivers "this place is alive right now" using data that already exists. Worth scoping on its own rather than staying lost inside an archived item.
+**8. [SHIPPED 2026-09-16, reframed] "Who's here" pulse (split out from archived item #2, 2026-09-08).**
+The one sub-idea from the now-archived "Live at the Zone" hub that never actually depended on the removed hero mini-game. Originally scoped as a live check-in count ("14 people checked in today") built from real SENET/Verkada data — but investigating this round found **no such live or even daily-refreshed data actually exists**: Verkada is a static year-long sign-in link with no API feed, and the SENET numbers on Games are hand-refreshed by Eric from an export, not a live pull. Building the original framing would have meant fabricating a number, which core rule 4 rules out. **Reframed per Eric's own call instead:** a real, dynamically-computed count of this week's actual scheduled events ("1 real event happening at the Zone this week"), shown on Home only, right under the Weekly Lineup heading (`#eu-week-pulse` in `index.html`, computed in `event-update.js` from the exact same `weekAll` array that already builds the board below it, so the two can never drift). Hides entirely on a genuinely quiet week (0 real events) rather than showing a deflating count — same disappear-rather-than-lie pattern as `.hero-status`. See CLAUDE.md's "Weekly lineup activity pulse" section for the full writeup. If real live check-in data ever becomes available (Verkada API access, admin portal, etc.), the *original* live-count framing is still the better long-term version of this idea — revisit it then rather than assuming this reframed version is the final word.
 
 **9. Senior-designer wow/design audit follow-through, phased (2026-09-11).**
-From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phase 2 shipped the same day (see Part 2al). Phase 3 shipped 2026-09-15 (see Part 2am). Phases 4-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
+From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phase 2 shipped the same day (see Part 2al). Phase 3 shipped 2026-09-15 (see Part 2am). Phase 4's secondary-button leftover and Phase 5 both shipped 2026-09-16 (see Part 2ap below) — this whole item is now fully shipped.
   - *Phase 2 — [SHIPPED 2026-09-11] Interior page hero differentiation.* Events/Games/Academy/Ambassador shared the exact same `.hero` markup with no visual cue for which page you were on. Shipped as a per-page icon badge (real icons from the existing shared set, one per page) next to each hero's kicker — see Part 2al and CLAUDE.md's "Interior-page hero icon badges" section. Real page-specific photography (originally floated as an alternative for this item) was deliberately deferred to Phase 3 instead, since it needs real photo assets sourced per page rather than just markup/CSS.
   - *Phase 3 — [SHIPPED 2026-09-15] Real photography on Academy + Ambassador.* Shipped as two new `photo-waterfall.js`-driven galleries: "Schools we've hosted" on `edu.html` (Diamond Bar High School, Bosco Tech, Lorbeer Middle School) and "Ambassador events at the Zone" on `ambassador.html` (an Evil Geniuses VALORANT Collegiate Cup, a UGREEN x WD session) — see Part 2am and CLAUDE.md's "Real photography on Academy + Ambassador (Phase 3)" section. Games was intentionally **not** touched in this same pass: no specific real photo source had been given for it yet, and a separate copyright question Eric raised about game box art/screenshots was answered (real risk without a license) but left as an open, proposed-not-implemented question per core rule 15. **Follow-up, same day:** Eric confirmed real Gamer Zone floor photography (option 2 of the three proposed) rather than per-game licensed art — see the new `#games-categories` section on `games.html` (Part 2ao below), which reuses the same real PC/Console/VR/Racing-Sim photos already captioned in About Gamer Zone's Zone Stack, styled like `.zone-card`. Arcade still has no real matching photo in the repo (confirmed via a full visual review, not just filename search) and got an honest icon-only card instead of a mismatched photo. No USC-specific photo issue applies here (that was the Ambassador gallery's own question, separately resolved — see Part 2an).
-  - *Phase 4 — Ambassador page polish + generic review cards.* [PARTIALLY SHIPPED 2026-09-15] The medal-icon-reused-7x piece shipped as part of the same-day "Ambassador redesign" round (see CLAUDE.md) — Silver/Gold/Platinum/Diamond and the 3 attendance-bonus badges now use distinct real icons (shield/coin/chip/trophy, note/coin/chip) instead of one repeated medal glyph. The generic-review-card piece also shipped the same day (see CLAUDE.md's "Reviews section: real-content word emphasis + derived highlight tags") — real recurring phrases already in each review's own text are now bolded, plus a small derived highlight tag per card, so cards read as distinct rather than identical placeholders, with zero new/invented copy. Still open from this item: a secondary-button styling pass.
-  - *Phase 5 — RGB picker discoverability.* The lighting picker undersells itself as a plain `<select>`. Propose a small live-preview swatch or label treatment so visitors realize it's a real customization feature, not decoration.
+  - *Phase 4 — Ambassador page polish + generic review cards.* [SHIPPED 2026-09-16] The medal-icon-reused-7x piece shipped 2026-09-15 as part of the same-day "Ambassador redesign" round (see CLAUDE.md) — Silver/Gold/Platinum/Diamond and the 3 attendance-bonus badges now use distinct real icons (shield/coin/chip/trophy, note/coin/chip) instead of one repeated medal glyph. The generic-review-card piece also shipped 2026-09-15 (see CLAUDE.md's "Reviews section: real-content word emphasis + derived highlight tags") — real recurring phrases already in each review's own text are now bolded, plus a small derived highlight tag per card. The last piece, the secondary-button styling pass, shipped 2026-09-16: `.btn.ghost`'s shine looked disproportionately intense on its transparent background (the same problem the Esports Training button was pulled off ghost for back on 2026-09-04, but never generalized) — rather than give ghost its own toned-down shine, every remaining ghost CTA (Ambassador's 3 track buttons, Featured Gear's "View on Newegg" ×14, the homepage's "Shop All Gaming Gear," gz-referrals.html's "Reload saved") converted to a plain solid `.btn`, matching Esports Training's own precedent. See CLAUDE.md's "Ghost button retirement" section.
+  - *Phase 5 — [SHIPPED 2026-09-16] RGB picker discoverability.* The lighting picker undersold itself as a plain `<select>`. Fixed with a small circular color swatch next to the control (`#hero-lighting-swatch`), filled with each profile's own real representative hue (the exact same base hue `colorState()` already computes for that profile, not a second guessed color) and updated on selection change — Cycle gets an honest rainbow conic-gradient instead of a fixed color, since its hue never actually settles on one value. See CLAUDE.md's "RGB picker discoverability swatch" section.
 
 ---
 

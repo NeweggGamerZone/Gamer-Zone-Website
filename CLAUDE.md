@@ -943,6 +943,86 @@ screenshot pass can catch mid-transition. Real settled contrast is 8.37:1 and 9.
 respectively -- confirmed via direct pixel sampling after a full settle, not just re-reading
 the CSS. No site content changed for either.
 
+## Weekly lineup activity pulse: "who's here," reframed around real event data (2026-09-16)
+
+Roadmap #8 ("who's here" pulse) was originally scoped as a live check-in count ("14 people
+checked in today") built from real SENET/Verkada data. Investigating this round found **no
+such live or even daily-refreshed data actually exists anywhere in this repo**: `data/
+config.json`'s `verkadaUrl` (see `docs/06-VERKADA.md`) is a static year-long guest
+sign-in link with no API feed, not a data source, and the SENET numbers on the Games page are
+hand-refreshed by Eric from an export (see `senet-chart.js`'s own header comment), not a live
+pull. Building the original framing would have meant fabricating a number -- a real core rule
+4 violation, not a hypothetical one -- so per Eric's own call it's reframed instead around data
+the site already has and computes honestly.
+
+**Implementation.** `#eu-week-pulse` (`index.html`, right under the "Weekly lineup" `<h2>`,
+Home page only -- not `events.html`, which already shows the full slate in detail immediately
+below its own copy of that heading, so a summary line there would just repeat what's on
+screen) is populated by `event-update.js`, reading the **exact same `weekAll` array** that
+already builds the board below it (`weekAll.filter(e => e.type !== 'closed').length`) rather
+than a second, independently-derived count that could drift from what's actually on the board.
+Renders as "`<b>N</b> real event(s) happening at the Zone this week`" with a small pulsing
+orange dot (`.eu-pulse-dot`, reusing the exact `cal-dot-pulse` keyframe the Plan Your Visit
+calendar's `.cal-dot` already established -- one shared pulsing-dot animation, not a second
+near-identical one). **A genuinely quiet week (0 real events) removes the whole element
+outright** rather than showing a deflating "0 events" line -- the same disappear-rather-than-
+lie pattern `.hero-status` already uses when `hoursSchedule` is missing (see "Live open/closed
+status" below).
+
+**If real live check-in data ever becomes available** (Verkada API access, an admin portal,
+etc.), the *original* "who's here, right now" framing is still the better long-term version of
+this idea -- this reframed event-count version is an honest stand-in given what's actually
+buildable today, not a final replacement.
+
+## Ghost button retirement: `.btn.ghost` is gone (2026-09-16)
+
+Per Eric, closing out the last open piece of Phase 4's Ambassador-page-polish audit item (the
+"secondary-button styling pass," flagged as still-open in the Reviews-round entry above): the
+transparent, bordered `.btn.ghost` style put the shared `gz-shine` sweep (`.btn::after`, see
+"Unified metallic shine" below) on a mostly-see-through background, where the flash read as
+disproportionately intense -- **the exact same problem the Esports Training button on
+`edu.html` was pulled off ghost for back on 2026-09-04** (see that round's own history), but
+that one-off fix was never generalized, so every ghost button added since (all three Ambassador
+track CTAs, added 2026-09-15) still had it.
+
+**Fix: retire `.btn.ghost` entirely rather than give it a second, toned-down shine treatment**
+(a second near-duplicate effect would contradict the "one shared implementation" rule this
+project already holds `gz-shine` to). Every former ghost CTA is now a plain solid `.btn`,
+matching Esports Training's own precedent instead of contradicting it: `ambassador.html`'s
+three "Apply as Collegiate/Influencer/Organization Ambassador" buttons, `featured-gear.js`'s
+14 "View on Newegg" links, `index.html`'s "Shop All Gaming Gear on Newegg," and
+`gz-referrals.html`'s (an internal, `noindex` admin tool) "Reload saved" button. The `.btn.
+ghost` CSS rule itself is removed, with a comment at its old location explaining why and
+pointing to this section for any future component that genuinely needs a lower-emphasis
+secondary action -- the right fix there is designing it to specifically exclude `.btn::after`'s
+shine selector, not resurrecting `.ghost` as-is.
+
+## RGB picker discoverability swatch (Phase 5, 2026-09-16)
+
+Per Eric's go-ahead on the last open item from the design-audit follow-through (Part 4 #9,
+Phase 5): the hero's RGB lighting picker (`#hero-lighting-select`) was a plain, unstyled
+`<select>` with nothing signaling it's a real customization feature rather than decorative
+text.
+
+**Fix:** a small circular swatch (`#hero-lighting-swatch`, `techno-hero.js`) sits next to the
+select, filled with the selected profile's own real representative hue -- reusing the *exact
+same* base-hue values `colorState()` already computes for that profile (`static`:205,
+`breathe`:28, `flame`:24, `wave`:200, `meteor`:195, `city`:210, `pulse`:342, `rapidpulse`:178,
+`multipulse`:200), not a second, independently-guessed color that could drift from what the
+tunnel actually renders. Updated once on page load and once per real `change` event -- **not
+every animation frame**, per this file's own "don't force a layout recalculation every frame"
+rule (a style write is cheap, but there's no reason to do it 60x/sec for a value that only
+changes on user input). `cycle` is the one profile whose hue never settles on a single value
+(it animates continuously), so it gets an honest rainbow `conic-gradient` (`.is-cycle` in
+`style.css`) instead of a fixed color that would misrepresent it. The swatch's glow ring reads
+`currentColor` (set alongside `background` from the same one real color value) so the fill and
+glow can never drift out of sync with each other.
+
+Verified via a live Puppeteer check: a real `page.select()` interaction (not a manual property
+set) correctly updates the swatch's background/glow, and the selection plus swatch color both
+correctly persist through a full page reload (the existing `localStorage`-backed
+`loadProfile()`/`saveProfile()` mechanism, unchanged).
+
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 
 `GZ.openStatus(cfg)` in `assets/js/main.js`, added 2026-08-28 for the homepage hero's `.hero-status` line, is the reference example for what core rule 4 ("never fabricate a specific fact") looks like applied to something that changes by the minute rather than something static. It computes real open/closed state from `data/config.json`'s `hoursSchedule` (structured days/open/close/timeZone, added alongside the existing plain-text `hours` string so both stay in sync from one source rather than drifting), evaluated in the **venue's** timezone (`America/Los_Angeles`), not the visitor's — a visitor in a different timezone should see whether Diamond Bar is actually open right now, not a status computed against their own local clock. If `hoursSchedule` is ever missing, `.hero-status` removes itself entirely rather than showing nothing-in-particular or a stale guess. Any future "right now" claim on the site (a live queue length, a "X spots left" count, anything time- or state-sensitive) should follow this same pattern: compute it for real from real data at render time, and have it disappear rather than lie if that data isn't available.
