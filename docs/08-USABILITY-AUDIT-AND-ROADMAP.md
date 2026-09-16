@@ -648,6 +648,34 @@ live Puppeteer click-through of the per-track CTA + form-reset fix, and mobile/t
 screenshots of the new pillar grid (confirming a clean 2x2 collapse at tablet and single-column
 at mobile) and track cards.
 
+## Part 2ao -- Hero boundary removal, Featured Gear button/click fixes, photo-band HD refresh, Games category cards (2026-09-15, same-day)
+
+Four more direct requests from Eric, same session as Part 2am/2an above. **Hero boundary:**
+the shape-matched "skyline" canvas below the hero read as "not really aligned with anything" --
+removed outright in favor of a plain gradient fade to `var(--bg)` in the same spot; no shape to
+misalign now. **Featured Gear:** the hover-to-reveal marquee-controls overlay was silently
+blocking clicks on the section's real "View on Newegg" links; fixed via a new reusable
+`opts.static` flag on `GZ.marquee()` (no autoscroll, no overlay -- same code path already built
+for `prefers-reduced-motion`) rather than a one-off patch, plus a flex-column +
+`margin-top:auto` fix so every card's button now sits at the same height regardless of spec-text
+wrap length. **Photo bands:** `#visit`/`#amb-teaser` swapped to their own real 1008px-wide photo
+sources (this repo's actual resolution ceiling, not upscaled), the scrim darkened
+(.72/.85/.88 -> .84/.92/.95), and the homepage Ambassador teaser cards' emoji fallback replaced
+with the same real `.amb-class-icon` glyphs `ambassador.html` already uses per track. **Games
+category cards:** a new `#games-categories` section reusing Zone Stack's real PC/Console/VR/
+Racing-Sim photos (Arcade honestly left icon-only -- no real photo exists in the repo) styled
+like `.zone-card`, wired to the existing chip-filter logic. Full writeups, verification methods,
+and exact numbers for all four are in CLAUDE.md's four matching dated sections. The same
+full-site contrast audit run also surfaced two pre-existing false-positive findings (a
+load/carousel-transition timing race in the audit tool itself, unrelated to any of this
+session's four changes) -- see CLAUDE.md's "A known false-positive category" note under
+Readability for the full root-cause, math, and why the tool itself wasn't changed without
+Eric's go-ahead (an open question per core rule 15). Verified via the full pixel-verified
+contrast audit (891 text items across 5 pages), live Puppeteer interaction checks (Featured
+Gear links now genuinely clickable; Games category cards driven by both real mouse clicks and
+keyboard-only Tab+Enter, with a confirmed-visible `:focus-visible` ring), and mobile/tablet/
+desktop screenshots of every changed section.
+
 ---
 
 ## Part 3 — Simulated user feedback
@@ -729,7 +757,7 @@ The one sub-idea from the now-archived "Live at the Zone" hub that never actuall
 **9. Senior-designer wow/design audit follow-through, phased (2026-09-11).**
 From the design audit in Part 2ak. Phase 1 shipped 2026-09-11 (the Featured Gear marquee — see Part 2ak and CLAUDE.md). Phase 2 shipped the same day (see Part 2al). Phase 3 shipped 2026-09-15 (see Part 2am). Phases 4-5 are scoped but **not yet implemented** — each needs its own explicit go-ahead before any file is touched, per core rule 15:
   - *Phase 2 — [SHIPPED 2026-09-11] Interior page hero differentiation.* Events/Games/Academy/Ambassador shared the exact same `.hero` markup with no visual cue for which page you were on. Shipped as a per-page icon badge (real icons from the existing shared set, one per page) next to each hero's kicker — see Part 2al and CLAUDE.md's "Interior-page hero icon badges" section. Real page-specific photography (originally floated as an alternative for this item) was deliberately deferred to Phase 3 instead, since it needs real photo assets sourced per page rather than just markup/CSS.
-  - *Phase 3 — [SHIPPED 2026-09-15] Real photography on Academy + Ambassador.* Shipped as two new `photo-waterfall.js`-driven galleries: "Schools we've hosted" on `edu.html` (Diamond Bar High School, Bosco Tech, Lorbeer Middle School) and "Ambassador events at the Zone" on `ambassador.html` (an Evil Geniuses VALORANT Collegiate Cup, a UGREEN x WD session) — see Part 2am and CLAUDE.md's "Real photography on Academy + Ambassador (Phase 3)" section. Games was intentionally **not** touched: no specific real photo source was given for it, and a separate copyright question Eric raised about game box art/screenshots was answered (real risk without a license) but left as an open, proposed-not-implemented question per core rule 15 — three options are written up in CLAUDE.md (licensed press-kit assets, real Gamer Zone floor photography instead of per-game art, or leave the current icon/text list as-is). No USC-specific photo exists anywhere in the repo (confirmed via full search) so it was honestly left out rather than faked, consistent with the no-fabrication rule.
+  - *Phase 3 — [SHIPPED 2026-09-15] Real photography on Academy + Ambassador.* Shipped as two new `photo-waterfall.js`-driven galleries: "Schools we've hosted" on `edu.html` (Diamond Bar High School, Bosco Tech, Lorbeer Middle School) and "Ambassador events at the Zone" on `ambassador.html` (an Evil Geniuses VALORANT Collegiate Cup, a UGREEN x WD session) — see Part 2am and CLAUDE.md's "Real photography on Academy + Ambassador (Phase 3)" section. Games was intentionally **not** touched in this same pass: no specific real photo source had been given for it yet, and a separate copyright question Eric raised about game box art/screenshots was answered (real risk without a license) but left as an open, proposed-not-implemented question per core rule 15. **Follow-up, same day:** Eric confirmed real Gamer Zone floor photography (option 2 of the three proposed) rather than per-game licensed art — see the new `#games-categories` section on `games.html` (Part 2ao below), which reuses the same real PC/Console/VR/Racing-Sim photos already captioned in About Gamer Zone's Zone Stack, styled like `.zone-card`. Arcade still has no real matching photo in the repo (confirmed via a full visual review, not just filename search) and got an honest icon-only card instead of a mismatched photo. No USC-specific photo issue applies here (that was the Ambassador gallery's own question, separately resolved — see Part 2an).
   - *Phase 4 — Ambassador page polish + generic review cards.* [PARTIALLY SHIPPED 2026-09-15] The medal-icon-reused-7x piece shipped as part of the same-day "Ambassador redesign" round (see CLAUDE.md) — Silver/Gold/Platinum/Diamond and the 3 attendance-bonus badges now use distinct real icons (shield/coin/chip/trophy, note/coin/chip) instead of one repeated medal glyph. The generic-review-card piece also shipped the same day (see CLAUDE.md's "Reviews section: real-content word emphasis + derived highlight tags") — real recurring phrases already in each review's own text are now bolded, plus a small derived highlight tag per card, so cards read as distinct rather than identical placeholders, with zero new/invented copy. Still open from this item: a secondary-button styling pass.
   - *Phase 5 — RGB picker discoverability.* The lighting picker undersells itself as a plain `<select>`. Propose a small live-preview swatch or label treatment so visitors realize it's a real customization feature, not decoration.
 

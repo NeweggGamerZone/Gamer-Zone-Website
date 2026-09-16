@@ -89,15 +89,27 @@ const GZ = {
   // spotlight card in an earlier redesign (see reviews.js's own history
   // comment for that bug). See .gz-marquee in style.css for the CSS half.
   marquee(container, items, opts = {}) {
-    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // opts.static (2026-09-15, per Eric on Featured Gear -- see
+    // featured-gear.js) opts a lane out of the scrolling animation
+    // regardless of the visitor's own reduced-motion setting, not just
+    // when the OS requests it. It reuses the exact same "no animation,
+    // wraps naturally, no hover-controls overlay" branch already built for
+    // prefers-reduced-motion below rather than a second bespoke static
+    // layout -- the two cases (an accessibility preference vs. a section
+    // that has a real per-card click target the pause/skip overlay would
+    // otherwise block, see that comment below) end up wanting the exact
+    // same rendering.
+    const reduceMotion = !!opts.static || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     container.classList.add('gz-marquee');
+    if (opts.static) container.classList.add('static');
     const track = document.createElement('div');
     track.className = 'gz-marquee-track' + (opts.reverse ? ' rev' : '');
     if (reduceMotion) {
       // No animation at all -- render the single real set once and let it
       // wrap naturally (see .gz-marquee-track under the reduced-motion
-      // media query in style.css), rather than showing the duplicated
-      // set statically, which would just look like a broken repeat. No
+      // media query, and the equivalent unconditional .static rule, in
+      // style.css), rather than showing the duplicated set statically,
+      // which would just look like a broken repeat. No
       // hover-controls overlay either -- there's no motion here to
       // pause/skip, and WCAG 2.2.2 doesn't apply to content that never
       // auto-animated in the first place.

@@ -61,5 +61,17 @@
     </div>`;
   }
 
-  GZ.marquee(wrap, GEAR.map(cardHTML), { speed: 30 });
+  // 2026-09-15, per Eric: the shared hover-to-reveal pause/skip overlay
+  // (GZ.buildMarqueeControls(), see main.js/CLAUDE.md) is a full-lane
+  // scrim with pointer-events:auto while visible -- fine for Reviews and
+  // the photo waterfalls, which have no per-card click target underneath
+  // it, but it was silently intercepting clicks on this section's real
+  // "View on Newegg" links the moment a visitor hovered to reach one.
+  // Rather than patch that overlay's hit-testing, per Eric's own call this
+  // section just doesn't auto-scroll at all: `static: true` renders the
+  // real 14-card set once, wrapped into rows with no animation and no
+  // controls overlay (same code path GZ.marquee already uses for
+  // prefers-reduced-motion -- see its own comment in main.js), so every
+  // link is always a normal, always-clickable anchor.
+  GZ.marquee(wrap, GEAR.map(cardHTML), { static: true });
 })();

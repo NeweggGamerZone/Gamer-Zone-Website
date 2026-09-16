@@ -22,7 +22,7 @@
 <meta name="twitter:description" content="The full game list at the Newegg Gamer Zone: PC, VR, party, esports, and fighting titles available to play, free.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=84">
+<link rel="stylesheet" href="assets/css/style.css?v=85">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -52,6 +52,53 @@
     </div>
     <h1>The <span class="accent">game</span> list</h1>
     <p class="lead">Everything on deck at the Zone: PC, VR, party, esports, and fighting titles. New adds drop regularly.</p>
+  </section>
+
+  <!-- 2026-09-15, per Eric ("scan our current photography and add those as
+       core images for each category... similar style to how images are
+       done on other sections or like the gamer zone cards"): reuses the
+       exact real Gamer Zone floor photos already captioned for these same
+       physical zones in About Gamer Zone's Zone Stack (index.html) --
+       PC/Console/VR/Racing Sim each get their own real photo, styled with
+       the same photo-plus-gradient-fade-plus-orange-title visual language
+       as .zone-card (see style.css's "Games category cards" comment for
+       why this is a plain grid, not the Zone Stack's carousel mechanics).
+       Arcade has no matching real photo anywhere in the repo -- confirmed
+       via a full visual review of every generic event photo, not just a
+       filename search -- so per the no-fabrication rule it gets an honest
+       icon-only card (the same "coin" icon already assigned to Arcade in
+       games.js's PLATFORMS) instead of a mismatched or duplicated photo.
+       Clicking a card jumps to and filters the exact same list below via
+       the existing chip-filter logic (games.js) -- no separate data or
+       markup to keep in sync. -->
+  <section id="games-categories">
+    <h2><i data-ic="gamepad"></i> Browse by Zone</h2>
+    <p class="dim">Every platform live at the Gamer Zone right now. Tap a zone to jump to its full game list below.</p>
+    <div class="game-cat-grid" id="games-cat-grid">
+      <button type="button" class="game-cat-card" data-platform="pc">
+        <span class="game-cat-art"><img src="assets/calendar/BGAssets/dailyplay-bg.jpg" alt="" loading="lazy"></span>
+        <h3>PC</h3>
+      </button>
+      <button type="button" class="game-cat-card" data-platform="console">
+        <span class="game-cat-art"><img src="assets/calendar/BGAssets/console-lounge-bg.jpg" alt="" loading="lazy"></span>
+        <h3>Consoles</h3>
+      </button>
+      <button type="button" class="game-cat-card" data-platform="vr">
+        <span class="game-cat-art"><img src="assets/calendar/BGAssets/vr-station-bg.jpg" alt="" loading="lazy"></span>
+        <h3>VR</h3>
+      </button>
+      <button type="button" class="game-cat-card" data-platform="racing-sim">
+        <span class="game-cat-art"><img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="" loading="lazy"></span>
+        <h3>Racing Simulators</h3>
+      </button>
+      <!-- No real arcade-cabinet/fighting-game photo exists in the repo (see
+           this section's own header comment) -- an honest icon-only card
+           instead of a mismatched photo, per the no-fabrication rule. -->
+      <button type="button" class="game-cat-card game-cat-card-noart" data-platform="arcade">
+        <span class="game-cat-art game-cat-art-empty" aria-hidden="true"><i data-ic="coin"></i></span>
+        <h3>Arcade</h3>
+      </button>
+    </div>
   </section>
 
   <section id="senet-chart-section">
@@ -135,9 +182,9 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=84" defer></script>
-<script src="assets/js/preregister-node.js?v=84" defer></script>
-<script src="assets/js/games.js?v=84" defer></script>
-<script src="assets/js/senet-chart.js?v=84" defer></script>
+<script src="assets/js/main.js?v=85" defer></script>
+<script src="assets/js/preregister-node.js?v=85" defer></script>
+<script src="assets/js/games.js?v=85" defer></script>
+<script src="assets/js/senet-chart.js?v=85" defer></script>
 </body>
 </html>

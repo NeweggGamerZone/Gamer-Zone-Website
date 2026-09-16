@@ -76,6 +76,40 @@ The reliable method (built 2026-08-26, reusable every session) actually walks th
 
 **Do this on every content update and every page change** — not only dedicated "color audit" or visual-redesign sessions. A copy edit, a new section, a new card, or a background swap can just as easily introduce a real contrast failure as a deliberate color-system change can.
 
+### A known false-positive category: elements gated by a load/scroll-triggered CSS transition
+
+Found and triaged 2026-09-15. The audit flagged two failures in the same session --
+`nav.main-nav a.active` on `games.html` (1.04:1, black text on a sampled near-black bg) and
+`.zone-card-code` ("ZONE 1") on `index.html` (also 1.04:1, same near-black sample) -- on
+elements neither one touched that session. Both turned out to be false positives from the
+exact same underlying cause, confirmed by direct pixel sampling and the real WCAG luminance
+math, not just re-reading the CSS: `.nav-pill` (the element actually behind the active nav
+link's black text) starts at `opacity:0` and only reaches `opacity:1` via a `requestAnimationFrame`-gated
+`.settle-in` class added right after its initial position is set (`initNavPill()` in
+`main.js`); `.zone-card-code`'s own card is subject to the Zone Stack carousel's own
+positioning transition. In both cases, a screenshot taken before that transition has actually
+finished settling samples the *pre-transition* (still invisible / still-near-black) state
+instead of the real, settled one -- even though `collect.js` does a full scroll-through first
+specifically to trigger scroll-based `.reveal` fades, that scroll-through doesn't guarantee
+every *load-triggered* or *carousel-internal* transition has also finished by the time its
+screenshot pass runs. Real contrast at rest, confirmed both by computing WCAG relative
+luminance from the actual CSS colors and by sampling real rendered pixels after a full
+settle: the nav pill's orange (sampled `rgb(237,140,19)`, a point partway through its
+gradient) against black text is **8.37:1**; `.zone-card-code`'s flat `var(--ne-orange)`
+(`rgb(250,157,40)`) against black text is **9.91:1** -- both comfortably clear of the 7:1 AAA
+floor, and both elements predate whatever session is currently running (nav-pill: 2026-09-10;
+zone-card-code: the original Zone Stack build). **When a fresh audit run flags a decorative
+orange badge/pill that sits behind a `position:absolute` or transitioning element, don't
+assume it's a real regression from the current session's work** -- re-check with a settled
+(1-2s post-transition), correctly-scrolled pixel sample (see this section's own repro method)
+before treating it as a real bug to fix. This is a real, disclosed limitation of `collect.js`
+itself, not a fix -- a future session could harden the tool (e.g. wait for a second
+`requestAnimationFrame` plus a fixed settle delay before the "text hidden" screenshot pass,
+or force `transition:none` globally during the audit run) but that's an open design question
+with more than one reasonable approach, so it hasn't been done without Eric's go-ahead per
+core rule 15 -- this note exists so the *known* false positives aren't re-investigated from
+scratch next time, not as a substitute for actually fixing the tool.
+
 ## Container & sizing discipline
 
 Lessons paid for the hard way this project (the Weekly Lineup mobile-clipping bug, the hero-game sizing miss) — don't re-learn these:
@@ -779,6 +813,135 @@ Verified via a live Puppeteer check across both marquee lanes (48 rendered cards
 errors), plus a mobile-width (250px card) check confirming no `.rv-tag` overflows its card at
 any of the 26 tagged cards. This addresses the "generic-review-card refresh" half of Part 4
 #9's still-open Phase 4 item; the secondary-button styling pass is still open.
+
+## Hero-to-Weekly-Lineup boundary: dropped the shape-matched canvas, plain fade instead (2026-09-15)
+
+Per Eric: the shape-matched "skyline" boundary canvas (`.hero-boundary`, `drawBoundary()` in
+`techno-hero.js` -- see "Site-wide interaction upgrade round" above for its original
+2026-09-10 build) read as "not really aligned with anything." Removed entirely --
+`boundaryCanvas`/`sizeBoundary()`/`drawBoundary()` and their call sites in `techno-hero.js`,
+the `<canvas id="hero-boundary-canvas">` in `index.html` -- and replaced with a plain
+`.hero-boundary` div: `background:linear-gradient(180deg,transparent 0%,var(--bg) 100%)` at
+the same height/full-bleed width the canvas used to occupy. No shape to misalign now; the
+background simply reads as fading to black on the way down into Weekly Lineup, working
+alongside the pre-existing `applyTechFade()` (`main.js`) that already dims the fixed tunnel
+layers' opacity over this same scroll range, unchanged. Confirmed via grep that no other file
+still references `hero-boundary-canvas`/`drawBoundary`/`boundaryCanvas` after the removal.
+
+## Featured Gear cards: equal button height + no autoscroll (2026-09-15)
+
+Per Eric: "the view on newegg button should be exactly the same height across the cards...
+ensure that buttons within cards are similar. also... I can't click on the view on newegg
+because the scrolling feature pause blocks it. Don't make that section autoscroll then." Two
+related fixes to `#featured-gear` (see "Featured Gear marquee," 2026-09-11, above):
+
+**Click-block fix.** `GZ.buildMarqueeControls()`'s hover-to-reveal pause/skip overlay (see
+"Shared infinite marquee" above) is a full-lane `pointer-events:auto` scrim while visible --
+harmless for Reviews/the photo waterfalls, which have no per-card click target underneath it,
+but it silently intercepted clicks on this section's real "View on Newegg" links the moment a
+visitor hovered to reach one. Rather than patch that overlay's hit-testing, per Eric's own
+call this section now opts out of auto-scrolling entirely via a new `opts.static` flag on
+`GZ.marquee()` (`main.js`): it reuses the exact same "no animation, no duplicated DOM, no
+controls overlay, wraps via flex-wrap" branch already built for `prefers-reduced-motion`,
+just triggerable per-instance regardless of the visitor's own OS motion setting --
+`featured-gear.js`'s call is now `GZ.marquee(wrap, GEAR.map(cardHTML), { static: true })`. Any
+future marquee section with real per-card click targets underneath it can opt into the same
+fix via `{ static: true }` rather than a bespoke patch.
+
+**Button-height fix.** `.gear-item` is now a flex column with its `.btn` pushed to
+`margin-top:auto`; every card in the same row already stretches to the tallest sibling's
+height (the grid's default `align-items:stretch`, unchanged), so the button now always sits
+flush against the bottom of that shared height regardless of how many lines a given card's
+spec text wrapped to, instead of its Y position drifting card to card. `align-self:flex-start`
+keeps the button its own natural content width rather than stretching full-width, matching how
+it looked before.
+
+Verified via a live Puppeteer check (28 rendered `<img>`s -- 14 real, no longer duplicated for
+a loop since the lane is now static -- all with real `naturalWidth`) confirming every "View on
+Newegg" link is a normal, always-clickable anchor with no overlay in front of it, plus the full
+pixel-verified contrast audit and console/width checks across all 5 pages.
+
+## Photo bands: HD photos, darker scrim, real ambassador track icons (2026-09-15)
+
+Per Eric: "use more HD photos for the plan your next visit and become a gamer zone ambassador,
+make those sections more readable and darken the background more. Use the same class symbols
+as on the ambassador page on the home ambassador section." Three changes to `.gz-photo-band`'s
+two live instances (`#visit`, `#amb-teaser` -- see "Shared photo-backed section" above):
+
+**HD photos.** Both bands' `background-image` swapped from the 640x360 `assets/img/reel/`
+copies (sized for the hero's small photo-strip cards) to two new 1008x567 copies in
+`assets/img/PhotoBands/` (`visit-band.jpg`, `ambassador-band.jpg`) -- the same real photos
+(`assets/calendar/BGAssets/PhotoReel/2026-07-25 (15).jpg` and `2026-06-20 (10).png`
+respectively), just each band's own real full-resolution source instead of a thumbnail meant
+for a ~300px hero card. 1008px is this repo's actual real-resolution ceiling for these dated
+PhotoReel batches (confirmed via `PIL.Image.open(...).size`, not assumed) -- no synthetic
+upscaling.
+
+**Darker scrim.** `.gz-photo-band::after`'s gradient darkened from `.72/.85/.88` to
+`.84/.92/.95`. Re-verified via the full pixel-verified contrast audit afterward, same
+discipline as every prior scrim-opacity change on this file.
+
+**Real ambassador icons, replacing the large-emoji fallback.** The three homepage
+`#amb-teaser` track cards (`.amb-class-teaser-card`) now reuse `.amb-class-icon` -- the exact
+circular icon-badge component `ambassador.html`'s own track cards already use (see
+"Ambassador redesign," 2026-09-15, above) -- with the same real grad/sword/bow icons and
+per-track colors (`class-collegiate`/`class-influencer`/`class-org`), replacing the
+🎓🎥🏪 emoji fallback. `.amb-class-teaser-emoji` and its rule were removed. This is a symbol
+match only (same icon glyphs, same colors) -- it does not revisit the emoji-vs-real-photo
+question that section's own comment already documents; see that comment for the current state
+of the "is there a real USC/collegiate photo" question.
+
+Verified via mobile/tablet/desktop screenshots of both bands (no clipping, text legible against
+the darker scrim + new photo at every width) and the full pixel-verified contrast audit (891
+text items across 5 pages -- see the games-category-cards entry below for the 2 unrelated
+pre-existing findings this run also surfaced and their triage).
+
+## Games page: real-photography category cards ("game-cat-*") (2026-09-15)
+
+Per Eric: "scan our current photography and add those as core images for each category,
+ensuring its a similar style to how images are done on other sections or like the gamer zone
+cards." New `#games-categories` section on `games.html`, right after the hero and before the
+Top Played Games chart: one card per platform-filter chip (PC/Consoles/VR/Racing
+Simulators/Arcade), styled with `.zone-card`'s own visual language (real photo, bottom
+gradient fade into `var(--bg-2)`, orange accents, uppercase centered title) via new
+`.game-cat-*` classes in `style.css` -- but as a plain CSS Grid of real `<button>` elements,
+not a carousel: every zone is visible and clickable at once here, so none of `.zone-card`'s
+absolute-position/`data-pos`/drag machinery applies, and a real `<button>` already gets
+keyboard reachability + Enter/Space activation + a focus state for free (core rule 8 satisfied
+without any custom widget code).
+
+**Photo sourcing: reused, not new.** Each card reuses the exact real Gamer Zone floor photo
+already captioned for that same physical zone in About Gamer Zone's Zone Stack (`index.html`)
+-- PC -> `dailyplay-bg.jpg`, Consoles -> `console-lounge-bg.jpg`, VR -> `vr-station-bg.jpg`,
+Racing Simulators -> `event-update-bg-week4.jpg` (captioned "Racing & Immersive Zone" there,
+the real match for this filter). **Arcade has no real matching photo anywhere in the repo** --
+confirmed via a full visual contact-sheet review of every generic PhotoReel event photo (99
+photos, viewed directly, not just filename-matched -- the same rigor the Ambassador
+gallery's USC-photo correction earlier this session established as the right method). Per the
+no-fabrication rule, Arcade gets an honest icon-only card (`.game-cat-art-empty`, the same
+`coin` icon already assigned to Arcade in `games.js`'s `PLATFORMS`) instead of a mismatched or
+duplicated photo.
+
+**Wired to the existing filter, not a second list.** Clicking a card clicks the matching chip
+in `#games-filters` (`games.js`'s new `catGrid` click handler), reusing that chip's own
+filter/render/active-state logic wholesale, then scrolls the filter row + list into view --
+there's no separate data or markup for the cards to drift out of sync with the real game list.
+
+Verified via live Puppeteer input (a real mouse click on the VR card correctly set the active
+chip, re-rendered the list, and scrolled the page; a keyboard-only Tab-to-focus + Enter on the
+Arcade card did the same via native `<button>` behavior, with a real, visibly-rendered
+`:focus-visible` outline confirmed via computed style -- not just present in the CSS) and
+mobile/tablet/desktop screenshots (2-column wrap at mobile, 4+1 at tablet, all 5 in a row at
+desktop, no clipping).
+
+**The same full-site audit run also surfaced 2 findings, both triaged as pre-existing false
+positives unrelated to this session's work** -- see "A known false-positive category" under
+"Readability" above for the full root-cause and math: `games.html`'s active nav link
+(1.04:1) and `index.html`'s "ZONE 1" badge (also 1.04:1), both decorative orange
+badges/pills sitting behind a load- or carousel-triggered CSS transition that the audit's
+screenshot pass can catch mid-transition. Real settled contrast is 8.37:1 and 9.91:1
+respectively -- confirmed via direct pixel sampling after a full settle, not just re-reading
+the CSS. No site content changed for either.
 
 ## Live open/closed status ("no fabrication," applied to a time-sensitive claim)
 

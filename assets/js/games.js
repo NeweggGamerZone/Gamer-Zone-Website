@@ -243,5 +243,23 @@
     if (li) li.focus();
   });
 
+  // Games page category cards (2026-09-15, per Eric) -- real <button>s in
+  // #games-cat-grid (games.html), styled like .zone-card photo cards. Each
+  // just clicks the matching chip in #games-filters -- reusing that click
+  // handler's own filter/render/active-state logic wholesale instead of a
+  // second, parallel way to select a platform -- then scrolls the filter
+  // row + list into view so the result of the click is actually visible.
+  const catGrid = document.getElementById('games-cat-grid');
+  if (catGrid) {
+    catGrid.addEventListener('click', e => {
+      const btn = e.target.closest('.game-cat-card');
+      if (!btn) return;
+      const chip = chipsWrap.querySelector(`.chip[data-platform="${btn.dataset.platform}"]`);
+      if (!chip) return;
+      chip.click();
+      chipsWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
   renderByPlatform();
 })();

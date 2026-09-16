@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=84">
+<link rel="stylesheet" href="assets/css/style.css?v=85">
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -275,21 +275,16 @@
     </div>
   </section>
 
-  <!-- 2026-09-10, per Eric: "a solid edge shape that matches the changing
-       background shapes... fades into solid black, but is constantly
-       changing." Rather than the hero just dimming out over a tall scroll
-       range (the pre-existing applyTechFade() in main.js, still in place
-       above), this draws one explicit, shaped cut line right where the
-       hero ends -- a horizontal "skyline" unrolled from the exact same
-       morphing ring shape/timing driving the tunnel above it (see
-       drawBoundary() in techno-hero.js), so the line is a smooth flat
-       plane on a Circle beat and a sharp zigzag on a Star beat, always in
-       lockstep with the tunnel, never a static decorative shape of its
-       own. Solid black below the line, transparent above it (revealing
-       whatever the fixed tunnel layers are currently faded to), so the
-       edge itself is the signal that the hero is over, not just a dimmer
-       reading. aria-hidden: purely decorative, no content of its own. -->
-  <div class="hero-boundary" aria-hidden="true"><canvas id="hero-boundary-canvas"></canvas></div>
+  <!-- 2026-09-15, per Eric: the shape-matched "skyline" boundary line
+       (2026-09-10, see CLAUDE.md/roadmap for its original reasoning) read
+       as not aligned with anything -- removed. Replaced with a plain
+       vertical gradient (transparent -> var(--bg)) in the same spot: no
+       shape to misalign, just the background reading as fading to black
+       on the way down into Weekly Lineup. Works alongside the pre-existing
+       applyTechFade() in main.js, which already dims the fixed tunnel
+       layers' opacity over this same scroll range. aria-hidden: purely
+       decorative, no content of its own. -->
+  <div class="hero-boundary" aria-hidden="true"></div>
 
   <section class="reveal eu-section" id="week">
     <h2>Weekly lineup</h2>
@@ -431,18 +426,18 @@
       <h2>Become a Gamer Zone Ambassador</h2>
       <p class="dim">Host recurring events with us and unlock more with every one you run — pick the track that fits how your community plays.</p>
       <div class="amb-class-teaser">
-        <div class="amb-class-teaser-card">
-          <span class="amb-class-teaser-emoji" aria-hidden="true">🎓</span>
+        <div class="amb-class-teaser-card class-collegiate">
+          <span class="amb-class-icon"><i data-ic="grad"></i></span>
           <h3>Collegiate</h3>
           <p class="dim">School clubs and officers get on-campus brand representation, hosting here or via a sponsored event at their own school.</p>
         </div>
-        <div class="amb-class-teaser-card">
-          <span class="amb-class-teaser-emoji" aria-hidden="true">🎥</span>
+        <div class="amb-class-teaser-card class-influencer">
+          <span class="amb-class-icon"><i data-ic="sword"></i></span>
           <h3>Influencer</h3>
           <p class="dim">Individual creators who bring their own community here for meetups, content sessions, and LAN nights.</p>
         </div>
-        <div class="amb-class-teaser-card">
-          <span class="amb-class-teaser-emoji" aria-hidden="true">🏪</span>
+        <div class="amb-class-teaser-card class-org">
+          <span class="amb-class-icon"><i data-ic="bow"></i></span>
           <h3>Organization</h3>
           <p class="dim">Clubs, vendors, and local businesses — including small shops like TCG, game, and tech stores — who run showcases and competitions.</p>
         </div>
@@ -547,14 +542,14 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=84" defer></script>
-<script src="assets/js/preregister-node.js?v=84" defer></script>
-<script src="assets/js/techno-hero.js?v=84" defer></script>
-<script src="assets/js/photo-waterfall.js?v=84" defer></script>
-<script src="assets/js/events.js?v=84" defer></script>
-<script src="assets/js/event-update.js?v=84" defer></script>
-<script src="assets/js/zone-stack.js?v=84" defer></script>
-<script src="assets/js/featured-gear.js?v=84" defer></script>
-<script src="assets/js/reviews.js?v=84" defer></script>
+<script src="assets/js/main.js?v=85" defer></script>
+<script src="assets/js/preregister-node.js?v=85" defer></script>
+<script src="assets/js/techno-hero.js?v=85" defer></script>
+<script src="assets/js/photo-waterfall.js?v=85" defer></script>
+<script src="assets/js/events.js?v=85" defer></script>
+<script src="assets/js/event-update.js?v=85" defer></script>
+<script src="assets/js/zone-stack.js?v=85" defer></script>
+<script src="assets/js/featured-gear.js?v=85" defer></script>
+<script src="assets/js/reviews.js?v=85" defer></script>
 </body>
 </html>

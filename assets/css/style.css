@@ -840,6 +840,39 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-stack-dot::before { content: ""; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
 .zone-stack-dot.active { background: var(--ne-orange); }
 @media (max-width: 480px) { .zone-stack { height: 500px; } }
+
+/* Games page category cards ("game-cat-*"), added 2026-09-15 per Eric
+   ("scan our current photography and add those as core images for each
+   category... similar style to how images are done on other sections or
+   like the gamer zone cards"). Reuses .zone-card's own visual language --
+   real photo, bottom gradient fade into var(--bg-2), orange accents,
+   uppercase centered title -- but as a plain CSS Grid of real <button>
+   elements, not a carousel: there's no "current card" concept here, every
+   zone is visible and clickable at once, so none of .zone-card's
+   absolute-position/data-pos/drag machinery applies (a real <button>
+   already gets keyboard reachability, Enter/Space activation, and a focus
+   state for free -- no custom widget code needed for core rule 8).
+   Clicking a card clicks the matching chip in #games-filters (games.js),
+   reusing the exact same filter/render logic the chips already use rather
+   than a second, parallel way to show the same list. */
+.game-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+.game-cat-card { position: relative; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 26px rgba(0,0,0,.45); cursor: pointer; padding: 0; font: inherit; text-align: center; transition: transform .2s ease, box-shadow .2s ease; }
+.game-cat-card:hover, .game-cat-card:focus-visible { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(0,0,0,.55); }
+.game-cat-card:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 3px; }
+.game-cat-art { position: relative; display: block; height: 130px; flex: none; background: #000; }
+.game-cat-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.game-cat-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, var(--bg-2) 100%); }
+/* Arcade has no real matching photo anywhere in the repo -- confirmed via a
+   full visual review of every generic event photo, not just a filename
+   search (see games.html's own comment on this card) -- so per the
+   no-fabrication rule it gets an honest icon-only treatment instead of a
+   mismatched or duplicated photo. Same background tone as every other
+   card's art zone so it reads as a deliberate variant, not a broken image. */
+.game-cat-art-empty { display: flex; align-items: center; justify-content: center; background: var(--bg-3); }
+.game-cat-art-empty .ic { width: 42px; height: 42px; color: var(--ne-orange); }
+.game-cat-art-empty::after { display: none; }
+.game-cat-card h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: 1rem; color: var(--ne-orange); margin: 0; padding: .7rem .6rem; min-height: 2.6em; display: flex; align-items: center; justify-content: center; }
+
 .console-systems { margin-bottom: .4rem; }
 .sticky { font-family: var(--head); color: #16181d; padding: 1.1rem 1rem 1.3rem; box-shadow: 5px 7px 16px rgba(0,0,0,.55); position: relative; min-height: 140px; font-size: 1rem; line-height: 1.4; word-wrap: break-word; }
 .sticky::before { content: ""; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 54px; height: 16px; background: rgba(255,255,255,.32); }

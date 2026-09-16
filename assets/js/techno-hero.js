@@ -29,16 +29,6 @@
   const ctx = canvas.getContext('2d');
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Hero/Weekly-Lineup boundary canvas (2026-09-10, per Eric) -- a second,
-  // much smaller canvas drawn in the same frame()/elapsed clock as the
-  // tunnel above, so its shape is always in lockstep with the ring shape
-  // currently on screen. Optional: index.html's own markup, not every
-  // page that includes this script has it (board-mode captures etc.), so
-  // this stays null-safe throughout.
-  const boundaryCanvas = document.getElementById('hero-boundary-canvas');
-  const bctx = boundaryCanvas ? boundaryCanvas.getContext('2d') : null;
-  let BW, BH, BDPR;
-
   let W, H, DPR, cx, cy;
   const F = 300;
   const Z_NEAR = 60, Z_FAR = 1500;
@@ -70,16 +60,6 @@
     cx = W / 2; cy = H / 2;
     A = Math.max(W, H) * 0.72;
     buildRings();
-    sizeBoundary();
-  }
-
-  function sizeBoundary() {
-    if (!boundaryCanvas || !bctx) return;
-    BDPR = Math.min(window.devicePixelRatio || 1, 2);
-    BW = boundaryCanvas.clientWidth; BH = boundaryCanvas.clientHeight;
-    if (BW <= 0 || BH <= 0) return; // e.g. board-mode hides the hero entirely
-    boundaryCanvas.width = BW * BDPR; boundaryCanvas.height = BH * BDPR;
-    bctx.setTransform(BDPR, 0, 0, BDPR, 0, 0);
   }
 
   function buildRings() {
@@ -532,79 +512,6 @@
     return out;
   }
 
-  // Read the real --bg custom property once at startup rather than
-  // hardcoding a duplicate hex value, so this canvas fill can never drift
-  // from the CSS variable every dark section actually uses.
-  let BG_COLOR = '#060708';
-  try {
-    const v = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-    if (v) BG_COLOR = v;
-  } catch { /* getComputedStyle unavailable in some test harnesses -- fall back to the literal above */ }
-
-  // Unrolls the tunnel's own current morphed-shape points (the exact same
-  // `pts` array frame() already computed for the rings this frame) into a
-  // horizontal "skyline" line across the boundary strip, solid-fills
-  // everything below it in BG_COLOR, and leaves everything above it
-  // untouched/transparent (so whatever the fixed tunnel layers are
-  // currently faded to keeps showing through above the line). Each
-  // point's *radius* from the shape's own center becomes the line's
-  // height at that x position -- a Circle beat (constant radius) draws a
-  // calm, nearly-flat line near the top of the strip (mostly open above
-  // it); a Star beat (alternating ~1.0/~0.45 radius) draws a sharp
-  // zigzag that dips much closer to full black at each inner vertex. That
-  // mapping is deliberate: the "busier" the current tunnel shape reads,
-  // the more the boundary itself visibly changes frame to frame and shape
-  // to shape, instead of a flat divider that merely happens to redraw.
-  const B_MIN_R = 0.45, B_MAX_R = 1.05; // matches this file's real shape radius range (star inner .. egg's widest)
-  function drawBoundary(pts, hue, globalFade) {
-    if (!bctx || !boundaryCanvas || BW <= 0 || BH <= 0) return;
-    const n = pts.length;
-    const yTop = BH * 0.12, yBottom = BH * 0.88;
-    const xs = new Array(n), ys = new Array(n);
-    for (let i = 0; i < n; i++) {
-      const r = Math.hypot(pts[i][0], pts[i][1]);
-      const t = Math.min(1, Math.max(0, (B_MAX_R - r) / (B_MAX_R - B_MIN_R)));
-      xs[i] = (i / n) * BW;
-      ys[i] = yTop + t * (yBottom - yTop);
-    }
-    bctx.clearRect(0, 0, BW, BH);
-
-    // Smooth path through the unrolled points via the same
-    // midpoint-quadratic technique drawRing() uses for the tunnel's own
-    // outlines, so this reads as one continuous curve, not a faceted
-    // polyline -- then closed down to the strip's bottom-right/bottom-left
-    // corners and filled solid, so everything under the line is opaque.
-    function tracePath() {
-      bctx.beginPath();
-      bctx.moveTo(0, ys[0]);
-      for (let i = 0; i < n; i++) {
-        const nextX = i + 1 < n ? xs[i + 1] : BW;
-        const nextY = i + 1 < n ? ys[i + 1] : ys[n - 1];
-        const midX = (xs[i] + nextX) / 2, midY = (ys[i] + nextY) / 2;
-        bctx.quadraticCurveTo(xs[i], ys[i], midX, midY);
-      }
-    }
-
-    tracePath();
-    bctx.lineTo(BW, BH);
-    bctx.lineTo(0, BH);
-    bctx.closePath();
-    bctx.fillStyle = BG_COLOR;
-    bctx.fill();
-
-    // A soft glowing stroke retraces the same line, tinted with the
-    // active RGB lighting profile's current hue -- so the cut line's
-    // color, not just its shape, keeps pace with whatever profile is
-    // selected (e.g. Flame's warm flicker vs Wave's traveling hue).
-    tracePath();
-    bctx.strokeStyle = `hsla(${hue}, 80%, 62%, ${0.55 * globalFade})`;
-    bctx.lineWidth = 2;
-    bctx.shadowColor = `hsla(${hue}, 90%, 66%, ${0.6 * globalFade})`;
-    bctx.shadowBlur = 18;
-    bctx.stroke();
-    bctx.shadowBlur = 0; // never leave glow bleeding into the next draw call
-  }
-
   let raf, last = 0, elapsed = 0;
 
   function frame(ts) {
@@ -624,7 +531,6 @@
       if (r.z < Z_NEAR) r.z += (Z_FAR - Z_NEAR);
       drawRing(r, pts, rot, globalFade, cs.ringHue(i), cs.ringAlpha ? cs.ringAlpha(i, r.z) : 1);
     }
-    drawBoundary(pts, cs.hue, globalFade);
 
     raf = requestAnimationFrame(frame);
   }
@@ -633,11 +539,6 @@
     ctx.clearRect(0, 0, W, H);
     strokeSpokes(0, 0.6, 200);
     rings.forEach((r, i) => drawRing(r, RESAMPLED[SHAPES[0]], 0, 0.6, (200 + i * 12) % 360));
-    // Reduced-motion still gets the boundary line (one still frame, same
-    // as the tunnel above it) rather than an unshaped gap -- it's a
-    // static shape either way for these users, just like the rest of the
-    // hero's reduced-motion fallback.
-    drawBoundary(RESAMPLED[SHAPES[0]], 200, 0.6);
   }
 
   window.addEventListener('resize', size);
