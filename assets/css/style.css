@@ -773,12 +773,20 @@ details.archive-month .grid { margin-top: 1rem; }
    area (see above), but keeps anything still touching the boundary
    (narrower viewports between 620px and 900px) from ending in a flat cut. */
 .zone-stack { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); }
-/* 2026-09-16: widened from min(340px,78%) to min(460px,60%) -- the other
-   half of "shorter and wider" above -- so a fixed card is bigger on
-   typical desktop widths while the % cap still shrinks it correctly on
-   narrow viewports rather than ever forcing an oversized card into a
-   small section. */
-.zone-card { position: absolute; top: 0; left: 50%; width: min(460px, 60%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease, filter .55s ease; -webkit-user-select: none; user-select: none; }
+/* 2026-09-16, round 2: widened from min(340px,78%) to min(460px,60%) -- the
+   other half of "shorter and wider" above.
+   2026-09-16, round 3 (per Eric: "I should at least be able to see 3 cards
+   fully. They are cut off in the outermost edges."): that 460px/60% card,
+   combined with the round-2 72% peek offset, produced a 3-card span
+   (~1122px) wider than .zone-stack's own real box (~1070px on a typical
+   desktop viewport) -- the prev/next cards' outer edges were genuinely
+   being clipped by this element's own overflow:hidden, not just the mask
+   feather above. Shrunk to min(380px,36%): the percentage half of this
+   formula is what actually matters for the "always fully visible" promise
+   -- it keeps total 3-card span at a fixed ~91% of .zone-stack's own width
+   at every viewport size (see the peek-offset comment below for the exact
+   math), not just on the desktop width this was eyeballed at. */
+.zone-card { position: absolute; top: 0; left: 50%; width: min(380px, 36%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease, filter .55s ease; -webkit-user-select: none; user-select: none; }
 /* 2026-09-08, per Eric: "ZONE 1"-"ZONE 5" badge moved from the top-right
    corner to horizontally centered at the top of the card -- centered via
    left:50%/translateX(-50%) rather than switching to a flex/grid layout,
@@ -823,23 +831,35 @@ details.archive-month .grid { margin-top: 1rem; }
 /* 2026-09-16, round 2 (per Eric, reversing the round above): "show three,
    make the cards a little shorter and wider so three cards can fit the
    section width, with the side cards slightly hiding behind the center
-   card." Back to visible + clickable, but the offset dropped from 82% to
-   72% of the (now-wider) card's own width, so the near peek layer
-   genuinely overlaps behind the center card's edge (~28% of the peek
-   card's own width hidden) instead of sitting almost fully separate from
-   it the way 82% did -- at this card width that lands the combined
-   3-card span at roughly 1122px, a few px shy of .zone-stack's own
-   ~1140px container width on a typical desktop viewport (checked via the
-   real translateX math, not just assumed from the percentages alone),
-   i.e. "fits the section width" without overflowing it or leaving a lot
-   of dead space at the edges either.
-   Restored the exact pre-2026-09-16-round-1 blur+brightness(.8)
+   card." Restored the exact pre-2026-09-16-round-1 blur+brightness(.8)
    depth-of-field treatment (see this file's git history / CLAUDE.md) for
    the visible portion of each peek card, so the ones "hiding behind" the
    center card read as out-of-focus background depth, not just a second
-   copy at full clarity. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 72% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 72% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+   copy at full clarity.
+   2026-09-16, round 3 (per Eric: "I should at least be able to see 3 cards
+   fully. They are cut off in the outermost edges."): round 2's 460px-wide
+   card + 72% offset produced a 3-card span (~1122px) that could exceed
+   .zone-stack's own real width at typical desktop sizes, clipping the
+   prev/next cards' outer edges against this element's own overflow:hidden
+   -- a real bug, not a screenshot artifact (confirmed by comparing the
+   measured span against .zone-stack's own getBoundingClientRect() width).
+   Fixed together with .zone-card's width dropping to min(380px,36%)
+   above: the offset here also moved 72% -> 70%, and because BOTH numbers
+   are now expressed as a percentage of quantities that scale together
+   (card width is itself proportional to .zone-stack's width, and this
+   offset is a percentage of the card's own width), the total 3-card span
+   is a fixed ~91% of .zone-stack's width -- card width 0.36 *
+   (1 + 2*0.70) = 0.36 * 2.4 = 0.864 of the stack's width -- at literally
+   any viewport size, not just the one this was measured at, with an
+   automatic ~4.5%-per-side margin so the outer card edges never reach
+   .zone-stack's own clipping boundary or the mask's 5%/95% feather zone.
+   Verified via getBoundingClientRect() at 390/768/1400px, not assumed from
+   the percentages alone -- see this round's CLAUDE.md entry for the exact
+   numbers. Peek overlap is ~30% of the peek card's own width hidden behind
+   the center card (slightly more than round 2's 28%), still reading as
+   "slightly hiding behind," not fully separate. */
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 70% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 70% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
 /* Second, further-out peek layer -- per Eric's "another layer of cards
    on the outermost left and right of center" ask for About Gamer Zone.
    These are real zone cards from the same rotation (not decorative
@@ -1168,8 +1188,15 @@ body.home-page { background: transparent; }
    a conic rainbow gradient instead of a solid color -- Cycle is the one
    profile whose hue never settles on a single value, so a fixed color
    swatch would misrepresent it. */
-.hero-lighting-swatch { flex: none; width: 16px; height: 16px; border-radius: 50%; box-shadow: 0 0 0 2px var(--line), 0 0 8px 1px currentColor; transition: background .2s ease; }
+.hero-lighting-swatch { flex: none; position: relative; width: 16px; height: 16px; border-radius: 50%; box-shadow: 0 0 0 2px var(--line), 0 0 8px 1px currentColor; transition: background .2s ease; border: none; padding: 0; cursor: pointer; }
 .hero-lighting-swatch.is-cycle { background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); box-shadow: 0 0 0 2px var(--line); }
+/* 2026-09-16, RGB cursor feature: this dot became a real <button> (see
+   index.html's own comment on the element) rather than gaining a wrapping
+   button, so it needs its own focus ring and touch-target treatment --
+   same invisible-tap-zone-pad pattern as .zone-stack-dot/.pin-close (F-14)
+   rather than inflating the visible 16px dot itself. */
+.hero-lighting-swatch::before { content: ""; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+.hero-lighting-swatch:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 3px; }
 /* F-14 (2026-09-08): was 30px tall (padding .4rem top/bottom) -- bumped
    vertical padding to clear the 44px floor. This is a native <select>, so
    its own real box IS the tap target; there's no separate "invisible zone
@@ -1847,6 +1874,36 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .modal textarea{min-height:80px;resize:vertical}
 .modal .req{color:var(--ne-blue-text)}
 .modal .form-note{font-size:.76rem;color:var(--ink-dim);margin-top:.9rem}
+
+/* ===== RGB cursor glow + color-wheel picker (2026-09-16) =====
+   Per Eric's direct request: "a mouse that copies the hero's own rgb hue.
+   Let users who click on the rgb color be able to change it to various
+   colors in a simplistic color wheel, and it's cached accordingly." See
+   assets/js/rgb-cursor.js for the full mechanism/reasoning; this is just
+   the visual layer. The picker itself reuses the site's one existing
+   .modal-bg/.modal component above rather than a new floating-panel look.
+
+   The glow dot is a small fixed circle that trails the real cursor,
+   pointer-events:none so it can never intercept a click (the exact class
+   of bug this project has hit and fixed before with hover overlays -- see
+   "Featured Gear cards" in CLAUDE.md). It's created and driven entirely by
+   JS (only on fine-pointer, motion-enabled devices -- see that file), so
+   there's nothing here gating its existence, only its appearance. */
+.gz-cursor-glow{position:fixed;top:0;left:0;width:16px;height:16px;border-radius:50%;pointer-events:none;z-index:45;transform:translate3d(-100px,-100px,0);background:hsl(205,85%,55%);color:hsl(205,85%,55%);box-shadow:0 0 16px 4px currentColor,0 0 34px 10px currentColor;opacity:0;transition:opacity .25s ease;mix-blend-mode:screen}
+.gz-cursor-glow.is-active{opacity:.7}
+
+/* The wheel is a real conic-gradient rainbow disc -- deliberately
+   "simplistic" per Eric's own word, angle-only (radius doesn't matter),
+   matching the exact same rainbow stops the Cycle-profile swatch above
+   already uses so the two never look like two different color systems.
+   The paired <input type="range"> (styled natively, no custom CSS needed)
+   is what makes this genuinely keyboard-operable per core rule 8 -- a
+   mouse-drag-only wheel would fail a keyboard-only visitor entirely. */
+.gz-wheel-wrap{display:flex;justify-content:center;margin:1rem 0 1.2rem}
+.gz-color-wheel{position:relative;width:170px;height:170px;max-width:100%;border-radius:50%;background:conic-gradient(from 0deg,red,yellow,lime,cyan,blue,magenta,red);box-shadow:0 0 0 2px var(--line);cursor:pointer;touch-action:none}
+.gz-wheel-knob{position:absolute;top:50%;left:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#fff;border:2px solid #111;box-shadow:0 0 0 2px rgba(255,255,255,.65);transform:translate(var(--kx,0px),var(--ky,-64px));pointer-events:none}
+#gz-hue-range{cursor:pointer}
+#gz-hue-reset{margin-top:0}
 
 /* ===== v10 (2026-09-15): Ambassador journey — 4 vertical pillars =====
    Per Eric ("instead of left to right, just have 4 pillars of increasing

@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=88">
+<link rel="stylesheet" href="assets/css/style.css?v=89">
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -81,9 +81,20 @@
            techno-hero.js from the exact same colorState() values driving
            the tunnel, not a second guessed color) so this reads as a real
            customization control at a glance, not decorative text.
-           aria-hidden: purely a visual echo of the <select>'s own value,
-           which already has its own accessible label below. -->
-      <span class="hero-lighting-swatch" id="hero-lighting-swatch" aria-hidden="true"></span>
+
+           2026-09-16, RGB cursor feature (same day, per Eric's direct
+           request: "a mouse that copies the hero's own rgb hue... let
+           users who click on the rgb color change it via a color wheel"):
+           this is the only visible "rgb color" indicator on the page, so
+           it doubles as the launcher for the cursor-color popover
+           (assets/js/rgb-cursor.js) -- now a real <button>, not a
+           decorative aria-hidden <span>, so it's keyboard-reachable with
+           a visible focus state for free. It still shows the *lighting
+           profile's* hue exactly as before (techno-hero.js's own
+           responsibility, unchanged); the popover it opens is a separate,
+           independent preference (the cursor glow's own color), not a
+           second control over the tunnel itself. -->
+      <button type="button" class="hero-lighting-swatch" id="hero-lighting-swatch" aria-label="Customize cursor color"></button>
       <label for="hero-lighting-select" class="sr-only">Background lighting</label>
       <select id="hero-lighting-select">
         <option value="cycle">Color Cycle</option>
@@ -554,14 +565,41 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=88" defer></script>
-<script src="assets/js/preregister-node.js?v=88" defer></script>
-<script src="assets/js/techno-hero.js?v=88" defer></script>
-<script src="assets/js/photo-waterfall.js?v=88" defer></script>
-<script src="assets/js/events.js?v=88" defer></script>
-<script src="assets/js/event-update.js?v=88" defer></script>
-<script src="assets/js/zone-stack.js?v=88" defer></script>
-<script src="assets/js/featured-gear.js?v=88" defer></script>
-<script src="assets/js/reviews.js?v=88" defer></script>
+<!-- RGB cursor color picker (assets/js/rgb-cursor.js), 2026-09-16, per Eric's
+     direct request. Reuses the site's one existing modal look (.modal-bg/
+     .modal -- the same component the Ambassador application form uses, see
+     that section's own CLAUDE.md history) rather than inventing a second
+     floating-panel style. The wheel is a real conic-gradient rainbow disc
+     (angle-only, "simplistic" per Eric's own word); the paired range input
+     is the genuinely keyboard-operable version of the same control (arrow
+     keys step the hue) since a mouse-drag-only wheel would fail core rule
+     8 -- both stay in sync with each other and with the live preview. -->
+<div class="modal-bg" id="cursor-modal" role="dialog" aria-modal="true" aria-label="Cursor color">
+  <div class="modal">
+    <button class="close" id="cursor-modal-close" aria-label="Close">&times;</button>
+    <h3>Cursor Color</h3>
+    <p class="dim" style="font-size:.88rem">Your cursor glow matches the hero's RGB lighting by default. Drag the wheel (or use the slider) to pick your own color instead.</p>
+    <div class="gz-wheel-wrap">
+      <div class="gz-color-wheel" id="gz-color-wheel" role="presentation">
+        <div class="gz-wheel-knob" id="gz-wheel-knob"></div>
+      </div>
+    </div>
+    <label for="gz-hue-range">Hue</label>
+    <input type="range" id="gz-hue-range" min="0" max="359" step="1" value="205" aria-label="Cursor color hue">
+    <div class="btn-row" style="margin-top:1rem">
+      <button type="button" class="btn" id="gz-hue-reset">Match hero color</button>
+    </div>
+  </div>
+</div>
+<script src="assets/js/main.js?v=89" defer></script>
+<script src="assets/js/preregister-node.js?v=89" defer></script>
+<script src="assets/js/techno-hero.js?v=89" defer></script>
+<script src="assets/js/photo-waterfall.js?v=89" defer></script>
+<script src="assets/js/events.js?v=89" defer></script>
+<script src="assets/js/event-update.js?v=89" defer></script>
+<script src="assets/js/zone-stack.js?v=89" defer></script>
+<script src="assets/js/featured-gear.js?v=89" defer></script>
+<script src="assets/js/reviews.js?v=89" defer></script>
+<script src="assets/js/rgb-cursor.js?v=89" defer></script>
 </body>
 </html>

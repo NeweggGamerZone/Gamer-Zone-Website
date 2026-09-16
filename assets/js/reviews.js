@@ -147,33 +147,41 @@
   // broadest, most common word in the whole list: every more specific term
   // above it gets first chance at a match, so "fun" only ever fills in a
   // card that has nothing more specific to say. Every other kept term
-  // (VR Setups, Raffles & Prizes, Giveaways, Hidden Gem, Family Friendly,
-  // Tournaments, Immersive Setup, Feels Welcoming, Beautiful Space, Weekly
-  // Events, Free to Play) is retained under Eric's own "whatever else is
+  // (VR, Raffles, Giveaways, Gem, Family, Tournaments, Immersive, Welcoming,
+  // Beautiful, Events, Free) is retained under Eric's own "whatever else is
   // clear and professional" discretion -- each is still a real, verified,
   // recurring phrase from round 1, just judged to already read as a clean,
   // professional categorical fit rather than needing to be cut.
+  // 2026-09-16, round 3 (per Eric, "keep the tags like one word, so VR
+  // setups is just VR"): every label below shortened to a single word --
+  // "100% Free"/"Free to Play" -> "Free", "Free Snacks" -> "Snacks",
+  // "VR Setups" -> "VR", "Raffles & Prizes" -> "Raffles", "Hidden Gem" ->
+  // "Gem", "Family Friendly" -> "Family", "Clean Space" -> "Clean",
+  // "Immersive Setup" -> "Immersive", "Good Vibes" -> "Vibes", "Feels
+  // Welcoming" -> "Welcoming", "Beautiful Space" -> "Beautiful", "Friendly
+  // Staff" -> "Staff", "Weekly Events" -> "Events". Matching logic and term
+  // list are unchanged -- this only renames the rendered `.rv-tag` label.
   const HIGHLIGHT_TERMS = [
-    ['completely free', '100% Free'],
-    ['free snacks', 'Free Snacks'],
-    ['free food and drinks', 'Free Snacks'],
-    ['free', 'Free to Play'],
-    ['VR', 'VR Setups'],
-    ['raffles', 'Raffles & Prizes'],
+    ['completely free', 'Free'],
+    ['free snacks', 'Snacks'],
+    ['free food and drinks', 'Snacks'],
+    ['free', 'Free'],
+    ['VR', 'VR'],
+    ['raffles', 'Raffles'],
     ['giveaways', 'Giveaways'],
-    ['hidden gem', 'Hidden Gem'],
-    ['kid friendly', 'Family Friendly'],
+    ['hidden gem', 'Gem'],
+    ['kid friendly', 'Family'],
     ['tournaments', 'Tournaments'],
     ['tournament', 'Tournaments'],
-    ['clean', 'Clean Space'],
-    ['immersive', 'Immersive Setup'],
-    ['chill', 'Good Vibes'],
-    ['vibe', 'Good Vibes'],
-    ['welcoming', 'Feels Welcoming'],
-    ['beautiful', 'Beautiful Space'],
-    ['staff', 'Friendly Staff'],
-    ['friendly', 'Friendly Staff'],
-    ['events every', 'Weekly Events'],
+    ['clean', 'Clean'],
+    ['immersive', 'Immersive'],
+    ['chill', 'Vibes'],
+    ['vibe', 'Vibes'],
+    ['welcoming', 'Welcoming'],
+    ['beautiful', 'Beautiful'],
+    ['staff', 'Staff'],
+    ['friendly', 'Staff'],
+    ['events every', 'Events'],
     ['fun', 'Fun'],
   ];
   const MAX_BOLD = 2;

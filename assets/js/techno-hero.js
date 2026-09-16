@@ -585,6 +585,14 @@
     last = ts; elapsed += dt;
     const rot = elapsed * ROT_SPEED;
     const cs = colorState(elapsed);
+    // 2026-09-16, RGB cursor feature: expose the tunnel's real live hue
+    // (the exact same value driving the spokes this frame, not a second
+    // guessed color) so assets/js/rgb-cursor.js can mirror it without
+    // duplicating colorState()'s own math. A plain number write, not a
+    // DOM/style write, so this costs nothing extra per the "don't force
+    // layout every frame" rule -- it's cheaper than the canvas draw calls
+    // already happening on this same line.
+    window.GZ_HERO_HUE = cs.hue;
     const globalFade = Math.min(1, elapsed / 3.2) * 0.85 * cs.breatheMul;
 
     const pts = morphedPoints(morphStateAt(elapsed));
