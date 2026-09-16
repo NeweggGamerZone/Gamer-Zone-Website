@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=87">
+<link rel="stylesheet" href="assets/css/style.css?v=88">
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -284,37 +284,8 @@
     </div>
   </section>
 
-  <!-- 2026-09-15, per Eric: the shape-matched "skyline" boundary line
-       (2026-09-10, see CLAUDE.md/roadmap for its original reasoning) read
-       as not aligned with anything -- removed. Replaced with a plain
-       vertical gradient (transparent -> var(--bg)) in the same spot: no
-       shape to misalign, just the background reading as fading to black
-       on the way down into Weekly Lineup. Works alongside the pre-existing
-       applyTechFade() in main.js, which already dims the fixed tunnel
-       layers' opacity over this same scroll range. aria-hidden: purely
-       decorative, no content of its own. -->
-  <div class="hero-boundary" aria-hidden="true"></div>
-
   <section class="reveal eu-section" id="week">
     <h2>Weekly lineup</h2>
-    <!-- 2026-09-16, per Eric (roadmap #8, "who's here" pulse -- reframed:
-         see CLAUDE.md for the reasoning): a real, dynamically-computed
-         count of this week's real events, not a fabricated live check-in
-         number (no such live data source exists -- see CLAUDE.md's note
-         on this). event-update.js already computes exactly this week's
-         real event slate (weekAll) to build the board below; this line
-         reads that same array rather than a second, independently-derived
-         count, so the two can never drift out of sync. Home-page only
-         (not events.html, which already shows the full slate in detail
-         right below its own copy of this heading -- a summary line there
-         would just repeat what's already on screen). Hidden entirely on a
-         genuinely quiet week (0 real events) rather than showing a
-         deflating "0 events" line -- same disappear-rather-than-lie
-         pattern as .hero-status when hoursSchedule is missing. -->
-    <p class="dim eu-week-pulse" id="eu-week-pulse">
-      <span class="eu-pulse-dot" aria-hidden="true"></span>
-      <span id="eu-week-pulse-text"></span>
-    </p>
     <div class="eu-board">
       <!-- .eu-board-inner wraps everything that used to be .eu-board's
            direct flex children -- event-update.js's fitBoard() applies a
@@ -403,7 +374,21 @@
   <section id="featured-gear" class="reveal">
     <h2>Gear We Feature</h2>
     <p class="dim">We feature similar products in our Gamer Zone — real Newegg gear you can browse, and buy, right now.</p>
-    <div class="gear-waterfall" id="gear-waterfall"></div>
+    <!-- 2026-09-16, per Eric ("make it only one row tall and just add the
+         left and right controls on the outside of the section to be able
+         to cycle through, and also allow me to mouse drag that area"):
+         replaced the old GZ.marquee() static wrapping-grid (4 rows of
+         cards) with a single-row, manually-scrolled strip -- real native
+         horizontal scroll (so keyboard/trackpad/wheel scrolling all still
+         work for free), driven by the two arrow buttons flanking it and a
+         real pointer-drag (see featured-gear.js). Arrows sit outside the
+         card row itself, inside the section's own container -- not a new
+         width system, just flanking the existing row (core rule 6). -->
+    <div class="gear-carousel">
+      <button type="button" class="gear-carousel-arrow gear-carousel-prev" aria-label="Scroll gear left"><i data-ic="arrow" style="transform:scaleX(-1)"></i></button>
+      <div class="gear-carousel-track" id="gear-waterfall"></div>
+      <button type="button" class="gear-carousel-arrow gear-carousel-next" aria-label="Scroll gear right"><i data-ic="arrow"></i></button>
+    </div>
     <p style="margin-top:1.2rem;text-align:center">
       <a class="btn" href="https://www.newegg.com/gamerzone" target="_blank" rel="noopener">Shop All Gaming Gear on Newegg</a>
     </p>
@@ -569,14 +554,14 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=87" defer></script>
-<script src="assets/js/preregister-node.js?v=87" defer></script>
-<script src="assets/js/techno-hero.js?v=87" defer></script>
-<script src="assets/js/photo-waterfall.js?v=87" defer></script>
-<script src="assets/js/events.js?v=87" defer></script>
-<script src="assets/js/event-update.js?v=87" defer></script>
-<script src="assets/js/zone-stack.js?v=87" defer></script>
-<script src="assets/js/featured-gear.js?v=87" defer></script>
-<script src="assets/js/reviews.js?v=87" defer></script>
+<script src="assets/js/main.js?v=88" defer></script>
+<script src="assets/js/preregister-node.js?v=88" defer></script>
+<script src="assets/js/techno-hero.js?v=88" defer></script>
+<script src="assets/js/photo-waterfall.js?v=88" defer></script>
+<script src="assets/js/events.js?v=88" defer></script>
+<script src="assets/js/event-update.js?v=88" defer></script>
+<script src="assets/js/zone-stack.js?v=88" defer></script>
+<script src="assets/js/featured-gear.js?v=88" defer></script>
+<script src="assets/js/reviews.js?v=88" defer></script>
 </body>
 </html>

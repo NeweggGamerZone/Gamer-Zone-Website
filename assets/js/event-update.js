@@ -64,28 +64,6 @@
   const weekAll = (data.events || []).filter(e => e.date >= weekStart && e.date <= weekEnd);
   const remaining = weekAll.filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
 
-  // "Who's here" pulse, reframed (2026-09-16, per Eric -- see index.html's
-  // own comment on #eu-week-pulse and CLAUDE.md for the full reasoning):
-  // a real activity signal for the homepage, built from this exact same
-  // weekAll array rather than a second, independently-computed count --
-  // counts every real scheduled event this week (closures aren't
-  // "activity" in the sense this line is trying to convey, so they're
-  // excluded). Only runs on index.html, which is the only page with the
-  // #eu-week-pulse element; no-ops everywhere else, same pattern as
-  // eyebrowTitleEl above. A genuinely quiet week (0) hides the line
-  // entirely rather than showing a deflating "0 events" -- no fabricated
-  // floor, no fallback copy.
-  const pulseEl = document.getElementById('eu-week-pulse');
-  const pulseTextEl = document.getElementById('eu-week-pulse-text');
-  if (pulseEl && pulseTextEl) {
-    const realCount = weekAll.filter(e => e.type !== 'closed').length;
-    if (realCount > 0) {
-      pulseTextEl.innerHTML = `<b>${realCount}</b> real event${realCount === 1 ? '' : 's'} happening at the Zone this week`;
-    } else {
-      pulseEl.remove();
-    }
-  }
-
   const monthDate = iso => {
     const d = new Date(iso + 'T12:00:00');
     return { mon: d.toLocaleDateString('en-US', { month: 'short' }), day: d.getDate() };

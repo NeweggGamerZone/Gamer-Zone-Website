@@ -128,6 +128,19 @@
      already matched (see the `used` containment check below). A short
      review with no matching theme (e.g. "Very fun") simply gets no bold
      and no tag -- honest silence over a forced, meaningless label. */
+  // 2026-09-16, per Eric ("add a Good vibes tab or more fun tags for the
+  // reviews as well"): 4 more real recurring phrases from this same review
+  // pool, added the same honest way as the original list -- every term
+  // below is a phrase actually present, more than once, across these 62
+  // real quotes (checked by hand against the REVIEWS array above, not
+  // guessed), not an invented category. 'chill' covers "chill out and
+  // play"/"chill day of gaming"/"chill/clean atmosphere" (4 real reviews)
+  // -- distinct wording from 'vibe' below, so it gets its own tag rather
+  // than merging into "Great Vibe". The existing `used` containment guard
+  // already prevents 'friendly' (a broad, late-priority catch-all) from
+  // ever stealing a match that 'kid friendly' should win instead, so
+  // ordering these after the more specific terms was enough -- no change
+  // needed to the matching logic itself.
   const HIGHLIGHT_TERMS = [
     ['completely free', '100% Free'],
     ['free snacks', 'Free Snacks'],
@@ -142,8 +155,12 @@
     ['tournament', 'Tournaments'],
     ['clean', 'Clean Space'],
     ['immersive', 'Immersive Setup'],
+    ['chill', 'Good Vibes'],
     ['vibe', 'Great Vibe'],
+    ['welcoming', 'Feels Welcoming'],
+    ['beautiful', 'Beautiful Space'],
     ['staff', 'Great Staff'],
+    ['friendly', 'Super Friendly'],
     ['events every', 'Weekly Events'],
   ];
   const MAX_BOLD = 2;

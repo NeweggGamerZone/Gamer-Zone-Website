@@ -204,16 +204,6 @@ h2 .ic { color: var(--ne-orange); }
 h1 .accent, h2 .accent { color: var(--ne-blue-text); }
 .kicker { color: var(--ne-blue-text); font-family: var(--head); font-weight: 700; text-transform: uppercase; letter-spacing: .16em; font-size: .76rem; }
 .dim { color: var(--ink-dim); }
-/* Weekly-lineup "who's here" pulse line (2026-09-16, per Eric -- see
-   index.html/event-update.js's own comments for the full reasoning).
-   `.eu-pulse-dot` reuses the exact `cal-dot-pulse` keyframe the Plan Your
-   Visit calendar's `.cal-dot` already established, rather than a second,
-   near-identical pulsing-dot animation -- same "one shared implementation"
-   rule as gz-shine/gz-marquee elsewhere on this site. */
-.eu-week-pulse { display: flex; align-items: center; gap: .5rem; margin: -.3rem 0 1rem; font-size: .88rem; }
-.eu-week-pulse b { color: var(--ne-orange); font-family: var(--head); font-weight: 800; }
-.eu-pulse-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ne-orange); animation: cal-dot-pulse 2.4s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .eu-pulse-dot { animation: none; opacity: .9; } }
 .updated-stamp { font-size: .78rem; color: var(--ink-dim); }
 
 /* overflow:hidden clips .hero-decor's stripes, which intentionally bleed a
@@ -429,13 +419,39 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
    align-self:flex-start keeps the button its own natural content width
    rather than stretching to the card's full width, matching how it always
    looked before this fix. */
-.gear-item { position: relative; flex: 0 0 auto; width: 230px; padding: 1rem; display: flex; flex-direction: column; }
+.gear-item { position: relative; flex: 0 0 auto; width: 230px; padding: 1rem; display: flex; flex-direction: column; -webkit-user-select: none; user-select: none; }
 .gear-item-img { width: 100%; aspect-ratio: 1/1; background: #fff; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.gear-item-img img { width: 100%; height: 100%; object-fit: contain; padding: .6rem; display: block; }
+.gear-item-img img { width: 100%; height: 100%; object-fit: contain; padding: .6rem; display: block; -webkit-user-drag: none; user-drag: none; }
 .gear-item .gear-item-spec { font-size: .8rem; }
 .gear-item-price { font-family: var(--head); font-weight: 800; color: var(--ne-orange); font-size: 1.05rem; margin: .3rem 0 .7rem; }
 .gear-item .btn { padding: .5rem 1.1rem; font-size: .8rem; margin-top: auto; align-self: flex-start; }
 @media (max-width: 560px) { .gear-item { width: 190px; } }
+
+/* 2026-09-16, per Eric ("make it only one row tall and just add the left
+   and right controls on the outside of the section to be able to cycle
+   through, and also allow me to mouse drag that area as well"): replaces
+   the old GZ.marquee() static wrapping-grid entirely -- see
+   featured-gear.js's own header comment for why this isn't built on
+   GZ.marquee at all. `.gear-carousel-track` is a real native
+   `overflow-x:auto` scroller (not a transform-driven fake one), so
+   keyboard/trackpad/wheel scrolling and the individual "View on Newegg"
+   links' own Tab stops all keep working with zero extra code -- the
+   arrows and drag are additive conveniences on top of a normal scroll
+   container, not a replacement for it. Scrollbar hidden across browsers
+   since the two arrow buttons are the intended affordance; the native
+   scrollbar would just be visual noise sitting under a section that
+   already has real visible controls for the same action. */
+.gear-carousel { display: flex; align-items: center; gap: .6rem; }
+.gear-carousel-track { flex: 1; min-width: 0; display: flex; gap: .9rem; overflow-x: auto; scroll-snap-type: x proximity; cursor: grab; scrollbar-width: none; -ms-overflow-style: none; }
+.gear-carousel-track::-webkit-scrollbar { display: none; }
+.gear-carousel-track.dragging { cursor: grabbing; scroll-snap-type: none; }
+.gear-carousel-track .gear-item { scroll-snap-align: start; }
+.gear-carousel-arrow { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color .15s, color .15s, opacity .15s; }
+.gear-carousel-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }
+.gear-carousel-arrow:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(255,255,255,.35); }
+.gear-carousel-arrow .ic { width: 18px; height: 18px; fill: currentColor; }
+.gear-carousel-arrow.is-end { opacity: .35; }
+@media (max-width: 560px) { .gear-carousel { gap: .35rem; } .gear-carousel-arrow { width: 38px; height: 38px; } }
 /* Registration steps: the step number is the most emphasized element (big,
    orange, bold) — matching the reference "AI mode" step pattern — while the
    step's icon becomes a small, white, secondary accent instead of the large
@@ -753,7 +769,7 @@ details.archive-month .grid { margin-top: 1rem; }
    area (see above), but keeps anything still touching the boundary
    (narrower viewports between 620px and 900px) from ending in a flat cut. */
 .zone-stack { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); }
-.zone-card { position: absolute; top: 0; left: 50%; width: min(340px, 78%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease; }
+.zone-card { position: absolute; top: 0; left: 50%; width: min(340px, 78%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease; -webkit-user-select: none; user-select: none; }
 /* 2026-09-08, per Eric: "ZONE 1"-"ZONE 5" badge moved from the top-right
    corner to horizontally centered at the top of the card -- centered via
    left:50%/translateX(-50%) rather than switching to a flex/grid layout,
@@ -761,7 +777,16 @@ details.archive-month .grid { margin-top: 1rem; }
    card's own photo/body content, not a layout change to the card itself. */
 .zone-card-code { position: absolute; top: .6rem; left: 50%; transform: translateX(-50%); z-index: 2; font-family: var(--head); font-weight: 800; font-size: .75rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
 .zone-card-art { position: relative; height: 56%; flex: none; background: #000; }
-.zone-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* 2026-09-16, per Eric ("remove the image highlight of the cards when I
+   drag"): a plain <img> is natively draggable in every browser, so
+   dragging across it during the custom pointer-based swipe (zone-stack.js)
+   was fighting the site's own gesture with the browser's built-in "drag
+   this image out" affordance -- a translucent ghost thumbnail plus (in
+   some browsers) a text-selection-style highlight outline following the
+   cursor. Disabling the native drag/selection on the image and the whole
+   card removes that competing browser chrome; the real swipe (Pointer
+   Events, not HTML5 drag-and-drop) is completely unaffected. */
+.zone-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; user-select: none; -webkit-user-select: none; }
 .zone-card-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, var(--bg-2) 100%); }
 .zone-card-body { flex: 1; padding: .3rem 1.2rem 1.2rem; display: flex; flex-direction: column; }
 .zone-card-body h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: 1.15rem; margin: 0 0 .5rem; color: var(--ne-orange); text-align: center; }
@@ -786,8 +811,24 @@ details.archive-month .grid { margin-top: 1rem; }
    out-of-focus background depth, the same visual cue a camera's depth-of-
    field blur gives a background subject, rather than draining their color
    entirely. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+/* 2026-09-16, per Eric ("I don't know if I like the half faded side
+   cards, maybe we can adjust so those edge ones aren't shown"): the near
+   peek layer's blur+brightness treatment above is now hidden outright
+   (opacity:0, pointer-events:none) rather than shown dimmed -- only the
+   centered card is visible. Position/transform math is left untouched
+   (still real translateX/scale values, not deleted) so this is a one-line
+   toggle to revert if the fully-hidden look doesn't land either; the
+   real navigation (prev/next arrows, dot nav, and drag/swipe) all still
+   work exactly the same, they just no longer have a visible target to
+   click on directly. Note: this reopens the "full section width" reasoning
+   the far-peek layer above was originally built to satisfy (see that
+   layer's own comment) -- .zone-stack's outer width/mask are left as-is,
+   so the section still occupies its full container width, it now just has
+   visibly empty space on either side of the center card instead of a
+   composed multi-card scene filling it. Worth a look if the section reads
+   too narrow again per the container-width rule in CLAUDE.md. */
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 82% + var(--zs-drag, 0px))) scale(.9); opacity: 0; pointer-events: none; z-index: 4; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 82% + var(--zs-drag, 0px))) scale(.9); opacity: 0; pointer-events: none; z-index: 4; }
 /* Second, further-out peek layer -- per Eric's "another layer of cards
    on the outermost left and right of center" ask for About Gamer Zone.
    These are real zone cards from the same rotation (not decorative
@@ -797,8 +838,8 @@ details.archive-month .grid { margin-top: 1rem; }
    by real content instead of just being a wide empty wrapper around one
    centered card. Lower z-index than the near peek layer so they sit
    visually behind it. */
-.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154% + var(--zs-drag, 0px))) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
-.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154% + var(--zs-drag, 0px))) scale(.8); opacity: 1; filter: blur(4px) brightness(.65); z-index: 3; cursor: pointer; }
+.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154% + var(--zs-drag, 0px))) scale(.8); opacity: 0; pointer-events: none; z-index: 3; }
+.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154% + var(--zs-drag, 0px))) scale(.8); opacity: 0; pointer-events: none; z-index: 3; }
 .zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
 /* Drag/swipe (2026-09-10, per Eric: "do the swipe and drag animation as
    well"). --zs-drag is a live px offset zone-stack.js writes to #zone-stack
@@ -1071,7 +1112,6 @@ body.home-page { background: transparent; }
    bleed-width unchanged from the original (a transition beat, not a new
    hero; breaks out to full viewport width like .hero-stage since it's
    finishing a full-bleed background effect, not laying out content). */
-.hero-boundary { position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); height: clamp(64px, 9vw, 130px); background: linear-gradient(180deg, transparent 0%, var(--bg) 100%); }
 
 .hero-in { opacity: 0; transform: translateY(22px); animation: hero-rise .85s cubic-bezier(.2,.7,.3,1) forwards; animation-delay: var(--d, 0s); }
 @keyframes hero-rise { to { opacity: 1; transform: none; } }
@@ -2138,7 +2178,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    it's driven by real browser hover/focus state, not a JS-toggled class
    -- the JS side (mouseenter/focusin/mouseleave/focusout in main.js) only
    drives the actual play/pause/skip logic, not this visibility. */
-.gz-marquee-controls{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:0 .6rem;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s ease}
+/* 2026-09-16, per Eric ("make the edge controls next to the play/pause
+   button"): prev/play-pause/next used to spread edge-to-edge via
+   justify-content:space-between (skip buttons pinned to the lane's far
+   left/right corners, independent of the play/pause button sitting alone
+   in the center). Grouped into one center cluster instead -- still the
+   same 3 buttons/same DOM order/same click behavior, just visually one
+   control unit rather than three independently-placed ones. */
+.gz-marquee-controls{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;gap:.9rem;padding:0 .6rem;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s ease}
 .gz-marquee:hover .gz-marquee-controls,.gz-marquee:focus-within .gz-marquee-controls{opacity:1;pointer-events:auto}
 /* F-14 (2026-09-08): 38x38 -> 44x44 -- close enough to the 44px floor that
    growing the real button (not just an invisible pad) reads as no visible
