@@ -3231,6 +3231,23 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
   html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% + 38px),-50%);opacity:.24;z-index:3;max-width:min(64%,550px);max-height:min(36cqw,300px)}
   html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(4){transform:translate(calc(-50% + 54px),-50%);opacity:.12;z-index:2;max-width:min(60%,515px);max-height:min(34cqw,280px)}
   html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(5){transform:translate(calc(-50% + 68px),-50%);opacity:.05;z-index:1;max-width:min(56%,480px);max-height:min(32cqw,260px)}
+  /* 2026-09-17, per Eric ("for the gloves, have the blur be on both the
+     left and right sides"): opt-in override for Fighting Games Week
+     (data/events.json's weeklyThemes[].iconSymmetric -> event-update.js
+     toggling this class -- see its own comment for why this is per-theme,
+     not a redesign of the default one-directional trail above). Only the
+     two copies that sit BEFORE the center icon in the DOM (nth-child(1)/
+     (2), already going right by default above) get their translateX sign
+     flipped negative here; the two copies AFTER center (nth-child(4)/(5))
+     are untouched since they already trail right, so the net effect is a
+     symmetric fan out from the center icon -- two gloves splitting left
+     and right -- instead of every copy trailing the same direction. Higher
+     selector specificity (the extra .eu-icon-symmetric class) means these
+     win over the base rules above regardless of source order; opacity/
+     size/z-index are intentionally NOT repeated here since they're
+     already correct from the base rules and only the direction changes. */
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-side:nth-child(2){transform:translate(calc(-50% - 20px),-50%)}
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% - 38px),-50%)}
 }
 /* Special one-off callout banner: rendered above a Special Events row
    when that specific event has a `banner` field in data/events.json (see
@@ -3286,6 +3303,13 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
   html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% + 48px),-50%);max-height:100px;opacity:.24;z-index:3}
   html.board-mode .eu-board-icon img.eu-board-icon-side:nth-child(4){transform:translate(calc(-50% + 68px),-50%);max-height:88px;opacity:.12;z-index:2}
   html.board-mode .eu-board-icon img.eu-board-icon-outer:nth-child(5){transform:translate(calc(-50% + 86px),-50%);max-height:76px;opacity:.05;z-index:1}
+  /* 2026-09-17, per Eric -- same symmetric-fan override as the square
+     export's .eu-icon-symmetric block above (search that comment for the
+     full reasoning), scaled to this export's own offsets (26/48px instead
+     of 20/38px) instead of copy-pasted 1:1, matching how the base v11
+     trail offsets above were already scaled up from the square version's. */
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-side:nth-child(2){transform:translate(calc(-50% - 26px),-50%)}
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% - 48px),-50%)}
 }
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal

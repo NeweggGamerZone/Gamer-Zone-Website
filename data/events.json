@@ -272,6 +272,6 @@
     { "start": "2026-09-01", "end": "2026-09-05", "theme": "Riot Games Week", "desc": "League of Legends, TFT, and Valorant running throughout the week.", "icon": "assets/calendar/LineupAssets/us-flag-metallic.png" },
     { "start": "2026-09-08", "end": "2026-09-12", "theme": "Party Games Week", "desc": "Jackbox Party, Overcooked!, Mario Party, and other couch-co-op favorites all week.", "icon": "assets/calendar/LineupAssets/FortnitePickaxeAsset.png" },
     { "start": "2026-09-15", "end": "2026-09-19", "theme": "Racing Games Week", "desc": "Racing sims, Mario Kart, and other racing games on rotation all week.", "icon": "assets/calendar/LineupAssets/MarioKarty.png" },
-    { "start": "2026-09-22", "end": "2026-09-26", "theme": "Fighting Games Week", "desc": "Street Fighter bracket play and fighting-game showdowns all week.", "icon": "assets/calendar/LineupAssets/FightingGamesAsset.png" }
+    { "start": "2026-09-22", "end": "2026-09-26", "theme": "Fighting Games Week", "desc": "Street Fighter bracket play and fighting-game showdowns all week.", "icon": "assets/calendar/LineupAssets/FightingGamesAsset.png", "iconSymmetric": true }
   ]
 }

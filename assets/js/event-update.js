@@ -130,9 +130,22 @@
       boardIconSideImgs.forEach(img => { img.src = currentTheme.icon; });
       boardIconEl.hidden = false;
       boardIconHasTheme = true;
+      // Optional per-week override (weeklyThemes[].iconSymmetric in
+      // data/events.json): the ghost-trail effect (style.css, search
+      // "eu-icon-symmetric") defaults to every copy trailing the SAME
+      // direction (right), reading as motion -- built for, and still used
+      // by, Racing Games Week's kart "driving onto the board." Fighting
+      // Games Week's icon (two boxing gloves) isn't a single object with a
+      // direction of travel, so per Eric 2026-09-17 that week's icon fans
+      // symmetrically outward from center instead (copies before center in
+      // the DOM go left, copies after go right) -- a real per-icon call,
+      // not a universal redesign of the trail, so it's opt-in per theme
+      // rather than replacing the default for every week.
+      boardIconEl.classList.toggle('eu-icon-symmetric', !!currentTheme.iconSymmetric);
     } else {
       boardIconEl.hidden = true;
       boardIconImg.removeAttribute('src');
+      boardIconEl.classList.remove('eu-icon-symmetric');
       boardIconSideImgs.forEach(img => img.removeAttribute('src'));
     }
   }
