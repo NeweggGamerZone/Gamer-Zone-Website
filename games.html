@@ -86,11 +86,12 @@
        the same photo-plus-gradient-fade-plus-orange-title visual language
        as .zone-card (see style.css's "Games category cards" comment for
        why this is a plain grid, not the Zone Stack's carousel mechanics).
-       Arcade has no matching real photo anywhere in the repo -- confirmed
-       via a full visual review of every generic event photo, not just a
-       filename search -- so per the no-fabrication rule it gets an honest
-       icon-only card (the same "coin" icon already assigned to Arcade in
-       games.js's PLATFORMS) instead of a mismatched or duplicated photo.
+       Arcade originally had no matching real photo anywhere in the repo
+       (confirmed via a full visual review of every generic event photo,
+       not just a filename search) and shipped with an honest icon-only
+       card instead of a mismatched photo -- Eric supplied a real photo of
+       the Zone's own fighting-game/arcade station on 2026-09-17, so that
+       placeholder was retired; see the Arcade card's own comment below.
        Clicking a card jumps to and filters the exact same list below via
        the existing chip-filter logic (games.js) -- no separate data or
        markup to keep in sync. -->
@@ -114,11 +115,15 @@
         <span class="game-cat-art"><img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="" loading="lazy"></span>
         <h3>Racing Simulators</h3>
       </button>
-      <!-- No real arcade-cabinet/fighting-game photo exists in the repo (see
-           this section's own header comment) -- an honest icon-only card
-           instead of a mismatched photo, per the no-fabrication rule. -->
-      <button type="button" class="game-cat-card game-cat-card-noart" data-platform="arcade">
-        <span class="game-cat-art game-cat-art-empty" aria-hidden="true"><i data-ic="coin"></i></span>
+      <!-- 2026-09-17, per Eric: real photo of the Zone's fighting-game/
+           arcade station (character-select screen + dual arcade-stick
+           control panel), cropped to the same 3:2 ratio as the other four
+           zone photos above. Supersedes the icon-only placeholder this
+           section used to ship with real Arcade photography now that one
+           actually exists in the repo -- see this file's own history for
+           the earlier no-fabrication reasoning that placeholder was based on. -->
+      <button type="button" class="game-cat-card" data-platform="arcade">
+        <span class="game-cat-art"><img src="assets/calendar/BGAssets/arcade-bg.jpg" alt="" loading="lazy"></span>
         <h3>Arcade</h3>
       </button>
     </div>

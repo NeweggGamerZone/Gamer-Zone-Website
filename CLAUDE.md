@@ -954,6 +954,8 @@ screenshot pass can catch mid-transition. Real settled contrast is 8.37:1 and 9.
 respectively -- confirmed via direct pixel sampling after a full settle, not just re-reading
 the CSS. No site content changed for either.
 
+**Correction, 2026-09-17: Arcade now has a real photo, superseding the icon-only placeholder above.** Eric supplied a real photo of the Zone's own fighting-game/arcade station (a character-select screen on a large monitor with a dual-joystick arcade-stick control panel, flanked by the PC lounge's neon lighting) and asked for it to be cropped to match the other four zone cards' style. Cropped to the same 3:2 ratio the other four `game-cat-*` photos already use (light top/bottom trim, full width kept, since the source was 4:3 and only needed a modest ratio adjustment -- see the crop math in `games.html`'s own comment above the Arcade card), resized to the same 900x600 convention, and saved as `assets/calendar/BGAssets/arcade-bg.jpg`. The `.game-cat-art-empty`/icon-only markup and its no-fabrication reasoning above is now historical -- Arcade uses the exact same `.game-cat-art`/`<img>` markup as PC/Consoles/VR/Racing Simulators, no CSS changes needed. Verified via a live Puppeteer check (`naturalWidth`/`naturalHeight` both real, click still correctly filters the game list below) and mobile/tablet/desktop screenshots confirming it sits flush with its four siblings at every width; the full contrast/width/console audit re-run clean (0 new findings on `games.html`, only the already-disclosed pre-existing Featured Gear findings on `index.html`).
+
 ## Weekly lineup activity pulse: "who's here," reframed around real event data (2026-09-16)
 
 Roadmap #8 ("who's here" pulse) was originally scoped as a live check-in count ("14 people
