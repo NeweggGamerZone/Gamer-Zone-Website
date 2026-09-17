@@ -22,7 +22,7 @@
 <meta name="twitter:description" content="The full game list at the Newegg Gamer Zone: PC, VR, party, esports, and fighting titles available to play, free.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=88">
+<link rel="stylesheet" href="assets/css/style.css?v=91">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -54,6 +54,29 @@
     <p class="lead">Everything on deck at the Zone: PC, VR, party, esports, and fighting titles. New adds drop regularly.</p>
   </section>
 
+  <!-- 2026-09-17, per Eric ("put the top played games on top first... browse
+       by zone should be on top of the game list"): Top Played Games now
+       comes first, then Browse by Zone, then the full game list -- Browse by
+       Zone still sits directly above the game list either way, since it's
+       the section immediately before it in the page. -->
+  <section id="senet-chart-section" style="margin-bottom:1.5rem">
+    <h2><i data-ic="chip"></i> Top Played Games In The Zone</h2>
+    <p class="dim">All-time hours played distribution across the top games at the Zone. Hover a slice for a breakdown.</p>
+    <div class="senetdb-chart" style="margin-top:1rem" data-pin-avoid>
+      <div class="senetdb-head">
+        <span class="senetdb-live">All-time totals</span>
+      </div>
+      <div class="senetdb-pie-row">
+        <div class="senetdb-pie-holder">
+          <svg class="senetdb-pie" id="senet-pie-svg" viewBox="0 0 200 200" aria-hidden="true"></svg>
+          <div class="senetdb-pie-center"><span id="senet-hero-value">0</span><small>total hours all-time</small></div>
+          <div class="senetdb-pie-tip" id="senet-pie-tip"><b id="senet-pie-tip-val"></b><span id="senet-pie-tip-label"></span></div>
+        </div>
+        <div class="senetdb-rows" id="senet-chart-rows"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- 2026-09-15, per Eric ("scan our current photography and add those as
        core images for each category... similar style to how images are
        done on other sections or like the gamer zone cards"): reuses the
@@ -71,7 +94,7 @@
        Clicking a card jumps to and filters the exact same list below via
        the existing chip-filter logic (games.js) -- no separate data or
        markup to keep in sync. -->
-  <section id="games-categories">
+  <section id="games-categories" style="margin-top:1.5rem">
     <h2><i data-ic="gamepad"></i> Browse by Zone</h2>
     <p class="dim">Every platform live at the Gamer Zone right now. Tap a zone to jump to its full game list below.</p>
     <div class="game-cat-grid" id="games-cat-grid">
@@ -98,24 +121,6 @@
         <span class="game-cat-art game-cat-art-empty" aria-hidden="true"><i data-ic="coin"></i></span>
         <h3>Arcade</h3>
       </button>
-    </div>
-  </section>
-
-  <section id="senet-chart-section">
-    <h2><i data-ic="chip"></i> Top Played Games In The Zone</h2>
-    <p class="dim">All-time hours played distribution across the top games at the Zone. Hover a slice for a breakdown.</p>
-    <div class="senetdb-chart" style="margin-top:1rem" data-pin-avoid>
-      <div class="senetdb-head">
-        <span class="senetdb-live">All-time totals</span>
-      </div>
-      <div class="senetdb-pie-row">
-        <div class="senetdb-pie-holder">
-          <svg class="senetdb-pie" id="senet-pie-svg" viewBox="0 0 200 200" aria-hidden="true"></svg>
-          <div class="senetdb-pie-center"><span id="senet-hero-value">0</span><small>total hours all-time</small></div>
-          <div class="senetdb-pie-tip" id="senet-pie-tip"><b id="senet-pie-tip-val"></b><span id="senet-pie-tip-label"></span></div>
-        </div>
-        <div class="senetdb-rows" id="senet-chart-rows"></div>
-      </div>
     </div>
   </section>
 
@@ -155,6 +160,7 @@
         <h4>Reviews</h4>
         <a class="ftr-link" data-cfg-href="googleReviewUrl" href="#"><i data-ic="google"></i><span>Google</span></a>
         <a class="ftr-link" data-cfg-href="yelpReviewUrl" href="#"><i data-ic="yelp"></i><span>Yelp</span></a>
+        <a class="ftr-link" data-cfg-href="surveyUrl" href="#"><i data-ic="note"></i><span>Feedback</span></a>
       </div>
       <div>
         <h4>Connect</h4>
@@ -164,12 +170,10 @@
       </div>
       <div>
         <h4>Discover</h4>
-        <a class="ftr-link" href="edu.html"><i data-ic="grad"></i><span>Academy</span></a>
         <a class="ftr-link" data-cfg-href="startggUrl" href="#"><i data-ic="trophy"></i><span>Start.GG</span></a>
         <a class="ftr-link" data-cfg-href="meetupUrl" href="#"><i data-ic="users"></i><span>Meetup</span></a>
         <a class="ftr-link" data-cfg-href="eventbriteUrl" href="#"><i data-ic="ticket"></i><span>Eventbrite</span></a>
         <a class="ftr-link" data-cfg-href="neweggUrl" href="#"><i data-ic="globe"></i><span>Shop Newegg</span></a>
-        <a class="ftr-link" data-cfg-href="surveyUrl" href="#"><i data-ic="note"></i><span>Feedback</span></a>
       </div>
     </div>
   </div>
@@ -182,9 +186,9 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=88" defer></script>
-<script src="assets/js/preregister-node.js?v=88" defer></script>
-<script src="assets/js/games.js?v=88" defer></script>
-<script src="assets/js/senet-chart.js?v=88" defer></script>
+<script src="assets/js/main.js?v=91" defer></script>
+<script src="assets/js/preregister-node.js?v=91" defer></script>
+<script src="assets/js/games.js?v=91" defer></script>
+<script src="assets/js/senet-chart.js?v=91" defer></script>
 </body>
 </html>

@@ -135,7 +135,7 @@
     const closed = (wd === 0 || wd === 1) || closedByType;
     const isToday = dt === today;
     const preregBlock = isToday
-      ? `<p style="margin-top:.8rem"><a class="btn" href="${GZ.esc(verkada)}" target="_blank" rel="noopener">Preregister your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Visiting today? Skip the line: reservations are one per visitor.</p>`
+      ? `<p style="margin-top:.8rem"><a class="btn prereg-btn" href="${GZ.esc(verkada)}" target="_blank" rel="noopener">Preregister your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Visiting today? Skip the line: preregistrations are one per visitor.</p>`
       : '';
     // Reorganized card layout, same order/spacing for every day type:
     // tag -> title -> subtitle -> date/time meta row (with icons) ->

@@ -52,6 +52,65 @@
   const SPOKE_COUNT = 10;
   const SPOKES = Array.from({ length: SPOKE_COUNT }, (_, i) => (Math.PI * 2 / SPOKE_COUNT) * i - Math.PI / 2);
 
+  // 2026-09-17, per Eric ("have my mouse be able to do a ripple or water
+  // effect on the shapes in the background... water ripple on the
+  // shapes" -- confirmed via AskUserQuestion over the ASCII-trail
+  // alternative): replaces the old rgb-cursor.js light-trail canvas
+  // entirely (see that file's own updated header comment). Ripples are
+  // real screen-space origins (mouse position at spawn time); every
+  // frame, every ring's already-projected screen points get an extra
+  // radial offset from each still-alive ripple -- a concentric sine wave
+  // centered on the ripple's origin, exactly like a stone dropped in
+  // water: `sin(distance*FREQ - age*PHASE_SPEED)` produces several
+  // alternating rings that visibly travel outward from the origin over
+  // time (not a single static bump), an exponential falloff with real
+  // distance from the origin keeps the effect local rather than
+  // disturbing the whole tunnel, and an age-based falloff fades the whole
+  // ripple to nothing by RIPPLE_LIFE seconds -- "decaying by both
+  // distance and age" per the original spec. Applied directly to each
+  // ring's screen-space points (in drawRing, after project()), not to the
+  // spokes -- the rings are what reads as "the shapes," and this keeps
+  // the effect cheap (one extra sin() + a couple sqrt-free-ish ops per
+  // point, ~9 rings * 56 points/frame, trivial at 60fps).
+  let ripples = []; // {x, y, t0 (elapsed seconds at spawn), amp}
+  const RIPPLE_LIFE = 1.6;          // seconds -- matches the "~1-2s lifespan" spec
+  const RIPPLE_FREQ = 0.035;        // radians per px of distance -- controls ring spacing
+  const RIPPLE_PHASE_SPEED = 7.5;   // radians/sec -- how fast the concentric rings visibly propagate outward
+  const RIPPLE_REACH = 850;         // px -- exponential distance falloff scale
+  const MAX_RIPPLES = 24;           // hard cap so a long mouse drag can't grow this unbounded
+  const RIPPLE_MOVE_AMP = 7;        // px, a gentle continuous disturbance while moving
+  const RIPPLE_CLICK_AMP = 18;      // px, a real "splash" on click -- roughly 2.5x a move ripple
+
+  function addRipple(x, y, amp) {
+    ripples.push({ x, y, t0: elapsed, amp });
+    // Cap by dropping the oldest -- simpler than a separate prune pass,
+    // and correct since ripples are always pushed in time order.
+    if (ripples.length > MAX_RIPPLES) ripples.shift();
+  }
+
+  // Mutates `pt` (a {x,y} screen point already produced by project()) in
+  // place, adding every still-alive ripple's radial contribution.
+  function applyRipples(pt) {
+    if (!ripples.length) return;
+    let ox = 0, oy = 0;
+    for (let k = 0; k < ripples.length; k++) {
+      const rp = ripples[k];
+      const age = elapsed - rp.t0;
+      if (age < 0 || age > RIPPLE_LIFE) continue;
+      const dx = pt.x - rp.x, dy = pt.y - rp.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 0.5) continue; // avoid a divide-by-near-zero direction vector
+      const distanceDecay = Math.exp(-dist / RIPPLE_REACH);
+      const ageDecay = Math.pow(1 - age / RIPPLE_LIFE, 1.4);
+      const phase = dist * RIPPLE_FREQ - age * RIPPLE_PHASE_SPEED;
+      const mag = rp.amp * Math.sin(phase) * distanceDecay * ageDecay;
+      const inv = 1 / dist;
+      ox += dx * inv * mag;
+      oy += dy * inv * mag;
+    }
+    pt.x += ox; pt.y += oy;
+  }
+
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     W = canvas.clientWidth; H = canvas.clientHeight;
@@ -577,7 +636,9 @@
     const n = unitPts.length;
     const pts = new Array(n);
     for (let i = 0; i < n; i++) {
-      pts[i] = project(unitPts[i][0] * A, unitPts[i][1] * A, ring.z, rot);
+      const p = project(unitPts[i][0] * A, unitPts[i][1] * A, ring.z, rot);
+      applyRipples(p);
+      pts[i] = p;
     }
     // Smooth closed path through every point via a quadratic curve between
     // each successive pair of edge midpoints (using the original point as
@@ -656,6 +717,14 @@
     // layout every frame" rule -- it's cheaper than the canvas draw calls
     // already happening on this same line.
     window.GZ_HERO_HUE = cs.hue;
+    // Same "plain number write, not a DOM/style write" reasoning as
+    // GZ_HERO_HUE above -- exposes how many spawned ripples are still
+    // within their RIPPLE_LIFE window, for live debugging/QA (confirming
+    // ripples actually decay over real time rather than piling up) without
+    // needing to reach into this IIFE's closure state.
+    let activeRipples = 0;
+    for (let k = 0; k < ripples.length; k++) { if (elapsed - ripples[k].t0 <= RIPPLE_LIFE) activeRipples++; }
+    window.GZ_HERO_RIPPLE_COUNT = activeRipples;
     const globalFade = Math.min(1, elapsed / 3.2) * 0.85 * cs.breatheMul;
 
     const pts = morphedPoints(morphStateAt(elapsed));
@@ -676,6 +745,36 @@
     ctx.clearRect(0, 0, W, H);
     strokeSpokes(0, 0.6, 200);
     rings.forEach((r, i) => drawRing(r, RESAMPLED[SHAPES[0]], 0, 0.6, (200 + i * 12) % 360));
+  }
+
+  // Spawn ripples from real pointer input -- fine-pointer, motion-enabled
+  // devices only (matches rgb-cursor.js's own existing coarse-pointer/
+  // reduced-motion opt-outs: there's no real "mouse dragging across the
+  // surface" gesture on a touch device, and reduced-motion means frame()
+  // never runs in the first place, so ripples would never even draw).
+  // Movement is throttled by both distance (>=24px since the last spawn)
+  // and time (>=55ms) so a fast continuous drag reads as a real trail of
+  // ripples, not one ripple per raw pointermove event (which can fire far
+  // more often than needed and would blow past MAX_RIPPLES instantly). A
+  // click/tap-down always spawns one, stronger, single ripple regardless
+  // of the movement throttle -- a deliberate "drop" versus the ambient
+  // "disturbance while moving" feel.
+  const isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  if (!reduceMotion && !isCoarsePointer) {
+    let lastSpawnT = 0, lastSpawnX = null, lastSpawnY = null;
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return;
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const movedFar = lastSpawnX === null || Math.hypot(e.clientX - lastSpawnX, e.clientY - lastSpawnY) >= 24;
+      if (movedFar && now - lastSpawnT >= 55) {
+        addRipple(e.clientX, e.clientY, RIPPLE_MOVE_AMP);
+        lastSpawnT = now; lastSpawnX = e.clientX; lastSpawnY = e.clientY;
+      }
+    }, { passive: true });
+    window.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') return;
+      addRipple(e.clientX, e.clientY, RIPPLE_CLICK_AMP);
+    });
   }
 
   window.addEventListener('resize', size);

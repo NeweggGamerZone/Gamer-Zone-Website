@@ -69,6 +69,8 @@
     ['Jackbox Party Pack 4', 'pc', 'coop'], ['Jackbox Party Pack 6', 'pc', 'coop'],
     ['Jackbox Party Pack 7', 'pc', 'coop'], ['Drawful 2', 'pc', 'coop'],
     ['Castle Crashers', 'pc', 'coop'],
+    // Added 2026-09-17, per Eric.
+    ['WARDOGS', 'pc'], ['Minecraft', 'pc'],
 
     // Consoles — Nintendo Switch station.
     ['Super Smash Bros.', 'console', 'competitive'], ['Mario Party', 'console', 'coop'],
@@ -82,7 +84,9 @@
     // Racing Simulator rigs.
     ['Forza Horizon 6', 'racing-sim'], ['Assetto Corsa', 'racing-sim'],
 
-    // Arcade — fighting games only.
+    // Arcade — was fighting games only until 2026-09-17; per Eric, now also
+    // covers a few real co-op/party arcade titles (see below) alongside the
+    // existing fighting-game core.
     ['2XKO', 'arcade', 'competitive'], ['Street Fighter 6', 'arcade', 'competitive'],
     ['Street Fighter Collection 30th Anniversary', 'arcade', 'competitive'],
     ['MARVEL vs. CAPCOM Fighting Collection: Arcade Classics', 'arcade', 'competitive'],
@@ -91,6 +95,18 @@
     ['Marvel Tokon: Fighting Souls', 'arcade', 'competitive'],
     ['Street Fighter DLC (1-4)', 'arcade', 'competitive'],
     ['Avatar Legends: The Fighting Game', 'arcade', 'competitive'],
+    ['Dragon Ball FighterZ', 'arcade', 'competitive'],
+    // Added 2026-09-17, per Eric. Teenage Mutant Ninja Turtles: Shredder's
+    // Revenge is a co-op beat-'em-up, not a 1v1 fighter, tagged 'coop' to
+    // match its real genre rather than lumping it in with 'competitive'
+    // just because it's in the Arcade list. The three Jackbox Party Packs
+    // are also already in the PC list above (played there as party games
+    // during general PC sessions) -- this adds them to Arcade too, since
+    // that's genuinely a second, separate place they get played, not a
+    // move/duplicate-cleanup request.
+    ["Teenage Mutant Ninja Turtles: Shredder's Revenge", 'arcade', 'coop'],
+    ['Jackbox Party Pack 4', 'arcade', 'coop'], ['Jackbox Party Pack 5', 'arcade', 'coop'],
+    ['Jackbox Party Pack 6', 'arcade', 'coop'],
   ].map(([name, platform, genre]) => ({ name, platform, genre: genre || null }));
 
   function byName(a, b) { return a.name.localeCompare(b.name); }

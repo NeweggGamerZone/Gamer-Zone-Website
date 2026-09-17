@@ -22,7 +22,7 @@
 <meta name="twitter:description" content="Gamer Zone Workshops: AI in Game Design, PC Building 101, and XP League esports training for high schoolers in Diamond Bar, CA.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=88">
+<link rel="stylesheet" href="assets/css/style.css?v=91">
 <style>
   /* Kicker/accent text and track badges are blue site-wide by default now,
      so no page-scoped override is needed here anymore. */
@@ -63,6 +63,67 @@
     </div>
   </section>
 
+  <!-- 2026-09-17, per Eric: this page's section order and content changed
+       in four ways together --
+       (1) "Schools we've hosted" renamed "Past Academy Events" and moved
+           to be the FIRST section after the hero (previously last) --
+           subtitle changed to "Learn PC building, Game Design, Esports,
+           and more!" and its copy no longer names any school directly
+           (was "Diamond Bar High School, Bosco Tech, and Lorbeer Middle
+           School" -- now "real schools and youth groups"), same for every
+           photo's alt text in the gallery below (was "Diamond Bar High
+           School students at..." etc -- now describes what's shown
+           without naming the school). The real photos themselves are
+           unchanged, still real recaps from those actual visits.
+       (2) Section order overall is now Past Academy Events -> Why Learn
+           with Newegg -> Workshop Tracks -> XP League (was Workshop
+           Tracks -> XP League -> Why Learn with Newegg -> Schools &
+           groups -> Schools we've hosted -> Want to teach here).
+       (3) "Schools & groups" and "Want to teach here?" are both removed
+           entirely -- the first was a thin contact-us box mostly
+           redundant with the hero's own workshop CTA and this page's
+           general contact links; the second pointed off to the
+           Ambassadors page for the exact same self-serve "run something
+           here" pitch that page already covers directly (Collegiate
+           track), so this page no longer needed a second, thinner version
+           of it.
+       (4) The XP League section gained a real link to their actual site
+           (https://xpleague.com/california-irvine/, the real local league
+           this partnership already refers to) and one real photo sourced
+           from that same page -- see the <img> in that section for the
+           real source URL and an honest alt text (not repeating that
+           photo's own baked-in "New Site Same League" banner text, which
+           refers to XP League's own site relaunch, not anything about
+           this page). -->
+  <section class="reveal">
+    <h2>Past Academy Events</h2>
+    <p class="dim">Learn PC building, Game Design, Esports, and more! Real visits from real schools and youth groups who've brought students through the Zone.</p>
+    <!-- Real recap photos scroll through one continuous marquee lane
+         (assets/js/photo-waterfall.js + GZ.marquee in main.js), the same
+         shared gallery mechanism as the Past Events waterfall on
+         events.html -- add or remove <img> entries in the <template>
+         below to change the pool, no JS edit needed. -->
+    <div class="photo-waterfall" id="photo-waterfall-academy" data-gallery style="margin-top:1rem">
+      <template>
+        <img src="assets/img/AcademyPartnerSchools/diamond-bar-01.jpg" alt="Students at a Gamer Zone tech demo">
+        <img src="assets/img/AcademyPartnerSchools/diamond-bar-02.jpg" alt="Students at a Gamer Zone hardware demo">
+        <img src="assets/img/AcademyPartnerSchools/bosco-tech-01.jpg" alt="A youth group touring the Gamer Zone">
+        <img src="assets/img/AcademyPartnerSchools/bosco-tech-02.jpg" alt="A student on a racing sim rig at the Gamer Zone">
+        <img src="assets/img/AcademyPartnerSchools/lorbeer-01.jpg" alt="Students on a Gamer Zone visit">
+        <img src="assets/img/AcademyPartnerSchools/lorbeer-02.jpg" alt="A student group photo at the Gamer Zone">
+      </template>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2>Why learn with Newegg?</h2>
+    <div class="grid cols-3">
+      <div class="card"><i data-ic="pc" data-lg></i><h3>Tech Experts</h3><p class="dim">PC enthusiasts and tech producers sharing knowledge through hands-on building and demos.</p></div>
+      <div class="card"><i data-ic="chip" data-lg></i><h3>AI Natives</h3><p class="dim">AI-native designers, programmers, and builders shaping how AI improves the tech landscape.</p></div>
+      <div class="card"><i data-ic="gamepad" data-lg></i><h3>Gaming Extraordinaires</h3><p class="dim">Gamers and esports fans sharing a passion for gaming and game design with the players of tomorrow.</p></div>
+    </div>
+  </section>
+
   <section class="reveal">
     <h2>Workshop tracks</h2>
     <div class="grid cols-2">
@@ -93,55 +154,23 @@
   <section id="esports" class="reveal">
     <h2>XP League × Newegg Gamer Zone</h2>
     <div class="card hud">
-      <p>We've partnered with <strong>XP League</strong> to deliver biweekly Fortnite trainings and tournaments for all ages. On the <strong>second and fourth week of each month</strong>, XP League coaches, students, and players train interested youth to play Fortnite, VALORANT, and other games at a professional level: new keybinds, strategies, and ways to play, with a Wednesday training session and a Friday tournament each of those weeks.</p>
+      <p>We've partnered with <a href="https://xpleague.com/california-irvine/" target="_blank" rel="noopener"><strong>XP League</strong></a> to deliver biweekly Fortnite trainings and tournaments for all ages. On the <strong>second and fourth week of each month</strong>, XP League coaches, students, and players train interested youth to play Fortnite, VALORANT, and other games at a professional level: new keybinds, strategies, and ways to play, with a Wednesday training session and a Friday tournament each of those weeks.</p>
+      <!-- Real photo sourced from XP League's own Irvine, CA league page
+           (https://xpleague.com/california-irvine/), 2026-09-17, per
+           Eric's link + "add one photo from the web with them." Downloaded
+           and self-hosted here rather than hotlinked directly from their
+           CDN -- a live Puppeteer check found the hotlinked version fails
+           to load in real Chromium (net::ERR_BLOCKED_BY_ORB, a browser-
+           level cross-origin image protection), so linking it live would
+           have shown a broken image to real visitors on the same browser
+           engine. Same real photo either way, just reliably self-hosted
+           the way every other real photo on this site already is. -->
+      <p style="margin-top:.8rem"><img src="assets/img/XPLeague/xpleague-banner.jpg" alt="A young player competing in an XP League esports match" style="width:100%;border-radius:8px;display:block"></p>
       <div class="grid cols-2" style="margin-top:1rem">
         <div class="card"><i data-ic="grad" data-lg></i><h3>Wednesdays: training</h3><p class="dim">2nd &amp; 4th week of the month. Coached sessions: mechanics, builds, game sense. Check <a href="events.html">the calendar</a> for this week's flyer.</p></div>
         <div class="card"><i data-ic="medal" data-lg></i><h3>Fridays: tournament</h3><p class="dim">2nd &amp; 4th week of the month. Put the training to work in bracket play. End-of-month editions add a party and prizes.</p></div>
       </div>
-    </div>
-  </section>
-
-  <section class="reveal">
-    <h2>Why learn with Newegg?</h2>
-    <div class="grid cols-3">
-      <div class="card"><i data-ic="pc" data-lg></i><h3>Tech Experts</h3><p class="dim">PC enthusiasts and tech producers sharing knowledge through hands-on building and demos.</p></div>
-      <div class="card"><i data-ic="chip" data-lg></i><h3>AI Natives</h3><p class="dim">AI-native designers, programmers, and builders shaping how AI improves the tech landscape.</p></div>
-      <div class="card"><i data-ic="gamepad" data-lg></i><h3>Gaming Extraordinaires</h3><p class="dim">Gamers and esports fans sharing a passion for gaming and game design with the players of tomorrow.</p></div>
-    </div>
-  </section>
-
-  <section class="reveal">
-    <h2>Schools &amp; groups</h2>
-    <p class="dim">Bringing a class, team, or youth organization? Reach out to us at <a href="mailto:gamerzone@newegg.com">gamerzone@newegg.com</a>. Under-18 visitors need an accompanying guardian for regular free play.</p>
-    <div class="btn-row" style="margin-top:1rem;justify-content:center">
-      <span class="btn is-disabled" aria-disabled="true">Register for workshops</span>
-    </div>
-  </section>
-
-  <section class="reveal">
-    <h2>Schools we've hosted</h2>
-    <p class="dim">Real visits from real schools: Diamond Bar High School, Bosco Tech, and Lorbeer Middle School have all brought students through the Zone.</p>
-    <!-- Real recap photos scroll through one continuous marquee lane
-         (assets/js/photo-waterfall.js + GZ.marquee in main.js), the same
-         shared gallery mechanism as the Past Events waterfall on
-         events.html -- add or remove <img> entries in the <template>
-         below to change the pool, no JS edit needed. -->
-    <div class="photo-waterfall" id="photo-waterfall-academy" data-gallery style="margin-top:1rem">
-      <template>
-        <img src="assets/img/AcademyPartnerSchools/diamond-bar-01.jpg" alt="Diamond Bar High School students at a Gamer Zone tech demo">
-        <img src="assets/img/AcademyPartnerSchools/diamond-bar-02.jpg" alt="Diamond Bar High School students at a Gamer Zone hardware demo">
-        <img src="assets/img/AcademyPartnerSchools/bosco-tech-01.jpg" alt="Bosco Tech students touring the Gamer Zone">
-        <img src="assets/img/AcademyPartnerSchools/bosco-tech-02.jpg" alt="Bosco Tech student on a racing sim rig at the Gamer Zone">
-        <img src="assets/img/AcademyPartnerSchools/lorbeer-01.jpg" alt="Lorbeer Middle School students on a Gamer Zone visit">
-        <img src="assets/img/AcademyPartnerSchools/lorbeer-02.jpg" alt="Lorbeer Middle School group photo at the Gamer Zone">
-      </template>
-    </div>
-  </section>
-
-  <section class="reveal">
-    <h2>Want to teach here?</h2>
-    <div class="card">
-      <p>Interested in using Gamer Zone to teach a course? See our <a href="ambassador.html">Ambassadors page</a> to host classes and teach students.</p>
+      <p class="dim" style="margin-top:.9rem"><a href="https://xpleague.com/california-irvine/" target="_blank" rel="noopener">Visit XP League's Irvine, CA league page</a> for their full schedule and standings.</p>
     </div>
   </section>
 </main>
@@ -162,6 +191,7 @@
         <h4>Reviews</h4>
         <a class="ftr-link" data-cfg-href="googleReviewUrl" href="#"><i data-ic="google"></i><span>Google</span></a>
         <a class="ftr-link" data-cfg-href="yelpReviewUrl" href="#"><i data-ic="yelp"></i><span>Yelp</span></a>
+        <a class="ftr-link" data-cfg-href="surveyUrl" href="#"><i data-ic="note"></i><span>Feedback</span></a>
       </div>
       <div>
         <h4>Connect</h4>
@@ -171,12 +201,10 @@
       </div>
       <div>
         <h4>Discover</h4>
-        <a class="ftr-link" href="edu.html"><i data-ic="grad"></i><span>Academy</span></a>
         <a class="ftr-link" data-cfg-href="startggUrl" href="#"><i data-ic="trophy"></i><span>Start.GG</span></a>
         <a class="ftr-link" data-cfg-href="meetupUrl" href="#"><i data-ic="users"></i><span>Meetup</span></a>
         <a class="ftr-link" data-cfg-href="eventbriteUrl" href="#"><i data-ic="ticket"></i><span>Eventbrite</span></a>
         <a class="ftr-link" data-cfg-href="neweggUrl" href="#"><i data-ic="globe"></i><span>Shop Newegg</span></a>
-        <a class="ftr-link" data-cfg-href="surveyUrl" href="#"><i data-ic="note"></i><span>Feedback</span></a>
       </div>
     </div>
   </div>
@@ -189,8 +217,8 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=88" defer></script>
-<script src="assets/js/preregister-node.js?v=88" defer></script>
-<script src="assets/js/photo-waterfall.js?v=88" defer></script>
+<script src="assets/js/main.js?v=91" defer></script>
+<script src="assets/js/preregister-node.js?v=91" defer></script>
+<script src="assets/js/photo-waterfall.js?v=91" defer></script>
 </body>
 </html>

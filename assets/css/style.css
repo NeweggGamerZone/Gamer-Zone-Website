@@ -161,6 +161,14 @@ nav.main-nav a:hover { color: var(--ink); text-decoration: none; }
    carry the class. Text color still flips to black here since the pill
    sits underneath it at the same rounded shape/size. */
 nav.main-nav a.active { color: #000; }
+/* 2026-09-17, per Eric: while the bright hover-preview .nav-pill is
+   sitting on a different link, the active link only has the lighter
+   .nav-pill-current ring under it -- black text there would fail contrast,
+   so it switches to the site's own orange text color instead (already a
+   proven-readable combo against this dark nav background elsewhere, e.g.
+   .kicker). Reverts to the default black-on-solid-pill treatment above the
+   instant the bright pill comes home (main.js's moveTo() toggles this). */
+nav.main-nav a.active.pill-away { color: var(--ne-orange); }
 
 /* Continuous-tabs sliding pill (2026-09-10, per Eric: "do the continuous
    tab style... give that fluid feel", referencing Watermelon UI's
@@ -184,6 +192,17 @@ nav.main-nav a.active { color: #000; }
    slide, to still land under the right link once the layout changes. */
 .nav-pill { position: absolute; top: 0; left: 0; height: 0; width: 0; border-radius: 999px; background: linear-gradient(145deg, var(--ne-orange), var(--ne-orange-deep)); z-index: 0; pointer-events: none; opacity: 0; transition: left .32s cubic-bezier(.22,.9,.3,1), width .32s cubic-bezier(.22,.9,.3,1), top .32s cubic-bezier(.22,.9,.3,1), height .32s cubic-bezier(.22,.9,.3,1), opacity .25s ease; }
 .nav-pill.settle-in { opacity: 1; }
+/* 2026-09-17: a second, static "you are here" marker -- see main.js's
+   initNavPill() comment. Sits at a lower z-index than the real nav link
+   text (z-index:1 on nav.main-nav a) so it never covers the label, and
+   lower than .nav-pill itself isn't necessary since the two never really
+   compete: this one never moves, so it's always exactly where the bright
+   pill returns to at rest. A translucent fill + border rather than a
+   solid one -- "lighter orange" per Eric's own wording -- since the active
+   link's text switches to a plain orange color (not black) whenever this
+   is the only marker visible (see nav.main-nav a.active.pill-away above). */
+.nav-pill-current { position: absolute; top: 0; left: 0; height: 0; width: 0; border-radius: 999px; background: rgba(250,157,40,.16); border: 1px solid rgba(250,157,40,.55); z-index: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease; }
+.nav-pill-current.settle-in { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .nav-pill { transition: opacity .25s ease; }
 }
@@ -198,6 +217,28 @@ section { margin: 3rem 0; }
    Calendar section above it. Home page keeps the original, more spacious
    3rem rhythm. */
 body:not(.home-page) section { margin: 1.8rem 0; }
+/* 2026-09-17, per Eric ("reduce the margin above each page to the header
+   to be around 40px site-wide"): the real gap from the sticky header down
+   to each page's first section varied 48.8px (interior pages: 20px
+   .container padding-top + 28.8px from the 1.8rem rule just above) to
+   68px (home page: 20px + the base 3rem/48px section margin) before this
+   rule -- confirmed via live getBoundingClientRect measurements, not
+   assumed from reading the padding/margin values on paper. One rule,
+   specific enough to win over both of the general section-margin rules
+   above without needing !important (see this rule's own selector
+   specificity vs. `section`/`body:not(.home-page) section`), sets every
+   page's real first-section-to-header gap to the same ~40px regardless of
+   which of those two margin rules would otherwise have applied -- the
+   "one shared mechanism" this project already prefers over two pages
+   independently landing on two different gap sizes. Set to 20px, not
+   40px: `.container`'s own 20px top padding (unchanged, still needed for
+   its normal left/right/bottom job) sits between the header and this
+   margin and does NOT collapse with it (a child's margin only collapses
+   into a parent's padding when that padding is zero), so the two stack to
+   the real target -- 20px padding + 20px margin = 40px total, confirmed
+   via a live getBoundingClientRect check after this rule, not assumed
+   from the two numbers on paper. */
+main.container > section:first-child { margin-top: 20px; }
 h1 { font-family: var(--head); font-weight: 800; font-size: clamp(1.9rem, 5vw, 3.1rem); line-height: 1.08; text-transform: uppercase; letter-spacing: .01em; }
 h2 { font-family: var(--head); font-weight: 800; font-size: clamp(1.2rem, 3vw, 1.6rem); margin-bottom: .85rem; text-transform: uppercase; letter-spacing: .02em; display: flex; align-items: center; gap: .55rem; }
 h2 .ic { color: var(--ne-orange); }
@@ -427,31 +468,21 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .gear-item .btn { padding: .5rem 1.1rem; font-size: .8rem; margin-top: auto; align-self: flex-start; }
 @media (max-width: 560px) { .gear-item { width: 190px; } }
 
-/* 2026-09-16, per Eric ("make it only one row tall and just add the left
-   and right controls on the outside of the section to be able to cycle
-   through, and also allow me to mouse drag that area as well"): replaces
-   the old GZ.marquee() static wrapping-grid entirely -- see
-   featured-gear.js's own header comment for why this isn't built on
-   GZ.marquee at all. `.gear-carousel-track` is a real native
-   `overflow-x:auto` scroller (not a transform-driven fake one), so
-   keyboard/trackpad/wheel scrolling and the individual "View on Newegg"
-   links' own Tab stops all keep working with zero extra code -- the
-   arrows and drag are additive conveniences on top of a normal scroll
-   container, not a replacement for it. Scrollbar hidden across browsers
-   since the two arrow buttons are the intended affordance; the native
-   scrollbar would just be visual noise sitting under a section that
-   already has real visible controls for the same action. */
-.gear-carousel { display: flex; align-items: center; gap: .6rem; }
-.gear-carousel-track { flex: 1; min-width: 0; display: flex; gap: .9rem; overflow-x: auto; scroll-snap-type: x proximity; cursor: grab; scrollbar-width: none; -ms-overflow-style: none; }
-.gear-carousel-track::-webkit-scrollbar { display: none; }
-.gear-carousel-track.dragging { cursor: grabbing; scroll-snap-type: none; }
-.gear-carousel-track .gear-item { scroll-snap-align: start; }
-.gear-carousel-arrow { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color .15s, color .15s, opacity .15s; }
-.gear-carousel-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }
-.gear-carousel-arrow:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(255,255,255,.35); }
-.gear-carousel-arrow .ic { width: 18px; height: 18px; fill: currentColor; }
-.gear-carousel-arrow.is-end { opacity: .35; }
-@media (max-width: 560px) { .gear-carousel { gap: .35rem; } .gear-carousel-arrow { width: 38px; height: 38px; } }
+/* 2026-09-17, per Eric ("make Gear We Feature an autoscrolling shopping
+   reel with the controls center aligned underneath"): the 2026-09-16
+   manual single-row scroller (`.gear-carousel`/`.gear-carousel-track`/
+   `.gear-carousel-arrow`, a bespoke overflow-x:auto strip with two arrow
+   buttons) is retired -- this section moves back onto the shared
+   GZ.marquee() lane every other reel on the site uses (see featured-
+   gear.js). That's safe now in a way it wasn't on 2026-09-15 (the reason
+   it was pulled off GZ.marquee in the first place): the hover-reveal
+   pause/skim overlay that used to block "View on Newegg" clicks is long
+   gone (see "Marquee click-zone redesign," 2026-09-16), and the
+   2026-09-17 control-bar rewrite removed the click-zone delegation on the
+   lane too -- there is nothing left sitting in front of the cards that
+   could intercept a real link click. See the "Shared infinite marquee"
+   block further down (.gz-marquee/.gz-marquee-bar) for the shared lane/
+   controls this section now shares with Reviews and the photo waterfalls. */
 /* Registration steps: the step number is the most emphasized element (big,
    orange, bold) — matching the reference "AI mode" step pattern — while the
    step's icon becomes a small, white, secondary accent instead of the large
@@ -712,6 +743,17 @@ details.archive-month .grid { margin-top: 1rem; }
 .pin-btn:hover{filter:brightness(1.08)}
 .pin-btn:focus-visible{outline:none;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 4px rgba(250,157,40,.18),0 0 0 3px #fff}
 .pin-node.is-dragging .pin-btn{cursor:grabbing}
+/* 2026-09-17, per Eric's font-mismatch bug report: every real "Preregister"
+   button shares this one class regardless of which page/component renders
+   it (.gz-photo-band's PREREGISTER, events.html's How Registration Works
+   PREREGISTER, the calendar detail panel's "Preregister your visit") so
+   they all read identically -- matching .pin-btn's own bold Montserrat
+   treatment instead of the base .btn's plain Open Sans (base .btn stays
+   Open Sans on purpose for its many sentence-case CTAs like "Plan your
+   visit"/"Shop Newegg" -- this is a scoped override, not a base .btn
+   change). One shared implementation, not three independently-guessed
+   Preregister button looks. */
+.btn.prereg-btn{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:.02em}
 /* Close control: small, its own real button (not part of the link), so
    Tab/Enter/Space work on it independently of the main CTA -- see
    "Keyboard accessibility" in CLAUDE.md. Positioned relative to .pin-node's
@@ -739,7 +781,23 @@ details.archive-month .grid { margin-top: 1rem; }
    time, framed like an MTG/trading card (art panel + name plate + rules-text
    box), with a couple of the next cards peeking out from behind to read as
    an actual stack you're cycling through (see assets/js/zone-stack.js). */
-.zone-stack-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
+/* align-items:stretch (not center) is deliberate -- see the FLIP-carousel
+   comment above and zone-stack.js's own header comment. With `center`,
+   #zone-grid (a flex item with no explicit width) sized itself via
+   shrink-to-fit instead of filling this wrapper, and a `1fr`-column grid's
+   shrink-to-fit width is content-dependent: a featured card whose
+   description text is short enough to fit on one line under 1070px (e.g.
+   Console Gaming Zone) let the grid shrink-wrap down to that shorter
+   line's own width, while a longer description (PC Gaming Zone's) forced
+   the shrink-to-fit calculation up against the container's fill-available
+   width, reading as "full width" by coincidence, not by design -- exactly
+   the "one card grid shrink-wraps while a sibling state doesn't" failure
+   core rule 6 warns about, confirmed via live getBoundingClientRect
+   measurements (948.8px featuring Console vs. the correct 1069.6px
+   featuring PC) before this fix, 2026-09-17. `stretch` removes the
+   content-dependent sizing basis entirely -- #zone-grid now always fills
+   this wrapper's real width regardless of which card is featured. */
+.zone-stack-wrap { display: flex; flex-direction: column; align-items: stretch; gap: 1.1rem; }
 
 /* ===== About Gamer Zone: expanding grid carousel, round 4 (2026-09-16) =====
    Replaces the left/right peek-card carousel (its full history is preserved
@@ -1242,24 +1300,26 @@ body.home-page { background: transparent; }
 .score-guide .sg .lbl { font-family:var(--head); text-transform:uppercase; font-size:.8rem; letter-spacing:.03em; margin-top:.2rem; }
 /* Achievement-badge framing for each attendance bonus tier — bronze/silver/
    gold escalation, like unlocking a side-quest reward. */
-/* 2026-09-04 (per Eric, same "hit harder" pass as the .mile ladder above):
-   enlarged badge + bigger, bolder point value, plus the same contained
-   BG-asset-texture-behind-icon technique as .rank-badge (never behind
-   real text -- see that rule's comment for the readability reasoning). */
-.sg-badge { position:relative; display:flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:50%; margin-bottom:.6rem; overflow:hidden; }
-.sg-badge::before { content:""; position:absolute; inset:0; background-size:cover; background-position:center; opacity:.4; z-index:0; }
-.sg-badge::after { content:""; position:absolute; inset:0; background:radial-gradient(circle,transparent 15%,rgba(6,7,8,.6) 100%); z-index:1; }
-.sg-badge .ic { position:relative; z-index:2; width:28px; height:28px; fill:currentColor; filter:drop-shadow(0 1px 3px rgba(0,0,0,.7)); }
+/* 2026-09-17 (per Eric: "the emojis on top of images is a little too messy,
+   clarify and clean up"): dropped the blurred-photo-behind-icon treatment
+   this badge and .rank-badge below both used to share (a background-image
+   layer + a radial-gradient vignette on top of it, underneath the icon) --
+   at this badge's actual 60px size the photo read as noise rather than a
+   real, recognizable image, and stacking an icon on top of it on top of a
+   colored ring was genuinely the "too messy" look Eric flagged. Now a
+   clean flat tier-color circle + icon only, same escalating bronze/
+   silver/gold color identity as before via each tier's own background/
+   color/box-shadow (all unchanged) -- just without the photo layer
+   underneath fighting for attention. */
+.sg-badge { position:relative; display:flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:50%; margin-bottom:.6rem; }
+.sg-badge .ic { position:relative; z-index:2; width:28px; height:28px; fill:currentColor; }
 .score-guide .sg .pts { font-size:2.1rem; }
 .sg-unlock { display:block; font-family:var(--head); font-weight:800; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem; }
 .sg-bronze .sg-badge { background:rgba(214,149,85,.18); color:#D69555; box-shadow:0 0 16px -5px #D69555; }
-.sg-bronze .sg-badge::before { background-image:url('../calendar/BGAssets/dailyplay-bg-blurred.jpg'); }
 .sg-bronze .sg-unlock { color:#D69555; }
 .sg-silver .sg-badge { background:rgba(169,188,205,.18); color:#a9bccd; box-shadow:0 0 16px -5px #a9bccd; }
-.sg-silver .sg-badge::before { background-image:url('../calendar/BGAssets/event-update-bg-week2-blurred.jpg'); }
 .sg-silver .sg-unlock { color:#a9bccd; }
 .sg-gold .sg-badge { background:rgba(250,157,40,.18); color:var(--ne-orange); box-shadow:0 0 16px -5px var(--ne-orange); }
-.sg-gold .sg-badge::before { background-image:url('../calendar/BGAssets/majorevent2-bg-blurred.jpg'); }
 .sg-gold .sg-unlock { color:var(--ne-orange); }
 
 .visit-cta-note { font-size:.78rem; color:var(--ink-dim); margin-top:.55rem; }
@@ -1660,7 +1720,17 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    description. Each archetype (Shield/Sword/Bow) gets its own accent color
    so the three read as distinct classes rather than identical cards. */
 .amb-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-top:1rem}
-.amb-type{position:relative;background:var(--bg-2);border:1px solid var(--line);border-top:4px solid var(--ne-orange);padding:1.6rem 1.2rem 1.3rem;text-align:center;transition:border-color .2s,transform .2s}
+/* 2026-09-17, per Eric ("make the buttons the same y value on the choose
+   your track [cards], the buttons should be the same height"): .amb-type
+   was a plain block, so each card's "Apply as X" button sat wherever that
+   card's own description text happened to end -- a shorter description
+   left its button higher than a longer one's, even though the grid's
+   default row-stretch already made all 3 cards the same overall height.
+   Same fix as Featured Gear's card buttons (see that CLAUDE.md entry):
+   flex column + the button's own margin-top:auto (below) pushes it flush
+   to the bottom of every card's shared height, regardless of how many
+   lines that card's own description wrapped to. */
+.amb-type{position:relative;background:var(--bg-2);border:1px solid var(--line);border-top:4px solid var(--ne-orange);padding:1.6rem 1.2rem 1.3rem;text-align:center;transition:border-color .2s,transform .2s;display:flex;flex-direction:column}
 .amb-type:hover{transform:translateY(-3px)}
 .amb-class-icon{display:flex;align-items:center;justify-content:center;width:64px;height:64px;margin:0 auto .8rem;border-radius:50%;background:var(--bg-3);border:2px solid var(--ne-orange)}
 .amb-class-icon .ic{width:30px;height:30px;color:var(--ne-orange)}
@@ -1722,7 +1792,14 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    applied to all three. Wired in ambassador.js: each carries
    data-track="Collegiate|Influencer|Organization", read on click to
    preset the application modal's new Track field. */
-.amb-type .btn{margin-top:1.1rem;width:100%}
+/* margin-top:auto (not a fixed 1.1rem) now that .amb-type is a flex column
+   (see that rule's own 2026-09-17 comment) -- auto margin absorbs
+   whatever leftover space a shorter description leaves, landing every
+   card's button at the same Y position regardless of description length.
+   The description <p> keeps its own real bottom spacing via .amb-type
+   p's margin, so the button never sits flush against the text either. */
+.amb-type .btn{margin-top:auto;width:100%}
+.amb-type p.dim{margin-bottom:1.1rem}
 .quota{background:var(--bg-2);border:1px solid var(--line);border-left:4px solid var(--ne-navy-glow);padding:1.1rem 1.3rem;margin-top:.6rem}
 .quota b{color:var(--ne-blue-text)}
 /* tenure ladder */
@@ -1754,24 +1831,17 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .modal .req{color:var(--ne-blue-text)}
 .modal .form-note{font-size:.76rem;color:var(--ink-dim);margin-top:.9rem}
 
-/* ===== RGB light-trail cursor + grid-color popover, round 4 (2026-09-16) =====
-   Per Eric's direct follow-up: "don't make it just a faint glow. Make it an
-   actual light trail effect instead"; "clicking on the color should open up
-   a mini pop up tab to the left of the color, and it should be changing the
-   color of the background grid lines. The mouse effect should always copy
-   what the hero color profile is set to." See assets/js/rgb-cursor.js for
-   the full mechanism; this is just the visual layer.
+/* ===== Grid-color popover, round 5 (2026-09-17) =====
+   The round-4 `.gz-cursor-trail` canvas (a light-trail effect following the
+   cursor) is gone -- per Eric's direct request this round, the mouse now
+   does a real water-ripple effect on the hero tunnel's own ring geometry
+   instead (see techno-hero.js's own header comment for the full mechanism
+   and reasoning, including how this also resolves the "permanent circles"
+   bug the old trail had by removing the effect it was happening in). This
+   section is now just the popover below -- see assets/js/rgb-cursor.js for
+   its full mechanism; this is just the visual layer.
 
-   The trail is a single fixed full-viewport <canvas>, pointer-events:none
-   so it can never intercept a click (the exact class of bug this project
-   has hit and fixed before with hover overlays -- see "Featured Gear
-   cards" in CLAUDE.md) and z-indexed above normal content but below the
-   popover/nav/pin-node. The fade-to-a-streak effect is drawn entirely on
-   the canvas itself (see rgb-cursor.js) -- there is no CSS animation here
-   to keep in sync with it. */
-.gz-cursor-trail{position:fixed;inset:0;pointer-events:none;z-index:45}
-
-/* Small anchored popover (not the site's full-screen .modal-bg/.modal) --
+   Small anchored popover (not the site's full-screen .modal-bg/.modal) --
    per Eric's "mini pop up tab" framing. Positioned via JS
    (rgb-cursor.js's positionPopover()) rather than CSS centering, since its
    whole point is to sit next to the swatch that opened it, not take over
@@ -1856,23 +1926,17 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mc-num{font-family:var(--head);font-weight:800;font-size:2rem;line-height:1}
 .mc-lbl{font-family:var(--head);font-weight:700;font-size:.56rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin-top:.15rem}
 .mile .unlock{position:relative;z-index:2;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:0;flex:1}
-/* Rank-badge now carries a real graphic behind its icon -- a low-opacity
-   crop of one of this project's own real event-photography BG assets
-   (assets/calendar/BGAssets/, already used for the calendar/weekly-lineup
-   boards), tinted with each tier's own color and a dark radial gradient
-   so the icon on top stays clearly legible. This is a narrower, more
-   contained reuse of "photo texture behind content" than the crosshatch
-   pattern removed 2026-08-26 (see the block below this one) -- confined
-   to a small circular badge rather than spanning the whole card behind
-   real text, so it can't repeat that readability failure. */
-.rank-badge{position:relative;z-index:2;flex:none;margin-left:auto;width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:2px solid var(--line);overflow:hidden;box-shadow:0 0 18px -5px var(--tier-c, var(--ne-orange))}
-.rank-badge::before{content:"";position:absolute;inset:0;background-size:cover;background-position:center;opacity:.4;z-index:0}
-.rank-badge::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,transparent 15%,rgba(6,7,8,.6) 100%);z-index:1}
-.rank-badge .ic{position:relative;z-index:2;width:34px;height:34px;fill:currentColor;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))}
-.mile.tier-silver .rank-badge::before{background-image:url('../calendar/BGAssets/training-bg-blurred.jpg')}
-.mile.tier-gold .rank-badge::before{background-image:url('../calendar/BGAssets/freeplay-bg2-blurred.jpg')}
-.mile.tier-platinum .rank-badge::before{background-image:url('../calendar/BGAssets/freeplay-bg3-blurred.jpg')}
-.mile.tier-diamond .rank-badge::before{background-image:url('../calendar/BGAssets/tournament-major-bg-blurred.jpg')}
+/* 2026-09-17 (per Eric: "the emojis on top of images is a little too messy,
+   clarify and clean up"): this badge used to carry a low-opacity crop of a
+   real event-photography BG asset behind its icon, tinted with each tier's
+   color and a dark radial gradient -- see .sg-badge's own comment above
+   for the identical fix and reasoning; the same messiness applied here,
+   just at a bigger 72px size. Dropped the photo layer and its per-tier
+   background-image rules entirely -- a clean flat circle (already tinted
+   per tier via border-color/box-shadow using --tier-c) with the rank icon
+   on top, nothing underneath competing with it. */
+.rank-badge{position:relative;z-index:2;flex:none;margin-left:auto;width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:2px solid var(--line);box-shadow:0 0 18px -5px var(--tier-c, var(--ne-orange))}
+.rank-badge .ic{position:relative;z-index:2;width:34px;height:34px;fill:currentColor}
 /* Icon-led perks list (per Eric: "a list of perks", more graphic/icon-led
    than a plain bullet) -- each <li> now leads with a small SVG icon
    (assigned per perk's real content in the markup, not decorative/random)
@@ -2085,7 +2149,7 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    of a bare hover-freeze.
    2026-09-08, F-13 fix: that future pass is this one. A real pause
    mechanism (not just a hover-freeze) now exists -- see
-   ".gz-marquee-controls" below and GZ.buildMarqueeControls() in main.js.
+   ".gz-marquee-bar"/".gz-mq-btn" below and GZ.buildMarqueeControls() in main.js.
    Hover/focus once again pauses the motion, but now with an actual
    visible control scheme instead of just silently stopping, satisfying
    WCAG 2.2.2 (Pause, Stop, Hide) for every visitor rather than leaving it
@@ -2150,27 +2214,27 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .gz-marquee.static{overflow-x:auto;-webkit-mask-image:none;mask-image:none;cursor:grab}
 .gz-marquee.static.dragging{cursor:grabbing}
 .gz-marquee.static .gz-marquee-track{animation:none;flex-wrap:wrap;width:auto}
-/* 2026-09-16 rewrite, per Eric ("we don't even need to show controls
-   anymore... clicking towards the left and right sections will scroll
-   through instead") -- see GZ.buildMarqueeControls in main.js for the
-   full reasoning (the WCAG 2.2.2/2.4.7 tradeoff this makes, and why the
-   old always-there-on-hover dark scrim is what was blocking Reviews'
-   own card popups in the first place). Every button here is invisible at
-   rest and only appears for a keyboard user who has actually tabbed onto
-   it -- :focus-visible is a real, WCAG-safe "visually hidden until
-   needed" pattern, not a corner being cut. Mouse/touch users get the same
-   3 actions via a click-zone convention (see the container 'click'
-   listener in main.js), not this button chrome, which is why these have
-   no :hover treatment at all -- a hover state would imply a mouse user is
-   meant to find and click the button itself, which isn't the model here. */
-.gz-mq-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border-radius:50%;background:rgba(22,24,29,.85);border:1px solid rgba(242,244,248,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:0;pointer-events:none}
-.gz-mq-btn:focus-visible{opacity:1;pointer-events:auto;outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
-.gz-mq-prev{left:.5rem}
-.gz-mq-next{right:.5rem}
-.gz-mq-playpause{left:50%;transform:translate(-50%,-50%);width:46px;height:46px}
-.gz-mq-btn .ic{width:18px;height:18px}
-.gz-mq-playpause .ic{width:20px;height:20px}
-@media (prefers-reduced-motion: reduce){.gz-mq-btn{display:none}}
+/* 2026-09-17 rewrite, per Eric ("remove the invisible controls and just
+   have a very small play pause, left and right control underneath each
+   photo reel") -- see GZ.buildMarqueeControls in main.js for the full
+   reasoning. `.gz-marquee-bar` is a real, always-visible row of 3 small
+   buttons placed as a SIBLING right after the lane (never on top of the
+   cards), so it can never block a card's own click target and doesn't
+   need any "invisible until focused" trick -- it's just a normal small
+   control row, identical for every GZ.marquee instance site-wide. */
+.gz-marquee-bar{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:.8rem}
+.gz-mq-btn{position:relative;z-index:2;width:34px;height:34px;border-radius:50%;background:rgba(22,24,29,.85);border:1px solid rgba(242,244,248,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+/* F-14 touch-target floor: Eric asked for these "very small" visually, so
+   rather than inflating the visible circle to 44px, an invisible ::before
+   tap zone grows the real hit area -- the same pattern .zone-stack-dot/
+   .pin-close already use elsewhere on this site for a small-by-design
+   control. */
+.gz-mq-btn::before{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
+.gz-mq-btn:hover{background:rgba(22,24,29,1);border-color:rgba(242,244,248,.6)}
+.gz-mq-btn:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(255,255,255,.35)}
+.gz-mq-playpause{width:38px;height:38px}
+.gz-mq-btn .ic{width:15px;height:15px}
+.gz-mq-playpause .ic{width:17px;height:17px}
 
 /* ===== Past Events photo waterfall ===== */
 /* 2026-08-26 redesign: all 11 real photos from the recap's pool, in a

@@ -61,103 +61,19 @@
     </div>`;
   }
 
-  // 2026-09-15, per Eric: the shared hover-to-reveal pause/skip overlay
-  // (GZ.buildMarqueeControls(), see main.js/CLAUDE.md) is a full-lane
-  // scrim with pointer-events:auto while visible -- fine for Reviews and
-  // the photo waterfalls, which have no per-card click target underneath
-  // it, but it was silently intercepting clicks on this section's real
-  // "View on Newegg" links the moment a visitor hovered to reach one.
-  // Rather than patch that overlay's hit-testing, per Eric's own call this
-  // section stopped auto-scrolling entirely that round.
-  //
-  // 2026-09-16, per Eric ("make it only one row tall and just add the left
-  // and right controls on the outside of the section to be able to cycle
-  // through, and also allow me to mouse drag that area as well"): the
-  // static wrapping-grid from that fix (GZ.marquee's `{ static: true }`
-  // branch -- 4 rows of cards) is replaced with a real single-row,
-  // manually-navigable strip. This is NOT built on GZ.marquee at all
-  // (unlike Reviews/the photo waterfalls) -- that mechanism's whole point
-  // is an auto-scrolling infinite loop with a duplicated DOM, which is the
-  // opposite of what a manually-paged, drag-to-browse single row needs.
-  // Just a plain native-scroll container instead: real `overflow-x`
-  // scrolling (so keyboard/trackpad/wheel scrolling all work automatically,
-  // no custom reimplementation needed), the two arrow buttons step it by
-  // one card's width via scrollBy(), and a pointer-drag directly sets
-  // scrollLeft while held. No duplicated cards, no animation loop, no
-  // pause/skip overlay to fight with real links underneath it.
-  wrap.innerHTML = GEAR.map(cardHTML).join('');
-
-  const prevBtn = document.querySelector('.gear-carousel-prev');
-  const nextBtn = document.querySelector('.gear-carousel-next');
-
-  function cardStep() {
-    const first = wrap.children[0];
-    const second = wrap.children[1];
-    if (!first) return wrap.clientWidth * 0.8;
-    const gap = second ? (second.getBoundingClientRect().left - first.getBoundingClientRect().right) : 0;
-    return first.getBoundingClientRect().width + gap;
-  }
-
-  function updateArrows() {
-    // Dim (not disable -- an already-disabled button loses its focus
-    // outline, which would silently break Tab navigation past this
-    // control) an arrow once there's genuinely nothing further to scroll
-    // to in that direction, so the boundary is visible rather than a click
-    // that quietly does nothing.
-    const max = wrap.scrollWidth - wrap.clientWidth;
-    if (prevBtn) prevBtn.classList.toggle('is-end', wrap.scrollLeft <= 4);
-    if (nextBtn) nextBtn.classList.toggle('is-end', wrap.scrollLeft >= max - 4);
-  }
-
-  if (prevBtn) prevBtn.addEventListener('click', () => wrap.scrollBy({ left: -cardStep(), behavior: 'smooth' }));
-  if (nextBtn) nextBtn.addEventListener('click', () => wrap.scrollBy({ left: cardStep(), behavior: 'smooth' }));
-  wrap.addEventListener('scroll', updateArrows, { passive: true });
-  window.addEventListener('resize', updateArrows);
-
-  // Pointer-based click-and-drag panning (mouse, touch, and pen alike, same
-  // Pointer Events approach as zone-stack.js's swipe). Unlike Zone Stack's
-  // discrete card-snap carousel, this drives the container's own native
-  // `scrollLeft` directly -- a real scrollable element, just also
-  // draggable, rather than a second bespoke position system.
-  const DRAG_SUPPRESS_PX = 6; // below this, treat it as a click on a real link/button, not a drag
-  let dragging = false;
-  let dragPointerId = null;
-  let dragStartX = 0;
-  let dragStartScroll = 0;
-  let dragMoved = false;
-
-  wrap.addEventListener('pointerdown', e => {
-    if (e.button !== undefined && e.button !== 0) return;
-    dragging = true;
-    dragMoved = false;
-    dragPointerId = e.pointerId;
-    dragStartX = e.clientX;
-    dragStartScroll = wrap.scrollLeft;
-  });
-  wrap.addEventListener('pointermove', e => {
-    if (!dragging || e.pointerId !== dragPointerId) return;
-    const dx = e.clientX - dragStartX;
-    if (Math.abs(dx) > DRAG_SUPPRESS_PX) {
-      if (!dragMoved) { dragMoved = true; wrap.classList.add('dragging'); try { wrap.setPointerCapture(dragPointerId); } catch (err) { /* no-op */ } }
-      wrap.scrollLeft = dragStartScroll - dx;
-    }
-  });
-  function endDrag(e) {
-    if (!dragging || (e && e.pointerId !== undefined && e.pointerId !== dragPointerId)) return;
-    dragging = false;
-    wrap.classList.remove('dragging');
-    dragPointerId = null;
-  }
-  wrap.addEventListener('pointerup', endDrag);
-  wrap.addEventListener('pointercancel', endDrag);
-  wrap.addEventListener('pointerleave', endDrag);
-  // A drag that moved past the suppress threshold shouldn't also fire the
-  // "View on Newegg" link's click the instant the pointer releases on top
-  // of it -- same dragMoved-suppresses-the-next-click pattern zone-stack.js
-  // already uses for its own peek-card click handler.
-  wrap.addEventListener('click', e => {
-    if (dragMoved) { e.preventDefault(); e.stopPropagation(); dragMoved = false; }
-  }, true);
-
-  updateArrows();
+  // 2026-09-15: the shared hover-reveal pause/skip overlay used to block
+  // this section's real "View on Newegg" links, so it was pulled off
+  // GZ.marquee entirely (2026-09-16, a manual single-row scroll strip with
+  // its own arrow buttons/drag). 2026-09-17, per Eric ("make Gear We
+  // Feature an autoscrolling shopping reel with the controls center
+  // aligned underneath"): back onto the shared GZ.marquee() lane, now that
+  // the thing that made it unsafe is gone -- the hover overlay was removed
+  // 2026-09-16, and the click-zone delegation that replaced it was itself
+  // removed in the 2026-09-17 control-bar rewrite (GZ.buildMarqueeControls
+  // now builds 3 real, always-visible buttons in a bar BELOW the lane, not
+  // anything layered on top of the cards). Real drag also comes for free
+  // via GZ.enableMarqueeDrag, which already skips real links/buttons on
+  // pointerdown -- one shared implementation instead of this file's own
+  // bespoke scroll/drag code.
+  GZ.marquee(wrap, GEAR.map(cardHTML), { speed: 30 });
 })();

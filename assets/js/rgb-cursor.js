@@ -1,101 +1,30 @@
-/* RGB cursor light trail + grid-color popover, round 4 (2026-09-16), per
-   Eric's direct follow-up corrections to the first version:
-   "clicking on the color should open up a mini pop up tab to the left of
-   the color, and it should be changing the color of the background grid
-   lines. The mouse effect should always copy what the hero color profile
-   is set to... don't make it just a faint glow. Make it an actual light
-   trail effect instead."
+/* Grid-color popover, round 5 (2026-09-17). Per Eric's direct request
+   this round ("have my mouse be able to do a ripple or water effect on
+   the shapes in the background... water ripple on the shapes" --
+   confirmed via AskUserQuestion over an ASCII-trail alternative), the
+   light-trail cursor effect this file used to own (built round 4,
+   2026-09-16) has been removed entirely, superseding its own header
+   comment below the line. It also directly resolves a real reported bug
+   ("current mouse trail effect leaves behind permanent circles") by
+   removing the effect it was happening in rather than patching it --
+   see techno-hero.js's own new header comment for the replacement
+   water-ripple effect, which now lives there (it displaces the hero
+   tunnel's own ring geometry directly, so it has to be built where that
+   geometry is, not in a separate overlay canvas).
 
-   Two independent pieces:
-   1. A real light-trail cursor effect (a fixed full-viewport canvas that
-      redraws each frame with a translucent fill to fade the previous
-      frame, then paints a bright dot at the current pointer position --
-      the classic "comet tail" technique) tinted with the hero's real live
-      hue, ALWAYS -- there is no per-cursor color state anymore. It reads
-      `window.GZ_HERO_HUE`, which techno-hero.js's frame() writes every
-      frame from its own `cs.hue` (post any grid-color override -- see
-      that file's own comment), so the trail automatically follows
-      whatever the tunnel is actually rendering, profile or custom color,
-      with zero duplicated color logic here.
-   2. A small popover (not a full-screen modal) anchored to the left of
-      `#hero-lighting-swatch`, opened by clicking it, that lets a visitor
-      recolor the tunnel's own grid lines/rings via `window.GZ_HERO`'s
-      setCustomHue()/getCustomHue() API (exposed by techno-hero.js) --
-      this file holds no color state of its own, it's a thin UI over that
-      API, so there's exactly one source of truth for "what color is this
-      site rendering."
-
-   Skipped entirely on coarse-pointer (touch) devices -- there's no real
-   cursor to trail -- and under `prefers-reduced-motion` (a decorative
-   motion effect gets the same opt-out every other transform/animation on
-   this site already respects). The popover itself still works on those
-   devices, since recoloring the grid lines is a real, useful setting
-   independent of whether this browser can show the trail. */
+   What's left here is exactly the second of that old file's two pieces:
+   a small popover (not a full-screen modal) anchored to the left of
+   `#hero-lighting-swatch`, opened by clicking it, that lets a visitor
+   recolor the tunnel's own grid lines/rings via `window.GZ_HERO`'s
+   setCustomHue()/getCustomHue() API (exposed by techno-hero.js) -- this
+   file holds no color state of its own, it's a thin UI over that API, so
+   there's exactly one source of truth for "what color is this site
+   rendering." Unchanged from round 4 other than this file no longer
+   needing its own coarse-pointer/reduced-motion gate up front (that gate
+   only ever applied to the now-removed trail canvas -- the popover always
+   worked on every device, since recoloring the grid lines is a real,
+   useful setting independent of whether a device has a hoverable cursor). */
 (function () {
-  // ---------------------------------------------------------------
-  // 1. Light-trail cursor -- fine pointer + motion-enabled devices only
-  // ---------------------------------------------------------------
-  var isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (!isCoarse && !reduceMotion) {
-    var canvas = document.createElement('canvas');
-    canvas.className = 'gz-cursor-trail';
-    canvas.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(canvas);
-    var ctx = canvas.getContext('2d');
-    var dpr = Math.min(2, window.devicePixelRatio || 1);
-    var W = 0, H = 0;
-
-    function sizeCanvas() {
-      W = window.innerWidth; H = window.innerHeight;
-      canvas.width = W * dpr; canvas.height = H * dpr;
-      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    sizeCanvas();
-    window.addEventListener('resize', sizeCanvas);
-
-    var mx = -999, my = -999, active = false, rafId = null;
-    window.addEventListener('pointermove', function (e) {
-      if (e.pointerType === 'touch') return;
-      mx = e.clientX; my = e.clientY;
-      active = true;
-    }, { passive: true });
-    document.addEventListener('mouseleave', function () { active = false; });
-
-    function tick() {
-      var hue = Math.round((typeof window.GZ_HERO_HUE === 'number' && isFinite(window.GZ_HERO_HUE)) ? window.GZ_HERO_HUE : 205);
-      // Fade the previous frame instead of clearing outright -- this is
-      // what turns a single dot into a real trailing streak. A lower
-      // alpha here means a longer-lingering tail.
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0,0,0,0.18)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
-      if (active) {
-        var color = 'hsl(' + hue + ',90%,60%)';
-        var grad = ctx.createRadialGradient(mx, my, 0, mx, my, 14);
-        grad.addColorStop(0, color);
-        grad.addColorStop(1, 'hsla(' + hue + ',90%,60%,0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(mx, my, 14, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      rafId = requestAnimationFrame(tick);
-    }
-    rafId = requestAnimationFrame(tick);
-
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { cancelAnimationFrame(rafId); }
-      else { rafId = requestAnimationFrame(tick); }
-    });
-  }
-
-  // ---------------------------------------------------------------
-  // 2. Grid-color popover, anchored left of the swatch
-  // ---------------------------------------------------------------
   var swatch = document.getElementById('hero-lighting-swatch');
   var popover = document.getElementById('cursor-modal');
   if (!swatch || !popover) return;

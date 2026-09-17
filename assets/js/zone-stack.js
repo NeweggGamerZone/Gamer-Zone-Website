@@ -100,6 +100,24 @@
   syncTabIndex();
   items.forEach((it, i) => { it.addEventListener('click', () => select(i)); });
 
+  // 2026-09-17, per Eric ("the minimal carousel should return to its
+  // original card design when we click off"): clicking anywhere outside
+  // the grid reverts to the original default-featured card (index 0, PC
+  // Gaming Zone -- the same card that's marked is-featured in the raw
+  // HTML on page load), the same way the Watermelon UI reference this
+  // component is based on returns to its own resting state once you look
+  // away. A plain document-level 'click' listener (not 'pointerdown', so
+  // it fires after the item's own click handler above has already run and
+  // won't fight a genuine "click a different card" action) checks
+  // `contains` against the grid itself, not `closest('.zone-grid-item')`,
+  // so clicking the grid's own padding/gaps (not a card) also counts as
+  // "outside" and reverts -- matching the reference pattern where any
+  // click off the component collapses it back down.
+  document.addEventListener('click', e => {
+    if (grid.contains(e.target)) return;
+    select(0);
+  });
+
   function columnCount() {
     const style = getComputedStyle(grid);
     return style.gridTemplateColumns.split(' ').filter(Boolean).length || 1;

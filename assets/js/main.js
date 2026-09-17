@@ -273,47 +273,41 @@ const GZ = {
     // paused exactly like they left it.
     if (!track.dataset.gzHardPaused) anim.play();
   },
-  // 2026-09-16 rewrite, per Eric ("we don't even need to show controls
-  // anymore, clicking in the center area pauses and plays it, and clicking
-  // towards the left and right sections will scroll through instead"),
-  // replacing the 2026-09-08 hover-reveal dark-scrim version. That version's
-  // full-lane pointer-events:auto overlay is exactly what was blocking
-  // Reviews' own click-to-read-more popup on long cards ("I can't hover
-  // them since the hover controls are overriding") -- removing the overlay
-  // fixes that for real, not just by making it more transparent.
-  //
-  // A real, disclosed WCAG 2.2.2/2.4.7 judgment call: 2.2.2 ("Pause, Stop,
-  // Hide") requires a real, operable mechanism to pause auto-moving
-  // content -- it does not require that mechanism to be permanently
-  // visible chrome. But a control a keyboard user can never actually SEE
-  // even once they've tabbed onto it would separately fail 2.4.7 ("Focus
-  // Visible"), and core rule 8 here requires every custom interactive
-  // element to have a visible focus state -- so "no controls" can't mean
-  // "no controls, ever, for anyone." The fix below keeps 3 real buttons in
-  // the DOM (prev/play-pause/next), invisible at rest, but revealed with a
-  // real focus ring the instant a keyboard user tabs onto one
-  // (`:focus-visible` in style.css) -- fully operable and fully visible to
-  // the one input method that has no other way to discover them, with zero
-  // visible chrome for a mouse user who never needs it. Mouse/touch users
-  // get the same 3 actions through a click-zone convention instead (left
-  // third = previous, center third = play/pause, right third = next) --
-  // the same left/right/center-tap idiom a lot of video players already
-  // use, so it's discoverable through prior convention even with no visible
-  // affordance drawn on screen.
+  // 2026-09-17 rewrite, per Eric ("I think it would be easier to remove the
+  // invisible controls and just have a very small play pause, left and
+  // right control underneath each photo reel"), replacing the 2026-09-16
+  // click-zone-on-the-lane version. That version worked but was entirely
+  // implicit -- nothing on screen told a visitor the lane was even
+  // pausable/skippable, and there was no truly consistent visual "control"
+  // shared across every reel to point to. This version builds one real,
+  // always-visible, small control row (`.gz-marquee-bar`) as a SIBLING right
+  // after the marquee lane itself (never layered on top of the cards, so it
+  // can never block a card's own click target the way the 2026-09-08
+  // hover-scrim version once did) -- prev / play-pause / next, in that
+  // order, identical markup and classes for every GZ.marquee instance
+  // site-wide, so every reel's controls look and behave exactly the same
+  // (Past Events, hero-proof, Academy/Ambassador galleries, Reviews,
+  // Featured Gear). Real buttons, not a click-zone convention, means this
+  // also satisfies WCAG 2.2.2/2.4.7 the plain way: visible, labeled,
+  // reachable via Tab, with a normal :focus-visible ring -- no judgment call
+  // needed about "invisible until focused" chrome.
   buildMarqueeControls(container, track) {
+    const bar = document.createElement('div');
+    bar.className = 'gz-marquee-bar';
     const mkBtn = (cls, label, iconName) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'gz-mq-btn ' + cls;
       b.setAttribute('aria-label', label);
       b.innerHTML = GZ.icon(iconName, 'ic');
-      container.appendChild(b);
+      bar.appendChild(b);
       return b;
     };
     const prevBtn = mkBtn('gz-mq-prev', 'Show previous', 'arrow');
     const ppBtn = mkBtn('gz-mq-playpause', 'Pause', 'pause');
     const nextBtn = mkBtn('gz-mq-next', 'Show next', 'arrow');
     prevBtn.querySelector('.ic').style.transform = 'scaleX(-1)';
+    container.insertAdjacentElement('afterend', bar);
 
     function setPlayPauseIcon(isPlaying) {
       ppBtn.innerHTML = GZ.icon(isPlaying ? 'pause' : 'play', 'ic');
@@ -395,34 +389,11 @@ const GZ = {
     prevBtn.addEventListener('click', () => skip(-1));
     nextBtn.addEventListener('click', () => skip(1));
     ppBtn.addEventListener('click', togglePlayPause);
-
-    // Mouse/touch click-zone routing. A real click anywhere in the lane
-    // that ISN'T on one of the 3 invisible-until-focused buttons above and
-    // ISN'T on a real piece of interactive content already living inside a
-    // card (a review's own data-full popup trigger, a "View on Newegg"
-    // link, etc. -- checked first and left completely alone) is treated as
-    // a left/center/right zone tap. This is deliberately event delegation
-    // on the container rather than a 3rd invisible overlay stacked on top
-    // of the cards -- an overlay is exactly the shape of the original bug
-    // this rewrite is fixing (something sitting in front of the cards,
-    // intercepting clicks meant for them), so the fix doesn't reintroduce
-    // it in a new form.
-    container.addEventListener('click', e => {
-      // A real drag (see GZ.enableMarqueeDrag below) also ends in a click
-      // event on release in most browsers -- swallow exactly that one
-      // synthetic click so a drag-release doesn't also fire a skip/pause.
-      if (track.dataset.gzSuppressClick) { delete track.dataset.gzSuppressClick; return; }
-      if (e.target.closest('.gz-mq-btn')) return; // already handled by that button's own listener above
-      if (e.target.closest('a,[data-full],button')) return; // real content's own click behavior wins
-      const anim = track.getAnimations()[0];
-      if (!anim || !track.dataset.gzDur) return;
-      const rect = container.getBoundingClientRect();
-      if (!rect.width) return;
-      const frac = (e.clientX - rect.left) / rect.width;
-      if (frac < 1 / 3) skip(-1);
-      else if (frac > 2 / 3) skip(1);
-      else togglePlayPause();
-    });
+    // No click-zone delegation on the lane itself anymore -- the 3 always-
+    // visible buttons in the bar below are now the one, sole way to
+    // pause/skip, so a plain click on a card is just a plain click on a
+    // card (its own link/popup behavior, or nothing) with no hidden
+    // second meaning layered on top of it.
   },
   // 2026-09-16, per Eric ("allow me to mouse/finger drag every section that
   // has scrolling content"): one shared drag implementation reused by every
@@ -607,17 +578,16 @@ GZ.initFullTextTooltips = function initFullTextTooltips(root = document) {
   els.forEach(el => {
     if (el.dataset.gzTooltipBound) return;
     el.dataset.gzTooltipBound = '1';
-    // 2026-09-08, per Eric ("No hover effect for the what gamers are
-    // saying section"): review cards no longer show this tooltip on
-    // mouse hover -- only real interactions elsewhere on the site (the
-    // Games list's truncated titles) still use it that way. Focus/blur
-    // stay wired for every trigger so keyboard/tap users (who have no
-    // :hover at all) still reach the full text -- reviews.js's own
-    // click-to-focus handler is what gets a mouse/touch user there now.
-    if (!el.closest('.review-waterfall')) {
-      el.addEventListener('mouseenter', () => show(el));
-      el.addEventListener('mouseleave', hide);
-    }
+    // 2026-09-08: review cards briefly had mouse hover disabled here per an
+    // earlier "no hover effect" request. 2026-09-17, per Eric's direct
+    // reversal ("on the reviews, on hover should show the full review"):
+    // every [data-full] trigger site-wide -- including review cards --
+    // shows on hover again, same as the Games list's truncated titles
+    // always have. Focus/blur stay wired too so keyboard/tap users (no
+    // :hover at all) still reach the full text via reviews.js's own
+    // click-to-focus handler.
+    el.addEventListener('mouseenter', () => show(el));
+    el.addEventListener('mouseleave', hide);
     el.addEventListener('focus', () => show(el));
     el.addEventListener('blur', hide);
   });
@@ -747,19 +717,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     pill.setAttribute('aria-hidden', 'true');
     nav.prepend(pill);
 
-    function moveTo(link) {
+    // 2026-09-17, per Eric ("when the top nav bar is moving around, what I
+    // am currently navigating moves the actual button -- keep a lighter
+    // orange selection there on what page we are currently on, so hovering
+    // other nav areas still keeps a marker on what we selected"): a second,
+    // static ring pinned to the real current page's link, positioned once
+    // (and on resize/menu-toggle) and never moved by hover/focus -- the
+    // bright .nav-pill above still previews wherever the pointer/keyboard
+    // focus currently is, exactly as before, it just no longer doubles as
+    // the only "you are here" signal.
+    const currentMarker = document.createElement('span');
+    currentMarker.className = 'nav-pill-current';
+    currentMarker.setAttribute('aria-hidden', 'true');
+    nav.prepend(currentMarker);
+
+    function place(el, link) {
       const navR = nav.getBoundingClientRect();
       const r = link.getBoundingClientRect();
       // Full rect, not just left/width -- the mobile menu stacks links
       // into a column (nav.main-nav flex-direction:column below 720px),
       // so the pill needs to move vertically between rows there, not
       // just slide horizontally the way the desktop single-row nav does.
-      pill.style.left = (r.left - navR.left) + 'px';
-      pill.style.top = (r.top - navR.top) + 'px';
-      pill.style.width = r.width + 'px';
-      pill.style.height = r.height + 'px';
+      el.style.left = (r.left - navR.left) + 'px';
+      el.style.top = (r.top - navR.top) + 'px';
+      el.style.width = r.width + 'px';
+      el.style.height = r.height + 'px';
+    }
+    function moveTo(link) {
+      place(pill, link);
+      // While the bright preview pill sits anywhere other than the real
+      // active link, the active link's own text switches from "sitting on
+      // a solid pill" black to the site's orange text color instead (see
+      // nav.main-nav a.active.pill-away in style.css) -- black text with
+      // nothing but the lighter static marker under it would fail the
+      // contrast floor, so the text treatment tracks which pill is
+      // actually covering it rather than assuming the bright one always is.
+      activeLink.classList.toggle('pill-away', link !== activeLink);
     }
     function toActive() { moveTo(activeLink); }
+    function placeCurrentMarker() { place(currentMarker, activeLink); }
 
     // Initial placement happens with the settle-in transition suppressed
     // (no left/width to animate FROM yet), then the very next frame turns
@@ -767,9 +763,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // fresh page load has no real "previous tab" position to slide from.
     pill.style.transition = 'none';
     toActive();
+    placeCurrentMarker();
     requestAnimationFrame(() => {
       pill.style.transition = '';
       pill.classList.add('settle-in');
+      currentMarker.classList.add('settle-in');
     });
 
     // Hover and keyboard-focus both preview the pill sliding to whatever
@@ -788,14 +786,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!nav.contains(e.relatedTarget)) toActive();
     });
 
-    window.addEventListener('resize', toActive);
+    window.addEventListener('resize', () => { toActive(); placeCurrentMarker(); });
 
     // Opening/closing the mobile menu (#nav-toggle, a plain checkbox hack)
     // takes the nav from display:none to a real stacked column or back --
     // its links' rects don't exist until that toggle fires, so reposition
-    // right after rather than leaving the pill wherever it last was.
+    // right after rather than leaving either marker wherever it last was.
     const navToggle = document.getElementById('nav-toggle');
-    if (navToggle) navToggle.addEventListener('change', () => requestAnimationFrame(toActive));
+    if (navToggle) navToggle.addEventListener('change', () => requestAnimationFrame(() => { toActive(); placeCurrentMarker(); }));
   })();
 
   const io = new IntersectionObserver(es => es.forEach(e => {

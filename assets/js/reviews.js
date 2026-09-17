@@ -258,22 +258,24 @@
     </div>`;
   }
 
-  // Two lanes, shuffled once per page load (not re-shuffled after -- see
-  // GZ.marquee for why nothing changes post-render) so a repeat visitor
-  // sees a different real mix each time without any runtime jank. 24 of
-  // the 62 written reviews is enough for two dense-feeling lanes without
-  // shipping the entire pool's worth of DOM/text on every homepage load;
-  // "Read our Google reviews" below links out to the rest -- real link,
-  // not a fabricated "see more" that goes nowhere.
+  // 2026-09-17, per Eric ("make the reviews a single scrolling reel so that
+  // there needs to be only one set of controls on it"): consolidated from
+  // two opposite-direction lanes down to one -- simpler to operate (one
+  // play/pause/skip row instead of two, per the shared .gz-marquee-bar
+  // control redesign in main.js) and one less thing to keep in sync.
+  // Shuffled once per page load (not re-shuffled after -- see GZ.marquee
+  // for why nothing changes post-render) so a repeat visitor sees a
+  // different real mix each time without any runtime jank. 24 of the 62
+  // written reviews is enough for one dense-feeling lane without shipping
+  // the entire pool's worth of DOM/text on every homepage load; "Read our
+  // Google reviews" below links out to the rest -- real link, not a
+  // fabricated "see more" that goes nowhere.
   const pool = shuffle(REVIEWS);
   const COUNT = Math.min(24, pool.length);
   const picked = pool.slice(0, COUNT);
-  const mid = Math.ceil(picked.length / 2);
   const row1 = document.createElement('div');
-  const row2 = document.createElement('div');
-  wrap.append(row1, row2);
-  GZ.marquee(row1, picked.slice(0, mid).map(cardHTML), { speed: 26 });
-  GZ.marquee(row2, picked.slice(mid).map(cardHTML), { speed: 26, reverse: true });
+  wrap.append(row1);
+  GZ.marquee(row1, picked.map(cardHTML), { speed: 26 });
 
   wrap.addEventListener('click', e => {
     const card = e.target.closest('.review-card[data-full]');
