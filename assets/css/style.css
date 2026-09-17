@@ -740,202 +740,72 @@ details.archive-month .grid { margin-top: 1rem; }
    box), with a couple of the next cards peeking out from behind to read as
    an actual stack you're cycling through (see assets/js/zone-stack.js). */
 .zone-stack-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
-/* Real left/right carousel: .zone-stack is wider than a single .zone-card
-   so the prev/next cards have room to peek at the edges, and overflow:hidden
-   clips them cleanly instead of letting them spill into the page. */
-/* Full container width (was capped at min(620px,100%), later min(960px,94vw)
-   on wider screens) per a site-wide "every section should span its full
-   container width" pass -- the card itself stays a fixed size (below), so
-   this just gives the peeking prev/next cards more room to clear the
-   center card's edge cleanly (see the comment on [data-pos="prev"] below)
-   and more of the section's own background to show through at the sides. */
-/* 2026-09-16, per Eric ("show three, make the cards a little shorter and
-   wider so three cards can fit the section width"): height dropped from
-   560px/500px(mobile) to 420px/360px -- see .zone-card's own width bump
-   just below for the matching "wider" half of this. */
-.zone-stack { position: relative; width: 100%; height: 420px; overflow: hidden; touch-action: pan-y; }
-/* At the old 620px width, the prev/next cards' own far edge (rounded
-   corner + orange border) sat off in the clipped-away zone -- with the
-   card fixed at 340px wide and the peek offset a fixed 82% of that (in
-   px, since translateX% resolves against the element's OWN box, not the
-   container), the card's visible sliver was bounded on one side by
-   .zone-stack's hard overflow:hidden edge and on the other by the
-   opaque, higher-z-index center card sitting on top of it -- neither of
-   which is the peeking card's actual border. The result reads as a flat
-   slice of background image with no visible card shape at all, not a
-   "stack." Widening the track on screens with room for it moves that
-   overflow boundary far enough out that the peek card's own far edge
-   (rounded corner, border, shadow) lands inside the visible area instead
-   -- so what's cut off is a natural mid-card overlap under the center
-   card, and what's left showing is a genuine, fully-bordered card edge. */
-/* Soft feather at the track's own edges instead of a hard slice -- mostly
-   inert now that the peek cards' true borders land inside the visible
-   area (see above), but keeps anything still touching the boundary
-   (narrower viewports between 620px and 900px) from ending in a flat cut. */
-.zone-stack { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); }
-/* 2026-09-16, round 2: widened from min(340px,78%) to min(460px,60%) -- the
-   other half of "shorter and wider" above.
-   2026-09-16, round 3 (per Eric: "I should at least be able to see 3 cards
-   fully. They are cut off in the outermost edges."): that 460px/60% card,
-   combined with the round-2 72% peek offset, produced a 3-card span
-   (~1122px) wider than .zone-stack's own real box (~1070px on a typical
-   desktop viewport) -- the prev/next cards' outer edges were genuinely
-   being clipped by this element's own overflow:hidden, not just the mask
-   feather above. Shrunk to min(380px,36%): the percentage half of this
-   formula is what actually matters for the "always fully visible" promise
-   -- it keeps total 3-card span at a fixed ~91% of .zone-stack's own width
-   at every viewport size (see the peek-offset comment below for the exact
-   math), not just on the desktop width this was eyeballed at. */
-.zone-card { position: absolute; top: 0; left: 50%; width: min(380px, 36%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease, filter .55s ease; -webkit-user-select: none; user-select: none; }
-/* 2026-09-08, per Eric: "ZONE 1"-"ZONE 5" badge moved from the top-right
-   corner to horizontally centered at the top of the card -- centered via
-   left:50%/translateX(-50%) rather than switching to a flex/grid layout,
-   since this is one small absolutely-positioned label on top of the
-   card's own photo/body content, not a layout change to the card itself. */
-.zone-card-code { position: absolute; top: .6rem; left: 50%; transform: translateX(-50%); z-index: 2; font-family: var(--head); font-weight: 800; font-size: .75rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
-.zone-card-art { position: relative; height: 56%; flex: none; background: #000; }
-/* 2026-09-16, per Eric ("remove the image highlight of the cards when I
-   drag"): a plain <img> is natively draggable in every browser, so
-   dragging across it during the custom pointer-based swipe (zone-stack.js)
-   was fighting the site's own gesture with the browser's built-in "drag
-   this image out" affordance -- a translucent ghost thumbnail plus (in
-   some browsers) a text-selection-style highlight outline following the
-   cursor. Disabling the native drag/selection on the image and the whole
-   card removes that competing browser chrome; the real swipe (Pointer
-   Events, not HTML5 drag-and-drop) is completely unaffected. */
-.zone-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; user-select: none; -webkit-user-select: none; }
-.zone-card-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, var(--bg-2) 100%); }
-.zone-card-body { flex: 1; padding: .3rem 1.2rem 1.2rem; display: flex; flex-direction: column; }
-.zone-card-body h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: 1.15rem; margin: 0 0 .5rem; color: var(--ne-orange); text-align: center; }
-.zone-card-body p { font-size: .88rem; line-height: 1.5; }
-/* Left/right carousel: JS sets data-pos (prev/center/next/hidden) on every
-   .zone-card. The centered card is full size and interactive; prev/next
-   peek in from either edge of .zone-stack (clipped by its overflow:hidden);
-   everything else is parked invisible in the center spot, ready to slide
-   in next. */
-.zone-card[data-pos="center"] { transform: translateX(calc(-50% + var(--zs-drag, 0px))) scale(1); opacity: 1; z-index: 5; }
-/* Peeking cards were pointer-events:none, so zone-stack.js's "click a
-   peeking card to bring it to front" handler could never actually fire
-   from a direct click on the card — only the prev/next buttons and dot
-   nav worked. Re-enabled here plus a pointer cursor for the affordance. */
-/* 2026-09-03 (per Eric): peeking cards used to dim via opacity, which let
-   whatever sits behind .zone-stack show through -- reads as "translucent,"
-   not "greyed out." Switched to full-opacity filters instead, so the card
-   itself is what's muted, not its visibility against the page behind it.
-   2026-09-04 follow-up (per Eric: grayscale "looks too depressing"):
-   swapped grayscale+brightness for blur+brightness -- the peek cards stay
-   in full, vivid color (nothing desaturated) and just read as
-   out-of-focus background depth, the same visual cue a camera's depth-of-
-   field blur gives a background subject, rather than draining their color
-   entirely. */
-/* 2026-09-16, round 2 (per Eric, reversing the round above): "show three,
-   make the cards a little shorter and wider so three cards can fit the
-   section width, with the side cards slightly hiding behind the center
-   card." Restored the exact pre-2026-09-16-round-1 blur+brightness(.8)
-   depth-of-field treatment (see this file's git history / CLAUDE.md) for
-   the visible portion of each peek card, so the ones "hiding behind" the
-   center card read as out-of-focus background depth, not just a second
-   copy at full clarity.
-   2026-09-16, round 3 (per Eric: "I should at least be able to see 3 cards
-   fully. They are cut off in the outermost edges."): round 2's 460px-wide
-   card + 72% offset produced a 3-card span (~1122px) that could exceed
-   .zone-stack's own real width at typical desktop sizes, clipping the
-   prev/next cards' outer edges against this element's own overflow:hidden
-   -- a real bug, not a screenshot artifact (confirmed by comparing the
-   measured span against .zone-stack's own getBoundingClientRect() width).
-   Fixed together with .zone-card's width dropping to min(380px,36%)
-   above: the offset here also moved 72% -> 70%, and because BOTH numbers
-   are now expressed as a percentage of quantities that scale together
-   (card width is itself proportional to .zone-stack's width, and this
-   offset is a percentage of the card's own width), the total 3-card span
-   is a fixed ~91% of .zone-stack's width -- card width 0.36 *
-   (1 + 2*0.70) = 0.36 * 2.4 = 0.864 of the stack's width -- at literally
-   any viewport size, not just the one this was measured at, with an
-   automatic ~4.5%-per-side margin so the outer card edges never reach
-   .zone-stack's own clipping boundary or the mask's 5%/95% feather zone.
-   Verified via getBoundingClientRect() at 390/768/1400px, not assumed from
-   the percentages alone -- see this round's CLAUDE.md entry for the exact
-   numbers. Peek overlap is ~30% of the peek card's own width hidden behind
-   the center card (slightly more than round 2's 28%), still reading as
-   "slightly hiding behind," not fully separate. */
-.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 70% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
-.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 70% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
-/* Second, further-out peek layer -- per Eric's "another layer of cards
-   on the outermost left and right of center" ask for About Gamer Zone.
-   These are real zone cards from the same rotation (not decorative
-   filler), pushed out past the near peek layer and scaled/dimmed down
-   further so the depth reads correctly (furthest = smallest + faintest),
-   which is what lets .zone-stack's full section width actually get used
-   by real content instead of just being a wide empty wrapper around one
-   centered card. Lower z-index than the near peek layer so they sit
-   visually behind it. */
-.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154% + var(--zs-drag, 0px))) scale(.8); opacity: 0; pointer-events: none; z-index: 3; }
-.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154% + var(--zs-drag, 0px))) scale(.8); opacity: 0; pointer-events: none; z-index: 3; }
-.zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
-/* Drag/swipe (2026-09-10, per Eric: "do the swipe and drag animation as
-   well"). --zs-drag is a live px offset zone-stack.js writes to #zone-stack
-   (a custom property, so it inherits down to every .zone-card above without
-   each position needing its own JS-computed transform string) while a
-   pointer drag is active, added into each position's existing translateX so
-   the whole stack -- center card AND both peek layers -- tracks the
-   pointer together, preserving the flat/non-rotated trading-card look and
-   the "see cards behind it" depth cue Eric asked to keep. .dragging kills
-   the normal .55s transition so the stack follows the pointer 1:1 with no
-   lag; removing that class on release (in the same JS tick as resetting
-   --zs-drag and/or advancing data-pos) lets the existing transition animate
-   the snap-back or the advance-to-next/prev, so both cases use the one
-   shared easing curve instead of a separate bespoke animation. */
-.zone-stack.dragging .zone-card { transition: none; }
-/* Only a sliver of a prev/next card is actually visible (mostly hidden by
-   .zone-stack's own overflow:hidden). Both the paragraph AND the centered
-   h3 title read as broken/cut-off content when shown through that sliver
-   -- centered text means the visible edge shows a mid-word fragment (e.g.
-   "OADCAST" instead of "Broadcast", "ACING & IMMERS" instead of "Racing &
-   Immersive") rather than a clean preview. */
-.zone-card[data-pos="prev"] .zone-card-body p,
-.zone-card[data-pos="next"] .zone-card-body p,
-.zone-card[data-pos="far-prev"] .zone-card-body p,
-.zone-card[data-pos="far-next"] .zone-card-body p,
-.zone-card[data-pos="prev"] .zone-card-body h3,
-.zone-card[data-pos="next"] .zone-card-body h3,
-.zone-card[data-pos="far-prev"] .zone-card-body h3,
-.zone-card[data-pos="far-next"] .zone-card-body h3 { display: none; }
-/* The ZONE badge is also hidden on every peeking position (2026-08-26,
-   pixel-verified contrast audit) -- it used to stay visible and
-   re-centered here as "enough to say there's another zone over here,"
-   but that reasoning didn't account for .zone-card's own dimming (then
-   opacity .3/.14, now the grayscale+brightness filter above) pulling the
-   badge's black-on-orange text toward whatever's behind the whole card,
-   collapsing their contrast well below AAA's 7:1. Still hidden today even
-   though the dimming mechanism changed 2026-09-03 (filter, not opacity) --
-   the card's own art plus its position in the stack already reads as
-   "another zone is here" without needing the badge to survive it. */
-.zone-card[data-pos="prev"] .zone-card-code,
-.zone-card[data-pos="next"] .zone-card-code,
-.zone-card[data-pos="far-prev"] .zone-card-code,
-.zone-card[data-pos="far-next"] .zone-card-code,
-.zone-card[data-pos="hidden"] .zone-card-code { display: none; }
-.zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
-/* F-14 (2026-09-08): 40x40 -> 44x44, same "close enough that growing the
-   real button is imperceptible" call as .gz-mq-btn above. */
-.zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
-.zone-stack-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }
-.zone-stack-arrow .ic { width: 18px; height: 18px; fill: currentColor; }
-.zone-stack-dots { display: flex; gap: .5rem; }
-/* F-14 (2026-09-08, per Eric): these were a 9x9px visual dot AND a 9x9px
-   tap target -- both the audit's own example of a too-small touch target
-   and, separately, genuinely hard to see at a glance. Two independent
-   moves: the visible dot grows a little (9px -> 11px, still reads as a
-   minimal dot, not a real button) for legibility, and `position:relative`
-   plus the `::before` below gives each dot its own real 44x44 CSS px tap
-   zone via an invisible, absolutely-centered hit area -- the visual dot
-   never grows to match, per Eric's "generous tap zone, but the visible
-   icon doesn't have to match it 1:1" call. Screenshot-verified at 390px
-   (tools/audit/out/touch-targets) before landing on 11px + 44px. */
-.zone-stack-dot { position: relative; width: 11px; height: 11px; border-radius: 50%; background: var(--line); border: none; padding: 0; cursor: pointer; }
-.zone-stack-dot::before { content: ""; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
-.zone-stack-dot.active { background: var(--ne-orange); }
-@media (max-width: 480px) { .zone-stack { height: 360px; } }
+
+/* ===== About Gamer Zone: expanding grid carousel, round 4 (2026-09-16) =====
+   Replaces the left/right peek-card carousel (its full history is preserved
+   in git/this file's own prior revisions and in CLAUDE.md) per Eric's
+   direct reference: "Let's make the zone cards this minimal carousel, so it
+   expands and exists as a grid like this:
+   https://ui.watermelon.sh/animated-components/category/carousel" -- that
+   reference ("Minimal Carousel," a wallet-card UI) shows a small grid of
+   equal thumbnails where clicking one promotes it into a large featured
+   card at the top with the others compacting into a row beneath it, all
+   with a smooth layout animation. This site is plain HTML/CSS/vanilla JS
+   (no React/framer-motion, the reference's own dependencies), so the
+   pattern is reproduced natively: a real CSS Grid of `<button>` thumbnails,
+   the "featured" one promoted via `order:-1` + `grid-column:1/-1`, and the
+   layout-changing animation done via a JS FLIP transform (see
+   zone-stack.js) since CSS can't transition discrete grid properties on
+   its own. Every zone is a real, always-in-the-DOM, always-tabbable
+   button -- there's no hidden/carousel-only content the way the old
+   version had "hidden"/"far" peek positions, so nothing here needs the old
+   version's data-pos-based show/hide rules. */
+.zone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.zone-grid-item { position: relative; grid-column: span 1; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 26px rgba(0,0,0,.45); cursor: pointer; padding: 0; font: inherit; text-align: left; -webkit-user-select: none; user-select: none; }
+.zone-grid-item:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 3px; }
+.zone-grid-code { position: absolute; top: .5rem; left: .5rem; z-index: 2; font-family: var(--head); font-weight: 800; font-size: .65rem; letter-spacing: .06em; color: #000; background: var(--ne-orange); padding: .15rem .45rem; border-radius: 20px; }
+.zone-grid-art { position: relative; height: 108px; flex: none; background: #000; transition: height .45s cubic-bezier(.2,.7,.2,1); }
+/* Same native-drag-ghost fix the old carousel needed (a plain <img> is
+   draggable by default in every browser, which fights this component's
+   own click-to-expand interaction the same way it fought the old
+   pointer-drag swipe) -- kept for the same reason, not copy-pasted blind. */
+.zone-grid-art img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; user-select: none; -webkit-user-select: none; }
+.zone-grid-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, var(--bg-2) 100%); }
+/* Demo Zone (the Bar) has no real matching photo anywhere in the repo --
+   checked assets/calendar/BGAssets/PhotoReel for "bar"/"demo"/"hardware"/
+   "display" by filename and found nothing real (only an unrelated "Diamond
+   Bar High School" match). Per the no-fabrication rule, an honest
+   icon-only treatment stands in instead of a mismatched/duplicated photo --
+   same pattern already established for the Games page's Arcade card
+   (.game-cat-art-empty) -- swap this for a real photo the moment one
+   actually turns up in the PhotoReel pool. */
+.zone-grid-art-empty { display: flex; align-items: center; justify-content: center; background: var(--bg-3); }
+.zone-grid-art-empty .ic { width: 34px; height: 34px; color: var(--ne-orange); }
+.zone-grid-art-empty::after { display: none; }
+.zone-grid-body { padding: .6rem .8rem .8rem; }
+.zone-grid-body h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: .88rem; color: var(--ne-orange); margin: 0; transition: font-size .3s ease; }
+.zone-grid-desc { display: none; font-size: .88rem; line-height: 1.5; margin-top: .6rem; }
+/* The featured card: full grid width, pulled to the top of the grid via
+   order:-1 (grid auto-placement respects `order` the same way flexbox
+   does), taller art, and its full description revealed -- everything else
+   stays a plain small thumbnail (title only, per the reference UI showing
+   less detail on the non-featured cards). */
+.zone-grid-item.is-featured { grid-column: 1 / -1; order: -1; cursor: default; }
+.zone-grid-item.is-featured .zone-grid-art { height: 300px; }
+.zone-grid-item.is-featured .zone-grid-body h3 { font-size: 1.3rem; }
+.zone-grid-item.is-featured .zone-grid-desc { display: block; }
+@media (max-width: 480px) { .zone-grid-item.is-featured .zone-grid-art { height: 200px; } }
+/* FLIP animation support (see zone-stack.js): while the JS-computed
+   inverse transform is applied (the "first" position, right after the
+   class swap), transitions are off so the jump is invisible; the very
+   next frame clears the transform WITH a transition, animating the real
+   move/grow. `.zone-grid.flip-ready` is the one-frame window where the
+   transition is enabled again. */
+.zone-grid-item.flip-pre { transition: none; }
+.zone-grid.flip-ready .zone-grid-item { transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+@media (prefers-reduced-motion: reduce) { .zone-grid-item, .zone-grid.flip-ready .zone-grid-item, .zone-grid-art, .zone-grid-body h3 { transition: none !important; } }
+@media (max-width: 820px) { .zone-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .zone-grid { gap: .7rem; } }
 
 /* Games page category cards ("game-cat-*"), added 2026-09-15 per Eric
    ("scan our current photography and add those as core images for each
@@ -1321,7 +1191,16 @@ body.home-page { background: transparent; }
    one that needs an explicit width down the whole chain, same pattern as
    the Weekly Lineup eyebrow's nested-flex fix. See .gz-marquee's own
    comment for the full bug writeup. */
-.hero-proof-wrap { margin-top: 3.6rem; width: 100%; min-width: 0; }
+/* 2026-09-16, round 4 (per Eric: "make the hero page photo reel the same
+   width as the sections below, so it is not as wide"): capped to the
+   shared .container/--safe-x width instead of the full .hero-stage
+   100vw bleed -- the reel now reads as part of the same one-column system
+   every section below it already uses (core rule 6), rather than being
+   the one hero element that ignored it. width:100%/min-width:0 (2026-09-08
+   fix, still needed) plus the new max-width/auto-centering below both
+   coexist fine inside .hero-stage's flex column: the item still fills up
+   to its cap, then centers via the auto margins. */
+.hero-proof-wrap { margin-top: 3.6rem; width: 100%; max-width: 1140px; margin-left: auto; margin-right: auto; padding: 0 var(--safe-x); box-sizing: border-box; min-width: 0; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
 /* 2026-09-03 (per Eric): sized up to match .photo-waterfall's own card
    treatment exactly (was a smaller 168px "peek" strip) and caption
@@ -1875,22 +1754,36 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .modal .req{color:var(--ne-blue-text)}
 .modal .form-note{font-size:.76rem;color:var(--ink-dim);margin-top:.9rem}
 
-/* ===== RGB cursor glow + color-wheel picker (2026-09-16) =====
-   Per Eric's direct request: "a mouse that copies the hero's own rgb hue.
-   Let users who click on the rgb color be able to change it to various
-   colors in a simplistic color wheel, and it's cached accordingly." See
-   assets/js/rgb-cursor.js for the full mechanism/reasoning; this is just
-   the visual layer. The picker itself reuses the site's one existing
-   .modal-bg/.modal component above rather than a new floating-panel look.
+/* ===== RGB light-trail cursor + grid-color popover, round 4 (2026-09-16) =====
+   Per Eric's direct follow-up: "don't make it just a faint glow. Make it an
+   actual light trail effect instead"; "clicking on the color should open up
+   a mini pop up tab to the left of the color, and it should be changing the
+   color of the background grid lines. The mouse effect should always copy
+   what the hero color profile is set to." See assets/js/rgb-cursor.js for
+   the full mechanism; this is just the visual layer.
 
-   The glow dot is a small fixed circle that trails the real cursor,
-   pointer-events:none so it can never intercept a click (the exact class
-   of bug this project has hit and fixed before with hover overlays -- see
-   "Featured Gear cards" in CLAUDE.md). It's created and driven entirely by
-   JS (only on fine-pointer, motion-enabled devices -- see that file), so
-   there's nothing here gating its existence, only its appearance. */
-.gz-cursor-glow{position:fixed;top:0;left:0;width:16px;height:16px;border-radius:50%;pointer-events:none;z-index:45;transform:translate3d(-100px,-100px,0);background:hsl(205,85%,55%);color:hsl(205,85%,55%);box-shadow:0 0 16px 4px currentColor,0 0 34px 10px currentColor;opacity:0;transition:opacity .25s ease;mix-blend-mode:screen}
-.gz-cursor-glow.is-active{opacity:.7}
+   The trail is a single fixed full-viewport <canvas>, pointer-events:none
+   so it can never intercept a click (the exact class of bug this project
+   has hit and fixed before with hover overlays -- see "Featured Gear
+   cards" in CLAUDE.md) and z-indexed above normal content but below the
+   popover/nav/pin-node. The fade-to-a-streak effect is drawn entirely on
+   the canvas itself (see rgb-cursor.js) -- there is no CSS animation here
+   to keep in sync with it. */
+.gz-cursor-trail{position:fixed;inset:0;pointer-events:none;z-index:45}
+
+/* Small anchored popover (not the site's full-screen .modal-bg/.modal) --
+   per Eric's "mini pop up tab" framing. Positioned via JS
+   (rgb-cursor.js's positionPopover()) rather than CSS centering, since its
+   whole point is to sit next to the swatch that opened it, not take over
+   the screen. Reuses the same dark-card look (bg/border/orange top accent)
+   as the site's one modal component for visual consistency, just at a much
+   smaller footprint and with no backdrop scrim. */
+.gz-hue-popover{position:fixed;top:0;left:0;display:none;width:240px;max-width:calc(100vw - 16px);background:var(--bg-2);border:1px solid var(--line);border-top:3px solid var(--ne-orange);box-shadow:0 12px 32px rgba(0,0,0,.5);padding:1rem 1.1rem 1.1rem;z-index:210}
+.gz-hue-popover.open{display:block}
+.gz-hue-popover h3{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.95rem;margin:0 0 .3rem}
+.gz-hue-popover .close{position:absolute;top:.5rem;right:.6rem;background:none;border:none;color:var(--ink-dim);font-size:1.3rem;cursor:pointer;line-height:1}
+.gz-hue-popover label{display:block;font-family:var(--head);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin:0 0 .25rem}
+.gz-hue-popover input[type="range"]{width:100%}
 
 /* The wheel is a real conic-gradient rainbow disc -- deliberately
    "simplistic" per Eric's own word, angle-only (radius doesn't matter),
@@ -1899,11 +1792,11 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    The paired <input type="range"> (styled natively, no custom CSS needed)
    is what makes this genuinely keyboard-operable per core rule 8 -- a
    mouse-drag-only wheel would fail a keyboard-only visitor entirely. */
-.gz-wheel-wrap{display:flex;justify-content:center;margin:1rem 0 1.2rem}
-.gz-color-wheel{position:relative;width:170px;height:170px;max-width:100%;border-radius:50%;background:conic-gradient(from 0deg,red,yellow,lime,cyan,blue,magenta,red);box-shadow:0 0 0 2px var(--line);cursor:pointer;touch-action:none}
-.gz-wheel-knob{position:absolute;top:50%;left:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#fff;border:2px solid #111;box-shadow:0 0 0 2px rgba(255,255,255,.65);transform:translate(var(--kx,0px),var(--ky,-64px));pointer-events:none}
+.gz-wheel-wrap{display:flex;justify-content:center;margin:.8rem 0 1rem}
+.gz-color-wheel{position:relative;width:130px;height:130px;max-width:100%;border-radius:50%;background:conic-gradient(from 0deg,red,yellow,lime,cyan,blue,magenta,red);box-shadow:0 0 0 2px var(--line);cursor:pointer;touch-action:none}
+.gz-wheel-knob{position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;border:2px solid #111;box-shadow:0 0 0 2px rgba(255,255,255,.65);transform:translate(var(--kx,0px),var(--ky,-64px));pointer-events:none}
 #gz-hue-range{cursor:pointer}
-#gz-hue-reset{margin-top:0}
+#gz-hue-reset{margin-top:0;width:100%;font-size:.8rem;padding:.6rem}
 
 /* ===== v10 (2026-09-15): Ambassador journey — 4 vertical pillars =====
    Per Eric ("instead of left to right, just have 4 pillars of increasing

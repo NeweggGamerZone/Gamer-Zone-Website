@@ -228,6 +228,40 @@
   }
   let profile = loadProfile();
 
+  // 2026-09-16, round 4: a custom "grid line" color override, per Eric's
+  // direct request ("clicking on the color should open up a mini pop up
+  // tab... and it should be changing the color of the background grid
+  // lines"). Distinct from `profile` -- the select still picks the
+  // *animation pattern* (Cycle/Breathe/Meteor/etc.); this is a color tint
+  // layered on top of whichever pattern is active, applied in frame() via
+  // a hue-shift so the pattern's own motion/brightness is untouched. null
+  // means "no override, use the profile's own real hue" (the previous,
+  // still-default behavior). Cached the same way as RGB_KEY.
+  const GRID_HUE_KEY = 'gzGridHue';
+  function loadGridHue() {
+    try {
+      const v = localStorage.getItem(GRID_HUE_KEY);
+      if (v === null || v === 'auto') return null;
+      const n = Number(v);
+      return (Number.isFinite(n) && n >= 0 && n < 360) ? n : null;
+    } catch { return null; }
+  }
+  function saveGridHue(v) {
+    try { localStorage.setItem(GRID_HUE_KEY, v === null ? 'auto' : String(v)); } catch { /* private mode etc -- fine to skip */ }
+  }
+  let gridHueOverride = loadGridHue();
+  // Exposed so assets/js/rgb-cursor.js's color-wheel popover can drive this
+  // without techno-hero.js and rgb-cursor.js needing to independently agree
+  // on a localStorage key/shape -- one real API, one source of truth for
+  // "what color is the tunnel actually rendering right now."
+  window.GZ_HERO = window.GZ_HERO || {};
+  window.GZ_HERO.getCustomHue = () => gridHueOverride;
+  window.GZ_HERO.setCustomHue = (h) => {
+    gridHueOverride = (h === null) ? null : (((h % 360) + 360) % 360);
+    saveGridHue(gridHueOverride);
+    updateSwatch();
+  };
+
   // RGB-picker discoverability swatch (2026-09-16, Phase 5 of the design-
   // audit follow-through -- per Eric's go-ahead). The lighting picker was a
   // plain <select> with no visual hint that it's a real customization
@@ -250,6 +284,21 @@
   const swatchEl = document.getElementById('hero-lighting-swatch');
   function updateSwatch() {
     if (!swatchEl) return;
+    // 2026-09-16, round 4: a custom grid-hue override always wins the
+    // swatch display -- it's the more specific, more recently-chosen
+    // "what color is this actually rendering" answer than the profile's
+    // own base hue. (Disclosed simplification for Cycle-with-override: the
+    // true rendered hue still drifts under Cycle even with an override
+    // active, since the override is a fixed *shift*, not a fixed value --
+    // showing the override's own color here is a close, honest-enough
+    // approximation rather than a second rainbow-vs-static distinction.)
+    if (gridHueOverride !== null) {
+      swatchEl.classList.remove('is-cycle');
+      const color = `hsl(${gridHueOverride}, 85%, 55%)`;
+      swatchEl.style.background = color;
+      swatchEl.style.color = color;
+      return;
+    }
     if (profile === 'cycle') {
       swatchEl.classList.add('is-cycle');
       swatchEl.style.background = '';
@@ -584,7 +633,21 @@
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts; elapsed += dt;
     const rot = elapsed * ROT_SPEED;
-    const cs = colorState(elapsed);
+    let cs = colorState(elapsed);
+    // 2026-09-16, round 4 (per Eric: the color-wheel popover should recolor
+    // the tunnel's own grid lines, not just a separate cursor-only value,
+    // and the cursor should always mirror whatever the tunnel actually
+    // renders): if a custom grid hue is active, rotate every hue this
+    // profile would have produced by the same fixed delta that brings its
+    // base hue to the custom target. This keeps each profile's own
+    // animation/brightness pattern (breatheMul, ringAlpha, the per-ring
+    // hue *spread* for multi-hue profiles like City Lights) fully intact --
+    // only the palette's center point moves, not its shape or motion.
+    if (gridHueOverride !== null) {
+      const shift = ((gridHueOverride - cs.hue) % 360 + 360) % 360;
+      const baseRingHue = cs.ringHue;
+      cs = { hue: gridHueOverride, breatheMul: cs.breatheMul, ringHue: i => (baseRingHue(i) + shift) % 360, ringAlpha: cs.ringAlpha };
+    }
     // 2026-09-16, RGB cursor feature: expose the tunnel's real live hue
     // (the exact same value driving the spokes this frame, not a second
     // guessed color) so assets/js/rgb-cursor.js can mirror it without

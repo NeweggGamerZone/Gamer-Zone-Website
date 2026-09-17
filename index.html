@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=89">
+<link rel="stylesheet" href="assets/css/style.css?v=90">
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -94,7 +94,7 @@
            responsibility, unchanged); the popover it opens is a separate,
            independent preference (the cursor glow's own color), not a
            second control over the tunnel itself. -->
-      <button type="button" class="hero-lighting-swatch" id="hero-lighting-swatch" aria-label="Customize cursor color"></button>
+      <button type="button" class="hero-lighting-swatch" id="hero-lighting-swatch" aria-label="Customize grid line color"></button>
       <label for="hero-lighting-select" class="sr-only">Background lighting</label>
       <select id="hero-lighting-select">
         <option value="cycle">Color Cycle</option>
@@ -331,53 +331,67 @@
   <section id="about" class="reveal">
     <h2>About Gamer Zone</h2>
     <p class="dim">A 2,300 sq. ft. gaming and content-creation space inside Newegg HQ in Diamond Bar: built for free play, esports, streaming, and hands-on tech education. Here's what's inside -- flip through it below.</p>
+    <!-- 2026-09-16, round 4: rebuilt as an expanding grid carousel per
+         Eric's reference (https://ui.watermelon.sh/animated-components/
+         category/carousel's "Minimal Carousel") -- see the CSS's own
+         header comment on .zone-grid for the full reasoning. Every zone is
+         a real, always-visible, always-tabbable <button>; clicking one
+         (assets/js/zone-stack.js) promotes it to the large featured
+         position at the top. Zone 5 renamed "Broadcast" -> "Broadcast
+         Zone" and Zone 6 "Demo Zone" added for the Bar area, both per
+         Eric's direct instruction this round -- Demo Zone has no real
+         matching photo in the repo (see the CSS's own no-fabrication
+         note), so it gets an honest icon-only card instead. -->
     <div class="zone-stack-wrap" style="margin-top:1.4rem">
-      <div class="zone-stack" id="zone-stack">
-        <article class="zone-card">
-          <span class="zone-card-code">ZONE 1</span>
-          <div class="zone-card-art"><img src="assets/calendar/BGAssets/dailyplay-bg.jpg" alt="PC Gaming Zone at Newegg Gamer Zone" loading="lazy"></div>
-          <div class="zone-card-body">
+      <div class="zone-grid" id="zone-grid">
+        <button type="button" class="zone-grid-item is-featured" data-zone-index="0" aria-pressed="true">
+          <span class="zone-grid-code">ZONE 1</span>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/dailyplay-bg.jpg" alt="PC Gaming Zone at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-body">
             <h3>PC Gaming Zone</h3>
-            <p class="dim">26 prebuilt gaming PCs with Intel and AMD Ryzen processors, NVIDIA GeForce RTX and AMD Radeon graphics, and pro-grade peripherals, webcams, and Stream Decks, all set up with CORSAIR gaming chairs and COUGAR desks.</p>
+            <p class="dim zone-grid-desc">26 prebuilt gaming PCs with Intel and AMD Ryzen processors, NVIDIA GeForce RTX and AMD Radeon graphics, and pro-grade peripherals, webcams, and Stream Decks, all set up with CORSAIR gaming chairs and COUGAR desks.</p>
           </div>
-        </article>
-        <article class="zone-card">
-          <span class="zone-card-code">ZONE 2</span>
-          <div class="zone-card-art"><img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="Racing and immersive zone at Newegg Gamer Zone" loading="lazy"></div>
-          <div class="zone-card-body">
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="1" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 2</span>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="Racing and immersive zone at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-body">
             <h3>Racing &amp; Immersive Zone</h3>
-            <p class="dim">Triple-monitor racing rigs with force-feedback wheels and pedals from Fanatec, MOZA, and Thermaltake, plus a semi-enclosed Cooler Master ORB X pod for a fully wrapped-in driving experience.</p>
+            <p class="dim zone-grid-desc">Triple-monitor racing rigs with force-feedback wheels and pedals from Fanatec, MOZA, and Thermaltake, plus a semi-enclosed Cooler Master ORB X pod for a fully wrapped-in driving experience.</p>
           </div>
-        </article>
-        <article class="zone-card">
-          <span class="zone-card-code">ZONE 3</span>
-          <div class="zone-card-art"><img src="assets/calendar/BGAssets/vr-station-bg.jpg" alt="VR and mixed reality zone at Newegg Gamer Zone" loading="lazy"></div>
-          <div class="zone-card-body">
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="2" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 3</span>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/vr-station-bg.jpg" alt="VR and mixed reality zone at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-body">
             <h3>VR &amp; Mixed Reality Zone</h3>
-            <p class="dim">Meta Quest VR paired with the Virtuix Omni One treadmill for full 360&deg; motion tracking: walk, crouch, and jump right in the game. A favorite for first-timers and livestream demos alike.</p>
+            <p class="dim zone-grid-desc">Meta Quest VR paired with the Virtuix Omni One treadmill for full 360&deg; motion tracking: walk, crouch, and jump right in the game. A favorite for first-timers and livestream demos alike.</p>
           </div>
-        </article>
-        <article class="zone-card">
-          <span class="zone-card-code">ZONE 4</span>
-          <div class="zone-card-art"><img src="assets/calendar/BGAssets/console-lounge-bg.jpg" alt="Console gaming zone at Newegg Gamer Zone" loading="lazy"></div>
-          <div class="zone-card-body">
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="3" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 4</span>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/console-lounge-bg.jpg" alt="Console gaming zone at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-body">
             <h3>Console Gaming Zone</h3>
-            <p class="dim">Xbox, Nintendo Switch 2, PlayStation 5, and a retro games emulator, ready for couch co-op, classic showcases, and casual multiplayer nights.</p>
+            <p class="dim zone-grid-desc">Xbox, Nintendo Switch 2, PlayStation 5, and a retro games emulator, ready for couch co-op, classic showcases, and casual multiplayer nights.</p>
           </div>
-        </article>
-        <article class="zone-card">
-          <span class="zone-card-code">ZONE 5</span>
-          <div class="zone-card-art"><img src="assets/calendar/BGAssets/broadcast-bg.jpg" alt="Broadcast setup at Newegg Gamer Zone" loading="lazy"></div>
-          <div class="zone-card-body">
-            <h3>Broadcast</h3>
-            <p class="dim">A dedicated setup for livestreaming, tournaments, and shoutcasting, built to bring the action to viewers watching from home.</p>
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="4" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 5</span>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/broadcast-bg.jpg" alt="Broadcast Zone at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-body">
+            <h3>Broadcast Zone</h3>
+            <p class="dim zone-grid-desc">A dedicated setup for livestreaming, tournaments, and shoutcasting, built to bring the action to viewers watching from home.</p>
           </div>
-        </article>
-      </div>
-      <div class="zone-stack-nav">
-        <button type="button" class="zone-stack-arrow" id="zone-prev" aria-label="Previous zone"><i data-ic="arrow" style="transform:scaleX(-1)"></i></button>
-        <div class="zone-stack-dots" id="zone-dots"></div>
-        <button type="button" class="zone-stack-arrow" id="zone-next" aria-label="Next zone"><i data-ic="arrow"></i></button>
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="5" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 6</span>
+          <div class="zone-grid-art zone-grid-art-empty"><i data-ic="chip" class="ic"></i></div>
+          <div class="zone-grid-body">
+            <h3>Demo Zone</h3>
+            <p class="dim zone-grid-desc">Located at the Bar, this is where display PCs and hardware are usually shown off -- the latest builds and components on hand to see and try up close.</p>
+          </div>
+        </button>
       </div>
     </div>
   </section>
@@ -565,41 +579,41 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<!-- RGB cursor color picker (assets/js/rgb-cursor.js), 2026-09-16, per Eric's
-     direct request. Reuses the site's one existing modal look (.modal-bg/
-     .modal -- the same component the Ambassador application form uses, see
-     that section's own CLAUDE.md history) rather than inventing a second
-     floating-panel style. The wheel is a real conic-gradient rainbow disc
-     (angle-only, "simplistic" per Eric's own word); the paired range input
-     is the genuinely keyboard-operable version of the same control (arrow
-     keys step the hue) since a mouse-drag-only wheel would fail core rule
-     8 -- both stay in sync with each other and with the live preview. -->
-<div class="modal-bg" id="cursor-modal" role="dialog" aria-modal="true" aria-label="Cursor color">
-  <div class="modal">
-    <button class="close" id="cursor-modal-close" aria-label="Close">&times;</button>
-    <h3>Cursor Color</h3>
-    <p class="dim" style="font-size:.88rem">Your cursor glow matches the hero's RGB lighting by default. Drag the wheel (or use the slider) to pick your own color instead.</p>
-    <div class="gz-wheel-wrap">
-      <div class="gz-color-wheel" id="gz-color-wheel" role="presentation">
-        <div class="gz-wheel-knob" id="gz-wheel-knob"></div>
-      </div>
-    </div>
-    <label for="gz-hue-range">Hue</label>
-    <input type="range" id="gz-hue-range" min="0" max="359" step="1" value="205" aria-label="Cursor color hue">
-    <div class="btn-row" style="margin-top:1rem">
-      <button type="button" class="btn" id="gz-hue-reset">Match hero color</button>
+<!-- Grid-color popover (assets/js/rgb-cursor.js), round 4, 2026-09-16, per
+     Eric's direct correction: "clicking on the color should open up a mini
+     pop up tab to the left of the color, and it should be changing the
+     color of the background grid lines." A small anchored panel (JS-
+     positioned to the swatch's left, see rgb-cursor.js's positionPopover())
+     -- not the site's full-screen .modal-bg/.modal dialog, which was too
+     heavy for a "mini pop up tab." The wheel is a real conic-gradient
+     rainbow disc (angle-only, "simplistic" per Eric's own word); the
+     paired range input is the genuinely keyboard-operable version of the
+     same control (arrow keys step the hue) since a mouse-drag-only wheel
+     would fail core rule 8 -- both stay in sync with each other. -->
+<div class="gz-hue-popover" id="cursor-modal" role="dialog" aria-label="Grid line color">
+  <button class="close" id="cursor-modal-close" aria-label="Close">&times;</button>
+  <h3>Grid Color</h3>
+  <p class="dim" style="font-size:.82rem">Recolor the background grid lines. Your cursor trail always matches whatever color is showing.</p>
+  <div class="gz-wheel-wrap">
+    <div class="gz-color-wheel" id="gz-color-wheel" role="presentation">
+      <div class="gz-wheel-knob" id="gz-wheel-knob"></div>
     </div>
   </div>
+  <label for="gz-hue-range">Hue</label>
+  <input type="range" id="gz-hue-range" min="0" max="359" step="1" value="205" aria-label="Grid line color hue">
+  <div class="btn-row" style="margin-top:1rem">
+    <button type="button" class="btn" id="gz-hue-reset">Match lighting profile</button>
+  </div>
 </div>
-<script src="assets/js/main.js?v=89" defer></script>
-<script src="assets/js/preregister-node.js?v=89" defer></script>
-<script src="assets/js/techno-hero.js?v=89" defer></script>
-<script src="assets/js/photo-waterfall.js?v=89" defer></script>
-<script src="assets/js/events.js?v=89" defer></script>
-<script src="assets/js/event-update.js?v=89" defer></script>
-<script src="assets/js/zone-stack.js?v=89" defer></script>
-<script src="assets/js/featured-gear.js?v=89" defer></script>
-<script src="assets/js/reviews.js?v=89" defer></script>
-<script src="assets/js/rgb-cursor.js?v=89" defer></script>
+<script src="assets/js/main.js?v=90" defer></script>
+<script src="assets/js/preregister-node.js?v=90" defer></script>
+<script src="assets/js/techno-hero.js?v=90" defer></script>
+<script src="assets/js/photo-waterfall.js?v=90" defer></script>
+<script src="assets/js/events.js?v=90" defer></script>
+<script src="assets/js/event-update.js?v=90" defer></script>
+<script src="assets/js/zone-stack.js?v=90" defer></script>
+<script src="assets/js/featured-gear.js?v=90" defer></script>
+<script src="assets/js/reviews.js?v=90" defer></script>
+<script src="assets/js/rgb-cursor.js?v=90" defer></script>
 </body>
 </html>
