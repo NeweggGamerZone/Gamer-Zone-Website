@@ -72,14 +72,28 @@
   // spokes -- the rings are what reads as "the shapes," and this keeps
   // the effect cheap (one extra sin() + a couple sqrt-free-ish ops per
   // point, ~9 rings * 56 points/frame, trivial at 60fps).
+  // 2026-09-18, per Eric ("concentrate the ripple effect so it's more
+  // clear it's my mouse affecting the home page"): REACH cut roughly in
+  // half (850->380) so the disturbance falls off much faster with real
+  // distance from the cursor -- at the old 850px reach, exp(-dist/REACH)
+  // was still ~0.37 a full 850px out and ~0.14 at 1700px, so a single
+  // ripple visibly nudged rings well beyond arm's-length from the
+  // pointer, reading as a diffuse ambient wobble rather than something
+  // tied to the mouse specifically. At 380px, the same math is ~0.37 at
+  // only 380px out and ~0.05 by 1140px -- the effect now genuinely fades
+  // out within roughly a third of the tunnel's width instead of nearly
+  // half of it. Both amplitudes were raised (MOVE 7->11, CLICK 18->28,
+  // keeping the existing ~2.5x move/click ratio) so the now-tighter,
+  // smaller-footprint ripple still reads as clearly visible right at the
+  // cursor rather than just quieter everywhere.
   let ripples = []; // {x, y, t0 (elapsed seconds at spawn), amp}
   const RIPPLE_LIFE = 1.6;          // seconds -- matches the "~1-2s lifespan" spec
   const RIPPLE_FREQ = 0.035;        // radians per px of distance -- controls ring spacing
   const RIPPLE_PHASE_SPEED = 7.5;   // radians/sec -- how fast the concentric rings visibly propagate outward
-  const RIPPLE_REACH = 850;         // px -- exponential distance falloff scale
+  const RIPPLE_REACH = 380;         // px -- exponential distance falloff scale
   const MAX_RIPPLES = 24;           // hard cap so a long mouse drag can't grow this unbounded
-  const RIPPLE_MOVE_AMP = 7;        // px, a gentle continuous disturbance while moving
-  const RIPPLE_CLICK_AMP = 18;      // px, a real "splash" on click -- roughly 2.5x a move ripple
+  const RIPPLE_MOVE_AMP = 11;       // px, a gentle continuous disturbance while moving
+  const RIPPLE_CLICK_AMP = 28;      // px, a real "splash" on click -- roughly 2.5x a move ripple
 
   function addRipple(x, y, amp) {
     ripples.push({ x, y, t0: elapsed, amp });

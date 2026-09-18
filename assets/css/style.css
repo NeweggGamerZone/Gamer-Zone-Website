@@ -211,12 +211,22 @@ nav.main-nav a.active.pill-away { color: var(--ne-orange); }
 .announcement:empty { display: none; }
 
 .container { max-width: 1140px; margin: 0 auto; padding: 1.25rem var(--safe-x) 3rem; }
-section { margin: 3rem 0; }
+/* 2026-09-18, per Eric ("reduce the margin between the page title and the
+   section beneath it... 20% smaller"): both this rule and the tighter
+   interior-page override right below were each cut a real, exact 20%
+   (3rem->2.4rem, 1.8rem->1.44rem) rather than picked to a round-looking
+   number — since sibling section margins collapse to the larger of the
+   two adjoining values, this is what actually shrinks the real gap
+   between a page's hero and the section right after it (e.g. Games'
+   "Top Played Games", the example Eric gave) by the requested 20%, on
+   every page. The existing home-vs-interior spacing distinction (home
+   reads a little more spacious) is preserved, just scaled down together. */
+section { margin: 2.4rem 0; }
 /* Tighter section spacing on every page except home — e.g. on events.html
    this brings "How preregistering works" up closer to the Events &
    Calendar section above it. Home page keeps the original, more spacious
-   3rem rhythm. */
-body:not(.home-page) section { margin: 1.8rem 0; }
+   rhythm (now 2.4rem, see above). */
+body:not(.home-page) section { margin: 1.44rem 0; }
 /* 2026-09-17, per Eric ("reduce the margin above each page to the header
    to be around 40px site-wide"): the real gap from the sticky header down
    to each page's first section varied 48.8px (interior pages: 20px
@@ -842,12 +852,22 @@ details.archive-month .grid { margin-top: 1rem; }
 .zone-grid-body { padding: .6rem .8rem .8rem; }
 .zone-grid-body h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: .88rem; color: var(--ne-orange); margin: 0; transition: font-size .3s ease; }
 .zone-grid-desc { display: none; font-size: .88rem; line-height: 1.5; margin-top: .6rem; }
-/* The featured card: full grid width, pulled to the top of the grid via
-   order:-1 (grid auto-placement respects `order` the same way flexbox
-   does), taller art, and its full description revealed -- everything else
-   stays a plain small thumbnail (title only, per the reference UI showing
-   less detail on the non-featured cards). */
-.zone-grid-item.is-featured { grid-column: 1 / -1; order: -1; cursor: default; }
+/* The featured card: full grid width, taller art, full description
+   revealed -- everything else stays a plain small thumbnail (title only,
+   per the reference UI showing less detail on the non-featured cards).
+   2026-09-18, per Eric ("it shouldn't kick me down, just hold the same
+   position"): this used to also set order:-1, pulling the featured card
+   to the very front of the grid regardless of which card was actually
+   clicked -- so clicking e.g. the 5th card jumped it up to the top-left
+   and shoved every other card around it, a jarring reshuffle rather than
+   an in-place expand. Removed order:-1 entirely: a card now expands to
+   full width right where it already sits in source order (CSS Grid's
+   auto-placement just wraps the next item onto a new row beneath it),
+   so cards before the clicked one never move at all and the click target
+   itself doesn't relocate -- only the cards *after* it shift down to make
+   room, which is the honest, minimum amount of movement this interaction
+   can have. */
+.zone-grid-item.is-featured { grid-column: 1 / -1; cursor: default; }
 .zone-grid-item.is-featured .zone-grid-art { height: 300px; }
 .zone-grid-item.is-featured .zone-grid-body h3 { font-size: 1.3rem; }
 .zone-grid-item.is-featured .zone-grid-desc { display: block; }
@@ -1251,13 +1271,14 @@ body.home-page { background: transparent; }
 /* 2026-09-16, round 4 (per Eric: "make the hero page photo reel the same
    width as the sections below, so it is not as wide"): capped to the
    shared .container/--safe-x width instead of the full .hero-stage
-   100vw bleed -- the reel now reads as part of the same one-column system
-   every section below it already uses (core rule 6), rather than being
-   the one hero element that ignored it. width:100%/min-width:0 (2026-09-08
-   fix, still needed) plus the new max-width/auto-centering below both
-   coexist fine inside .hero-stage's flex column: the item still fills up
-   to its cap, then centers via the auto margins. */
-.hero-proof-wrap { margin-top: 3.6rem; width: 100%; max-width: 1140px; margin-left: auto; margin-right: auto; padding: 0 var(--safe-x); box-sizing: border-box; min-width: 0; }
+   100vw bleed. Reverted 2026-09-18 (per Eric: "make the hero photo reel
+   stretch all the way across again, so users see more images") -- back
+   to filling .hero-stage's own full 100vw bleed width so more cards are
+   visible in the lane at once; width:100%/min-width:0 (2026-09-08 fix)
+   is still needed regardless of which width convention wins, since it's
+   what stops the un-clipped duplicated marquee track from blowing out
+   this flex item's intrinsic width in the first place. */
+.hero-proof-wrap { margin-top: 3.6rem; width: 100%; min-width: 0; padding: 0 var(--safe-x); box-sizing: border-box; }
 .hero-proof-label { text-align: center; font-family: var(--head); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin-bottom: .6rem; }
 /* 2026-09-03 (per Eric): sized up to match .photo-waterfall's own card
    treatment exactly (was a smaller 168px "peek" strip) and caption
@@ -1296,24 +1317,23 @@ body.home-page { background: transparent; }
 .score-guide { display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); margin-top:.4rem; }
 .score-guide .sg { position:relative; background:var(--bg-2); border:1px solid var(--line); clip-path:var(--clip); padding:1.3rem 1rem 1rem; }
 .score-guide .sg .pts { font-family:var(--head); font-weight:800; font-size:1.5rem; color:var(--ne-blue-text); }
-.score-guide .sg .lbl { font-family:var(--head); text-transform:uppercase; font-size:.8rem; letter-spacing:.03em; margin-top:.2rem; }
-/* Achievement-badge framing for each attendance bonus tier — bronze/silver/
-   gold escalation, like unlocking a side-quest reward. */
-/* 2026-09-17 (per Eric: "the emojis on top of images is a little too messy,
-   clarify and clean up"): dropped the blurred-photo-behind-icon treatment
-   this badge and .rank-badge below both used to share (a background-image
-   layer + a radial-gradient vignette on top of it, underneath the icon) --
-   at this badge's actual 60px size the photo read as noise rather than a
-   real, recognizable image, and stacking an icon on top of it on top of a
-   colored ring was genuinely the "too messy" look Eric flagged. Now a
-   clean flat tier-color circle + icon only, same escalating bronze/
-   silver/gold color identity as before via each tier's own background/
-   color/box-shadow (all unchanged) -- just without the photo layer
-   underneath fighting for attention. */
-.sg-badge { position:relative; display:flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:50%; margin-bottom:.6rem; }
-.sg-badge .ic { position:relative; z-index:2; width:28px; height:28px; fill:currentColor; }
-.score-guide .sg .pts { font-size:2.1rem; }
-.sg-unlock { display:block; font-family:var(--head); font-weight:800; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem; }
+.score-guide .sg .lbl { font-family:var(--head); text-transform:uppercase; font-size:.8rem; letter-spacing:.03em; margin-top:.2rem; color:var(--ink); }
+.sg-unlock { display:block; font-family:var(--head); font-weight:800; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.5rem; }
+/* 2026-09-18 (per Eric: "emphasize the 20+/40+ as the core part in a
+   similar horizontal tag format... similar design to the ambassador
+   journey '1 Event Hosted' tag style, it should be inside a square"):
+   the old 60px icon circle is gone -- .sg-badge is now a square (rounded
+   corners, not a circle) sized to its own content, holding the number and
+   "Attendees" side by side as one horizontal tag, the exact same row
+   layout .mile-count uses above for "1 Event Hosted". The number is the
+   visual headline here (kept large, matching its own pre-existing
+   2.1rem size) with the unit label riding alongside it rather than
+   underneath as a separate caption. Escalating bronze/silver/gold color
+   identity still comes from each tier's own background/color/box-shadow
+   below (unchanged) applied to this square instead of the old circle. */
+.sg-badge { position:relative; display:inline-flex; flex-direction:row; align-items:baseline; justify-content:center; gap:.4rem; width:auto; height:auto; padding:.7rem 1.1rem; border-radius:14px; margin-bottom:.6rem; }
+.score-guide .sg .pts { font-size:2.1rem; line-height:1; }
+.score-guide .sg .lbl { font-size:.72rem; margin-top:0; }
 .sg-bronze .sg-badge { background:rgba(214,149,85,.18); color:#D69555; box-shadow:0 0 16px -5px #D69555; }
 .sg-bronze .sg-unlock { color:#D69555; }
 .sg-silver .sg-badge { background:rgba(169,188,205,.18); color:#a9bccd; box-shadow:0 0 16px -5px #a9bccd; }
@@ -1847,95 +1867,72 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    the screen. Reuses the same dark-card look (bg/border/orange top accent)
    as the site's one modal component for visual consistency, just at a much
    smaller footprint and with no backdrop scrim. */
-.gz-hue-popover{position:fixed;top:0;left:0;display:none;width:240px;max-width:calc(100vw - 16px);background:var(--bg-2);border:1px solid var(--line);border-top:3px solid var(--ne-orange);box-shadow:0 12px 32px rgba(0,0,0,.5);padding:1rem 1.1rem 1.1rem;z-index:210}
+.gz-hue-popover{position:fixed;top:0;left:0;display:none;width:200px;max-width:calc(100vw - 16px);background:var(--bg-2);border:1px solid var(--line);border-top:3px solid var(--ne-orange);box-shadow:0 12px 32px rgba(0,0,0,.5);padding:1rem 1.1rem 1.1rem;z-index:210}
 .gz-hue-popover.open{display:block}
 .gz-hue-popover h3{font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.95rem;margin:0 0 .3rem}
 .gz-hue-popover .close{position:absolute;top:.5rem;right:.6rem;background:none;border:none;color:var(--ink-dim);font-size:1.3rem;cursor:pointer;line-height:1}
-.gz-hue-popover label{display:block;font-family:var(--head);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin:0 0 .25rem}
-.gz-hue-popover input[type="range"]{width:100%}
 
 /* The wheel is a real conic-gradient rainbow disc -- deliberately
    "simplistic" per Eric's own word, angle-only (radius doesn't matter),
    matching the exact same rainbow stops the Cycle-profile swatch above
    already uses so the two never look like two different color systems.
-   The paired <input type="range"> (styled natively, no custom CSS needed)
-   is what makes this genuinely keyboard-operable per core rule 8 -- a
-   mouse-drag-only wheel would fail a keyboard-only visitor entirely. */
-.gz-wheel-wrap{display:flex;justify-content:center;margin:.8rem 0 1rem}
+   2026-09-18 (per Eric: "not have a hue slider... just click various
+   values on the wheel"): the paired <input type="range"> this comment
+   used to describe is gone -- the wheel itself is now the one and only
+   control, made keyboard-operable directly (role="slider", tabindex,
+   arrow-key hue stepping in rgb-cursor.js) instead of relying on a
+   separate slider element for that job. */
+.gz-wheel-wrap{display:flex;justify-content:center;margin:.8rem 0 .2rem}
 .gz-color-wheel{position:relative;width:130px;height:130px;max-width:100%;border-radius:50%;background:conic-gradient(from 0deg,red,yellow,lime,cyan,blue,magenta,red);box-shadow:0 0 0 2px var(--line);cursor:pointer;touch-action:none}
+.gz-color-wheel:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .gz-wheel-knob{position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;border:2px solid #111;box-shadow:0 0 0 2px rgba(255,255,255,.65);transform:translate(var(--kx,0px),var(--ky,-64px));pointer-events:none}
-#gz-hue-range{cursor:pointer}
-#gz-hue-reset{margin-top:0;width:100%;font-size:.8rem;padding:.6rem}
 
 /* ===== v10 (2026-09-15): Ambassador journey — 4 vertical pillars =====
    Per Eric ("instead of left to right, just have 4 pillars of increasing
    amount of events, so 4 vertical pillars"): replaces the previous
    cascading-bar ladder (each tier a bit wider/more indented than the last,
    read top-to-bottom) with 4 equal-width columns side by side, read
-   left-to-right like a real leaderboard/podium. Escalating prestige now
-   comes from a real min-height floor per tier (420/460/500/540px, each
-   +40px) rather than from width/indent -- the same min-height-as-a-floor-
-   not-a-forced-height principle this file already uses everywhere else in
-   "Container & sizing discipline", so a tier whose perks list genuinely
-   needs more room (Silver has the longest list) still grows past its
-   floor instead of clipping. grid's default align-items:stretch is
-   deliberately overridden to align-items:start so each column keeps its
-   own independent height instead of all 4 stretching to match whichever
-   is tallest, which would erase the whole "increasing pillar" effect. */
-.tier-pillars{position:relative;margin-top:2rem;display:grid;grid-template-columns:repeat(4,1fr);align-items:start;gap:1.1rem}
+   left-to-right like a real leaderboard/podium.
+   2026-09-18 (per Eric: "change silver gold platinum and diamond to just
+   the same card height, make it cleaner"): the escalating-height-per-tier
+   effect (420/460/500/540px+ per tier, each taller than the last) is
+   gone -- align-items switched back to grid's default stretch so all 4
+   columns share one row height (the tallest tier's real content, per the
+   same min-height-as-a-floor-not-a-forced-height principle), instead of
+   an artificially staggered "pillar" look. Cleaner and easier to compare
+   tier-to-tier at a glance. */
+.tier-pillars{position:relative;margin-top:2rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem}
 .mile{position:relative;padding:44px 1.1rem 1.2rem;border:1px solid var(--line);border-left-width:6px;background:var(--bg-2);transition:box-shadow .25s,border-color .25s,transform .25s;width:100%}
-/* Silver's own real content (4 perks) already renders at ~463px, taller
-   than a naive 420/460/500/540 step would have left room for -- Gold's
-   floor has to clear Silver's actual rendered height for the escalation
-   to read at all, not just its own nominal position in the list. Measured
-   the real rendered heights via Puppeteer before landing on these numbers
-   rather than guessing round values. */
-.mile.tier-silver{min-height:420px}
-.mile.tier-gold{min-height:505px}
-.mile.tier-platinum{min-height:545px}
-.mile.tier-diamond{min-height:585px}
+/* One shared floor for all 4 tiers now (measured against Diamond's real
+   rendered content -- the tallest of the four, even after removing the
+   rank-badge icon row below -- via Puppeteer, not guessed). */
+.tier-pillars .mile{min-height:460px}
 /* Shared rank-pill look, reused by both the Ambassador Journey tiles and
    the Featured Ambassador cards — only the position differs per context. */
 .node{position:relative;overflow:hidden;z-index:2;padding:.3rem .7rem;background:var(--ne-orange);color:#000;font-family:var(--head);font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 .mile .node{position:absolute;left:1.1rem;top:-14px}
-/* Progression is the headline here: a big event-count badge sits right
-   alongside the benefit it unlocks, instead of a small caption above it —
-   so "how many events" and "what you get" read together at a glance. A
-   rounded rank-badge icon sits at the far end of the bar, like the node at
-   the end of each step in the reference ladder. */
+/* Progression is the headline here: a big event-count tag sits right
+   alongside the benefit it unlocks, instead of a small caption above it --
+   so "how many events" and "what you get" read together at a glance. */
 .mile-head{display:flex;align-items:center;gap:.85rem;margin:.4rem 0 .7rem}
-/* 2026-09-15: at 4 equal columns (~240-270px each on desktop) the old
-   inline count+unlock+badge row has nowhere near enough width for the
-   unlock label ("Newegg Gift Cards" etc.) to read comfortably -- stacked
-   and centered instead, badge on top like a cap on the pillar, so the
-   narrow-column layout doesn't fight the no-ellipsis rule by forcing that
-   label to wrap into 1-2 characters per line. */
+/* Stacked and centered rather than a left-to-right row -- at 4 equal
+   columns (~240-270px each on desktop) there isn't enough width for the
+   unlock label ("Newegg Gift Cards" etc.) to sit inline without wrapping
+   into 1-2 characters per line, which would fight the no-ellipsis rule. */
 .tier-pillars .mile-head{flex-direction:column;align-items:center;text-align:center;gap:.6rem}
-.tier-pillars .rank-badge{margin-left:0}
 .tier-pillars .mile .unlock{flex:none;text-align:center}
-/* 2026-09-04 (per Eric: "our ambassadors rank page... does not hit as
-   hard" -- referencing a COD-style "Level Progress" screen with big
-   ribbon-icon badges and a bold per-ribbon count): enlarged both the
-   event-count badge and the rank-badge icon well past their old small
-   corner-accent size so they carry real visual weight, the way the
-   reference's ribbon icons and level-progress number do -- "based on
-   number of events" (the count) and an icon-led badge, not just a small
-   label. */
-.mile-count{position:relative;z-index:2;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:72px;height:72px;background:var(--bg-3);border:2px solid var(--line)}
-.mc-num{font-family:var(--head);font-weight:800;font-size:2rem;line-height:1}
-.mc-lbl{font-family:var(--head);font-weight:700;font-size:.56rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim);margin-top:.15rem}
+/* 2026-09-18 (per Eric: "make 1 Event Hosted a horizontal tag rather than
+   a square, remove the icons entirely"): the old fixed 72x72 square badge
+   (stacked number-over-label) is now a horizontal pill -- the number and
+   "Event(s) Hosted" sit side by side in one rounded-full tag, auto-width
+   to its own content instead of a forced square. The rank-badge icon
+   circle (shield/coin/chip/trophy) that used to sit above/beside this is
+   removed outright, per Eric's direct "remove the icons entirely" --
+   .rank-badge and its per-tier color rules are gone (not just hidden). */
+.mile-count{position:relative;z-index:2;flex:none;display:inline-flex;flex-direction:row;align-items:baseline;gap:.4rem;width:auto;height:auto;padding:.55rem 1.1rem;background:var(--bg-3);border:2px solid var(--line);border-radius:999px}
+.mc-num{font-family:var(--head);font-weight:800;font-size:1.5rem;line-height:1}
+.mc-lbl{font-family:var(--head);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim)}
 .mile .unlock{position:relative;z-index:2;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:0;flex:1}
-/* 2026-09-17 (per Eric: "the emojis on top of images is a little too messy,
-   clarify and clean up"): this badge used to carry a low-opacity crop of a
-   real event-photography BG asset behind its icon, tinted with each tier's
-   color and a dark radial gradient -- see .sg-badge's own comment above
-   for the identical fix and reasoning; the same messiness applied here,
-   just at a bigger 72px size. Dropped the photo layer and its per-tier
-   background-image rules entirely -- a clean flat circle (already tinted
-   per tier via border-color/box-shadow using --tier-c) with the rank icon
-   on top, nothing underneath competing with it. */
-.rank-badge{position:relative;z-index:2;flex:none;margin-left:auto;width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:2px solid var(--line);box-shadow:0 0 18px -5px var(--tier-c, var(--ne-orange))}
-.rank-badge .ic{position:relative;z-index:2;width:34px;height:34px;fill:currentColor}
 /* Icon-led perks list (per Eric: "a list of perks", more graphic/icon-led
    than a plain bullet) -- each <li> now leads with a small SVG icon
    (assigned per perk's real content in the markup, not decorative/random)
@@ -1956,22 +1953,18 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 .mile.tier-silver .node, .host-card.tier-silver .node{background:#cddae6;color:#0c1620}
 .mile.tier-silver .mile-count{border-color:#a9bccd}
 .mile.tier-silver .mc-num{color:#a9bccd}
-.mile.tier-silver .rank-badge{border-color:#a9bccd;color:#a9bccd}
 .mile.tier-gold, .host-card.tier-gold{--tier-c:var(--ne-orange);border-color:var(--ne-orange);box-shadow:0 0 0 1px rgba(250,157,40,.18) inset,0 0 18px -7px rgba(250,157,40,.45)}
 .mile.tier-gold .node, .host-card.tier-gold .node{background:var(--ne-orange);color:#000}
 .mile.tier-gold .mile-count{border-color:var(--ne-orange)}
 .mile.tier-gold .mc-num{color:var(--ne-orange)}
-.mile.tier-gold .rank-badge{border-color:var(--ne-orange);color:var(--ne-orange)}
 .mile.tier-platinum, .host-card.tier-platinum{--tier-c:#e3e9ec;border-color:#e3e9ec;box-shadow:0 0 0 1px rgba(227,233,236,.2) inset,0 0 20px -7px rgba(227,233,236,.5)}
 .mile.tier-platinum .node, .host-card.tier-platinum .node{background:#e3e9ec;color:#10161a}
 .mile.tier-platinum .mile-count{border-color:#e3e9ec}
 .mile.tier-platinum .mc-num{color:#e3e9ec}
-.mile.tier-platinum .rank-badge{border-color:#e3e9ec;color:#e3e9ec}
 .mile.tier-diamond, .host-card.tier-diamond{--tier-c:#8fe3ff;border-color:#8fe3ff;box-shadow:0 0 0 1px rgba(143,227,255,.25) inset,0 0 24px -6px rgba(143,227,255,.6)}
 .mile.tier-diamond .node, .host-card.tier-diamond .node{background:#8fe3ff;color:#00131f}
 .mile.tier-diamond .mile-count{border-color:#8fe3ff}
 .mile.tier-diamond .mc-num{color:#8fe3ff}
-.mile.tier-diamond .rank-badge{border-color:#8fe3ff;color:#8fe3ff}
 
 /* 2026-08-26: the chromatic crosshatch texture that used to sit here (a
    faceted, low-opacity diagonal lattice behind .mile/.host-card content,
@@ -2086,7 +2079,7 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
      principle: a floor only needs to exist where it's doing real visual
      work). */
   .tier-pillars{grid-template-columns:1fr}
-  .mile.tier-silver, .mile.tier-gold, .mile.tier-platinum, .mile.tier-diamond{min-height:0}
+  .tier-pillars .mile{min-height:0}
 }
 
 /* ===== Past Events photo carousel ===== */
@@ -2271,7 +2264,16 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    the whole row a little taller, evenly. Keep example copy itself short
    where possible, but the layout must never rely on clipping to look
    tidy. */
-.host-card{position:relative;text-align:center;display:flex;flex-direction:column;height:100%;padding-bottom:1.7rem;overflow:hidden;transition:box-shadow .25s,border-color .25s}
+/* 2026-09-18 (per Eric: "just have the horizontal design, no open
+   closing"): this card used to default to a stacked column and only
+   switch to a side-by-side photo/bio row when a .host-expand-btn toggled
+   an .is-expanded class on (added 2026-09-10). That toggle is gone --
+   the side-by-side layout is now simply what .host-card always looks
+   like, on every screen wide enough for it (see the @media block below
+   for the narrow-viewport fallback). .host-photo and .host-body are
+   still the same two wrappers as before, just laid out as a row instead
+   of a column now. */
+.host-card{position:relative;display:flex;flex-direction:row;align-items:flex-start;text-align:left;gap:1.7rem;height:100%;padding:1.5rem 1.6rem;overflow:hidden;transition:box-shadow .25s,border-color .25s}
 /* An explicit [hidden] override, not relying on the bare attribute alone:
    .host-card's own display:flex above is an author-stylesheet rule, which
    always wins over the browser's default [hidden]{display:none} UA rule
@@ -2282,75 +2284,26 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
 /* Inset, not poking above like .mile's — the card clips overflow to keep
    its fixed height, so the rank pill sits inside the top-left corner. */
 .host-card .node{position:absolute;left:.7rem;top:.7rem;z-index:2}
-/* .host-photo (badge + avatar) and .host-body (name/bio/social/count/CTA)
-   -- added 2026-09-10 for the expandable-card upgrade below. In the
-   default (collapsed) state .host-card is still flex-direction:column,
-   so these two wrappers just stack full-width exactly like their loose
-   children used to; .host-body gets flex:1 so .host-count's own
-   margin-top:auto still pushes it to the bottom of the available space,
-   same visual result as before the wrap. See ".host-card.is-expanded"
-   further down for what changes when a card expands. */
-.host-photo{display:flex;flex-direction:column;align-items:center;flex-shrink:0;position:relative;z-index:2}
-.host-body{display:flex;flex-direction:column;flex:1;width:100%;min-width:0;position:relative;z-index:2}
-.host-avatar{width:56px;height:56px;border-radius:50%;background:var(--ne-navy);color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:1.05rem;margin:.6rem auto .7rem;flex-shrink:0;position:relative;z-index:2;transition:width .3s ease,height .3s ease,font-size .3s ease}
+.host-photo{display:flex;flex-direction:column;align-items:center;flex-shrink:0;align-self:center;position:relative;z-index:2}
+.host-body{display:flex;flex-direction:column;flex:1;width:100%;min-width:0;text-align:left;padding-top:.3rem;position:relative;z-index:2}
+.host-avatar{width:120px;height:120px;border-radius:50%;background:var(--ne-navy);color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:1.9rem;margin:.4rem auto;flex-shrink:0;position:relative;z-index:2}
 .host-card h3{white-space:normal;flex-shrink:0;position:relative;z-index:2}
 .host-cat{font-size:.85rem;margin-top:.5rem;color:var(--ink);flex-shrink:0;position:relative;z-index:2}
-.host-social{display:flex;justify-content:center;gap:.55rem;margin-top:.6rem;flex-shrink:0;position:relative;z-index:2}
+.host-social{display:flex;justify-content:flex-start;gap:.55rem;margin-top:.6rem;flex-shrink:0;position:relative;z-index:2}
 .host-social a{width:30px;height:30px;border-radius:50%;background:var(--bg-3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-dim);transition:color .15s,border-color .15s}
 .host-social a:hover{color:var(--ne-orange);border-color:var(--ne-orange)}
 .host-social a .ic{width:15px;height:15px}
 .host-count{margin-top:auto;padding-top:.6rem;font-family:var(--head);text-transform:uppercase;font-size:.74rem;letter-spacing:.03em;color:var(--ink-dim);flex-shrink:0;position:relative;z-index:2}
 .host-count b{color:var(--ne-orange);font-size:1.05rem}
-/* Real CTA in the expanded state only -- reuses the exact "Apply to
-   become an Ambassador" action already on this page (data-amb-open,
-   wired in ambassador.js) rather than inventing new content for the
-   expanded view, per the no-fabrication rule this whole section already
-   follows (see the F-04 comment above the grid). */
-.host-cta{display:none;margin-top:.9rem;flex-shrink:0}
-.host-card.is-expanded .host-cta{display:inline-flex}
 
-/* Expandable profile cards (2026-09-10, per Eric: "add the expandable
-   profile cards to the featured ambassador cards is a good upgrade" --
-   the Watermelon-UI-style pattern researched/proposed earlier this
-   session). .host-expand-btn is the one real, dedicated control for
-   opening/closing a card -- not the whole card made clickable -- so it
-   never nests one interactive element inside another (.host-social's own
-   links live in the same card and need their own independent focus
-   stop). Toggled by assets/js/ambassador.js's expand-card IIFE, which
-   also runs the one-open-at-a-time accordion behavior and Escape-to-
-   close. */
-.host-expand-btn{margin:.75rem auto 0;display:flex;align-items:center;gap:.35rem;background:none;border:none;color:var(--ink-dim);font-family:var(--head);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;padding:.6rem .5rem;position:relative;z-index:2;flex-shrink:0}
-.host-expand-btn::before{content:"";position:absolute;top:50%;left:50%;width:100%;height:44px;min-width:44px;transform:translate(-50%,-50%)}
-.host-expand-btn:hover,.host-expand-btn:focus-visible{color:var(--ne-orange)}
-.host-expand-ic{width:14px;height:14px;display:inline-flex;transform:rotate(90deg);transition:transform .3s ease}
-.host-expand-ic .ic{width:14px;height:14px;fill:currentColor}
-.host-expand-label-close{display:none}
-.host-card.is-expanded .host-expand-label-close{display:inline}
-.host-card.is-expanded .host-expand-label:not(.host-expand-label-close){display:none}
-.host-card.is-expanded .host-expand-ic{transform:rotate(-90deg)}
-
-/* The expanded state itself: the card spans the full grid row
-   (grid-column:1/-1 -- #host-grid:has() below lifts the grid's own
-   max-width cap so there's actually room to use) and switches from a
-   stacked column to a side-by-side row -- .host-photo and .host-body are
-   the exact same elements as the collapsed state, just reflowed by this
-   rule, so there is nothing to keep in sync between two copies of the
-   same content. */
-.host-card.is-expanded{grid-column:1/-1;flex-direction:row;align-items:flex-start;text-align:left;gap:1.7rem;padding:1.5rem 1.6rem}
-.host-card.is-expanded .host-photo{align-self:center}
-.host-card.is-expanded .host-avatar{width:120px;height:120px;font-size:1.9rem;margin:.4rem auto}
-.host-card.is-expanded .host-body{text-align:left;padding-top:.3rem}
-.host-card.is-expanded .host-social{justify-content:flex-start}
-.host-card.is-expanded .host-expand-btn{align-self:flex-start;margin:.3rem 0 0}
-#host-grid:has(.host-card.is-expanded){max-width:none;width:100%}
 @media (max-width:640px){
-  /* Not enough width for a real side-by-side split on a phone -- keep the
-     expanded card stacked (photo above body) but still visibly "opened"
-     via the now-visible CTA and the close-labeled toggle. */
-  .host-card.is-expanded{flex-direction:column;align-items:center;text-align:center;gap:0}
-  .host-card.is-expanded .host-body{text-align:center}
-  .host-card.is-expanded .host-social{justify-content:center}
-  .host-card.is-expanded .host-expand-btn{align-self:center}
+  /* Not enough width for a real side-by-side split on a phone -- these
+     illustrative cards fall back to a stacked column (photo above body)
+     at narrow widths, same as any other card grid on this project. */
+  .host-card{flex-direction:column;align-items:center;text-align:center;gap:0}
+  .host-photo{align-self:auto}
+  .host-body{text-align:center}
+  .host-social{justify-content:center}
 }
 
 /* Pillar tag (top-right corner): what kind of Ambassador this is --
@@ -2384,7 +2337,12 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    overlap both on a card this narrow. */
 .host-example-badge{display:block;width:max-content;margin:2.2rem auto 0;position:relative;z-index:2;font-family:var(--head);font-weight:800;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:#0c1620;background:var(--ne-orange);border-radius:3px;padding:.2rem .5rem}
 .host-card-example .host-avatar{margin-top:.5rem}
-#host-grid{max-width:340px;margin:1rem auto 0}
+/* 2026-09-18: was capped to a single 340px-wide card (max-width:340px) --
+   now that .host-card is permanently the wider side-by-side layout and
+   two illustrative example cards sit in a real .cols-2 grid (per Eric:
+   "have two columns of ambassadors fit in one row"), the grid uses the
+   page's normal container width instead of its own narrow cap. */
+#host-grid{margin:1rem auto 0}
 
 /* ===== v9: home leaderboard + refined dark polish ===== */
 .lbx{display:flex;flex-direction:column;gap:8px;max-width:620px}

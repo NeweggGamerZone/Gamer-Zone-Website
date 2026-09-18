@@ -48,6 +48,36 @@
   const t0 = new Date(today + 'T12:00:00');
   let view = new Date(t0.getFullYear(), t0.getMonth(), 1);
 
+  // 2026-09-18, per Eric ("let me click around the dates on the calendar,
+  // and only return it back to the original date after 5 minutes of
+  // inactivity"): a real 5-minute idle timer, replacing the old
+  // mouseleave-instant-revert below. A click used to persist visually
+  // (the .sel highlight stays put) but the very next time the cursor left
+  // the grid, the hover-preview's own mouseleave handler snapped the
+  // detail card straight back to today anyway -- so a click's effect
+  // barely outlived the click itself for a desktop mouse user, and never
+  // reverted at all for a touch user (no mouseleave event exists on
+  // touch, so a tapped-open future date used to just stay open forever).
+  // markActivity() is called from every real interaction (click, keyboard
+  // nav, hover, month prev/next) and resets a single pending timeout;
+  // resetToToday() fires only once nothing has touched the calendar for
+  // a full 5 minutes, and it also snaps `view` back to today's own month
+  // if the visitor had paged away, not just the detail card, so the
+  // calendar really does return to "the original date" whole.
+  const IDLE_RESET_MS = 5 * 60 * 1000;
+  let idleTimer = null;
+  function markActivity() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(resetToToday, IDLE_RESET_MS);
+  }
+  function resetToToday() {
+    if (view.getFullYear() !== t0.getFullYear() || view.getMonth() !== t0.getMonth()) {
+      view = new Date(t0.getFullYear(), t0.getMonth(), 1);
+      render();
+    }
+    show(today);
+  }
+
   const iso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const pretty = dt => new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
@@ -137,6 +167,24 @@
     const preregBlock = isToday
       ? `<p style="margin-top:.8rem"><a class="btn prereg-btn" href="${GZ.esc(verkada)}" target="_blank" rel="noopener">Preregister your visit</a></p><p class="dim" style="font-size:.78rem;margin-top:.4rem">Visiting today? Skip the line: preregistrations are one per visitor.</p>`
       : '';
+    // 2026-09-18, per Eric ("add Start.GG links and buttons for the dates
+    // ahead... Preregister should appear under those buttons when it's the
+    // day of. Call it Tournament Sign Up"): a real per-event `startgg` URL
+    // (data/events.json, tournament-type entries only, hand-verified
+    // against the tournament's own real start.gg page -- see the daily-
+    // updates scheduled task for how these stay current) renders as its
+    // own button, reusing the same `.btn.prereg-btn` unified button
+    // treatment every other primary CTA on this card already uses rather
+    // than inventing a second button look. Only shown for today or a real
+    // future date (`dt >= today`, safe as a plain ISO string compare) --
+    // a past tournament's registration has already closed, so the button
+    // isn't shown there. `preregBlock` above is unchanged and still only
+    // ever renders on the day-of, so stacking it directly under this one
+    // in cd-body is exactly "Preregister appears under Tournament Sign Up
+    // when it's the day of," with zero extra conditional needed here.
+    const startggBlock = (e && e.startgg && dt >= today)
+      ? `<p style="margin-top:.8rem"><a class="btn prereg-btn" href="${GZ.esc(e.startgg)}" target="_blank" rel="noopener">Tournament Sign Up</a></p>`
+      : '';
     // Reorganized card layout, same order/spacing for every day type:
     // tag -> title -> subtitle -> date/time meta row (with icons) ->
     // description -> CTA.
@@ -151,7 +199,7 @@
           ${e.time ? `<span class="cd-meta-item"><i data-ic="clock"></i>${GZ.esc(e.time)}</span>` : ''}
         </div>
         ${e.blurb ? `<p class="cd-blurb">${GZ.esc(e.blurb)}</p>` : ''}
-        <div class="cd-body">${preregBlock}</div>`;
+        <div class="cd-body">${startggBlock}${preregBlock}</div>`;
     } else if (closed) {
       setCardBg(null);
       const reasonLine = (closedByType && e.blurb) ? `<p class="cd-blurb">${GZ.esc(e.blurb)}</p>` : '';
@@ -191,6 +239,7 @@
     show(c.dataset.d);
     grid.querySelectorAll('[data-d]').forEach(cell => { cell.tabIndex = -1; });
     c.tabIndex = 0;
+    markActivity();
   });
   // Keyboard operation: Enter/Space activates the focused day (same as a
   // click); Arrow keys move focus cell-to-cell (Left/Right = adjacent day,
@@ -207,6 +256,7 @@
       e.preventDefault();
       if (c.classList.contains('cal-closed')) return; // closed days aren't activatable, see click handler above
       show(c.dataset.d);
+      markActivity();
       return;
     }
     const deltas = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
@@ -226,6 +276,7 @@
       next.tabIndex = 0;
       next.focus();
       show(next.dataset.d);
+      markActivity();
     }
   });
   // Preview a day's event just by hovering — no click needed on desktop.
@@ -239,12 +290,13 @@
     const c = e.target.closest('.cal-cell[data-d]');
     if (!c || c.classList.contains('cal-closed')) return;
     show(c.dataset.d);
+    markActivity();
   });
-  // Once the cursor leaves the grid entirely, fall back to today rather than
-  // leaving whatever day was last hovered on screen.
-  grid.addEventListener('mouseleave', () => show(today));
-  document.getElementById('cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); render(); });
-  document.getElementById('cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); render(); });
+  // 2026-09-18: no more instant mouseleave-revert here -- see the
+  // resetToToday()/markActivity() idle-timer block near the top of this
+  // file for the real 5-minute-inactivity behavior that replaces it.
+  document.getElementById('cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); render(); markActivity(); });
+  document.getElementById('cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); render(); markActivity(); });
 
   render();
   // Default to today — the same thing shown whenever nothing is hovered.

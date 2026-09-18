@@ -330,40 +330,30 @@ const GZ = {
       return (stepDist / totalDist) * dur * 1000;
     }
 
-    // Skips one card smoothly (per Eric: "skip back and skip forward an
-    // image smoothly", not an instant cut) by temporarily boosting
-    // Animation.playbackRate in the requested direction and polling with
-    // requestAnimationFrame until currentTime reaches the target, then
-    // snapping exactly to it and resetting the rate. currentTime on an
-    // infinitely-looping animation counts up without ever wrapping back
-    // to 0 internally (the wrap is purely a visual effect of the
-    // keyframes), so target math never needs a modulo or to handle
-    // crossing the loop seam as a special case.
+    // Skips one card instantly -- reversed 2026-09-18 from the prior
+    // "smoothly ramp playbackRate, poll with requestAnimationFrame" version
+    // (that was itself an explicit 2026-09-08 spec: "skip back and skip
+    // forward an image smoothly, not an instant cut"). Per Eric's direct
+    // follow-up call: the ramped skip read as a laggy wait rather than an
+    // immediate, actionable click, and he wants every reel (Reviews,
+    // Featured Gear, Past Events waterfall, hero photo strip, Academy/
+    // Ambassador galleries -- this is the one shared implementation behind
+    // all of them, so one fix here reaches every consumer at once) to snap
+    // straight to the next card and immediately resume its normal
+    // autoscroll from there. currentTime on an infinitely-looping animation
+    // counts up without ever wrapping back to 0 internally (the wrap is
+    // purely a visual effect of the keyframes), so the target math still
+    // never needs a modulo or to handle crossing the loop seam specially --
+    // only the "how we get there" (instant set vs. ramped poll) changed.
     function skip(dir) {
       const anim = track.getAnimations()[0];
       const step = stepMs();
-      if (!anim || !step || track.dataset.gzSkipping) return;
-      track.dataset.gzSkipping = '1';
-      const target = (anim.currentTime || 0) + dir * step;
-      const rate = dir * 8;
-      anim.playbackRate = rate;
-      anim.play();
-      function tick() {
-        const ct = anim.currentTime || 0;
-        const reached = dir > 0 ? ct >= target : ct <= target;
-        if (reached) {
-          anim.currentTime = target;
-          anim.playbackRate = 1;
-          // Resume normal playback after the skip completes, unless the
-          // visitor has this lane explicitly paused via the play/pause
-          // control.
-          if (track.dataset.gzHardPaused) anim.pause();
-          delete track.dataset.gzSkipping;
-          return;
-        }
-        requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
+      if (!anim || !step) return;
+      anim.currentTime = (anim.currentTime || 0) + dir * step;
+      // Resume normal playback immediately after the jump, unless the
+      // visitor has this lane explicitly paused via the play/pause control.
+      if (track.dataset.gzHardPaused) anim.pause();
+      else { anim.playbackRate = 1; anim.play(); }
     }
 
     // A manual pause is now a sticky toggle (not a hover-scoped state --

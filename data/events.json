@@ -225,7 +225,8 @@
       "featured": true,
       "reservation": false,
       "accent": "#FF2E97",
-      "banner": "Newegg Mario Kart Cup"
+      "banner": "Newegg Mario Kart Cup",
+      "startgg": "https://www.start.gg/tournament/newegg-mario-kart-cup"
     },
     {
       "id": "xp-fortnite-training-2026-09-23",
@@ -260,7 +261,8 @@
       "blurb": "Southern California's best fighters battle it out in SF6 bracket play. Free play and raffle prizes all day. Walk-ins welcome.",
       "featured": true,
       "reservation": false,
-      "accent": "#FF2E97"
+      "accent": "#FF2E97",
+      "startgg": "https://www.start.gg/tournament/street-fighter-6-saturday-slam-newegg-gamer-zone-1"
     }
   ],
   "weeklyThemes": [

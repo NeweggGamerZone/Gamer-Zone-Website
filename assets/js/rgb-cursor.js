@@ -23,7 +23,19 @@
    needing its own coarse-pointer/reduced-motion gate up front (that gate
    only ever applied to the now-removed trail canvas -- the popover always
    worked on every device, since recoloring the grid lines is a real,
-   useful setting independent of whether a device has a hoverable cursor). */
+   useful setting independent of whether a device has a hoverable cursor).
+
+   2026-09-18, per Eric ("not have a hue slider or a match lighting
+   profile button, just have it so I can direct click various values on
+   the wheel"): the separate <input type="range"> and its "Match lighting
+   profile" reset button are gone -- direct click/drag on the wheel
+   (already the primary interaction, see hueFromPointer() below) is now
+   the only way to set a color. Since removing the range input would also
+   remove the one keyboard-operable path this control had (core rule 8),
+   the wheel itself picked up that job instead: it's now a real
+   role="slider" element (tabindex, aria-value*) and Left/Right/Down/Up
+   arrow keys step its hue by 5deg, Home/End jump to 0/359 -- the same
+   "one control, not two" simplification, just moved onto the wheel. */
 (function () {
   var swatch = document.getElementById('hero-lighting-swatch');
   var popover = document.getElementById('cursor-modal');
@@ -31,8 +43,6 @@
 
   var wheel = document.getElementById('gz-color-wheel');
   var knob = document.getElementById('gz-wheel-knob');
-  var range = document.getElementById('gz-hue-range');
-  var resetBtn = document.getElementById('gz-hue-reset');
   var closeBtn = document.getElementById('cursor-modal-close');
   var WHEEL_R = 64;
 
@@ -52,8 +62,8 @@
 
   function applyHue(hue) {
     var h = Math.round(((hue % 360) + 360) % 360);
-    range.value = h;
     setKnobFromHue(h);
+    wheel.setAttribute('aria-valuenow', String(h));
     if (hero().setCustomHue) hero().setCustomHue(h);
   }
 
@@ -75,11 +85,19 @@
     popover.style.top = top + 'px';
   }
 
+  // Syncs the wheel's knob position/aria-valuenow to a hue WITHOUT pushing
+  // it to the tunnel -- used on open/init so just looking at the popover
+  // never itself changes the current color, only an actual click/drag/
+  // key on the wheel does.
+  function syncKnob(hue) {
+    var h = Math.round(((hue % 360) + 360) % 360);
+    setKnobFromHue(h);
+    wheel.setAttribute('aria-valuenow', String(h));
+  }
+
   function openPopover() {
     popover.classList.add('open');
-    var h = currentHue();
-    range.value = h;
-    setKnobFromHue(h);
+    syncKnob(currentHue());
     positionPopover();
   }
   function closePopover() { popover.classList.remove('open'); }
@@ -97,15 +115,6 @@
     if (e.key === 'Escape' && popover.classList.contains('open')) { closePopover(); swatch.focus(); }
   });
   window.addEventListener('resize', function () { if (popover.classList.contains('open')) positionPopover(); });
-
-  range.addEventListener('input', function () { applyHue(Number(range.value)); });
-
-  resetBtn.addEventListener('click', function () {
-    if (hero().setCustomHue) hero().setCustomHue(null);
-    var h = currentHue();
-    range.value = h;
-    setKnobFromHue(h);
-  });
 
   // Real conic-gradient angle math: conic-gradient(from 0deg, ...) starts
   // straight up and proceeds clockwise, and this wheel's exact stops
@@ -131,5 +140,21 @@
   wheel.addEventListener('pointerup', function () { dragging = false; });
   wheel.addEventListener('pointercancel', function () { dragging = false; });
 
-  setKnobFromHue(range ? Number(range.value) : 205);
+  // Keyboard operability (core rule 8) now lives on the wheel itself
+  // since the separate range-input slider is gone: Left/Down step the
+  // hue back 5deg, Right/Up step it forward 5deg, Home/End jump to the
+  // wheel's 0/359 extremes -- standard role="slider" key bindings.
+  wheel.addEventListener('keydown', function (e) {
+    var h = currentHue();
+    var step = 5;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') h += step;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') h -= step;
+    else if (e.key === 'Home') h = 0;
+    else if (e.key === 'End') h = 359;
+    else return;
+    e.preventDefault();
+    applyHue(h);
+  });
+
+  syncKnob(currentHue());
 })();

@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=92">
+<link rel="stylesheet" href="assets/css/style.css?v=94">
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -119,7 +119,7 @@
       <span class="hs-line solid hero-in" style="--d:.15s">Get in</span>
       <span class="hs-line outline hero-in" style="--d:.32s">The Zone</span>
     </h1>
-    <p class="lead hero-in" style="--d:.5s">Newegg's FREE High-End Gaming Lounge. Experience the latest PCs, virtual reality headsets, racing simulators, and gaming hardware for free!</p>
+    <p class="lead hero-in" style="--d:.5s">Newegg's FREE High-End Gaming Lounge. Experience the latest PCs, virtual reality headsets, racing simulators, and gaming hardware.</p>
     <div class="btn-row hero-in" style="--d:.68s">
       <a class="btn" href="events.html#calendar">Plan your visit</a>
     </div>
@@ -616,34 +616,35 @@
      positioned to the swatch's left, see rgb-cursor.js's positionPopover())
      -- not the site's full-screen .modal-bg/.modal dialog, which was too
      heavy for a "mini pop up tab." The wheel is a real conic-gradient
-     rainbow disc (angle-only, "simplistic" per Eric's own word); the
-     paired range input is the genuinely keyboard-operable version of the
-     same control (arrow keys step the hue) since a mouse-drag-only wheel
-     would fail core rule 8 -- both stay in sync with each other. -->
+     rainbow disc (angle-only, "simplistic" per Eric's own word).
+     2026-09-18, per Eric ("not have a hue slider or a match lighting
+     profile button, just have it so I can direct click various values on
+     the wheel... shorter description"): the separate range-input slider
+     and "Match lighting profile" reset button are gone -- direct
+     click/drag on the wheel (already how it worked) is now the only way
+     to pick a color. The wheel itself picks up the keyboard-operability
+     that slider used to provide (role="slider" + arrow-key hue stepping,
+     see rgb-cursor.js) so core rule 8 still holds with one control
+     instead of two. -->
 <div class="gz-hue-popover" id="cursor-modal" role="dialog" aria-label="Grid line color">
   <button class="close" id="cursor-modal-close" aria-label="Close">&times;</button>
   <h3>Grid Color</h3>
-  <p class="dim" style="font-size:.82rem">Recolor the background grid lines. Your cursor trail always matches whatever color is showing.</p>
+  <p class="dim" style="font-size:.82rem">Click the wheel to recolor the background grid lines.</p>
   <div class="gz-wheel-wrap">
-    <div class="gz-color-wheel" id="gz-color-wheel" role="presentation">
+    <div class="gz-color-wheel" id="gz-color-wheel" role="slider" tabindex="0" aria-label="Grid line color hue" aria-valuemin="0" aria-valuemax="359" aria-valuenow="205">
       <div class="gz-wheel-knob" id="gz-wheel-knob"></div>
     </div>
   </div>
-  <label for="gz-hue-range">Hue</label>
-  <input type="range" id="gz-hue-range" min="0" max="359" step="1" value="205" aria-label="Grid line color hue">
-  <div class="btn-row" style="margin-top:1rem">
-    <button type="button" class="btn" id="gz-hue-reset">Match lighting profile</button>
-  </div>
 </div>
-<script src="assets/js/main.js?v=92" defer></script>
-<script src="assets/js/preregister-node.js?v=92" defer></script>
-<script src="assets/js/techno-hero.js?v=92" defer></script>
-<script src="assets/js/photo-waterfall.js?v=92" defer></script>
-<script src="assets/js/events.js?v=92" defer></script>
-<script src="assets/js/event-update.js?v=92" defer></script>
-<script src="assets/js/zone-stack.js?v=92" defer></script>
-<script src="assets/js/featured-gear.js?v=92" defer></script>
-<script src="assets/js/reviews.js?v=92" defer></script>
-<script src="assets/js/rgb-cursor.js?v=92" defer></script>
+<script src="assets/js/main.js?v=94" defer></script>
+<script src="assets/js/preregister-node.js?v=94" defer></script>
+<script src="assets/js/techno-hero.js?v=94" defer></script>
+<script src="assets/js/photo-waterfall.js?v=94" defer></script>
+<script src="assets/js/events.js?v=94" defer></script>
+<script src="assets/js/event-update.js?v=94" defer></script>
+<script src="assets/js/zone-stack.js?v=94" defer></script>
+<script src="assets/js/featured-gear.js?v=94" defer></script>
+<script src="assets/js/reviews.js?v=94" defer></script>
+<script src="assets/js/rgb-cursor.js?v=94" defer></script>
 </body>
 </html>
