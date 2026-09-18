@@ -10,12 +10,17 @@
   const chipsWrap = document.getElementById('games-filters');
   const genreWrap = document.getElementById('games-genre-filters');
 
+  // 2026-09-18, per Eric: "Arcade" renamed to "Arcade Station" in every
+  // visitor-facing label (this chip, the games-cat-grid card in games.html,
+  // and the panel heading, which is generated from this same `label`).
+  // The internal `key: 'arcade'` is unchanged so filtering/data-platform
+  // attributes/URLs keep working.
   const PLATFORMS = [
     { key: 'pc', label: 'PC', icon: 'pc' },
     { key: 'console', label: 'Consoles', icon: 'gamepad' },
     { key: 'vr', label: 'VR', icon: 'vr' },
     { key: 'racing-sim', label: 'Racing Simulators', icon: 'wheel' },
-    { key: 'arcade', label: 'Arcade', icon: 'coin' },
+    { key: 'arcade', label: 'Arcade Station', icon: 'coin' },
   ];
   const PLATFORM_BY_KEY = Object.fromEntries(PLATFORMS.map(p => [p.key, p]));
 
@@ -32,11 +37,36 @@
     console: 'Systems: Xbox &middot; Nintendo Switch 2 &middot; PlayStation 5 &middot; Retro Games Emulator',
   };
 
-  // VR sub-label — which headset/storefront each title runs on.
+  // VR sub-label — which headset/storefront each title runs on. Rebuilt
+  // 2026-09-18 per Eric's real supplied inventory (Steam VR list + Meta
+  // Quest list); every VR title now gets a label rather than only some.
+  // Population One is the one title on both lists -- entered once in
+  // GAMES below, labeled here as available on both rather than duplicated
+  // as two list rows.
   const VR_SYSTEM = {
-    'Beat Saber': 'Meta Quest & Steam VR',
-    'Kill It With Fire VR': 'Meta Quest & Steam VR',
-    'Dumb Ways to Die VR': 'Meta Quest only',
+    'Kill It With Fire VR': 'Steam VR',
+    'Among Us 3D: VR': 'Steam VR',
+    'Beat Saber': 'Steam VR',
+    'The Elder Scrolls V: Skyrim VR': 'Steam VR',
+    'VRChat': 'Steam VR',
+    'Doctor Who: The Edge of Time': 'Steam VR',
+    'Arizona Sunshine VR 2': 'Meta Quest only',
+    'The Thrill of the Fight 2': 'Meta Quest only',
+    'Batman: Arkham Shadow': 'Meta Quest only',
+    'Fruit Ninja': 'Meta Quest only',
+    'Teenage Mutant Ninja Turtles Empire City': 'Meta Quest only',
+    'Population One': 'Steam VR & Meta Quest',
+  };
+
+  // Generic secondary note shown under a game's title, same visual
+  // treatment as the VR sub-label above (dim, smaller, in parens) but not
+  // tied to VR platform info. Added 2026-09-18, per Eric, so "Street
+  // Fighter DLC (1-4)" is no longer a separate list entry -- it's now a
+  // note attached directly to Street Fighter 6 itself. Reusable for any
+  // future game that needs a similar secondary callout instead of
+  // hardcoding a one-off into the HTML.
+  const GAME_NOTE = {
+    'Street Fighter 6': 'DLC Years 1–4 Available',
   };
 
   // [name, platform, genre?]
@@ -65,54 +95,79 @@
     ['Onimusha: Way of the Sword', 'pc', 'single'], ['Stray', 'pc', 'single'],
     ['007 First Light', 'pc', 'single'], ['Crimson Desert', 'pc', 'single'],
     // Party titles — played on the PCs, tagged Co-op.
+    // 2026-09-18, per Eric: Jackbox Party Pack 4/6/7 removed from this PC
+    // list -- 4 and 6 are still available in Arcade Station below; 7
+    // wasn't previously in Arcade Station at all, so per Eric's own call
+    // it moved there too (see Arcade Station's own comment) rather than
+    // disappearing from the library entirely. Drawful 2 is unaffected.
     ['Taiko no Tatsujin: Rhythm Festival', 'pc', 'coop'],
-    ['Jackbox Party Pack 4', 'pc', 'coop'], ['Jackbox Party Pack 6', 'pc', 'coop'],
-    ['Jackbox Party Pack 7', 'pc', 'coop'], ['Drawful 2', 'pc', 'coop'],
+    ['Drawful 2', 'pc', 'coop'],
     ['Castle Crashers', 'pc', 'coop'],
     // Added 2026-09-17, per Eric.
     ['WARDOGS', 'pc'], ['Minecraft', 'pc'],
 
     // Consoles — Nintendo Switch station.
+    // 2026-09-18, per Eric: the old generic "Mario Kart" entry is now
+    // "Mario Kart 8" (renamed in place, not a new/duplicate row), plus two
+    // real Switch titles added -- Super Mario Wonder and Splatoon Raiders.
     ['Super Smash Bros.', 'console', 'competitive'], ['Mario Party', 'console', 'coop'],
-    ['Super Mario 3D World', 'console', 'coop'], ['Mario Kart', 'console', 'competitive'],
+    ['Super Mario 3D World', 'console', 'coop'], ['Mario Kart 8', 'console', 'competitive'],
+    ['Super Mario Wonder', 'console', 'coop'], ['Splatoon Raiders', 'console', 'competitive'],
     ['NBA2K26', 'console', 'competitive'], ['FC26', 'console', 'competitive'],
     ['Star Fox', 'console', 'single'], ['Xbox Game Pass Basic', 'console'],
 
-    // VR headsets.
-    ['Dumb Ways to Die VR', 'vr'], ['Kill It With Fire VR', 'vr'], ['Beat Saber', 'vr'],
+    // VR headsets. Rebuilt 2026-09-18 per Eric's real supplied inventory --
+    // see VR_SYSTEM above for the per-title Steam VR / Meta Quest / both
+    // labels. The old 3-title list (including Dumb Ways to Die VR, not
+    // part of the new inventory) is fully replaced, not merged.
+    ['Kill It With Fire VR', 'vr'], ['Among Us 3D: VR', 'vr'], ['Population One', 'vr'],
+    ['Beat Saber', 'vr'], ['The Elder Scrolls V: Skyrim VR', 'vr'], ['VRChat', 'vr'],
+    ['Doctor Who: The Edge of Time', 'vr'],
+    ['Arizona Sunshine VR 2', 'vr'], ['The Thrill of the Fight 2', 'vr'],
+    ['Batman: Arkham Shadow', 'vr'], ['Fruit Ninja', 'vr'],
+    ['Teenage Mutant Ninja Turtles Empire City', 'vr'],
 
     // Racing Simulator rigs.
     ['Forza Horizon 6', 'racing-sim'], ['Assetto Corsa', 'racing-sim'],
 
-    // Arcade — was fighting games only until 2026-09-17; per Eric, now also
-    // covers a few real co-op/party arcade titles (see below) alongside the
-    // existing fighting-game core.
-    ['2XKO', 'arcade', 'competitive'], ['Street Fighter 6', 'arcade', 'competitive'],
+    // Arcade Station — was fighting games only until 2026-09-17; per Eric,
+    // now also covers a few real co-op/party arcade titles (see below)
+    // alongside the existing fighting-game core.
+    ['2XKO', 'arcade', 'competitive'],
+    // 2026-09-18, per Eric: "Street Fighter DLC (1-4)" is no longer its
+    // own list entry -- see GAME_NOTE above, which attaches "DLC Years
+    // 1-4 Available" directly to Street Fighter 6's own row instead.
+    ['Street Fighter 6', 'arcade', 'competitive'],
     ['Street Fighter Collection 30th Anniversary', 'arcade', 'competitive'],
     ['MARVEL vs. CAPCOM Fighting Collection: Arcade Classics', 'arcade', 'competitive'],
     ['MARVEL Cosmic Invasion', 'arcade', 'competitive'], ['Tekken 7', 'arcade', 'competitive'],
     ['Tekken 8', 'arcade', 'competitive'], ['SoulCalibur VI', 'arcade', 'competitive'],
     ['Marvel Tokon: Fighting Souls', 'arcade', 'competitive'],
-    ['Street Fighter DLC (1-4)', 'arcade', 'competitive'],
     ['Avatar Legends: The Fighting Game', 'arcade', 'competitive'],
     ['Dragon Ball FighterZ', 'arcade', 'competitive'],
     // Added 2026-09-17, per Eric. Teenage Mutant Ninja Turtles: Shredder's
     // Revenge is a co-op beat-'em-up, not a 1v1 fighter, tagged 'coop' to
     // match its real genre rather than lumping it in with 'competitive'
-    // just because it's in the Arcade list. The three Jackbox Party Packs
-    // are also already in the PC list above (played there as party games
-    // during general PC sessions) -- this adds them to Arcade too, since
-    // that's genuinely a second, separate place they get played, not a
-    // move/duplicate-cleanup request.
+    // just because it's in the Arcade Station list. Jackbox Party Pack 4
+    // and 6 are also already in the PC list above (played there as party
+    // games during general PC sessions) -- this adds them to Arcade
+    // Station too, since that's genuinely a second, separate place they
+    // get played, not a move/duplicate-cleanup request.
     ["Teenage Mutant Ninja Turtles: Shredder's Revenge", 'arcade', 'coop'],
     ['Jackbox Party Pack 4', 'arcade', 'coop'], ['Jackbox Party Pack 5', 'arcade', 'coop'],
     ['Jackbox Party Pack 6', 'arcade', 'coop'],
+    // 2026-09-18, per Eric: Jackbox Party Pack 7 moved here from the PC
+    // list (see that list's own comment) rather than being removed from
+    // the library outright, so it stays available in Arcade Station.
+    ['Jackbox Party Pack 7', 'arcade', 'coop'],
   ].map(([name, platform, genre]) => ({ name, platform, genre: genre || null }));
 
   function byName(a, b) { return a.name.localeCompare(b.name); }
 
   function itemLine(g) {
-    const subText = g.platform === 'vr' && VR_SYSTEM[g.name] ? ` (${VR_SYSTEM[g.name]})` : '';
+    const vrLabel = g.platform === 'vr' && VR_SYSTEM[g.name] ? VR_SYSTEM[g.name] : '';
+    const noteLabel = !vrLabel && GAME_NOTE[g.name] ? GAME_NOTE[g.name] : '';
+    const subText = vrLabel || noteLabel ? ` (${vrLabel || noteLabel})` : '';
     const sub = subText ? ` <span class="dim" style="font-size:.82em">${GZ.esc(subText)}</span>` : '';
     // Full name (+ VR system, if any) wraps up to 2 lines inside .gl-name as
     // one flowing text block (see .game-list li .gl-name in style.css) --

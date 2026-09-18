@@ -463,8 +463,7 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .gear-item { position: relative; flex: 0 0 auto; width: 230px; padding: 1rem; display: flex; flex-direction: column; -webkit-user-select: none; user-select: none; }
 .gear-item-img { width: 100%; aspect-ratio: 1/1; background: #fff; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .gear-item-img img { width: 100%; height: 100%; object-fit: contain; padding: .6rem; display: block; -webkit-user-drag: none; user-drag: none; }
-.gear-item .gear-item-spec { font-size: .8rem; }
-.gear-item-price { font-family: var(--head); font-weight: 800; color: var(--ne-orange); font-size: 1.05rem; margin: .3rem 0 .7rem; }
+.gear-item .gear-item-spec { font-size: .8rem; margin-bottom: .7rem; }
 .gear-item .btn { padding: .5rem 1.1rem; font-size: .8rem; margin-top: auto; align-self: flex-start; }
 @media (max-width: 560px) { .gear-item { width: 190px; } }
 
@@ -3248,6 +3247,8 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
      already correct from the base rules and only the direction changes. */
   html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-side:nth-child(2){transform:translate(calc(-50% - 20px),-50%)}
   html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% - 38px),-50%)}
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-side:nth-child(4){transform:translate(calc(-50% + 20px),-50%);opacity:.4;max-width:min(68%,585px);max-height:min(38cqw,320px)}
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-outer:nth-child(5){transform:translate(calc(-50% + 38px),-50%);opacity:.24;max-width:min(64%,550px);max-height:min(36cqw,300px)}
 }
 /* Special one-off callout banner: rendered above a Special Events row
    when that specific event has a `banner` field in data/events.json (see
@@ -3291,7 +3292,8 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
    since this export has more real width to work with (1150px vs 700px)
    -- kept proportionally similar, not copy-pasted 1:1. */
 @media (min-width:900px){
-  html.board-mode .eu-board-icon{position:relative;display:block;height:130px;margin-top:clamp(.9rem,2.1cqw,1.4rem)}
+  html.board-mode .eu-board-icon{position:relative;display:block;height:130px;margin-top:clamp(.9rem,2.1cqw,1.4rem);transform:scale(var(--eu-icon-fit-scale,1));transform-origin:top center}
+  html.board-mode .eu-board-icon[hidden]{display:none}
   html.board-mode .eu-board-icon-side,html.board-mode .eu-board-icon-outer{display:block}
   html.board-mode .eu-board-icon img{position:absolute;left:50%;top:50%;margin:0;width:auto;max-width:none;height:auto}
   /* #eu-board-icon-img (an id) always wins specificity over the plain
@@ -3310,6 +3312,8 @@ html.board-mode .eu-board-icon{margin-top:clamp(1.15rem,2.76cqw,1.96rem)}
      trail offsets above were already scaled up from the square version's. */
   html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-side:nth-child(2){transform:translate(calc(-50% - 26px),-50%)}
   html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-outer:nth-child(1){transform:translate(calc(-50% - 48px),-50%)}
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-side:nth-child(4){transform:translate(calc(-50% + 26px),-50%);max-height:118px;opacity:.4}
+  html.board-mode .eu-board-icon.eu-icon-symmetric img.eu-board-icon-outer:nth-child(5){transform:translate(calc(-50% + 48px),-50%);max-height:100px;opacity:.24}
 }
 /* 2026-09-04 (v2), per Eric: adding a real icon to Racing Games Week
    (Mario Kart) surfaced a crop problem the 1:1 export never has to deal

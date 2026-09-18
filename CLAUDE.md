@@ -1001,6 +1001,131 @@ full contrast/width/console audit re-run clean on `edu.html` specifically (0 fin
 only the already-disclosed pre-existing Featured Gear horizontal-overflow findings on
 `index.html` and nothing new anywhere else.
 
+**Superseded the same day** -- see "Home/Games/Academy multi-page update round" below: Eric
+came back and said the logo-only treatment (specifically, comparing it against "the current
+image of the child") read as unnatural/distorted, and asked for an authentic action photo
+instead. The logo file (`xpleague-logo.png`) is left on disk, unreferenced, per this project's
+own "don't delete real assets speculatively" convention already stated above.
+
+## Home/Games/Academy multi-page update round (2026-09-18)
+
+Per a large, explicit, fully-specified requirements message from Eric covering three pages at
+once -- proposed back to him first per core rule 15 (three genuinely open sub-questions were
+resolved via `AskUserQuestion` before any file was touched: Jackbox Party Pack 7's fate, which
+real photos to use for the three brand-new zones, and whether to keep the just-shipped XP
+League logo or search for a real action photo instead), then implemented in full once answered.
+
+**Home -- About Gamer Zone expanded from 5 to the real 8 official zones.** The prior 5-card
+grid (with two wrong names -- "Racing & Immersive Zone" and "Broadcast Zone" -- that don't
+match newegg.com/gamerzone's own copy) is now all 8 real zones, sourced by fetching
+`newegg.com/gamerzone` directly (via Claude in Chrome, since it's JS-rendered and plain
+`web_fetch` returned nothing usable) and copying its real zone names/descriptions verbatim
+(shortened where needed): PC Gaming Zone, Immersive Zone (renamed from "Racing & Immersive"),
+VR & Mixed Reality Zone, Console Gaming Zone, Broadcast Command Zone (renamed from "Broadcast
+Zone"), Shoutcaster & Commentary Zone, Social Gathering Zone, and Presentation Zone -- the last
+three are genuinely new cards. `zone-stack.js`'s expanding-grid carousel needed zero code
+changes for this -- it already computes item count and column layout dynamically rather than
+assuming a fixed number, confirmed by reading the full file before touching any markup.
+
+Photos for the 3 new zones, per Eric's own hints ("the photo of the bar for social," "any
+photos of the broadcast zone for the shoutcaster and commentary," "the photo of the TV with
+shoutcasters... for presentation"): a subagent searched `PhotoReel` visually (not by filename)
+for matching candidates, which I then personally re-verified and refined via direct `Read`
+inspection -- picking cleaner alternates over the subagent's first suggestions in two cases.
+Shoutcaster & Commentary Zone and Social Gathering Zone got real, newly-cropped 900x600 photos
+(`shoutcaster-bg.jpg`, `social-gathering-bg.jpg`, both in `assets/calendar/BGAssets/`). **No
+real photo was found for Presentation Zone** despite a genuine look (Eric's "TV with
+shoutcasters" hint pointed at the same photo already used for Broadcast Command Zone, not a
+distinct one) -- per the no-fabrication rule, it uses the site's existing honest icon-only
+fallback pattern (`.zone-grid-art-empty`, already established for a previous Arcade-photo gap)
+rather than a mismatched or duplicated photo.
+
+**Home -- Featured Gear: renamed and pricing removed.** "Gear We Feature" -> "Featured Gear"
+(`<h2>` only). All 14 `GEAR` entries in `featured-gear.js` had their `price` field removed, and
+`cardHTML()` no longer renders a price line -- cards now show only image, name, spec line, and
+the "View on Newegg" link, per Eric's direct instruction (prices go stale against Newegg's live
+price, and Eric didn't want the upkeep). `.gear-item-price`'s CSS rule was deleted outright;
+`.gear-item-spec` gained `margin-bottom:.7rem` in its place so spacing above the button doesn't
+collapse now that the price line is gone.
+
+**Games -- "Arcade" renamed to "Arcade Station" (visitor-facing only).** The internal
+`PLATFORMS` key stays `arcade` (per Eric's own "don't change internal keys unless required"),
+but every visible label changed: `PLATFORMS[].label`, the `#games-cat-grid` card `<h3>`, and
+critically the **hardcoded** filter chip `<span>` in `games.html` -- this chip's text is not
+generated from `PLATFORMS.label` the way the panel heading is, so both had to be edited
+separately or the visible chip would have kept reading "Arcade" while everything else changed.
+
+**Games -- Jackbox Party Pack 4/6/7 handling.** Per the requirement to remove Jackbox titles
+from the PC list (they're not PC-exclusive, and Arcade Station already carries most of them):
+4 and 6 were simply removed from PC (Arcade Station already lists both). Party Pack 7 was
+PC-only with no Arcade Station counterpart, so removing it from PC per the instruction would
+have deleted it from the site outright -- flagged to Eric via `AskUserQuestion`, who chose
+"move it to Arcade Station" over dropping it. Implemented exactly that: removed from PC,
+added to Arcade Station's own list with a comment explaining the move.
+
+**Games -- Discord CTA replaced with a direct email link.** The old "request a game" CTA
+pointed at the site's Discord; per Eric's direct instruction this is now a plain
+`mailto:gamerzone@newegg.com` line ("Don't see your favorite? Email us at
+gamerzone@newegg.com."). This is a request-a-title contact channel, not general community
+chat, so it doesn't touch the footer's separate, unrelated Discord icon link.
+
+**Games -- Street Fighter 6 DLC merged into its own list entry.** The site used to carry a
+separate, standalone "Street Fighter DLC (1-4)" row alongside the real "Street Fighter 6" row
+-- two rows for one game. A new `GAME_NOTE` lookup (`{'Street Fighter 6': 'DLC Years 1–4
+Available'}`) attaches the note directly to the real game's own row instead, reusing
+`itemLine()`'s existing dim-sublabel rendering (previously VR-only, generalized to fall back to
+`GAME_NOTE` for any non-VR title) rather than adding a second, parallel rendering path -- one
+shared mechanism for "a game with a small qualifying note," per this file's own "one shared
+implementation" discipline.
+
+**Games -- VR list fully reorganized by real platform (Steam VR vs. Meta Quest).** The 12 real
+VR titles at the Zone are now each labeled with their actual platform via a rebuilt
+`VR_SYSTEM` lookup: Kill It With Fire VR, Among Us 3D: VR, Beat Saber, The Elder Scrolls V:
+Skyrim VR, VRChat, and Doctor Who: The Edge of Time are Steam VR; Arizona Sunshine VR 2, The
+Thrill of the Fight 2, Batman: Arkham Shadow, Fruit Ninja, and Teenage Mutant Ninja Turtles:
+Empire City are Meta Quest; Population One -- the one title genuinely on both platforms -- is
+listed once with a combined "Steam VR & Meta Quest" label rather than appearing twice.
+"Dumb Ways to Die VR" (not a real title at the Zone per Eric's list) was removed.
+
+**Games -- Nintendo Switch additions.** "Mario Kart" renamed in place to "Mario Kart 8" (same
+row, not a new/duplicate entry), plus two real additions: Super Mario Wonder and Splatoon
+Raiders.
+
+**Academy -- XP League image swapped a second time, from the logo mark to a real action
+photo.** Per Eric, directly comparing the shipped logo against "the current image of the
+child" and calling it unnatural/distorted, with a clear fallback order: (1) authentic in-house
+Gamer Zone/XP League photography if it exists, (2) another real photo from XP League's own
+Irvine page. A targeted, actually-look-at-them search of this repo's own event photography
+found no authentic in-house XP League photo, so per Eric's own fallback order this pulled from
+`xpleague.com/california-irvine/` again: a real, unedited photo of two people at an XP League
+Finals event, one wearing a real "DOOM / IRVINE, CA" XP League competitor jersey, shaking hands
+and celebrating with crowd/stage lighting visible behind them -- genuinely natural, not
+AI-generated or distorted. Two other real candidates from the same page were checked and
+passed over: a promotional web banner with marketing text baked into the image pixels
+(unusable as a clean photo), and a plain "Sportsmanship" icon graphic (not a photo at all).
+Self-hosted as `assets/img/XPLeague/xpleague-action.jpg` (same `net::ERR_BLOCKED_BY_ORB`
+hotlinking reason as every prior XP League image on this page). The 2026-09-17 logo file
+(`xpleague-logo.png`) stays on disk, unreferenced.
+
+**Cache-bust bump:** `?v=91` -> `?v=92` across all 6 shared-convention HTML files, since
+`style.css`, `assets/js/games.js`, and `assets/js/featured-gear.js` all changed this round.
+
+**Verification.** Full scripted QA suite: console/error smoke test (0 errors, 5 pages),
+container-width check (0 findings, 5 pages), and the pixel-verified contrast audit (986 text
+items across 5 pages) -- 24 failures, all in the same already-documented "horizontally-scrolled
+Featured Gear card past the initial viewport" false-positive category (see "Readability"
+above), re-confirmed this round via a live Puppeteer check of a flagged button's real computed
+`background-image` (the standard, already-AAA-verified `.btn` gradient, not the 1.04:1 the
+audit's background-only screenshot sampled). Live element screenshots (not full-page crops)
+confirmed: the 8-zone grid renders cleanly with no clipping at desktop (3-col), tablet (2-col),
+and mobile (2-col, scrolled into view); the Arcade Station panel shows Street Fighter 6 with
+its DLC note attached and no separate DLC row; the VR panel shows all 12 titles with correct
+per-title platform labels and Population One appearing exactly once; the Consoles panel shows
+"Mario Kart 8," "Super Mario Wonder," and "Splatoon Raiders"; the filter chip reads "Arcade
+Station"; the mailto link's real `href` is `mailto:gamerzone@newegg.com`; Featured Gear cards
+render with zero `.gear-item-price` elements; and the Academy XP League photo renders as a
+real, natural, unedited action photo.
+
 ## Weekly lineup activity pulse: "who's here," reframed around real event data (2026-09-16)
 
 Roadmap #8 ("who's here" pulse) was originally scoped as a live check-in count ("14 people

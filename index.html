@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="Try the latest tech for free at the Newegg Gamer Zone: gaming PCs, racing sims, VR, esports, free snacks. Weekly events, XP League, and an Ambassador program.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=91">
+<link rel="stylesheet" href="assets/css/style.css?v=92">
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -330,17 +330,38 @@
 
   <section id="about" class="reveal">
     <h2>About Gamer Zone</h2>
-    <p class="dim">A 2,300 sq. ft. gaming and content-creation space inside Newegg HQ in Diamond Bar: built for free play, esports, streaming, and hands-on tech education. Here's what's inside -- flip through it below.</p>
+    <p class="dim">A 2,300 sq. ft. immersive venue inside Newegg HQ in Diamond Bar, built for gamers, creators, and brands -- from esports tournaments and product launches to influencer streams and free community play. Here's what's inside -- flip through it below.</p>
     <!-- 2026-09-16, round 4: rebuilt as an expanding grid carousel per
          Eric's reference (https://ui.watermelon.sh/animated-components/
          category/carousel's "Minimal Carousel") -- see the CSS's own
          header comment on .zone-grid for the full reasoning. Every zone is
          a real, always-visible, always-tabbable <button>; clicking one
          (assets/js/zone-stack.js) promotes it to the large featured
-         position at the top. Zone 5 renamed "Broadcast" -> "Broadcast
-         Zone" per Eric's direct instruction. A 6th zone ("Demo Zone," the
-         Bar area) was added and then removed again the same week per
-         Eric's follow-up call -- 5 real zones only, going forward. -->
+         position at the top.
+
+         2026-09-18, per Eric: expanded from 5 zones to the full official
+         8 named on newegg.com/gamerzone, with the two names that had
+         drifted from official wording corrected -- Zone 2 "Racing &
+         Immersive Zone" -> "Immersive Zone", Zone 5 "Broadcast Zone" ->
+         "Broadcast Command Zone" (their real official names). Every
+         description below is a shortened version of that page's own real
+         copy, not invented. Zones 6/7/8 are new:
+         - Zone 6 (Shoutcaster & Commentary Zone) uses a real photo of the
+           venue's broadcast/production crew filming a segment
+           (shoutcaster-bg.jpg, cropped from a real 2026-07-25 event photo)
+           -- not literally a seated commentary desk (none exists in the
+           repo's photo pool, confirmed by actually looking), but an
+           honest depiction of the same broadcast production area.
+         - Zone 7 (Social Gathering Zone) uses a real photo of the venue's
+           actual bar counter (social-gathering-bg.jpg, cropped from a
+           real 2026-06-20 event photo), per Eric's own "use the photo of
+           the bar" direction.
+         - Zone 8 (Presentation Zone) has no real matching photo anywhere
+           in the repo (a targeted photo search came up empty) -- per the
+           no-fabrication rule, it ships icon-only (.zone-grid-art-empty,
+           the same honest fallback Arcade Station used before a real
+           photo existed) rather than a mismatched photo. Swap in a real
+           photo here if one ever turns up. -->
     <div class="zone-stack-wrap" style="margin-top:1.4rem">
       <div class="zone-grid" id="zone-grid">
         <button type="button" class="zone-grid-item is-featured" data-zone-index="0" aria-pressed="true">
@@ -353,9 +374,9 @@
         </button>
         <button type="button" class="zone-grid-item" data-zone-index="1" aria-pressed="false">
           <span class="zone-grid-code">ZONE 2</span>
-          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="Racing and immersive zone at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/event-update-bg-week4.jpg" alt="Immersive Zone at Newegg Gamer Zone" loading="lazy"></div>
           <div class="zone-grid-body">
-            <h3>Racing &amp; Immersive Zone</h3>
+            <h3>Immersive Zone</h3>
             <p class="dim zone-grid-desc">Triple-monitor racing rigs with force-feedback wheels and pedals from Fanatec, MOZA, and Thermaltake, plus a semi-enclosed Cooler Master ORB X pod for a fully wrapped-in driving experience.</p>
           </div>
         </button>
@@ -377,10 +398,34 @@
         </button>
         <button type="button" class="zone-grid-item" data-zone-index="4" aria-pressed="false">
           <span class="zone-grid-code">ZONE 5</span>
-          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/broadcast-bg.jpg" alt="Broadcast Zone at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/broadcast-bg.jpg" alt="Broadcast Command Zone at Newegg Gamer Zone" loading="lazy"></div>
           <div class="zone-grid-body">
-            <h3>Broadcast Zone</h3>
-            <p class="dim zone-grid-desc">A dedicated setup for livestreaming, tournaments, and shoutcasting, built to bring the action to viewers watching from home.</p>
+            <h3>Broadcast Command Zone</h3>
+            <p class="dim zone-grid-desc">Powered by vMix with multi-camera switching, branded overlays, instant replays, and custom transitions, streaming live to Twitch, YouTube, and Facebook with broadcast-quality production.</p>
+          </div>
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="5" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 6</span>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/shoutcaster-bg.jpg" alt="Broadcast production crew filming at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-body">
+            <h3>Shoutcaster &amp; Commentary Zone</h3>
+            <p class="dim zone-grid-desc">Built for live commentary, interviews, and influencer hosting, fully integrated into the broadcast system for real-time play-by-play coverage and instant social media engagement.</p>
+          </div>
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="6" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 7</span>
+          <div class="zone-grid-art"><img src="assets/calendar/BGAssets/social-gathering-bg.jpg" alt="The bar and social hub at Newegg Gamer Zone" loading="lazy"></div>
+          <div class="zone-grid-body">
+            <h3>Social Gathering Zone</h3>
+            <p class="dim zone-grid-desc">A casual social hub open throughout every event for networking and connection, with refreshments, snacks, and branded drinks at the bar -- a welcoming space alongside the gaming and presentations around it.</p>
+          </div>
+        </button>
+        <button type="button" class="zone-grid-item" data-zone-index="7" aria-pressed="false">
+          <span class="zone-grid-code">ZONE 8</span>
+          <div class="zone-grid-art zone-grid-art-empty" aria-hidden="true"><i data-ic="chat"></i></div>
+          <div class="zone-grid-body">
+            <h3>Presentation Zone</h3>
+            <p class="dim zone-grid-desc">Equipped with a large TV for videos, slides, and live demos -- ideal for panels, product launches, and workshops, with the corner space doubling as a vendor showcase.</p>
           </div>
         </button>
       </div>
@@ -388,7 +433,7 @@
   </section>
 
   <section id="featured-gear" class="reveal">
-    <h2>Gear We Feature</h2>
+    <h2>Featured Gear</h2>
     <p class="dim">We feature similar products in our Gamer Zone — real Newegg gear you can browse, and buy, right now.</p>
     <!-- 2026-09-17, per Eric ("make Gear We Feature an autoscrolling
          shopping reel with the controls center aligned underneath"): back
@@ -590,15 +635,15 @@
     <button type="button" class="btn" id="gz-hue-reset">Match lighting profile</button>
   </div>
 </div>
-<script src="assets/js/main.js?v=91" defer></script>
-<script src="assets/js/preregister-node.js?v=91" defer></script>
-<script src="assets/js/techno-hero.js?v=91" defer></script>
-<script src="assets/js/photo-waterfall.js?v=91" defer></script>
-<script src="assets/js/events.js?v=91" defer></script>
-<script src="assets/js/event-update.js?v=91" defer></script>
-<script src="assets/js/zone-stack.js?v=91" defer></script>
-<script src="assets/js/featured-gear.js?v=91" defer></script>
-<script src="assets/js/reviews.js?v=91" defer></script>
-<script src="assets/js/rgb-cursor.js?v=91" defer></script>
+<script src="assets/js/main.js?v=92" defer></script>
+<script src="assets/js/preregister-node.js?v=92" defer></script>
+<script src="assets/js/techno-hero.js?v=92" defer></script>
+<script src="assets/js/photo-waterfall.js?v=92" defer></script>
+<script src="assets/js/events.js?v=92" defer></script>
+<script src="assets/js/event-update.js?v=92" defer></script>
+<script src="assets/js/zone-stack.js?v=92" defer></script>
+<script src="assets/js/featured-gear.js?v=92" defer></script>
+<script src="assets/js/reviews.js?v=92" defer></script>
+<script src="assets/js/rgb-cursor.js?v=92" defer></script>
 </body>
 </html>
