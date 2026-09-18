@@ -155,17 +155,23 @@
     <h2>XP League × Newegg Gamer Zone</h2>
     <div class="card hud">
       <p>We've partnered with <a href="https://xpleague.com/california-irvine/" target="_blank" rel="noopener"><strong>XP League</strong></a> to deliver biweekly Fortnite trainings and tournaments for all ages. On the <strong>second and fourth week of each month</strong>, XP League coaches, students, and players train interested youth to play Fortnite, VALORANT, and other games at a professional level: new keybinds, strategies, and ways to play, with a Wednesday training session and a Friday tournament each of those weeks.</p>
-      <!-- Real photo sourced from XP League's own Irvine, CA league page
-           (https://xpleague.com/california-irvine/), 2026-09-17, per
-           Eric's link + "add one photo from the web with them." Downloaded
-           and self-hosted here rather than hotlinked directly from their
-           CDN -- a live Puppeteer check found the hotlinked version fails
-           to load in real Chromium (net::ERR_BLOCKED_BY_ORB, a browser-
-           level cross-origin image protection), so linking it live would
-           have shown a broken image to real visitors on the same browser
-           engine. Same real photo either way, just reliably self-hosted
-           the way every other real photo on this site already is. -->
-      <p style="margin-top:.8rem"><img src="assets/img/XPLeague/xpleague-banner.jpg" alt="A young player competing in an XP League esports match" style="width:100%;border-radius:8px;display:block"></p>
+      <!-- 2026-09-17, same-day correction, per Eric ("pick a better XP
+           league image, even just a simple logo"): the action-photo banner
+           above (self-hosted for the net::ERR_BLOCKED_BY_ORB reason
+           originally noted here) read as a generic stock action shot, not
+           something that actually identified XP League. Replaced with XP
+           League's own real logo mark -- their site's own 192x192 site-icon
+           asset (the largest version they publish; sourced from
+           https://xpleague.com/, self-hosted for the same ORB/hotlinking
+           reason as before) -- shown small and centered rather than
+           stretched full-width, since a logo mark reads as a brand
+           identifier at moderate size and looks distorted/oversized
+           stretched to a banner's width. A smaller crop of the same mark
+           (just the green swoosh) and an unrelated "FEATURING" press-strip
+           graphic were also sourced and visually rejected as illegible/
+           irrelevant before landing on this one -- consistent with this
+           project's "actually open and look at candidates" sourcing rule. -->
+      <p style="margin-top:.8rem;text-align:center"><img src="assets/img/XPLeague/xpleague-logo.png" alt="XP League logo" style="width:140px;height:140px;border-radius:20px;display:inline-block;box-shadow:0 6px 20px rgba(0,0,0,.4)"></p>
       <div class="grid cols-2" style="margin-top:1rem">
         <div class="card"><i data-ic="grad" data-lg></i><h3>Wednesdays: training</h3><p class="dim">2nd &amp; 4th week of the month. Coached sessions: mechanics, builds, game sense. Check <a href="events.html">the calendar</a> for this week's flyer.</p></div>
         <div class="card"><i data-ic="medal" data-lg></i><h3>Fridays: tournament</h3><p class="dim">2nd &amp; 4th week of the month. Put the training to work in bracket play. End-of-month editions add a party and prizes.</p></div>

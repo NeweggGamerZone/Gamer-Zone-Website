@@ -956,6 +956,51 @@ the CSS. No site content changed for either.
 
 **Correction, 2026-09-17: Arcade now has a real photo, superseding the icon-only placeholder above.** Eric supplied a real photo of the Zone's own fighting-game/arcade station (a character-select screen on a large monitor with a dual-joystick arcade-stick control panel, flanked by the PC lounge's neon lighting) and asked for it to be cropped to match the other four zone cards' style. Cropped to the same 3:2 ratio the other four `game-cat-*` photos already use (light top/bottom trim, full width kept, since the source was 4:3 and only needed a modest ratio adjustment -- see the crop math in `games.html`'s own comment above the Arcade card), resized to the same 900x600 convention, and saved as `assets/calendar/BGAssets/arcade-bg.jpg`. The `.game-cat-art-empty`/icon-only markup and its no-fabrication reasoning above is now historical -- Arcade uses the exact same `.game-cat-art`/`<img>` markup as PC/Consoles/VR/Racing Simulators, no CSS changes needed. Verified via a live Puppeteer check (`naturalWidth`/`naturalHeight` both real, click still correctly filters the game list below) and mobile/tablet/desktop screenshots confirming it sits flush with its four siblings at every width; the full contrast/width/console audit re-run clean (0 new findings on `games.html`, only the already-disclosed pre-existing Featured Gear findings on `index.html`).
 
+## XP League image swap: real logo mark, not an action-photo banner (2026-09-18)
+
+Per Eric ("pick a better XP league image, even just a simple logo"): `edu.html`'s `#esports`
+section previously showed a self-hosted action photo (`xpleague-banner.jpg`, sourced from XP
+League's own Irvine, CA league page -- see that section's now-superseded comment) stretched
+full-width via `style="width:100%"`. That treatment read as a generic stock action shot rather
+than something that actually identified the partner brand, so per Eric's own "even just a
+simple logo" framing it's replaced outright with XP League's real logo mark instead of another
+photo.
+
+**Sourcing, following this project's own "actually open and look at candidates" rule** (the
+same discipline that caught the earlier USC-photo and mis-cropped-`Logo.png` misses elsewhere
+in this file): fetched `https://xpleague.com/` and `https://xpleague.com/california-irvine/`
+directly and pulled every real logo-shaped asset referenced in their own markup -- three
+candidates total. `Logo.png` (their own uploads folder) turned out to be only the small green
+swoosh fragment of the full mark, illegible on its own -- this is the exact same asset this
+file's Ambassador-photo section already flagged as "a tiny, unrecognizable icon fragment" when
+rejected in an earlier round, re-confirmed by actually opening it again rather than trusting
+the earlier note secondhand. A `featuring-green-1024x283.png` graphic further down their page
+turned out to just read "FEATURING" in green block letters -- part of their own "as seen in"
+press strip, not their logo at all. Their real site-icon asset
+(`cropped-favicon-192x192-1.webp`, referenced in their own `<link rel="icon">` and
+`msapplication-TileImage` tags, 192x192 -- the largest version they publish anywhere on the
+site, confirmed by probing for larger common WordPress site-icon filename patterns and getting
+404s) is the actual complete mark: a rounded-square navy badge with the white/green "XP"
+wordmark, clean and legible at small sizes. That's the one used.
+
+**Implementation.** Self-hosted (same ORB/hotlinking reasoning as the original banner photo --
+XP League's CDN blocks direct hotlinking in real Chromium) as
+`assets/img/XPLeague/xpleague-logo.png`. Displayed small and centered (`140x140px`, rounded
+corners, a soft drop shadow) rather than stretched to the card's full width -- a logo reads as
+a brand identifier at a moderate, fixed size; stretching a 192x192 square mark to a ~1000px-wide
+card would have looked distorted and oversized, the same "don't force a fixed-shape asset into
+a mismatched box" reasoning this file's sizing-discipline section already applies elsewhere.
+The old banner photo file (`xpleague-banner.jpg`) was left in place on disk rather than deleted
+(no other page references it, but this project doesn't delete real assets speculatively without
+a reason to).
+
+Verified via a live Puppeteer check (`naturalWidth`/`naturalHeight` both real at 192x192,
+rendering at the intended 140x140 box) and mobile/tablet/desktop screenshots confirming the
+logo sits centered and legible, with the surrounding Wednesday/Friday cards unaffected; the
+full contrast/width/console audit re-run clean on `edu.html` specifically (0 findings), with
+only the already-disclosed pre-existing Featured Gear horizontal-overflow findings on
+`index.html` and nothing new anywhere else.
+
 ## Weekly lineup activity pulse: "who's here," reframed around real event data (2026-09-16)
 
 Roadmap #8 ("who's here" pulse) was originally scoped as a live check-in count ("14 people
