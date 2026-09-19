@@ -35,12 +35,29 @@
   const TYPE_BG = {
     edu: BG_DIR + 'training-bg-blurred.jpg',
     tournament: BG_DIR + 'tournament-major-bg-blurred.jpg',
-    major: BG_DIR + 'majorevent2-bg-blurred.jpg',
     'theme-night': BG_DIR + 'freeplay-bg2-blurred.jpg',
     vendor: BG_DIR + 'freeplay-bg3-blurred.jpg',
     community: BG_DIR + 'freeplay-bg3-blurred.jpg',
   };
   const FREE_PLAY_BG = BG_DIR + 'dailyplay-bg-blurred.jpg';
+  // 2026-09-19, per Eric ("cycling special images for major events"): a
+  // single day's card used to always show the exact same majorevent2-bg
+  // photo for every 'major'-type event, no matter which one -- every
+  // major day on the calendar looked identical. Cycles between the two
+  // real, purpose-shot "big event" background photos already in this
+  // folder (both already used elsewhere on this page for tournament/major
+  // energy, so this is reusing real, likeminded assets, not inventing new
+  // ones) rather than a single fixed image. Picked deterministically from
+  // the event's own date string (not Math.random()) so the same event
+  // always renders the same photo on every visit/reload -- only different
+  // events land on different photos, nothing flickers.
+  const MAJOR_BG_POOL = [BG_DIR + 'majorevent2-bg-blurred.jpg', BG_DIR + 'tournament-major-bg-blurred.jpg'];
+  function majorBgFor(e) {
+    const key = (e && (e.date || e.title)) || '';
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    return MAJOR_BG_POOL[h % MAJOR_BG_POOL.length];
+  }
   function setCardBg(url) {
     if (url) detail.style.setProperty('--cd-bg', `url('${url}')`);
     else detail.style.removeProperty('--cd-bg');
@@ -190,7 +207,7 @@
     // description -> CTA.
     if (e && !closedByType) {
       const typeCls = TYPE_COLOR[e.type] || 'cal-edu';
-      setCardBg(TYPE_BG[e.type] || FREE_PLAY_BG);
+      setCardBg(e.type === 'major' ? majorBgFor(e) : (TYPE_BG[e.type] || FREE_PLAY_BG));
       detail.innerHTML = `<span class="tag ${typeCls}">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
         <h3>${GZ.esc(e.title)}</h3>
         ${e.subtitle ? `<p class="cd-sub">${GZ.esc(e.subtitle)}</p>` : ''}

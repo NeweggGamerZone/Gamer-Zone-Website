@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', async () => {
      track already chosen, and can still change it if they clicked the
      wrong one. The hero/Featured-Ambassador-card CTAs carry no data-track,
      so those still open with the field blank, requiring a conscious pick. */
+  // 2026-09-19, design/QA audit fix: real focus management for this real
+  // dialog (role="dialog" was already set, but nothing ever moved focus
+  // into it, trapped Tab inside it, or returned focus on close). See
+  // GZ.dialogFocus in main.js for the shared implementation.
+  const focusMgr = GZ.dialogFocus(document.querySelector('#amb-modal .modal'));
   const open = (track) => {
     bg.classList.add('open');
     // Always set the field explicitly (to the preset track, or back to
@@ -30,8 +35,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Ambassador-card CTA would leave the previous track still selected,
     // silently misrepresenting a visitor's actual choice on this visit.
     if (form.elements['track']) form.elements['track'].value = track || '';
+    focusMgr.open();
   };
-  const close = () => bg.classList.remove('open');
+  const close = () => { bg.classList.remove('open'); focusMgr.close(); };
   document.querySelectorAll('[data-amb-open]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(b.dataset.track || ''); }));
   bg.addEventListener('click', e => { if (e.target === bg) close(); });
   document.getElementById('amb-close').addEventListener('click', close);
@@ -83,7 +89,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Sent from the Gamer Zone Ambassador page (fallback: form submission failed)'
       ].join('\n');
       errorNote.style.display = 'block';
-      errorNote.innerHTML = `Couldn't submit automatically. <a href="mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('Ambassador Application Program')}&body=${encodeURIComponent(body)}">click here to send it as an email instead</a>.`;
+      // 2026-09-19, per Eric ("keep it self descriptive"): the link text
+      // itself now describes the destination/action on its own, rather
+      // than leaning on "click here" -- a screen reader user tabbing
+      // through a page's links out of context (a common navigation
+      // pattern) hears "send this as an email instead," not "click here."
+      errorNote.innerHTML = `Couldn't submit automatically: <a href="mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('Ambassador Application Program')}&body=${encodeURIComponent(body)}">send this as an email instead</a>.`;
     } finally {
       submitBtn.disabled = false;
     }

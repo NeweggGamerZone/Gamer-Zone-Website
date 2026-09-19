@@ -24,7 +24,7 @@
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=94">
+<link rel="stylesheet" href="assets/css/style.css?v=95">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -163,7 +163,7 @@
           <div class="mile-count"><span class="mc-num">4</span><span class="mc-lbl">Events Hosted</span></div>
           <div class="unlock">Food and Products</div>
         </div>
-        <p class="dim" style="font-size:.83rem;margin:0 0 .45rem">Includes all Gold tiers benefits, plus:</p>
+        <p class="dim" style="font-size:.83rem;margin:0 0 .45rem">Includes all Gold tier benefits, plus:</p>
         <ul>
           <li><i data-ic="snack" class="ic" aria-hidden="true"></i>Catered food for up to 40 attendees</li>
           <li><i data-ic="chip" class="ic" aria-hidden="true"></i>Additional Newegg product prizes</li>
@@ -175,7 +175,7 @@
           <div class="mile-count"><span class="mc-num">6</span><span class="mc-lbl">Events Hosted</span></div>
           <div class="unlock">Featured Ambassador</div>
         </div>
-        <p class="dim" style="font-size:.83rem;margin:0 0 .45rem">Includes all Platinum benefits, plus</p>
+        <p class="dim" style="font-size:.83rem;margin:0 0 .45rem">Includes all Platinum tier benefits, plus:</p>
         <ul>
           <li><i data-ic="medal" class="ic" aria-hidden="true"></i>Featured professional profile highlighting your events, socials, and community impact.</li>
           <li><i data-ic="ticket" class="ic" aria-hidden="true"></i>Invitations to exclusive Gamer Zone Events</li>
@@ -276,22 +276,32 @@
     <button class="close" id="amb-close" aria-label="Close">&times;</button>
     <h3>Ambassador application</h3>
     <p class="dim" style="font-size:.88rem">Submits straight to the Gamer Zone team. Fields marked <span class="req">*</span> are required.</p>
+    <!-- 2026-09-19, per Eric ("still plugged into that form website" --
+         Formspree action/method below are untouched): every label now
+         has a real for/id pair pointing at its own field, so a screen
+         reader announces the correct label the instant a field receives
+         focus instead of relying on visual proximity alone (a real gap
+         the design/QA audit caught -- labels sat as plain siblings with
+         no programmatic tie to their inputs). -->
     <form id="amb-form" action="https://formspree.io/f/xrenvwra" method="POST">
-      <label>Name <span class="req">*</span></label><input name="name" required>
-      <label>Email <span class="req">*</span></label><input name="email" type="email" required>
-      <label>Ambassador track <span class="req">*</span></label>
-      <select name="track" required><option value="">Select…</option><option>Collegiate</option><option>Influencer</option><option>Organization</option></select>
-      <label>Organization / team / school (if any)</label><input name="org">
-      <label>How many events can you host in the next 6 months? <span class="req">*</span></label><input name="events" type="number" min="1" required>
-      <label>Expected attendees per event? <span class="req">*</span></label><input name="attendees" type="number" min="1" required>
-      <label>Would you like this event to recur monthly? <span class="req">*</span></label>
-      <select name="recurMonthly" required><option value="">Select…</option><option>Yes</option><option>No</option></select>
-      <label>Games / format</label><input name="games" placeholder="e.g. Fortnite tournaments, FGC locals, LAN night">
-      <label>Tell us about your events / community</label><textarea name="about"></textarea>
+      <label for="amb-name">Name <span class="req">*</span></label><input id="amb-name" name="name" required>
+      <label for="amb-email">Email <span class="req">*</span></label><input id="amb-email" name="email" type="email" required>
+      <label for="amb-track">Ambassador track <span class="req">*</span></label>
+      <select id="amb-track" name="track" required><option value="">Select…</option><option>Collegiate</option><option>Influencer</option><option>Organization</option></select>
+      <label for="amb-org">Organization / team / school (if any)</label><input id="amb-org" name="org">
+      <label for="amb-events">How many events can you host in the next 6 months? <span class="req">*</span></label><input id="amb-events" name="events" type="number" min="1" required>
+      <label for="amb-attendees">Expected attendees per event? <span class="req">*</span></label><input id="amb-attendees" name="attendees" type="number" min="1" required>
+      <label for="amb-recur">Would you like this event to recur monthly? <span class="req">*</span></label>
+      <select id="amb-recur" name="recurMonthly" required><option value="">Select…</option><option>Yes</option><option>No</option></select>
+      <label for="amb-games">Games / format</label><input id="amb-games" name="games" placeholder="e.g. Fortnite tournaments, FGC locals, LAN night">
+      <label for="amb-about">Tell us about your events / community</label><textarea id="amb-about" name="about"></textarea>
       <input type="hidden" name="_subject" value="Ambassador Application Program">
       <div class="btn-row" style="margin-top:1rem"><button class="btn" type="submit">Send application</button></div>
-      <p class="form-note" id="amb-sent" style="display:none;color:var(--ne-blue-text)">Application sent. We'll be in touch to set your quota and dates.</p>
-      <p class="form-note" id="amb-error" style="display:none;color:#ff6b6b">Something went wrong sending that. Please email us directly at gamerzone@newegg.com.</p>
+      <!-- aria-live so a screen reader user hears the outcome of a
+           submission -- these swap via style.display in ambassador.js,
+           which alone doesn't announce anything without a live region. -->
+      <p class="form-note" id="amb-sent" style="display:none;color:var(--ne-blue-text)" aria-live="polite">Application sent. We'll be in touch to set your quota and dates.</p>
+      <p class="form-note" id="amb-error" style="display:none;color:#ff6b6b" aria-live="polite">Something went wrong sending that. Please email us directly at gamerzone@newegg.com.</p>
       <p class="form-note">Prefer to reach out directly? Email us and include how many events you can host and your expected attendance.</p>
     </form>
   </div>
@@ -340,9 +350,9 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=94" defer></script>
-<script src="assets/js/preregister-node.js?v=94" defer></script>
-<script src="assets/js/photo-waterfall.js?v=94" defer></script>
-<script src="assets/js/ambassador.js?v=94" defer></script>
+<script src="assets/js/main.js?v=95" defer></script>
+<script src="assets/js/preregister-node.js?v=95" defer></script>
+<script src="assets/js/photo-waterfall.js?v=95" defer></script>
+<script src="assets/js/ambassador.js?v=95" defer></script>
 </body>
 </html>

@@ -22,7 +22,7 @@
 <meta name="twitter:description" content="Weekly events, XP League Fortnite trainings and tournaments, theme days, and the monthly calendar at the Newegg Gamer Zone.">
 <meta name="twitter:image" content="https://neweggamerzone.github.io/Gamer-Zone-Website/assets/calendar/weekly/event-update-1920x1080.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=94">
+<link rel="stylesheet" href="assets/css/style.css?v=95">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -87,7 +87,11 @@
           <div class="cal-grid" id="cal-grid"></div>
           <div class="cal-legend"><span><i class="lg-closed"></i> Closed</span><span><i class="lg-free"></i> Free Play</span><span><i class="lg-edu"></i> Academy</span><span><i class="lg-amb"></i> Ambassador</span><span><i class="lg-major"></i> Major</span></div>
         </div>
-        <div class="cal-detail" id="cal-detail"></div>
+        <!-- aria-live: this panel's content is replaced via innerHTML
+             whenever a visitor picks a new calendar day (calendar.js) --
+             without a live region a screen reader user gets no
+             notification that new day info has loaded. -->
+        <div class="cal-detail" id="cal-detail" aria-live="polite"></div>
       </div>
     </div>
   </section>
@@ -284,11 +288,11 @@
   <a class="pin-btn" data-verkada href="#" aria-label="Preregister now">Preregister</a>
   <button type="button" class="pin-close" id="pin-close" aria-label="Close">&times;</button>
 </div>
-<script src="assets/js/main.js?v=94" defer></script>
-<script src="assets/js/preregister-node.js?v=94" defer></script>
-<script src="assets/js/events.js?v=94" defer></script>
-<script src="assets/js/calendar.js?v=94" defer></script>
-<script src="assets/js/event-update.js?v=94" defer></script>
-<script src="assets/js/photo-waterfall.js?v=94" defer></script>
+<script src="assets/js/main.js?v=95" defer></script>
+<script src="assets/js/preregister-node.js?v=95" defer></script>
+<script src="assets/js/events.js?v=95" defer></script>
+<script src="assets/js/calendar.js?v=95" defer></script>
+<script src="assets/js/event-update.js?v=95" defer></script>
+<script src="assets/js/photo-waterfall.js?v=95" defer></script>
 </body>
 </html>

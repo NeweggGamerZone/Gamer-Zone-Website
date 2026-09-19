@@ -474,7 +474,13 @@ body.home-page .geo-bg { display: none; } /* homepage runs its own animated tech
 .gear-item-img { width: 100%; aspect-ratio: 1/1; background: #fff; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .gear-item-img img { width: 100%; height: 100%; object-fit: contain; padding: .6rem; display: block; -webkit-user-drag: none; user-drag: none; }
 .gear-item .gear-item-spec { font-size: .8rem; margin-bottom: .7rem; }
-.gear-item .btn { padding: .5rem 1.1rem; font-size: .8rem; margin-top: auto; align-self: flex-start; }
+/* 2026-09-19, per Eric ("view on newegg buttons larger"): the compact
+   .5rem/1.1rem padding + .8rem font measured 36px tall, under the site's
+   44px touch-target floor (F-14) -- bumped to the same vertical padding
+   the base .btn uses everywhere else on the site (.72rem), so this is
+   "the standard button, just still its own natural width" rather than a
+   third, independently-tuned button size. */
+.gear-item .btn { padding: .72rem 1.4rem; font-size: .85rem; margin-top: auto; align-self: flex-start; }
 @media (max-width: 560px) { .gear-item { width: 190px; } }
 
 /* 2026-09-17, per Eric ("make Gear We Feature an autoscrolling shopping
@@ -789,100 +795,79 @@ details.archive-month .grid { margin-top: 1rem; }
 /* About Gamer Zone: a gamefied "trading card" stack — one zone shown at a
    time, framed like an MTG/trading card (art panel + name plate + rules-text
    box), with a couple of the next cards peeking out from behind to read as
-   an actual stack you're cycling through (see assets/js/zone-stack.js). */
-/* align-items:stretch (not center) is deliberate -- see the FLIP-carousel
-   comment above and zone-stack.js's own header comment. With `center`,
-   #zone-grid (a flex item with no explicit width) sized itself via
-   shrink-to-fit instead of filling this wrapper, and a `1fr`-column grid's
-   shrink-to-fit width is content-dependent: a featured card whose
-   description text is short enough to fit on one line under 1070px (e.g.
-   Console Gaming Zone) let the grid shrink-wrap down to that shorter
-   line's own width, while a longer description (PC Gaming Zone's) forced
-   the shrink-to-fit calculation up against the container's fill-available
-   width, reading as "full width" by coincidence, not by design -- exactly
-   the "one card grid shrink-wraps while a sibling state doesn't" failure
-   core rule 6 warns about, confirmed via live getBoundingClientRect
-   measurements (948.8px featuring Console vs. the correct 1069.6px
-   featuring PC) before this fix, 2026-09-17. `stretch` removes the
-   content-dependent sizing basis entirely -- #zone-grid now always fills
-   this wrapper's real width regardless of which card is featured. */
-.zone-stack-wrap { display: flex; flex-direction: column; align-items: stretch; gap: 1.1rem; }
-
-/* ===== About Gamer Zone: expanding grid carousel, round 4 (2026-09-16) =====
-   Replaces the left/right peek-card carousel (its full history is preserved
-   in git/this file's own prior revisions and in CLAUDE.md) per Eric's
-   direct reference: "Let's make the zone cards this minimal carousel, so it
-   expands and exists as a grid like this:
-   https://ui.watermelon.sh/animated-components/category/carousel" -- that
-   reference ("Minimal Carousel," a wallet-card UI) shows a small grid of
-   equal thumbnails where clicking one promotes it into a large featured
-   card at the top with the others compacting into a row beneath it, all
-   with a smooth layout animation. This site is plain HTML/CSS/vanilla JS
-   (no React/framer-motion, the reference's own dependencies), so the
-   pattern is reproduced natively: a real CSS Grid of `<button>` thumbnails,
-   the "featured" one promoted via `order:-1` + `grid-column:1/-1`, and the
-   layout-changing animation done via a JS FLIP transform (see
-   zone-stack.js) since CSS can't transition discrete grid properties on
-   its own. Every zone is a real, always-in-the-DOM, always-tabbable
-   button -- there's no hidden/carousel-only content the way the old
-   version had "hidden"/"far" peek positions, so nothing here needs the old
-   version's data-pos-based show/hide rules. */
-.zone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-.zone-grid-item { position: relative; grid-column: span 1; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 26px rgba(0,0,0,.45); cursor: pointer; padding: 0; font: inherit; text-align: left; -webkit-user-select: none; user-select: none; }
-.zone-grid-item:focus-visible { outline: 2px solid var(--ne-orange); outline-offset: 3px; }
-.zone-grid-code { position: absolute; top: .5rem; left: .5rem; z-index: 2; font-family: var(--head); font-weight: 800; font-size: .65rem; letter-spacing: .06em; color: #000; background: var(--ne-orange); padding: .15rem .45rem; border-radius: 20px; }
-.zone-grid-art { position: relative; height: 108px; flex: none; background: #000; transition: height .45s cubic-bezier(.2,.7,.2,1); }
-/* Same native-drag-ghost fix the old carousel needed (a plain <img> is
-   draggable by default in every browser, which fights this component's
-   own click-to-expand interaction the same way it fought the old
-   pointer-drag swipe) -- kept for the same reason, not copy-pasted blind. */
-.zone-grid-art img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; user-select: none; -webkit-user-select: none; }
-.zone-grid-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, var(--bg-2) 100%); }
-/* Demo Zone (the Bar) has no real matching photo anywhere in the repo --
-   checked assets/calendar/BGAssets/PhotoReel for "bar"/"demo"/"hardware"/
-   "display" by filename and found nothing real (only an unrelated "Diamond
-   Bar High School" match). Per the no-fabrication rule, an honest
-   icon-only treatment stands in instead of a mismatched/duplicated photo --
-   same pattern already established for the Games page's Arcade card
-   (.game-cat-art-empty) -- swap this for a real photo the moment one
-   actually turns up in the PhotoReel pool. */
-.zone-grid-art-empty { display: flex; align-items: center; justify-content: center; background: var(--bg-3); }
-.zone-grid-art-empty .ic { width: 34px; height: 34px; color: var(--ne-orange); }
-.zone-grid-art-empty::after { display: none; }
-.zone-grid-body { padding: .6rem .8rem .8rem; }
-.zone-grid-body h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: .88rem; color: var(--ne-orange); margin: 0; transition: font-size .3s ease; }
-.zone-grid-desc { display: none; font-size: .88rem; line-height: 1.5; margin-top: .6rem; }
-/* The featured card: full grid width, taller art, full description
-   revealed -- everything else stays a plain small thumbnail (title only,
-   per the reference UI showing less detail on the non-featured cards).
-   2026-09-18, per Eric ("it shouldn't kick me down, just hold the same
-   position"): this used to also set order:-1, pulling the featured card
-   to the very front of the grid regardless of which card was actually
-   clicked -- so clicking e.g. the 5th card jumped it up to the top-left
-   and shoved every other card around it, a jarring reshuffle rather than
-   an in-place expand. Removed order:-1 entirely: a card now expands to
-   full width right where it already sits in source order (CSS Grid's
-   auto-placement just wraps the next item onto a new row beneath it),
-   so cards before the clicked one never move at all and the click target
-   itself doesn't relocate -- only the cards *after* it shift down to make
-   room, which is the honest, minimum amount of movement this interaction
-   can have. */
-.zone-grid-item.is-featured { grid-column: 1 / -1; cursor: default; }
-.zone-grid-item.is-featured .zone-grid-art { height: 300px; }
-.zone-grid-item.is-featured .zone-grid-body h3 { font-size: 1.3rem; }
-.zone-grid-item.is-featured .zone-grid-desc { display: block; }
-@media (max-width: 480px) { .zone-grid-item.is-featured .zone-grid-art { height: 200px; } }
-/* FLIP animation support (see zone-stack.js): while the JS-computed
-   inverse transform is applied (the "first" position, right after the
-   class swap), transitions are off so the jump is invisible; the very
-   next frame clears the transform WITH a transition, animating the real
-   move/grow. `.zone-grid.flip-ready` is the one-frame window where the
-   transition is enabled again. */
-.zone-grid-item.flip-pre { transition: none; }
-.zone-grid.flip-ready .zone-grid-item { transition: transform .45s cubic-bezier(.2,.7,.2,1); }
-@media (prefers-reduced-motion: reduce) { .zone-grid-item, .zone-grid.flip-ready .zone-grid-item, .zone-grid-art, .zone-grid-body h3 { transition: none !important; } }
-@media (max-width: 820px) { .zone-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .zone-grid { gap: .7rem; } }
+   an actual stack you're cycling through (see assets/js/zone-stack.js).
+   2026-09-19, per Eric: the round-4 "expanding grid" carousel (its own
+   history, and the peek-card version's interim history, are preserved in
+   git log and this file's prior revisions) read as too jarring a layout
+   shift on click, so it's reverted back to this original left/right
+   peek-card format -- restored from the last commit before the grid
+   rewrite (git log assets/js/zone-stack.js), re-applied to the site's
+   current 7 real zones (Presentation Zone removed the same round, see
+   index.html's own comment on #zone-stack for why). */
+.zone-stack-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
+/* Real left/right carousel: .zone-stack is wider than a single .zone-card
+   so the prev/next cards have room to peek at the edges, and overflow:hidden
+   clips them cleanly instead of letting them spill into the page. */
+.zone-stack { position: relative; width: 100%; height: 420px; overflow: hidden; touch-action: pan-y; }
+/* Soft feather at the track's own edges instead of a hard slice, so a peek
+   card's visible sliver fades out rather than ending in a flat cut. */
+.zone-stack { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); }
+.zone-card { position: absolute; top: 0; left: 50%; width: min(460px, 60%); height: 100%; display: flex; flex-direction: column; background: var(--bg-2); border: 2px solid var(--ne-orange); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.55); overflow: hidden; transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .55s ease, filter .55s ease; -webkit-user-select: none; user-select: none; }
+.zone-card-code { position: absolute; top: .6rem; left: 50%; transform: translateX(-50%); z-index: 2; font-family: var(--head); font-weight: 800; font-size: .75rem; letter-spacing: .08em; color: #000; background: var(--ne-orange); padding: .18rem .5rem; border-radius: 20px; }
+.zone-card-art { position: relative; height: 56%; flex: none; background: #000; }
+/* A plain <img> is natively draggable in every browser, which fights this
+   carousel's own pointer-based swipe (zone-stack.js) with the browser's
+   built-in "drag this image out" ghost/highlight -- disabled here. */
+.zone-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; user-select: none; -webkit-user-select: none; }
+.zone-card-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, var(--bg-2) 100%); }
+.zone-card-body { flex: 1; padding: .3rem 1.2rem 1.2rem; display: flex; flex-direction: column; }
+.zone-card-body h3 { font-family: var(--head); font-weight: 800; text-transform: uppercase; letter-spacing: .03em; font-size: 1.15rem; margin: 0 0 .5rem; color: var(--ne-orange); text-align: center; }
+.zone-card-body p { font-size: .88rem; line-height: 1.5; }
+/* Left/right carousel: JS sets data-pos (prev/center/next/far-prev/
+   far-next/hidden) on every .zone-card. The centered card is full size and
+   interactive; near-peek cards sit tucked ~28% behind the center card's
+   edge (clipped by .zone-stack's overflow:hidden); a further-out second
+   peek layer sits past that, faded down to nothing, so three cards' worth
+   of real content span roughly the section's own width. */
+.zone-card[data-pos="center"] { transform: translateX(calc(-50% + var(--zs-drag, 0px))) scale(1); opacity: 1; z-index: 5; }
+.zone-card[data-pos="prev"] { transform: translateX(calc(-50% - 72% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="next"] { transform: translateX(calc(-50% + 72% + var(--zs-drag, 0px))) scale(.9); opacity: 1; filter: blur(2.5px) brightness(.8); z-index: 4; cursor: pointer; }
+.zone-card[data-pos="far-next"] { transform: translateX(calc(-50% + 154% + var(--zs-drag, 0px))) scale(.8); opacity: 0; pointer-events: none; z-index: 3; }
+.zone-card[data-pos="far-prev"] { transform: translateX(calc(-50% - 154% + var(--zs-drag, 0px))) scale(.8); opacity: 0; pointer-events: none; z-index: 3; }
+.zone-card[data-pos="hidden"] { transform: translateX(-50%) scale(.9); opacity: 0; z-index: 1; pointer-events: none; }
+/* --zs-drag is a live px offset zone-stack.js writes to #zone-stack (a
+   custom property, so it inherits down to every .zone-card above without
+   each position needing its own JS-computed transform string) while a
+   pointer drag is active. .dragging kills the normal transition so the
+   stack tracks the pointer 1:1 with no lag. */
+.zone-stack.dragging .zone-card { transition: none; }
+/* Only a sliver of a prev/next/far card is actually visible -- hide their
+   title/body text (which would otherwise show a cut-off mid-word
+   fragment) and their ZONE badge (contrast risk once dimmed, per the
+   pixel-verified contrast audit). */
+.zone-card[data-pos="prev"] .zone-card-body p,
+.zone-card[data-pos="next"] .zone-card-body p,
+.zone-card[data-pos="far-prev"] .zone-card-body p,
+.zone-card[data-pos="far-next"] .zone-card-body p,
+.zone-card[data-pos="prev"] .zone-card-body h3,
+.zone-card[data-pos="next"] .zone-card-body h3,
+.zone-card[data-pos="far-prev"] .zone-card-body h3,
+.zone-card[data-pos="far-next"] .zone-card-body h3 { display: none; }
+.zone-card[data-pos="prev"] .zone-card-code,
+.zone-card[data-pos="next"] .zone-card-code,
+.zone-card[data-pos="far-prev"] .zone-card-code,
+.zone-card[data-pos="far-next"] .zone-card-code,
+.zone-card[data-pos="hidden"] .zone-card-code { display: none; }
+.zone-stack-nav { display: flex; align-items: center; gap: 1rem; }
+.zone-stack-arrow { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink); cursor: pointer; transition: border-color .15s, color .15s; }
+.zone-stack-arrow:hover { border-color: var(--ne-orange); color: var(--ne-orange); }
+.zone-stack-arrow .ic { width: 18px; height: 18px; fill: currentColor; }
+.zone-stack-dots { display: flex; gap: .5rem; }
+.zone-stack-dot { position: relative; width: 11px; height: 11px; border-radius: 50%; background: var(--line); border: none; padding: 0; cursor: pointer; }
+.zone-stack-dot::before { content: ""; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+.zone-stack-dot.active { background: var(--ne-orange); }
+@media (prefers-reduced-motion: reduce) { .zone-card { transition: none !important; } }
+@media (max-width: 480px) { .zone-stack { height: 360px; } }
 
 /* Games page category cards ("game-cat-*"), added 2026-09-15 per Eric
    ("scan our current photography and add those as core images for each

@@ -95,12 +95,26 @@
     wheel.setAttribute('aria-valuenow', String(h));
   }
 
+  // 2026-09-19, design/QA audit fix: real focus management (see
+  // GZ.dialogFocus in main.js) -- this popover had role="dialog" but
+  // opening it never moved focus in, Tab could still reach the page
+  // behind it, and closing it never returned focus to the swatch.
+  // GZ (from main.js) is a top-level `const`, which -- unlike `var` or a
+  // plain assignment -- never becomes a `window.GZ` property; it's only
+  // reachable as the bare identifier `GZ`, the same way this file's own
+  // hero()/currentHue() already reach `window.GZ_HERO` (a real, deliberate
+  // window export from techno-hero.js, a different case). Checking
+  // `window.GZ` here silently found nothing and skipped focus management
+  // entirely -- caught via a live focus check (Tab never actually reached
+  // the popover), not assumed from the code alone.
+  const focusMgr = typeof GZ !== 'undefined' ? GZ.dialogFocus(popover) : null;
   function openPopover() {
     popover.classList.add('open');
     syncKnob(currentHue());
     positionPopover();
+    if (focusMgr) focusMgr.open();
   }
-  function closePopover() { popover.classList.remove('open'); }
+  function closePopover() { popover.classList.remove('open'); if (focusMgr) focusMgr.close(); }
 
   swatch.addEventListener('click', function () {
     if (popover.classList.contains('open')) { closePopover(); } else { openPopover(); }

@@ -1,146 +1,176 @@
-/* About Gamer Zone: expanding grid carousel, round 4 (2026-09-16).
-   Replaces the old left/right peek-card carousel (full prior history in
-   git and CLAUDE.md) per Eric's direct reference to
-   https://ui.watermelon.sh/animated-components/category/carousel's
-   "Minimal Carousel" -- a grid of equal thumbnails where clicking one
-   promotes it into a large featured card with the rest compacting into a
-   row, animated with a smooth layout transition. That reference is a
-   React/framer-motion component; this site is plain vanilla JS, so the
-   same interaction is reproduced with real CSS Grid (.zone-grid-item's
-   `order`/`grid-column` toggle -- see style.css) plus a classic FLIP
-   animation here in JS, since CSS alone can't transition a discrete grid
-   property like `order` or `grid-column`.
-
-   FLIP = First, Last, Invert, Play: measure every item's position/size
-   BEFORE the DOM/class change ("First"), make the change and measure
-   again ("Last"), apply the inverse of that delta as an instant transform
-   so nothing visibly moves yet ("Invert"), then clear the transform with a
-   transition enabled so the browser animates from the inverted position
-   back to natural -- which reads as a smooth move from the old spot to the
-   new one, even though the underlying layout property itself just snapped. */
+/* About Gamer Zone "trading card" stack — cycles through the zone cards one
+   at a time (front card + two peeking behind it, like a hand of cards),
+   with prev/next buttons and dot nav for browsing manually.
+   2026-09-08, per Eric ("maybe zone stack should not auto scroll at all, so
+   there is no induced motion"): there is no auto-advance timer -- this
+   carousel only ever moves in response to a real click/tap (prev/next, a
+   dot, or a peeking card, or a drag/swipe), never on its own.
+   2026-09-19, per Eric: restored to this left/right peek-card format after
+   round 4's expanding-grid carousel read as too jarring a layout shift on
+   click -- this file is the same logic that shipped before that rewrite
+   (see git log), re-applied to the site's current 7 real zone cards. */
 (function () {
-  const grid = document.getElementById('zone-grid');
-  if (!grid) return;
-  const items = Array.from(grid.querySelectorAll('.zone-grid-item'));
-  const N = items.length;
+  const stack = document.getElementById('zone-stack');
+  if (!stack) return;
+  const cards = Array.from(stack.querySelectorAll('.zone-card'));
+  const dotsWrap = document.getElementById('zone-dots');
+  const prevBtn = document.getElementById('zone-prev');
+  const nextBtn = document.getElementById('zone-next');
+  const N = cards.length;
   if (!N) return;
 
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let current = 0;
 
-  function currentFeaturedIndex() {
-    const i = items.findIndex(it => it.classList.contains('is-featured'));
-    return i === -1 ? 0 : i;
+  if (dotsWrap) {
+    dotsWrap.innerHTML = cards.map((_, i) => `<button type="button" class="zone-stack-dot${i === 0 ? ' active' : ''}" data-i="${i}" aria-label="Show zone ${i + 1}"></button>`).join('');
   }
 
-  function setFeatured(index) {
-    if (index === currentFeaturedIndex()) return;
-
-    // "First": record every item's real rect before anything changes.
-    const first = reduceMotion ? null : items.map(it => it.getBoundingClientRect());
-
-    items.forEach((it, i) => {
-      const isTarget = i === index;
-      it.classList.toggle('is-featured', isTarget);
-      it.setAttribute('aria-pressed', String(isTarget));
+  function render() {
+    cards.forEach((card, i) => {
+      const offset = (i - current + N) % N;
+      // Real left/right carousel: one card centered, near neighbors
+      // peeking at the left/right edge of .zone-stack, and a second,
+      // further-out layer beyond that -- clipped by .zone-stack's
+      // overflow:hidden, all real zone cards from the same rotation
+      // rather than decorative filler, so the section reads as using its
+      // full width instead of just its wrapper technically being 100%
+      // wide. Anything beyond that second layer stays fully hidden.
+      // Guard against slot collisions if N ever shrinks (e.g. N=4 makes
+      // "2 offsets forward" and "2 offsets back" the same card) by only
+      // using the far-peek slots once they're distinct from every
+      // closer slot already claimed above.
+      if (offset === 0) card.dataset.pos = 'center';
+      else if (offset === 1) card.dataset.pos = 'next';
+      else if (offset === N - 1) card.dataset.pos = 'prev';
+      else if (offset === 2 && offset !== N - 2 && offset !== N - 1) card.dataset.pos = 'far-next';
+      else if (offset === N - 2 && offset !== 1 && offset !== 2) card.dataset.pos = 'far-prev';
+      else card.dataset.pos = 'hidden';
     });
+    if (dotsWrap) {
+      dotsWrap.querySelectorAll('.zone-stack-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    }
+  }
 
-    if (reduceMotion) return; // instant snap only -- no motion to animate
+  function goTo(i) {
+    current = ((i % N) + N) % N;
+    render();
+  }
 
-    // "Last": the browser has already reflowed synchronously since classList
-    // changes apply immediately; read the new rects now.
-    const last = items.map(it => it.getBoundingClientRect());
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
 
-    // "Invert": for each item, jump it back to where it visually WAS via a
-    // transform (translate + scale), with transitions off so this is
-    // invisible -- .flip-pre kills the transition for exactly one frame.
-    items.forEach((it, i) => {
-      const f = first[i], l = last[i];
-      const dx = f.left - l.left;
-      const dy = f.top - l.top;
-      const sx = f.width / l.width;
-      const sy = f.height / l.height;
-      it.classList.add('flip-pre');
-      it.style.transformOrigin = 'top left';
-      it.style.transform = `translate(${dx}px,${dy}px) scale(${sx},${sy})`;
-    });
-
-    // "Play": next frame, re-enable transitions and clear the inverse
-    // transform -- the browser animates from the inverted spot to the
-    // real, natural (untransformed) layout, which is the actual move/grow.
-    requestAnimationFrame(() => {
-      grid.classList.add('flip-ready');
-      items.forEach(it => {
-        it.classList.remove('flip-pre');
-        it.style.transform = '';
-      });
-      const done = () => {
-        grid.classList.remove('flip-ready');
-        items.forEach(it => { it.style.transformOrigin = ''; });
-        grid.removeEventListener('transitionend', done);
-      };
-      grid.addEventListener('transitionend', done, { once: true });
-      // Safety net in case transitionend never fires (e.g. a zero-delta
-      // item that never actually transitions).
-      setTimeout(done, 500);
+  if (nextBtn) nextBtn.addEventListener('click', next);
+  if (prevBtn) prevBtn.addEventListener('click', prev);
+  if (dotsWrap) {
+    dotsWrap.addEventListener('click', e => {
+      const btn = e.target.closest('.zone-stack-dot');
+      if (!btn) return;
+      goTo(Number(btn.dataset.i));
     });
   }
-
-  // ---- Keyboard: roving tabindex + arrow-key grid navigation (rule 8) ----
-  // Only the featured item is a real Tab stop at any given moment; every
-  // other item is reachable by arrow keys from there, matching the roving-
-  // tabindex pattern this project already uses on the calendar grid.
-  function syncTabIndex() {
-    const f = currentFeaturedIndex();
-    items.forEach((it, i) => { it.tabIndex = i === f ? 0 : -1; });
-  }
-  function select(index) {
-    setFeatured(index);
-    syncTabIndex();
-  }
-  syncTabIndex();
-  items.forEach((it, i) => { it.addEventListener('click', () => select(i)); });
-
-  // 2026-09-17, per Eric ("the minimal carousel should return to its
-  // original card design when we click off"): clicking anywhere outside
-  // the grid reverts to the original default-featured card (index 0, PC
-  // Gaming Zone -- the same card that's marked is-featured in the raw
-  // HTML on page load), the same way the Watermelon UI reference this
-  // component is based on returns to its own resting state once you look
-  // away. A plain document-level 'click' listener (not 'pointerdown', so
-  // it fires after the item's own click handler above has already run and
-  // won't fight a genuine "click a different card" action) checks
-  // `contains` against the grid itself, not `closest('.zone-grid-item')`,
-  // so clicking the grid's own padding/gaps (not a card) also counts as
-  // "outside" and reverts -- matching the reference pattern where any
-  // click off the component collapses it back down.
-  document.addEventListener('click', e => {
-    if (grid.contains(e.target)) return;
-    select(0);
+  // Clicking a peeking (non-front) card brings it to the front too.
+  // dragMoved (set by the drag handlers below) suppresses this when a real
+  // drag/swipe just ended -- otherwise releasing a drag on top of a peek
+  // card would both animate the swipe AND immediately re-fire goTo() from
+  // this click, double-advancing.
+  let dragMoved = false;
+  stack.addEventListener('click', e => {
+    if (dragMoved) { dragMoved = false; return; }
+    const card = e.target.closest('.zone-card');
+    if (!card || card.dataset.pos === 'center') return;
+    goTo(cards.indexOf(card));
   });
 
-  function columnCount() {
-    const style = getComputedStyle(grid);
-    return style.gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+  // Pointer-based drag/swipe -- single pointer-event set (works for touch,
+  // mouse, and pen alike) rather than separate touch/mouse listeners. The
+  // stack's own width is the drag "unit" -- a card only has to travel a
+  // modest fraction of the section before it commits to advancing,
+  // matching how the peek cards already sit fairly close to the center
+  // card.
+  const DRAG_COMMIT_PX = 70;      // distance threshold to commit to a swipe
+  const DRAG_COMMIT_VELOCITY = .5; // px/ms -- a fast flick commits even short
+  const CLICK_SUPPRESS_PX = 6;     // below this, treat it as a click/tap, not a drag
+  let dragging = false;
+  let dragPointerId = null;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragX = 0;
+  let dragAxisLocked = null; // 'x' | 'y' | null (undecided)
+  let lastMoveX = 0;
+  let lastMoveT = 0;
+  let velocity = 0;
+
+  function setDragOffset(px) {
+    stack.style.setProperty('--zs-drag', px + 'px');
   }
 
-  grid.addEventListener('keydown', e => {
-    const from = items.indexOf(document.activeElement);
-    if (from === -1) return;
-    let to = null;
-    const cols = columnCount();
-    if (e.key === 'ArrowRight') to = (from + 1) % N;
-    else if (e.key === 'ArrowLeft') to = (from - 1 + N) % N;
-    else if (e.key === 'ArrowDown') to = (from + cols) % N;
-    else if (e.key === 'ArrowUp') to = (from - cols + N) % N;
-    else if (e.key === 'Home') to = 0;
-    else if (e.key === 'End') to = N - 1;
-    if (to === null) return;
+  function onPointerDown(e) {
+    if (e.button !== undefined && e.button !== 0) return; // left-click/primary touch only
+    dragging = true;
+    dragAxisLocked = null;
+    dragPointerId = e.pointerId;
+    dragStartX = lastMoveX = e.clientX;
+    dragStartY = e.clientY;
+    lastMoveT = e.timeStamp;
+    velocity = 0;
+    dragX = 0;
+  }
+
+  function onPointerMove(e) {
+    if (!dragging || e.pointerId !== dragPointerId) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (dragAxisLocked === null) {
+      // Wait for a real, deliberate move before committing to an axis, so a
+      // near-vertical touch (a visitor trying to scroll the page over this
+      // section) isn't hijacked into a horizontal drag.
+      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      dragAxisLocked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if (dragAxisLocked === 'x') {
+        stack.classList.add('dragging');
+        try { stack.setPointerCapture(dragPointerId); } catch (err) { /* no-op */ }
+      }
+    }
+    if (dragAxisLocked !== 'x') return; // vertical intent -- let the page scroll normally
     e.preventDefault();
-    items[to].tabIndex = 0;
-    items[from].tabIndex = -1;
-    items[to].focus();
-    // Arrow keys move focus only (standard roving-tabindex behavior) --
-    // Enter/Space (native <button> behavior, free) is what actually
-    // selects/expands the focused item.
-  });
+    const dt = e.timeStamp - lastMoveT;
+    if (dt > 0) velocity = (e.clientX - lastMoveX) / dt;
+    lastMoveX = e.clientX;
+    lastMoveT = e.timeStamp;
+    // Clamped to the stack's own real measured width -- read fresh on
+    // every move rather than cached once, so a resize mid-drag (a rotated
+    // phone, say) can't leave a stale, wrong ceiling in place -- a fast or
+    // long real-world drag should never push the center card visibly past
+    // .zone-stack's own bounds before the pointer is released.
+    const maxDrag = stack.getBoundingClientRect().width;
+    dragX = Math.max(-maxDrag, Math.min(maxDrag, dx));
+    setDragOffset(dragX);
+  }
+
+  function endDrag(e) {
+    if (!dragging || (e && e.pointerId !== undefined && e.pointerId !== dragPointerId)) return;
+    dragging = false;
+    const wasHorizontalDrag = dragAxisLocked === 'x';
+    stack.classList.remove('dragging');
+    if (wasHorizontalDrag && Math.abs(dragX) > CLICK_SUPPRESS_PX) dragMoved = true;
+    if (wasHorizontalDrag && (Math.abs(dragX) > DRAG_COMMIT_PX || Math.abs(velocity) > DRAG_COMMIT_VELOCITY)) {
+      // Dragging the card leftward (negative dx) reveals what's coming from
+      // the right -- i.e. advances to "next" -- and vice versa.
+      if (dragX < 0) next(); else prev();
+    }
+    setDragOffset(0);
+    dragAxisLocked = null;
+    dragPointerId = null;
+  }
+
+  stack.addEventListener('pointerdown', onPointerDown);
+  stack.addEventListener('pointermove', onPointerMove);
+  stack.addEventListener('pointerup', endDrag);
+  stack.addEventListener('pointercancel', endDrag);
+  // A pointer that leaves the stack entirely (dragged off the section) while
+  // still down should resolve the same as a release, not leave the stack
+  // stuck mid-drag with no way to complete the gesture.
+  stack.addEventListener('pointerleave', e => { if (e.pointerId === dragPointerId) endDrag(e); });
+
+  render();
 })();

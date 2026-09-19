@@ -527,6 +527,49 @@ const GZ = {
   }
 };
 
+// Shared dialog focus management (2026-09-19, design/QA audit fix). Both
+// real dialogs on this site (#amb-modal, #cursor-modal) had role="dialog"
+// but no actual focus handling -- opening one never moved focus inside it,
+// Tab could still reach the page behind it, and closing it never returned
+// focus to whatever opened it. One shared helper instead of two
+// independently-written near-duplicates, per this project's usual "one
+// shared implementation" rule. Usage: const fm = GZ.dialogFocus(dialogEl);
+// then fm.open() right after showing the dialog and fm.close() right
+// before hiding it -- each call site keeps its own show/hide CSS class
+// logic, this only owns where focus goes.
+GZ.dialogFocus = function dialogFocus(dialogEl) {
+  let lastFocused = null;
+  const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function focusables() {
+    return Array.from(dialogEl.querySelectorAll(FOCUSABLE)).filter(el => el.offsetParent !== null);
+  }
+
+  function onKeydown(e) {
+    if (e.key !== 'Tab') return;
+    const items = focusables();
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  return {
+    open() {
+      lastFocused = document.activeElement;
+      const items = focusables();
+      (items[0] || dialogEl).focus();
+      dialogEl.addEventListener('keydown', onKeydown);
+    },
+    close() {
+      dialogEl.removeEventListener('keydown', onKeydown);
+      if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+      lastFocused = null;
+    },
+  };
+};
+
 // Shared "full text" tooltip (2026-09-04, per Eric: the games page's
 // popups shouldn't ever resize the container underneath them). Backs
 // every [data-full] trigger site-wide (.game-list li's truncated titles,
@@ -784,6 +827,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // right after rather than leaving either marker wherever it last was.
     const navToggle = document.getElementById('nav-toggle');
     if (navToggle) navToggle.addEventListener('change', () => requestAnimationFrame(() => { toActive(); placeCurrentMarker(); }));
+  })();
+
+  // 2026-09-19, design/QA audit fix: the mobile nav's checkbox+label
+  // "hamburger" hack had no aria-expanded anywhere, so assistive tech had
+  // no reliable way to know whether the menu is currently open. The
+  // checkbox itself (not its label) is what's actually focusable/toggled,
+  // so that's what carries the state -- kept in sync on every real change,
+  // plus set once up front to match whatever state the page loaded in.
+  // aria-controls only makes sense once the nav has a stable id to point
+  // at, so this gives .main-nav one (only if it doesn't already have one)
+  // rather than assuming a specific id exists across every page.
+  (function () {
+    const navToggle = document.getElementById('nav-toggle');
+    const nav = document.querySelector('.main-nav');
+    if (!navToggle || !nav) return;
+    if (!nav.id) nav.id = 'main-nav';
+    navToggle.setAttribute('aria-controls', nav.id);
+    const sync = () => navToggle.setAttribute('aria-expanded', String(navToggle.checked));
+    navToggle.addEventListener('change', sync);
+    sync();
   })();
 
   const io = new IntersectionObserver(es => es.forEach(e => {
