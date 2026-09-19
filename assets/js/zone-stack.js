@@ -92,6 +92,13 @@
   const CLICK_SUPPRESS_PX = 6;     // below this, treat it as a click/tap, not a drag
   let dragging = false;
   let dragPointerId = null;
+  // Set the instant a gesture commits mid-drag (see the threshold check in
+  // onPointerMove below) and only cleared by a real pointerup/pointercancel/
+  // pointerleave for that same pointer -- distinguishes "this physical hold
+  // already committed and should stay inert for the rest of it" from "a
+  // phantom pointercancel fired and this hold should self-heal" below, both
+  // of which otherwise look identical (dragging===false, button still down).
+  let committedPointerId = null;
   let dragStartX = 0;
   let dragStartY = 0;
   let dragX = 0;
@@ -116,8 +123,43 @@
     dragX = 0;
   }
 
+  // Ends the current drag gesture outright and releases the pointer, so
+  // nothing further (including any pointerup/pointercancel that arrives
+  // afterward for the same pointerId) can act on it a second time.
+  function stopDragState() {
+    dragging = false;
+    stack.classList.remove('dragging');
+    dragAxisLocked = null;
+    if (dragPointerId !== null) {
+      try { stack.releasePointerCapture(dragPointerId); } catch (err) { /* no-op */ }
+    }
+    dragPointerId = null;
+  }
+
   function onPointerMove(e) {
-    if (!dragging || e.pointerId !== dragPointerId) return;
+    if (!dragging || e.pointerId !== dragPointerId) {
+      // 2026-09-19: self-heal from a phantom pointercancel -- confirmed live
+      // (via the same instrumentation used to diagnose the marquee's own
+      // identical symptom, see main.js's enableMarqueeDrag) that Chromium
+      // can fire a real pointercancel on this element mid-gesture with the
+      // mouse button still physically held the whole time, no touch-action
+      // conflict involved. Without this, that phantom cancel would end
+      // dragging=false for good and silently drop the rest of the physical
+      // gesture -- if a pointermove for the SAME primary-button-down pointer
+      // still arrives afterward, that's proof the gesture never actually
+      // ended, so re-open dragging for it here instead of ignoring it.
+      if (dragging || e.pointerId === undefined || e.buttons === undefined || (e.buttons & 1) === 0) return;
+      if (e.pointerId === committedPointerId) return; // this hold already committed -- stay inert until release
+      dragging = true;
+      dragPointerId = e.pointerId;
+      dragAxisLocked = null;
+      dragStartX = lastMoveX = e.clientX;
+      dragStartY = e.clientY;
+      lastMoveT = e.timeStamp;
+      velocity = 0;
+      dragX = 0;
+      return;
+    }
     const dx = e.clientX - dragStartX;
     const dy = e.clientY - dragStartY;
     if (dragAxisLocked === null) {
@@ -145,32 +187,81 @@
     const maxDrag = stack.getBoundingClientRect().width;
     dragX = Math.max(-maxDrag, Math.min(maxDrag, dx));
     setDragOffset(dragX);
+
+    // 2026-09-19, per Eric ("it should auto next and stop my drag, I can
+    // currently drag it infinitely one direction or another"): committing
+    // to the next/prev card used to only ever happen at release (see
+    // endDrag below), so the gesture itself could be dragged arbitrarily
+    // far -- all the way out to the stack's own full width -- with nothing
+    // visibly happening until the pointer finally lifted. Real swipe
+    // gestures elsewhere on this site (and on any native carousel) commit
+    // the moment the drag crosses its threshold, not at some later release
+    // event -- so the instant |dragX| reaches DRAG_COMMIT_PX, advance right
+    // here and end the gesture outright (stopDragState()), rather than
+    // continuing to track this pointer any further. A real flick that's
+    // fast but short (under DRAG_COMMIT_PX) still commits via velocity at
+    // release, in endDrag below -- that case is untouched.
+    if (Math.abs(dragX) >= DRAG_COMMIT_PX) {
+      dragMoved = true;
+      const dir = dragX < 0 ? 1 : -1; // matches endDrag's own dragX<0 -> next() convention
+      committedPointerId = dragPointerId; // block self-heal from re-opening this same physical hold
+      stopDragState();
+      setDragOffset(0);
+      if (dir === 1) next(); else prev();
+    }
   }
 
   function endDrag(e) {
+    // Always clear committedPointerId on a real release/cancel for this
+    // pointer, even though `dragging` is already false after a mid-gesture
+    // commit above -- this is the only signal that the physical hold is
+    // actually over, so self-heal is safe to allow again for whatever
+    // pointer touches next.
+    if (e && e.pointerId !== undefined && e.pointerId === committedPointerId) committedPointerId = null;
     if (!dragging || (e && e.pointerId !== undefined && e.pointerId !== dragPointerId)) return;
-    dragging = false;
     const wasHorizontalDrag = dragAxisLocked === 'x';
-    stack.classList.remove('dragging');
     if (wasHorizontalDrag && Math.abs(dragX) > CLICK_SUPPRESS_PX) dragMoved = true;
-    if (wasHorizontalDrag && (Math.abs(dragX) > DRAG_COMMIT_PX || Math.abs(velocity) > DRAG_COMMIT_VELOCITY)) {
+    // Reaching here at all means the pixel threshold above was never hit
+    // during this gesture (onPointerMove already committed and called
+    // stopDragState() otherwise) -- so this only ever needs to check the
+    // velocity-based fast-flick case now, not distance again.
+    if (wasHorizontalDrag && Math.abs(velocity) > DRAG_COMMIT_VELOCITY) {
       // Dragging the card leftward (negative dx) reveals what's coming from
       // the right -- i.e. advances to "next" -- and vice versa.
       if (dragX < 0) next(); else prev();
     }
+    stopDragState();
     setDragOffset(0);
-    dragAxisLocked = null;
-    dragPointerId = null;
   }
 
   stack.addEventListener('pointerdown', onPointerDown);
   stack.addEventListener('pointermove', onPointerMove);
   stack.addEventListener('pointerup', endDrag);
   stack.addEventListener('pointercancel', endDrag);
-  // A pointer that leaves the stack entirely (dragged off the section) while
-  // still down should resolve the same as a release, not leave the stack
-  // stuck mid-drag with no way to complete the gesture.
-  stack.addEventListener('pointerleave', e => { if (e.pointerId === dragPointerId) endDrag(e); });
+  // 2026-09-19: this used to end the drag the instant the pointer physically
+  // left `stack`'s own bounds -- found to be the real cause behind Eric's
+  // "I can drag it infinitely" report reading as "nothing happens" in
+  // testing: once axis-lock picks 'x', onPointerMove calls
+  // stack.setPointerCapture(), which guarantees pointermove/pointerup/
+  // pointercancel keep targeting `stack` no matter where on screen the
+  // pointer travels -- but pointerleave/pointerenter fire off the pointer's
+  // REAL screen position regardless of capture (confirmed live in Chromium;
+  // MDN's own capture docs note boundary events are unaffected by capture).
+  // A horizontal drag across this section routinely dips outside its own
+  // vertical bounds for a frame, which silently fired this handler and
+  // called endDrag() before the commit threshold in onPointerMove ever had
+  // a chance to fire -- ending the gesture with dragging=false so every
+  // further pointermove was ignored, which is exactly the "drag does
+  // nothing" behavior seen in testing. Only fall back to treating
+  // pointerleave as a release when capture was never actually obtained for
+  // this pointer (e.g. before the axis lock above, or on a pointer type
+  // that doesn't support capture) -- once real capture is active,
+  // pointerup/pointercancel are the only signals that should end it.
+  stack.addEventListener('pointerleave', e => {
+    if (e.pointerId !== dragPointerId) return;
+    if (stack.hasPointerCapture && stack.hasPointerCapture(e.pointerId)) return;
+    endDrag(e);
+  });
 
   render();
 })();

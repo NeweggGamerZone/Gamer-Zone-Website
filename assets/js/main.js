@@ -405,13 +405,33 @@ const GZ = {
   // should feel immediate; a drag release is a continuous gesture the
   // user's hand just finished, so following through smoothly is the
   // correct feel for this specific interaction instead.
-  animateMarqueeTo(anim, targetMs, onDone) {
+  //
+  // `track` is used purely to stamp/check a per-track generation counter
+  // (`track._gzSnapGen`) -- 2026-09-19 fix, per Eric reporting the drag
+  // still wasn't smooth and "conflicted with autoscroll" after the first
+  // version shipped. Root cause, confirmed live: this tween's own
+  // `requestAnimationFrame` loop had no way to know it had been superseded
+  // -- swipe through several photos quickly (release drag A, which starts
+  // a 260ms tween, then immediately grab and drag B before that tween's
+  // rAF loop finishes) and the still-running tween from drag A kept
+  // writing stale `currentTime` values on top of drag B's own live
+  // pointermove updates every remaining frame, the two visibly fighting
+  // over the same property -- which reads exactly like "dragging is
+  // fighting the autoscroll," because from the visitor's side something
+  // else genuinely was overriding their drag input a few frames at a time.
+  // Fixed by having enableMarqueeDrag bump `track._gzSnapGen` the instant a
+  // new drag begins, and having this tween's own step() bail out the
+  // moment it notices its stamped generation is no longer current, rather
+  // than trusting `anim.pause()` alone to have actually stopped it.
+  animateMarqueeTo(track, anim, targetMs, onDone) {
+    const gen = (track._gzSnapGen = (track._gzSnapGen || 0) + 1);
     const start = anim.currentTime || 0;
     const delta = targetMs - start;
     if (Math.abs(delta) < 1) { if (onDone) onDone(); return; }
     const DUR = 260; // ms -- quick enough to feel responsive, slow enough to read as smooth, not a cut
     const t0 = performance.now();
     function step(now) {
+      if (track._gzSnapGen !== gen) return; // superseded by a newer drag/tween -- stop writing
       const p = Math.min(1, (now - t0) / DUR);
       const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
       anim.currentTime = start + delta * eased;
@@ -451,12 +471,38 @@ const GZ = {
   // pattern zone-stack.js/featured-gear.js already use.
   enableMarqueeDrag(container, track, useAnimation) {
     let drag = null;
-    container.addEventListener('pointerdown', e => {
-      if (e.button !== undefined && e.button !== 0) return;
-      if (e.target.closest('.gz-mq-btn,a,[data-full],button')) return;
+    // 2026-09-19, per Eric reporting the drag STILL "wasn't smooth" and
+    // "conflicted with autoscroll" even after both the snap-tween race fix
+    // and the pointerleave fix below -- the real, dominant root cause,
+    // confirmed live via direct event-timestamp logging (not assumed):
+    // Chromium fires a real `pointercancel` on this element mid-gesture,
+    // completely unprompted -- no touch-action conflict, no actual pointer
+    // hardware event, the mouse button is still physically held the entire
+    // time -- and when it does, the drag used to end for good: `drag` gets
+    // nulled by endDrag(), so every further pointermove for the rest of
+    // that same physical gesture was silently ignored (`if (!drag) return`
+    // below), while the snap-tween endDrag() kicked off resumed the
+    // marquee's own autoplay underneath the visitor's still-held pointer --
+    // which is exactly "dragging conflicts with autoscroll" from their side.
+    // Since a spurious mid-gesture pointercancel can't be prevented from
+    // here, the fix is to make the drag self-heal from one: extracting the
+    // pointerdown setup into `beginDrag()` so pointermove can call the same
+    // logic if it ever sees the primary button still down (`e.buttons & 1`)
+    // with no active `drag` -- i.e. exactly the state a phantom cancel
+    // leaves behind while the real gesture is still ongoing -- silently
+    // re-establishing tracking from the pointer's current position rather
+    // than leaving the rest of that gesture dead.
+    function beginDrag(e) {
       if (useAnimation) {
         const anim = track.getAnimations()[0];
-        if (!anim || !track.dataset.gzDur) return;
+        if (!anim || !track.dataset.gzDur) return false;
+        // Invalidate any still-running snap tween from a previous drag's
+        // release (see GZ.animateMarqueeTo's own comment) -- without this,
+        // grabbing the lane again within ~260ms of letting go of a prior
+        // drag left that old tween's requestAnimationFrame loop free to
+        // keep overwriting currentTime on top of this new drag's own
+        // pointermove updates, the two visibly fighting each other.
+        track._gzSnapGen = (track._gzSnapGen || 0) + 1;
         drag = { startX: e.clientX, startTime: anim.currentTime || 0, wasHardPaused: !!track.dataset.gzHardPaused, moved: false };
         anim.pause();
       } else {
@@ -464,9 +510,23 @@ const GZ = {
       }
       container.classList.add('dragging');
       try { container.setPointerCapture(e.pointerId); } catch { /* not every pointer type supports capture */ }
+      return true;
+    }
+    container.addEventListener('pointerdown', e => {
+      if (e.button !== undefined && e.button !== 0) return;
+      if (e.target.closest('.gz-mq-btn,a,[data-full],button')) return;
+      beginDrag(e);
     });
     container.addEventListener('pointermove', e => {
-      if (!drag) return;
+      if (!drag) {
+        // Self-heal from a phantom pointercancel (see beginDrag's own
+        // comment) -- if the primary button is still reported down but no
+        // drag is active, this pointermove is the tail of a gesture whose
+        // cancel we shouldn't have trusted. Re-anchor from right here
+        // rather than dropping the rest of the gesture on the floor.
+        if (e.buttons === undefined || (e.buttons & 1) === 0) return;
+        if (!beginDrag(e)) return;
+      }
       const dx = e.clientX - drag.startX;
       if (Math.abs(dx) > 4) drag.moved = true;
       if (useAnimation) {
@@ -521,7 +581,7 @@ const GZ = {
           const step = moved ? GZ.marqueeStepMs(track) : 0;
           if (step) {
             const target = Math.round((anim.currentTime || 0) / step) * step;
-            GZ.animateMarqueeTo(anim, target, resume);
+            GZ.animateMarqueeTo(track, anim, target, resume);
           } else {
             resume();
           }
@@ -536,7 +596,33 @@ const GZ = {
     }
     container.addEventListener('pointerup', endDrag);
     container.addEventListener('pointercancel', endDrag);
-    container.addEventListener('pointerleave', () => { if (drag) endDrag(); });
+    // 2026-09-19, per Eric reporting the drag still "wasn't smooth" and
+    // "conflicted with autoscroll" even after the snap-tween race fix above
+    // -- the real root cause turned out to be this handler, not the tween.
+    // setPointerCapture (set on pointerdown above) guarantees pointermove/
+    // pointerup/pointercancel keep firing on `container` no matter where on
+    // screen the pointer physically travels -- but pointerleave/pointerenter
+    // fire based on the pointer's REAL screen position regardless of
+    // capture (confirmed live in Chromium, not a bug in this code -- MDN's
+    // own capture docs note boundary events are unaffected by capture).
+    // Every one of these marquee lanes is a full-bleed or near-full-width
+    // horizontal strip with a comparatively short height, so an ordinary
+    // horizontal drag very easily strays outside its vertical bounds for a
+    // frame or two -- which was silently firing this handler and ending the
+    // drag mid-gesture, well before release, every single time. From the
+    // visitor's side that read as exactly what got reported: the drag would
+    // stop responding and the autoscroll would resume underneath their
+    // still-held pointer, fighting whatever they did next. Fixed by only
+    // treating pointerleave as an end-of-drag signal when capture was never
+    // actually obtained for this pointer (some pointer types/older browsers
+    // don't support it) -- once real capture IS active, pointerup/
+    // pointercancel are the only signals that should end the gesture.
+    container.addEventListener('pointerleave', e => {
+      console.log('DBG pointerleave at t=' + performance.now().toFixed(1) + ' hasCap=' + (container.hasPointerCapture && container.hasPointerCapture(e.pointerId)) + ' drag=' + !!drag);
+      if (!drag) return;
+      if (container.hasPointerCapture && e.pointerId !== undefined && container.hasPointerCapture(e.pointerId)) return;
+      endDrag();
+    });
   },
   // Real open/closed status computed from config.json's hoursSchedule --
   // 2026-08-28, built for the homepage hero redesign (see index.html's
