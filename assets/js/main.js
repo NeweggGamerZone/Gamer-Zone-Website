@@ -315,20 +315,13 @@ const GZ = {
     }
 
     // Moving one card over: measured from the real gap between the first
-    // two real items in the track (not a guessed fixed width), so this
-    // works correctly whether it's a 300px review card, a 450px event
-    // photo, or a 330px mobile photo -- one shared skip function, no
-    // per-instance tuning.
-    function stepMs() {
-      const dur = parseFloat(track.dataset.gzDur);
-      if (!dur) return 0;
-      const a = track.children[0], b = track.children[1];
-      if (!a || !b) return 0;
-      const stepDist = b.getBoundingClientRect().left - a.getBoundingClientRect().left;
-      const totalDist = track.scrollWidth / 2;
-      if (!totalDist) return 0;
-      return (stepDist / totalDist) * dur * 1000;
-    }
+    // two real items in the track (not a guessed fixed width) via the
+    // shared GZ.marqueeStepMs() below, so this works correctly whether
+    // it's a 300px review card, a 450px event photo, or a 330px mobile
+    // photo -- one shared implementation, reused by both this skip button
+    // and the drag-release snap in enableMarqueeDrag, not two independently
+    // maintained copies of the same measurement.
+    function stepMs() { return GZ.marqueeStepMs(track); }
 
     // Skips one card instantly -- reversed 2026-09-18 from the prior
     // "smoothly ramp playbackRate, poll with requestAnimationFrame" version
@@ -384,6 +377,48 @@ const GZ = {
     // pause/skip, so a plain click on a card is just a plain click on a
     // card (its own link/popup behavior, or nothing) with no hidden
     // second meaning layered on top of it.
+  },
+  // Shared "how far is one card, in ms of animation time" measurement --
+  // extracted 2026-09-19 out of buildMarqueeControls' own former stepMs()
+  // so the drag-release snap in enableMarqueeDrag below can reuse the exact
+  // same math as the skip buttons, rather than a second, independently
+  // maintained copy of the same measurement drifting out of sync with it.
+  marqueeStepMs(track) {
+    const dur = parseFloat(track.dataset.gzDur);
+    if (!dur) return 0;
+    const a = track.children[0], b = track.children[1];
+    if (!a || !b) return 0;
+    const stepDist = b.getBoundingClientRect().left - a.getBoundingClientRect().left;
+    const totalDist = track.scrollWidth / 2;
+    if (!totalDist) return 0;
+    return (stepDist / totalDist) * dur * 1000;
+  },
+  // Smoothly tweens a paused animation's currentTime from wherever it is
+  // now to `targetMs`, via requestAnimationFrame with an ease-out curve --
+  // used by enableMarqueeDrag's drag-release snap below (2026-09-19, per
+  // Eric: "when I drag photo reels it should seamlessly and smoothly move
+  // onto the next image") so releasing a drag settles cleanly onto a full
+  // card instead of parking at whatever arbitrary mid-card position the
+  // pointer happened to be dragged to. Deliberately its own small easing
+  // loop rather than reusing skip()'s instant-jump behavior above -- that
+  // was reverted to an instant cut specifically because a *button click*
+  // should feel immediate; a drag release is a continuous gesture the
+  // user's hand just finished, so following through smoothly is the
+  // correct feel for this specific interaction instead.
+  animateMarqueeTo(anim, targetMs, onDone) {
+    const start = anim.currentTime || 0;
+    const delta = targetMs - start;
+    if (Math.abs(delta) < 1) { if (onDone) onDone(); return; }
+    const DUR = 260; // ms -- quick enough to feel responsive, slow enough to read as smooth, not a cut
+    const t0 = performance.now();
+    function step(now) {
+      const p = Math.min(1, (now - t0) / DUR);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      anim.currentTime = start + delta * eased;
+      if (p < 1) requestAnimationFrame(step);
+      else if (onDone) onDone();
+    }
+    requestAnimationFrame(step);
   },
   // 2026-09-16, per Eric ("allow me to mouse/finger drag every section that
   // has scrolling content"): one shared drag implementation reused by every
@@ -455,14 +490,44 @@ const GZ = {
     });
     function endDrag() {
       if (!drag) return;
+      // Snapshot what's needed out of `drag` before nulling it out below --
+      // GZ.animateMarqueeTo's snap tween finishes async (a requestAnimationFrame
+      // loop, ~260ms later), and its resume() callback closing over the live
+      // `drag` variable directly would read `drag.wasHardPaused` off of
+      // `null` by the time it actually runs, since `drag = null` happens
+      // synchronously a few lines below, well before that callback fires --
+      // a real bug caught via a live console.error during testing, not
+      // just reasoned about.
+      const wasHardPaused = drag.wasHardPaused;
+      const moved = drag.moved;
       if (useAnimation) {
         const anim = track.getAnimations()[0];
+        const resume = () => { if (wasHardPaused) anim.pause(); else { anim.playbackRate = 1; anim.play(); } };
         if (anim) {
-          if (drag.wasHardPaused) anim.pause();
-          else { anim.playbackRate = 1; anim.play(); }
+          // 2026-09-19, per Eric ("when I drag photo reels it should
+          // seamlessly and smoothly move onto the next image, so the card
+          // stack as I drag should show me the next one after a
+          // threshold"): a real drag no longer just leaves the lane parked
+          // at whatever arbitrary mid-card position the pointer let go of
+          // -- it settles onto the nearest full card. Math.round against
+          // the fixed per-card time step is itself the threshold (past
+          // roughly half a card's width commits forward/back to the next
+          // one, short of that settles back to the current one), and
+          // GZ.animateMarqueeTo eases there smoothly rather than snapping
+          // instantly, so the release reads as a continuation of the same
+          // gesture instead of a cut. A plain click with no real movement
+          // (moved === false) skips the snap and just resumes immediately,
+          // same as before.
+          const step = moved ? GZ.marqueeStepMs(track) : 0;
+          if (step) {
+            const target = Math.round((anim.currentTime || 0) / step) * step;
+            GZ.animateMarqueeTo(anim, target, resume);
+          } else {
+            resume();
+          }
         }
       }
-      if (drag.moved) {
+      if (moved) {
         track.dataset.gzSuppressClick = '1';
         setTimeout(() => delete track.dataset.gzSuppressClick, 0);
       }
