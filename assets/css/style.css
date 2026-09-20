@@ -1300,30 +1300,45 @@ body.home-page { background: transparent; }
 .lb-table tr:first-child td { background:rgba(250,157,40,.06); }
 .lb-medal { display:inline-block; width:26px; }
 .score-guide { display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); margin-top:.4rem; }
-.score-guide .sg { position:relative; background:var(--bg-2); border:1px solid var(--line); clip-path:var(--clip); padding:1.3rem 1rem 1rem; }
-.score-guide .sg .pts { font-family:var(--head); font-weight:800; font-size:1.5rem; color:var(--ne-blue-text); }
-.score-guide .sg .lbl { font-family:var(--head); text-transform:uppercase; font-size:.8rem; letter-spacing:.03em; margin-top:.2rem; color:var(--ink); }
+.score-guide .sg { position:relative; background:var(--bg-2); border:1px solid var(--line); clip-path:var(--clip); padding:1.3rem 1rem 1rem; text-align:center; }
+/* The perk description below the badge reads as body copy, not a label --
+   keep it left-aligned even though the card's header (eyebrow + badge)
+   above it is centered, the same split the tier pillars use (centered
+   .mile-head, left-aligned perks <ul> underneath). */
+.score-guide .sg > p.dim { text-align:left; }
+.score-guide .sg .pts { font-family:var(--head); font-weight:800; color:var(--ne-blue-text); }
+.score-guide .sg .lbl { font-family:var(--head); text-transform:uppercase; letter-spacing:.03em; color:var(--ink-dim); }
 .sg-unlock { display:block; font-family:var(--head); font-weight:800; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.5rem; }
-/* 2026-09-18 (per Eric: "emphasize the 20+/40+ as the core part in a
-   similar horizontal tag format... similar design to the ambassador
-   journey '1 Event Hosted' tag style, it should be inside a square"):
-   the old 60px icon circle is gone -- .sg-badge is now a square (rounded
-   corners, not a circle) sized to its own content, holding the number and
-   "Attendees" side by side as one horizontal tag, the exact same row
-   layout .mile-count uses above for "1 Event Hosted". The number is the
-   visual headline here (kept large, matching its own pre-existing
-   2.1rem size) with the unit label riding alongside it rather than
-   underneath as a separate caption. Escalating bronze/silver/gold color
-   identity still comes from each tier's own background/color/box-shadow
-   below (unchanged) applied to this square instead of the old circle. */
-.sg-badge { position:relative; display:inline-flex; flex-direction:row; align-items:baseline; justify-content:center; gap:.4rem; width:auto; height:auto; padding:.7rem 1.1rem; border-radius:14px; margin-bottom:.6rem; }
-.score-guide .sg .pts { font-size:2.1rem; line-height:1; }
-.score-guide .sg .lbl { font-size:.72rem; margin-top:0; }
-.sg-bronze .sg-badge { background:rgba(214,149,85,.18); color:#D69555; box-shadow:0 0 16px -5px #D69555; }
+/* 2026-09-19 (per Eric: "make the 20/40/60+ attendees tags look like the
+   1/2/4/6 events hosted tag... the numbers are much larger than the
+   actual words, make it look clean and consistent"): this used to be its
+   own square, tinted-background, glowing badge with an oversized 2.1rem
+   number against a .72rem label (a ~2.9x size ratio) and no centering on
+   the card around it -- three real inconsistencies with `.mile-count`
+   above (a neutral bg-3 pill with a colored 2px border, a 1.5rem number
+   against a .68rem label -- ~2.2x -- and centered in its own column).
+   `.sg-badge` is now byte-for-byte the same shape/spacing/sizing as
+   `.mile-count` (pill, same padding, same neutral background, same
+   border treatment, `.pts`/`.lbl` sized and colored exactly like
+   `.mc-num`/`.mc-lbl`), just with its own bronze/silver/gold border+number
+   color per tier below in place of `.mile.tier-*`'s per-tier rules -- one
+   consistent tag look site-wide instead of two that had quietly drifted
+   apart, the same "one shared implementation" problem this file's own
+   history already documents for gz-shine/gz-marquee. The tinted
+   background + box-shadow glow is dropped along with the square shape --
+   a plain colored border reads as the same rank signal without competing
+   with the (now correctly sized) text the way a glowing fill did. */
+.sg-badge { position:relative; display:inline-flex; flex-direction:row; align-items:baseline; gap:.4rem; width:auto; height:auto; padding:.55rem 1.1rem; background:var(--bg-3); border:2px solid var(--line); border-radius:999px; margin-bottom:.6rem; }
+.score-guide .sg .pts { font-size:1.5rem; line-height:1; }
+.score-guide .sg .lbl { font-size:.68rem; font-weight:700; margin-top:0; }
+.sg-bronze .sg-badge { border-color:#D69555; }
+.sg-bronze .sg-badge .pts { color:#D69555; }
 .sg-bronze .sg-unlock { color:#D69555; }
-.sg-silver .sg-badge { background:rgba(169,188,205,.18); color:#a9bccd; box-shadow:0 0 16px -5px #a9bccd; }
+.sg-silver .sg-badge { border-color:#a9bccd; }
+.sg-silver .sg-badge .pts { color:#a9bccd; }
 .sg-silver .sg-unlock { color:#a9bccd; }
-.sg-gold .sg-badge { background:rgba(250,157,40,.18); color:var(--ne-orange); box-shadow:0 0 16px -5px var(--ne-orange); }
+.sg-gold .sg-badge { border-color:var(--ne-orange); }
+.sg-gold .sg-badge .pts { color:var(--ne-orange); }
 .sg-gold .sg-unlock { color:var(--ne-orange); }
 
 .visit-cta-note { font-size:.78rem; color:var(--ink-dim); margin-top:.55rem; }

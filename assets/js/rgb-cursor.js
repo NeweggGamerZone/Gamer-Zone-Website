@@ -54,10 +54,27 @@
     return (typeof live === 'number' && isFinite(live)) ? live : 205;
   }
 
+  // 2026-09-19, per Eric ("allow me to click anywhere in the wheel, not
+  // just the outside -- the node should go to that position"): the knob
+  // used to always render at the wheel's fixed outer radius (WHEEL_R)
+  // regardless of where the wheel was actually clicked, since only the
+  // click's ANGLE ever fed into anything -- correct for the hue itself
+  // (this conic-gradient wheel's color only varies by angle, not by
+  // distance from center, so radius was never meaningful there), but it
+  // meant clicking near the middle of the wheel visually snapped the knob
+  // straight out to the rim instead of landing where the pointer actually
+  // was, reading as broken/unresponsive for anything but the outer edge.
+  // `knobRadius` now tracks the real clamped distance from center of the
+  // last pointer interaction (defaulting to the rim on load, since there's
+  // no persisted "last clicked radius" to restore) -- a keyboard-driven
+  // hue change (arrow keys) only updates the angle and leaves whatever
+  // radius the knob was already sitting at alone, since there's no
+  // pointer position to derive a new one from.
+  var knobRadius = WHEEL_R;
   function setKnobFromHue(hue) {
     var rad = hue * Math.PI / 180;
-    knob.style.setProperty('--kx', (WHEEL_R * Math.sin(rad)) + 'px');
-    knob.style.setProperty('--ky', (-WHEEL_R * Math.cos(rad)) + 'px');
+    knob.style.setProperty('--kx', (knobRadius * Math.sin(rad)) + 'px');
+    knob.style.setProperty('--ky', (-knobRadius * Math.cos(rad)) + 'px');
   }
 
   function applyHue(hue) {
@@ -144,13 +161,30 @@
     return ((deg % 360) + 360) % 360;
   }
 
+  // Real distance from the wheel's own center, clamped to its radius so a
+  // click/drag that strays outside the visible disc (still caught by this
+  // listener while a drag has pointer capture) still parks the knob at the
+  // rim instead of flying off past it.
+  function radiusFromPointer(clientX, clientY) {
+    var rect = wheel.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var dx = clientX - cx, dy = clientY - cy;
+    return Math.min(WHEEL_R, Math.hypot(dx, dy));
+  }
+
+  function applyPointer(clientX, clientY) {
+    knobRadius = radiusFromPointer(clientX, clientY);
+    applyHue(hueFromPointer(clientX, clientY));
+  }
+
   var dragging = false;
   wheel.addEventListener('pointerdown', function (e) {
     dragging = true;
     try { wheel.setPointerCapture(e.pointerId); } catch (err) {}
-    applyHue(hueFromPointer(e.clientX, e.clientY));
+    applyPointer(e.clientX, e.clientY);
   });
-  wheel.addEventListener('pointermove', function (e) { if (dragging) applyHue(hueFromPointer(e.clientX, e.clientY)); });
+  wheel.addEventListener('pointermove', function (e) { if (dragging) applyPointer(e.clientX, e.clientY); });
   wheel.addEventListener('pointerup', function () { dragging = false; });
   wheel.addEventListener('pointercancel', function () { dragging = false; });
 
