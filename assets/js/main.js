@@ -34,6 +34,13 @@ const GZ_ICONS = {
   shield: '<path d="M12 2l8 3v6c0 5.25-3.5 9-8 11-4.5-2-8-5.75-8-11V5l8-3z"/>',
   sword: '<path d="M12 1l2.5 14h-5zM7 15h10v2H7zm4 2h2v5h-2zm-1 5h4v1.5h-4z"/>',
   bow: '<path d="M9 2c-4 4-4 16 0 20-2-4-2-16 0-20z"/><path d="M8.3 2h1.1v20h-1.1z"/><path d="M4.5 11h10l-2.8-2.8 1.4-1.4L18.5 12l-5.4 5.2-1.4-1.4L14.5 13h-10z"/>',
+  // 2026-09-19, per Eric ("collegiate ambassador icon a wizard or witch
+  // hat, so it feels in theme with the sword and the bow"): a simple flat
+  // cone-plus-brim silhouette matching this set's existing geometric style
+  // (see sword/bow above) rather than a more detailed illustrative glyph --
+  // a curled tip (the `q` curve near the apex) is the one detail that reads
+  // as "wizard hat" rather than a plain party hat at this icon's small size.
+  wizardhat: '<path d="M12 2c-1.2 3.6-3.4 7.7-5.3 10.2h11.7q-3-3.6-4.4-7c.7.2 1.3.6 1.3 1.2 0 0 1.6-2.9-3.3-4.4z"/><rect x="5.3" y="11.2" width="13.4" height="1.6" rx="0.5"/><ellipse cx="12" cy="14.3" rx="8.5" ry="1.8"/>',
   search: '<path fill-rule="evenodd" d="M10.5 3a7.5 7.5 0 015.9 12.1l4.75 4.75-1.4 1.4-4.75-4.75A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/>',
   close: '<path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/>',
   // 2026-09-08: added for the shared marquee hover-controls (GZ.marquee's
@@ -323,30 +330,40 @@ const GZ = {
     // maintained copies of the same measurement.
     function stepMs() { return GZ.marqueeStepMs(track); }
 
-    // Skips one card instantly -- reversed 2026-09-18 from the prior
-    // "smoothly ramp playbackRate, poll with requestAnimationFrame" version
-    // (that was itself an explicit 2026-09-08 spec: "skip back and skip
-    // forward an image smoothly, not an instant cut"). Per Eric's direct
-    // follow-up call: the ramped skip read as a laggy wait rather than an
-    // immediate, actionable click, and he wants every reel (Reviews,
-    // Featured Gear, Past Events waterfall, hero photo strip, Academy/
-    // Ambassador galleries -- this is the one shared implementation behind
-    // all of them, so one fix here reaches every consumer at once) to snap
-    // straight to the next card and immediately resume its normal
-    // autoscroll from there. currentTime on an infinitely-looping animation
-    // counts up without ever wrapping back to 0 internally (the wrap is
-    // purely a visual effect of the keyframes), so the target math still
-    // never needs a modulo or to handle crossing the loop seam specially --
-    // only the "how we get there" (instant set vs. ramped poll) changed.
+    // Skip button: a brief, quick tween -- not an instant cut, not a slow
+    // glide. History: this was a ramped requestAnimationFrame poll
+    // (2026-09-08 spec: "skip back and skip forward an image smoothly, not
+    // an instant cut"), then reverted to an instant currentTime jump
+    // (2026-09-18, per Eric: the ramp read as a laggy wait rather than an
+    // immediate click). 2026-09-19, per Eric again ("allowed to add a quick
+    // and brief transition... less sudden but also not so slow"): landed in
+    // between the two -- a short GZ.animateMarqueeTo ease (140ms, well under
+    // the 260ms drag-release snap's own duration, since a button click
+    // should still read as noticeably snappier than the tail end of a drag
+    // gesture) rather than either extreme. currentTime on an infinitely-
+    // looping animation counts up without ever wrapping back to 0
+    // internally (the wrap is purely a visual effect of the keyframes), so
+    // the target math still never needs a modulo or to handle crossing the
+    // loop seam specially -- only the "how we get there" changed.
+    //
+    // The animation is explicitly paused before tweening (mirroring
+    // enableMarqueeDrag's own pattern below) so the tween's own written
+    // currentTime values aren't simultaneously fighting a live autoplay
+    // clock -- and `wasHardPaused` is captured into a local const *before*
+    // the async tween starts, the same "capture what you need before the
+    // reference goes away" discipline this file's drag-release resume()
+    // already needed for the same reason (see animateMarqueeTo's own
+    // header comment for that bug's history).
     function skip(dir) {
       const anim = track.getAnimations()[0];
       const step = stepMs();
       if (!anim || !step) return;
-      anim.currentTime = (anim.currentTime || 0) + dir * step;
-      // Resume normal playback immediately after the jump, unless the
-      // visitor has this lane explicitly paused via the play/pause control.
-      if (track.dataset.gzHardPaused) anim.pause();
-      else { anim.playbackRate = 1; anim.play(); }
+      const target = (anim.currentTime || 0) + dir * step;
+      const wasHardPaused = !!track.dataset.gzHardPaused;
+      anim.pause();
+      GZ.animateMarqueeTo(track, anim, target, () => {
+        if (!wasHardPaused) { anim.playbackRate = 1; anim.play(); }
+      }, 140);
     }
 
     // A manual pause is now a sticky toggle (not a hover-scoped state --
@@ -423,12 +440,12 @@ const GZ = {
   // new drag begins, and having this tween's own step() bail out the
   // moment it notices its stamped generation is no longer current, rather
   // than trusting `anim.pause()` alone to have actually stopped it.
-  animateMarqueeTo(track, anim, targetMs, onDone) {
+  animateMarqueeTo(track, anim, targetMs, onDone, dur) {
     const gen = (track._gzSnapGen = (track._gzSnapGen || 0) + 1);
     const start = anim.currentTime || 0;
     const delta = targetMs - start;
     if (Math.abs(delta) < 1) { if (onDone) onDone(); return; }
-    const DUR = 260; // ms -- quick enough to feel responsive, slow enough to read as smooth, not a cut
+    const DUR = dur || 260; // ms -- quick enough to feel responsive, slow enough to read as smooth, not a cut
     const t0 = performance.now();
     function step(now) {
       if (track._gzSnapGen !== gen) return; // superseded by a newer drag/tween -- stop writing

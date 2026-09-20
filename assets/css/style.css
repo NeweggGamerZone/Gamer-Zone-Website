@@ -1328,15 +1328,35 @@ body.home-page { background: transparent; }
    background + box-shadow glow is dropped along with the square shape --
    a plain colored border reads as the same rank signal without competing
    with the (now correctly sized) text the way a glowing fill did. */
-.sg-badge { position:relative; display:inline-flex; flex-direction:row; align-items:baseline; gap:.4rem; width:auto; height:auto; padding:.55rem 1.1rem; background:var(--bg-3); border:2px solid var(--line); border-radius:999px; margin-bottom:.6rem; }
+.sg-badge { position:relative; display:inline-flex; flex-direction:row; align-items:center; gap:.4rem; width:auto; height:auto; padding:.55rem 1.1rem; background:var(--bg-3); border:2px solid var(--line); border-radius:999px; margin-bottom:.6rem; }
 .score-guide .sg .pts { font-size:1.5rem; line-height:1; }
 .score-guide .sg .lbl { font-size:.68rem; font-weight:700; margin-top:0; }
-.sg-bronze .sg-badge { border-color:#D69555; }
-.sg-bronze .sg-badge .pts { color:#D69555; }
-.sg-bronze .sg-unlock { color:#D69555; }
-.sg-silver .sg-badge { border-color:#a9bccd; }
-.sg-silver .sg-badge .pts { color:#a9bccd; }
-.sg-silver .sg-unlock { color:#a9bccd; }
+/* 2026-09-19, per Eric ("have the color in the attendance bonus go from
+   lighter to brighter oranges"): the bronze/silver/gold naming was a
+   leftover from this badge's pre-redesign medal-tier styling (see the
+   comment above .sg-badge) -- bronze was a muted tan (#D69555) and silver
+   a blue-grey (#a9bccd), neither of which is actually an orange, so there
+   was no real "lighter to brighter" progression to see. Replaced with a
+   real monochromatic light -> bright orange ramp across the three real
+   attendance thresholds (20+ -> 40+ -> 60+, ascending, per ambassador.html's
+   own markup order): a pale tint, a mid-saturation orange, and the site's
+   standard `--ne-orange` (already used everywhere else as the "brightest"
+   orange, e.g. the shared .btn gradient) as the top/60+ tier -- so the
+   brightest real orange on the page is reserved for the highest threshold,
+   same logic as brightness signaling "more." Contrast re-verified for real
+   (not assumed from lighter-reads-safer intuition): #FFC98A and #FBAE4A
+   both compute to 11.8:1 and 9.5:1 against `--bg-3` (#16181D) respectively
+   -- both comfortably clear of the 7:1 AAA floor, same as `--ne-orange`'s
+   own already-documented 8.4:1. The `.sg-bronze`/`.sg-silver`/`.sg-gold`
+   class *names* are unchanged (still what ambassador.html's markup uses) --
+   only the color values they resolve to moved, to avoid a bigger, riskier
+   rename across HTML+CSS for a change that's purely about color. */
+.sg-bronze .sg-badge { border-color:#FFC98A; }
+.sg-bronze .sg-badge .pts { color:#FFC98A; }
+.sg-bronze .sg-unlock { color:#FFC98A; }
+.sg-silver .sg-badge { border-color:#FBAE4A; }
+.sg-silver .sg-badge .pts { color:#FBAE4A; }
+.sg-silver .sg-unlock { color:#FBAE4A; }
 .sg-gold .sg-badge { border-color:var(--ne-orange); }
 .sg-gold .sg-badge .pts { color:var(--ne-orange); }
 .sg-gold .sg-unlock { color:var(--ne-orange); }
@@ -1928,8 +1948,16 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    to its own content instead of a forced square. The rank-badge icon
    circle (shield/coin/chip/trophy) that used to sit above/beside this is
    removed outright, per Eric's direct "remove the icons entirely" --
-   .rank-badge and its per-tier color rules are gone (not just hidden). */
-.mile-count{position:relative;z-index:2;flex:none;display:inline-flex;flex-direction:row;align-items:baseline;gap:.4rem;width:auto;height:auto;padding:.55rem 1.1rem;background:var(--bg-3);border:2px solid var(--line);border-radius:999px}
+   .rank-badge and its per-tier color rules are gone (not just hidden).
+   2026-09-19: align-items switched baseline -> center, per Eric ("make
+   events hosted and attendees for the ambassador bonuses center aligned
+   with the big numbers") -- baseline alignment sat the small uppercase
+   label's own text-baseline flush with the big number's baseline, which
+   visually reads low/bottom-heavy once the number is this much larger
+   than the label; centering the row instead lines the label up with the
+   number's vertical middle. Same fix applied to .sg-badge below, since
+   both share this exact row-layout pattern. */
+.mile-count{position:relative;z-index:2;flex:none;display:inline-flex;flex-direction:row;align-items:center;gap:.4rem;width:auto;height:auto;padding:.55rem 1.1rem;background:var(--bg-3);border:2px solid var(--line);border-radius:999px}
 .mc-num{font-family:var(--head);font-weight:800;font-size:1.5rem;line-height:1}
 .mc-lbl{font-family:var(--head);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-dim)}
 .mile .unlock{position:relative;z-index:2;font-family:var(--head);font-weight:800;text-transform:uppercase;font-size:.98rem;margin:0;flex:1}
@@ -2182,7 +2210,20 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    Still a real gradient, not a hard crop -- re-screenshotted hero-proof,
    Reviews, and the Past Events waterfall after the change to confirm none
    of the three now clips a card's edge abruptly. */
-.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;cursor:grab;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+/* 2026-09-19, per Eric ("distracting when I mouse drag reviews" -- native
+   text-selection highlighting was visibly painting across review quotes/
+   names mid-drag): a plain click-drag over any text node is the browser's
+   own built-in text-selection gesture, indistinguishable at the mousedown
+   moment from GZ.enableMarqueeDrag's pointer-drag-to-scrub gesture (main.js)
+   -- both start on the same mousedown. `.gear-item`/`.zone-card` already
+   carry `user-select:none` for exactly this reason (see those rules
+   elsewhere in this file), but the shared .gz-marquee lane itself never
+   did, so every OTHER consumer (Reviews, Past Events, hero-proof, the
+   Academy/Ambassador photo galleries) was still selectable text underneath
+   its own drag handler. Fixed once here so it reaches every .gz-marquee
+   instance site-wide, per this file's "one shared implementation" rule --
+   not a per-consumer patch. */
+.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
 .gz-marquee.dragging{cursor:grabbing}
 .gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
 .gz-marquee-track.rev{animation-direction:reverse}
