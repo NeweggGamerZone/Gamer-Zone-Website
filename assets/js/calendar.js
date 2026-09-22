@@ -25,9 +25,11 @@
   // Full-bleed card backgrounds, sourced from assets/calendar/BGAssets — chosen
   // per event type so the popup reads as "photo of that kind of event" rather
   // than a generic flyer image.
-  // Path is resolved relative to style.css (assets/css/), not this page,
-  // since the value is substituted into a CSS custom property.
-  const BG_DIR = '../calendar/BGAssets/';
+  // Path is resolved relative to THIS PAGE (events.html, at the repo root),
+  // not style.css — see the 2026-09-22 comment block below on why these are
+  // now baked directly into each render() as a real <div>'s inline style
+  // rather than routed through a CSS custom property.
+  const BG_DIR = 'assets/calendar/BGAssets/';
   // The -blurred variants are pre-rendered offline (blur/darken/desaturate
   // baked into the JPG itself) rather than relying on a live CSS blur
   // filter, which renders blocky/pixelated in some browsers — see the
@@ -58,9 +60,59 @@
     for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
     return MAJOR_BG_POOL[h % MAJOR_BG_POOL.length];
   }
-  function setCardBg(url) {
-    if (url) detail.style.setProperty('--cd-bg', `url('${url}')`);
-    else detail.style.removeProperty('--cd-bg');
+  // 2026-09-22, per Eric ("special graphics on days with specific events,
+  // daily normal free play uses a base image"): real per-event/per-day
+  // photo backgrounds are back, after being removed site-wide on 2026-09-08
+  // for an intermittent "renders once then disappears" flash/pop bug that
+  // was never actually root-caused -- the old fix just deleted the photo
+  // layer rather than diagnosing the race (see the .cal-detail comment in
+  // style.css). Two deliberate differences from that old, buggy
+  // implementation, aimed squarely at the two most likely real causes of a
+  // "loads once, then vanishes" symptom:
+  //   1. No more CSS custom property indirection (--cd-bg set via
+  //      el.style.setProperty(), read back by a ::before{background-image:
+  //      var(--cd-bg)} rule days apart in the codebase). The URL is now
+  //      baked directly into a real <div>'s inline style string as part of
+  //      the SAME innerHTML assignment that renders the day's text -- one
+  //      atomic DOM write, nothing set-then-read-later to race against.
+  //   2. Every distinct background URL is preloaded with a plain `new
+  //      Image()` once, up front (see preloadBgs() below, called once at
+  //      init) -- if the old bug really was a load-order/caching race (a
+  //      background-image the browser hadn't finished fetching yet on a
+  //      rapid hover-sweep), every image this page can possibly show is
+  //      already decoded and cache-warm before a visitor can hover fast
+  //      enough to trigger it.
+  // bgFor(e) resolves a per-event override first (data/events.json's own
+  // `image` field, for a specific real photo like the SF6 Saturday Slam
+  // crowd shot) before falling back to the existing per-type/major-pool
+  // logic -- so most days still get their generic type photo, and only
+  // days with a real, specific photo on file get something more special.
+  function bgFor(e) {
+    if (e && e.image) return e.image;
+    if (e && e.type === 'major') return majorBgFor(e);
+    return (e && TYPE_BG[e.type]) || FREE_PLAY_BG;
+  }
+  function preloadBgs() {
+    const urls = new Set([FREE_PLAY_BG, ...Object.values(TYPE_BG), ...MAJOR_BG_POOL]);
+    (data.events || []).forEach(e => { if (e.image) urls.add(e.image); });
+    urls.forEach(u => { const img = new Image(); img.src = u; });
+  }
+  function bgLayer(url) {
+    // Real DOM nodes (not pseudo-elements), rendered fresh as part of the
+    // same innerHTML string as the card's text -- see the block comment
+    // above for why this differs from the pre-2026-09-08 implementation.
+    return `<div class="cd-bg-photo" style="background-image:url('${url}')" aria-hidden="true"></div><div class="cd-bg-scrim" aria-hidden="true"></div>`;
+  }
+  // Real, structured prize/perk details (data/events.json's own `prizes`/
+  // `perks` fields, e.g. the SF6 Saturday Slam bracket payouts + its free
+  // pizza lunch) -- generic and reusable by any future event that defines
+  // the same fields, not a one-off hand-coded block just for this event.
+  function prizeBlock(e) {
+    if (!e || !e.prizes || !e.prizes.length) return '';
+    const ord = n => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
+    const rows = e.prizes.map(p => `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></span></div>`).join('');
+    const perks = (e.perks && e.perks.length) ? e.perks.map(p => `<div class="perk-chip">${GZ.esc(p)}</div>`).join('') : '';
+    return `<div class="prize-heading">Bracket Prizing</div><div class="prize-table">${rows}</div>${perks}`;
   }
   const t0 = new Date(today + 'T12:00:00');
   let view = new Date(t0.getFullYear(), t0.getMonth(), 1);
@@ -207,8 +259,7 @@
     // description -> CTA.
     if (e && !closedByType) {
       const typeCls = TYPE_COLOR[e.type] || 'cal-edu';
-      setCardBg(e.type === 'major' ? majorBgFor(e) : (TYPE_BG[e.type] || FREE_PLAY_BG));
-      detail.innerHTML = `<span class="tag ${typeCls}">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
+      detail.innerHTML = `${bgLayer(bgFor(e))}<span class="tag ${typeCls}">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
         <h3>${GZ.esc(e.title)}</h3>
         ${e.subtitle ? `<p class="cd-sub">${GZ.esc(e.subtitle)}</p>` : ''}
         <div class="cd-meta">
@@ -216,9 +267,12 @@
           ${e.time ? `<span class="cd-meta-item"><i data-ic="clock"></i>${GZ.esc(e.time)}</span>` : ''}
         </div>
         ${e.blurb ? `<p class="cd-blurb">${GZ.esc(e.blurb)}</p>` : ''}
-        <div class="cd-body">${startggBlock}${preregBlock}</div>`;
+        <div class="cd-body">${prizeBlock(e)}${startggBlock}${preregBlock}</div>`;
     } else if (closed) {
-      setCardBg(null);
+      // Closed days stay a flat panel, no photo -- there's no "day of"
+      // photo to show for a closure, and this matches Eric's actual ask
+      // (special-event graphics + a base Free Play image), not a request
+      // to photo-back every single day type.
       const reasonLine = (closedByType && e.blurb) ? `<p class="cd-blurb">${GZ.esc(e.blurb)}</p>` : '';
       const next = nextOpenInfo(dt);
       const nextLine = next
@@ -229,8 +283,7 @@
         ${reasonLine}
         <p class="cd-blurb">${nextLine}</p>`;
     } else {
-      setCardBg(FREE_PLAY_BG);
-      detail.innerHTML = `<span class="tag cal-free">Free Play</span>
+      detail.innerHTML = `${bgLayer(FREE_PLAY_BG)}<span class="tag cal-free">Free Play</span>
         <h3>FREE PLAY: ${pretty(dt)}</h3>
         <div class="cd-meta"><span class="cd-meta-item"><i data-ic="clock"></i>10am to 7pm</span></div>
         <p class="cd-blurb">Open 10am to 7pm. Try the latest tech for free: walk in, or pre-register to skip the line at check-in.</p>
@@ -315,6 +368,7 @@
   document.getElementById('cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); render(); markActivity(); });
   document.getElementById('cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); render(); markActivity(); });
 
+  preloadBgs();
   render();
   // Default to today — the same thing shown whenever nothing is hovered.
   show(today);

@@ -1711,8 +1711,21 @@ body.home-page { background: transparent; }
    comment): flex-start pins every day's content to the same top offset;
    shorter content just leaves its own blank space below, the same way a
    real second line would have. */
-.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;min-height:440px;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-start}
-.cal-detail::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--bg-2)}
+.cal-detail{position:relative;background:rgba(14,16,19,.4);border:1px solid rgba(242,244,248,.16);padding:1.6rem;min-height:440px;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden}
+/* Solid fallback fill, behind the real photo layer below -- if a per-day
+   image URL is ever slow/missing this is what shows instead of a hole,
+   never nothing. */
+.cal-detail::after{content:"";position:absolute;inset:0;z-index:-3;background:var(--bg-2)}
+/* 2026-09-22, per Eric ("special graphics on event days, a base image for
+   daily Free Play"): real per-event/per-day photo backgrounds, reintroduced
+   after being removed 2026-09-08 for an unresolved flash/pop bug -- see the
+   long comment above bgLayer() in assets/js/calendar.js for exactly what's
+   different this time (no CSS-custom-property indirection, everything
+   preloaded up front). .cd-bg-photo/.cd-bg-scrim are real <div>s rendered
+   fresh as part of calendar.js's own innerHTML string each time a day is
+   shown, not pseudo-elements toggled after the fact. */
+.cal-detail .cd-bg-photo{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center 30%}
+.cal-detail .cd-bg-scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(175deg,rgba(6,7,8,.55) 0%,rgba(6,7,8,.82) 55%,rgba(6,7,8,.94) 100%)}
 .cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
 /* line-clamp removed from h3/cd-sub/cd-blurb below, 2026-09-08 per Eric
    ("the event description should also be the full size") -- see the
@@ -1731,6 +1744,18 @@ body.home-page { background: transparent; }
 .cd-meta-item{display:flex;align-items:center;gap:.4rem;font-family:var(--eu-body);font-size:.85rem;font-weight:600;color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cd-meta-item .ic{width:15px;height:15px;color:var(--ne-orange);flex:none}
 .cd-blurb{font-family:var(--eu-body);color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);line-height:1.55;margin-top:.2rem}
+/* Generic, reusable prize/perk block for any event whose data/events.json
+   entry defines `prizes`/`perks` (currently just the SF6 Saturday Slam) --
+   not a one-off hand-coded block, so a future tournament gets the same
+   treatment automatically just by adding the same fields. */
+.prize-heading{font-family:var(--head);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-dim);margin:1rem 0 .5rem;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.prize-table{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin:0 0 .7rem}
+.prize-row{display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:.5rem .7rem}
+.prize-row .place{font-family:var(--head);font-weight:800;font-size:.7rem;color:#0a0b0d;background:var(--ne-orange);border-radius:999px;width:1.7rem;height:1.7rem;display:flex;align-items:center;justify-content:center;flex:none}
+.prize-row .amt{font-family:var(--head);font-weight:800;font-size:1.05rem;color:#fff;display:block}
+.prize-row .place-label{font-size:.66rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.04em;display:block}
+.perk-chip{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);color:#fff;font-weight:700;font-size:.8rem;padding:.35rem .8rem;border-radius:999px;margin:0 .4rem .4rem 0}
+@media (max-width:420px){.prize-table{grid-template-columns:1fr 1fr}}
 /* Shared type-color coding for tags — used by both the calendar detail card
    and the Event details cards, so a type reads the same color everywhere. */
 /* Black text on both — white measured under 4.5:1 WCAG AA against these two

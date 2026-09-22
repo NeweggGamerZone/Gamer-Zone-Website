@@ -262,7 +262,16 @@
       "featured": true,
       "reservation": false,
       "accent": "#FF2E97",
-      "startgg": "https://www.start.gg/tournament/street-fighter-6-saturday-slam-newegg-gamer-zone-1"
+      "startgg": "https://www.start.gg/tournament/street-fighter-6-saturday-slam-newegg-gamer-zone-1",
+      "image": "assets/calendar/BGAssets/sf6-saturday-slam-crowd-blurred.jpg",
+      "imageHD": "assets/calendar/BGAssets/sf6-saturday-slam-crowd-blurred-hd.jpg",
+      "prizes": [
+        { "place": 1, "amount": 150 },
+        { "place": 2, "amount": 100 },
+        { "place": 3, "amount": 75 },
+        { "place": 4, "amount": 50 }
+      ],
+      "perks": ["Free Pizza Lunch"]
     }
   ],
   "weeklyThemes": [

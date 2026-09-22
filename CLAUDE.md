@@ -1601,3 +1601,134 @@ Per Eric, five direct, fully-specified requests/bug reports in one stretch:
 Cache-bust bumped `?v=98` -> `?v=99` across all 6 shared-convention HTML files, since `style.css` and `assets/js/main.js` both changed (the two icon-usage HTML edits are covered by the same bump).
 
 **Verification for this round:** full scripted QA suite (957 text items / 5 pages, 0 container-width findings, 0 console errors; `ambassador.html` itself came back with 0 findings -- the 24 disclosed Featured Gear horizontal-overflow false positives on `index.html` are the only failures, nothing new), live Puppeteer checks for every interactive/visual change described above (text-selection-during-drag, the skip tween's gradual `currentTime` progression, the wizard-hat icon's rendered shape), and a full-page mobile screenshot of `ambassador.html` confirming the wizard-hat/sword/bow track icons, the centered tier-pillar tags, and the three orange-ramped attendance badges all render cleanly with no clipping at 390px.
+
+## Round 12 (2026-09-22): individual event cards -- real per-event photo backgrounds return, plus prize/perk data and a hidden square/horizontal social-export page
+
+Per Eric: "we should have an individual event card design... on days with specific events, we
+special graphics. Daily normal free play, use one of the base images, and then have a more
+special Background image for the specific event day... For Saturday Slam, use a blurred past
+crowd image of the street fighter, and add details for prizing... Free Pizza Lunch as well."
+Per core rule 15 this was a real, open-ended design question (a new visual system, not a
+one-line instruction), so the concrete design was mocked up and shown first (a standalone
+preview file, not touching any live page) before anything was implemented -- Eric reviewed it
+and approved with two corrections: "the horizontal should be 1920x1080 export" (the initial
+mockup proposed 1200x630) and confirmed the data structure. Implemented in full once approved.
+
+**Real per-event photo backgrounds are back on the `events.html` Plan Your Visit calendar's
+`.cal-detail` panel**, after being removed site-wide on 2026-09-08 for an intermittent
+"renders once then disappears" flash/pop bug that was never actually root-caused at the time
+(see that date's own comment in this file and in `style.css` -- the old fix just deleted the
+photo layer rather than diagnosing the race). This round targets the two most likely real
+causes of exactly that symptom, rather than re-shipping the same mechanism and hoping the bug
+doesn't recur:
+
+1. **No more CSS-custom-property indirection.** The old code set `--cd-bg` via
+   `el.style.setProperty()` and read it back via a `::before{background-image:var(--cd-bg)}`
+   rule defined hundreds of lines away in `style.css` -- two separate writes to reconcile. The
+   new `bgLayer(url)` (`assets/js/calendar.js`) bakes the URL directly into a real `<div>`'s
+   inline `style` attribute as part of the exact same `innerHTML` string that renders the
+   day's title/blurb/meta -- one atomic DOM write, nothing set-then-read-later to race against.
+2. **Every possible background URL is preloaded up front** (`preloadBgs()`, called once at
+   init) via a plain `new Image()` per URL -- if the original bug really was a load-order/
+   caching race on a rapid hover-sweep (the CSS comment's own working theory), every image the
+   calendar can ever show is already fetched and cache-warm before a visitor's cursor can move
+   fast enough to trigger it.
+
+`bgFor(e)` resolves a per-event `image` override (new, in `data/events.json`) first, then
+falls back to the existing per-type `TYPE_BG` lookup or the major-event date-hash pool
+(`majorBgFor()`, unchanged) -- so every day still gets *some* real photo (Eric's own "daily
+normal free play, use one of the base images" ask was already true of `FREE_PLAY_BG`, just
+not rendered since 2026-09-08), and only a day with a real, specific photo on file gets
+something more special. Closed days deliberately stay a flat panel -- there's no "day of"
+photo for a closure, and photo-backing every single day type was never what was actually
+asked for.
+
+**Verified functionally two ways**, since this repo has no working system Chromium and no
+root access to install one via `apt` directly (see "headless Chrome now launches locally" note
+below for how a real browser was eventually gotten working this same session):
+
+- A jsdom-based structural test (`calendar.js` loaded via `window.eval()`, a stubbed `GZ`/
+  `fetch`, real `mouseover` events dispatched at every visible day cell in sequence -- the
+  exact rapid-hover-sweep shape the original bug happened under) confirmed zero thrown errors
+  across all 30 cells, exactly one `.cd-bg-photo` node present in the DOM after every single
+  step (no leftover/duplicate nodes from the old element persisting alongside a new one), and
+  that returning to the SF6 date after the sweep still rendered correctly (nothing "used up").
+- Once headless Chrome was working (see below), a real Puppeteer run repeated the same rapid
+  hover-sweep against the live rendered page and screenshotted the panel immediately after
+  landing back on a Free Play day: it rendered cleanly with the real `dailyplay-bg-blurred.jpg`
+  photo, no visible flash artifact, no stale content from prior hovers.
+
+**New structured event data, generalized for reuse, not hand-coded once for this one event.**
+`data/events.json`'s Street Fighter 6 Saturday Slam entry (2026-09-26, real, pre-existing)
+gained: `"image"`/`"imageHD"` (the real crowd photo, see sourcing below, at panel-resolution
+and full-HD respectively), `"prizes":[{"place":1,"amount":150}, ...]` (the real 1st/2nd/3rd/4th
+payouts Eric gave: $150/$100/$75/$50), and `"perks":["Free Pizza Lunch"]`. `calendar.js`'s new
+`prizeBlock(e)` renders a `<div class="prize-table">` + perk chips generically off these two
+fields for *any* event that defines them -- a future tournament gets the identical treatment
+just by adding the same fields to its own JSON entry, not a copy-pasted one-off block.
+
+**Real photo sourcing, following this project's own "actually open and look at candidates, not
+just match filenames" discipline** (established repeatedly elsewhere in this file, e.g. the
+USC Games jersey photos, the XP League image searches): `assets/img/StreetFighterSaturdaySlam-
+07-25/` already held 11 real, unpublished-elsewhere photos from the actual July 25 2026
+Saturday Slam event (already used in `events.html`'s Past Events waterfall). `DSC05060.jpg`
+was the strongest real "SF6 tournament + visible crowd" candidate after viewing several: a
+busy tournament floor, 15-20+ people at PC stations under blue/white LED lighting, two screens
+visibly showing 2D fighting-game gameplay mid-match. Resized/pre-blurred offline (matching this
+project's existing `-blurred.jpg` convention -- Gaussian blur + darken + slight desaturate
+baked into the JPG itself, not a live CSS blur filter, for the same "renders blocky in some
+browsers" reason already documented elsewhere in this file) at two resolutions: 1280px wide
+(`sf6-saturday-slam-crowd-blurred.jpg`, for the calendar panel) and the source's full 1920x1080
+(`sf6-saturday-slam-crowd-blurred-hd.jpg`, for the horizontal social export, where a 1280px
+source would have looked soft stretched to 1920px). Both saved to
+`assets/calendar/BGAssets/`, alongside every other event-type background photo, per this
+project's "one place for this kind of asset" convention.
+
+**A new hidden export page, `event-card.html`, for the square/horizontal social-share
+graphics** -- reserved for "special" events per Eric's own framing, not generated for every
+ordinary day. Follows the existing `screenshot-monthly-calendar.html`/`screenshot-weekly-
+lineup.html` convention (noindex, nofollow, not linked from nav, a header comment explaining
+its purpose), but unlike those two hand-authored pages, this one is **data-driven**: it fetches
+the real `data/events.json` and renders whichever event id is requested
+(`event-card.html?id=<id>&format=square|horizontal`), defaulting to the next upcoming event
+that actually has real extra detail on file (an `image` override or `prizes`/`perks`) rather
+than just whatever's chronologically next -- so a future special event needs only its own
+data fields added, not a new page. `#card` is a real, fixed-size box (exactly 1200x1200 for
+square, exactly 1920x1080 for horizontal, per Eric's correction from the initial 1200x630
+mockup) with no page chrome around it, so opening the page at that exact browser viewport size
+and screenshotting the full viewport is already a pixel-perfect crop -- no external cropping
+step required. Reuses the same shared `.tag`/`.prize-table`/`.prize-row`/`.perk-chip` classes
+`calendar.js` introduced above (sized up via page-scoped overrides), rather than a second,
+parallel copy of the same markup.
+
+**Wiring this into `scripts/capture-social-images.mjs`'s existing Playwright+sharp automation
+(which already knows how to launch a fixed viewport and screenshot a single element for the
+Weekly Lineup board exports) is a real, disclosed next step, not done this round** -- which
+events should auto-export, and on what schedule, is an open question for Eric per core rule
+15, not a fully-specified one. `event-card.html`'s own header comment documents this for
+whoever picks it up next.
+
+**Headless Chrome now launches locally in this sandbox, for real Puppeteer verification** --
+worth recording since past sessions' screenshots relied on an environment that apparently had
+this already working, and this session's fresh sandbox did not. `tools/audit/setup.sh` (already
+checked into the repo, unchanged) does exactly what a fresh environment needs: `apt-get
+download` (no root required -- this only fetches .debs, it doesn't install them) the handful of
+shared libraries headless Chrome needs beyond a minimal base image (`libxdamage1`,
+`libgbm1`, `libnss3`, etc.), extracts them locally with `dpkg-deb -x`, and points
+`LD_LIBRARY_PATH` at the extracted `.so` files -- `run-full-qa.sh` already auto-detects and
+exports this path when `.deps/extracted` exists, so no manual step was needed once `setup.sh`
+had run once. Running it early in a session (before reaching for a screenshot) would have
+saved real back-and-forth this round -- a good habit for a fresh sandbox going forward.
+
+**Verification for this round:** the full scripted QA suite (960 text items / 5 pages, 0
+container-width findings, 0 console errors -- `events.html` itself came back with 0 contrast
+findings despite the new photo panel and prize table; the same 24 already-disclosed Featured
+Gear horizontal-overflow false positives on `index.html` and nothing new), the jsdom
+rapid-hover-sweep structural test described above, and real Puppeteer screenshots at
+desktop/tablet/mobile of the calendar detail panel (both the SF6 date and a plain Free Play
+day, including immediately after a rapid sweep) plus both `event-card.html` exports at their
+exact real pixel dimensions (1200x1200 and 1920x1080, confirmed via `getBoundingClientRect()`,
+not just the CSS on paper) -- all with zero console errors.
+
+Cache-bust bumped `?v=99` -> `?v=100` across all 6 shared-convention HTML files plus the new
+`event-card.html`, since `style.css` and `assets/js/calendar.js` both changed.

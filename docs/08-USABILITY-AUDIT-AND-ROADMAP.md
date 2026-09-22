@@ -774,6 +774,16 @@ The site's own stated identity is "one part vendors, one part customers," but ve
 **6. Automated weekly social export.**
 The screenshot-based 1:1/16:9 Weekly Lineup export pipeline already exists and produces polished output; today it still has to be run by hand. Scheduling it end-to-end (generate + stage for posting each week) removes a recurring manual step and keeps the marketing motion consistent even on a busy week.
 
+**Related, added 2026-09-22:** a second, per-*event* (not per-week) export page now exists —
+`event-card.html`, a hidden, data-driven page that renders any special event's own real photo
++ prize/perk details at exact 1200x1200 (square) or 1920x1080 (horizontal) sizes, for events
+that carry real extra detail in `data/events.json` (an `image` override and/or `prizes`/
+`perks` — currently just the Street Fighter 6 Saturday Slam). See CLAUDE.md's "Round 12" entry
+for the full build. It's manual-capture only right now (open the URL at the exact viewport
+size, screenshot) — wiring it into `scripts/capture-social-images.mjs`'s existing Playwright+
+sharp pipeline, the same one this item's weekly export already uses, is the natural next step
+once Eric decides which events should auto-export and on what schedule.
+
 **F-08 status note (2026-09-08, per Eric):** F-08 ("the liveliness section can render as a void" — a quiet week's Weekly Lineup is an empty dashed box, compounded by both Academy tracks reading `Closed`) is a **content-ops finding, not a site-code bug** — the fix is Eric keeping the weekly theme/events data and Academy cohort scheduling populated, not a change to how the site renders that data. Leaving it open here rather than closing it out, since the site's job (rendering whatever's in `data/events.json` honestly) is already working correctly and per core rule 4 shouldn't paper over a genuinely empty week with a fabricated placeholder. Worth revisiting as a real code item later if a *design* fallback is wanted for genuinely quiet weeks (e.g. the "Who's here" pulse in item #8, or leaning harder on the Past Events photo archive as a default) — but that's a future proposal, not this one.
 
 **7. [SHIPPED 2026-09-04] Live "Zone status" widget (stretch).**
