@@ -1726,6 +1726,13 @@ body.home-page { background: transparent; }
    shown, not pseudo-elements toggled after the fact. */
 .cal-detail .cd-bg-photo{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center 30%}
 .cal-detail .cd-bg-scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(175deg,rgba(6,7,8,.55) 0%,rgba(6,7,8,.82) 55%,rgba(6,7,8,.94) 100%)}
+/* Small partner-brand logo badge (data/events.json's `logo` field, e.g. XP
+   League on its own recurring Fortnite Training days) -- a real circular
+   badge in the panel's top-right corner, deliberately smaller/lighter-
+   weight than the full photo-background treatment reserved for one-off
+   major events, so a routine recurring day still reads as "this partner is
+   involved" without borrowing the special-event visual language. */
+.cal-detail .cd-partner-logo{position:absolute;top:1.1rem;right:1.1rem;z-index:1;width:52px;height:52px;border-radius:50%;background:#fff;padding:6px;box-sizing:border-box;box-shadow:0 4px 16px rgba(0,0,0,.45);object-fit:contain}
 .cal-detail .tag{margin-bottom:.55rem;align-self:flex-start}
 /* line-clamp removed from h3/cd-sub/cd-blurb below, 2026-09-08 per Eric
    ("the event description should also be the full size") -- see the

@@ -11,7 +11,8 @@
       "blurb": "XP League coaches teach keybinds, builds, and pro strategies. All skill levels welcome.",
       "featured": false,
       "reservation": false,
-      "accent": "#7ED321"
+      "accent": "#7ED321",
+      "logo": "assets/img/XPLeague/xpleague-logo.png"
     },
     {
       "id": "fps-day-2026-07-23",
@@ -48,7 +49,8 @@
       "blurb": "Build fights, edits, and endgame strategy with XP League coaches.",
       "featured": false,
       "reservation": false,
-      "accent": "#7ED321"
+      "accent": "#7ED321",
+      "logo": "assets/img/XPLeague/xpleague-logo.png"
     },
     {
       "id": "riot-thursday-2026-07-30",
@@ -97,7 +99,8 @@
       "blurb": "Live coaching from XP League pros: skill drills, squad coordination, real-time feedback. All skill levels welcome.",
       "featured": false,
       "reservation": false,
-      "accent": "#7ED321"
+      "accent": "#7ED321",
+      "logo": "assets/img/XPLeague/xpleague-logo.png"
     },
     {
       "id": "closed-intel-gamer-days-setup-2026-08-11",
@@ -155,7 +158,8 @@
       "blurb": "Second training session of the biweekly cadence. Live coaching from XP League pros, all skill levels welcome.",
       "featured": false,
       "reservation": false,
-      "accent": "#7ED321"
+      "accent": "#7ED321",
+      "logo": "assets/img/XPLeague/xpleague-logo.png"
     },
     {
       "id": "xp-fortnite-tournament-2026-08-28",
@@ -200,7 +204,8 @@
       "blurb": "Live coaching from XP League pros: skill drills, squad coordination, real-time feedback. All skill levels welcome.",
       "featured": false,
       "reservation": false,
-      "accent": "#7ED321"
+      "accent": "#7ED321",
+      "logo": "assets/img/XPLeague/xpleague-logo.png"
     },
     {
       "id": "xp-fortnite-tournament-2026-09-11",
@@ -239,7 +244,8 @@
       "blurb": "Live coaching from XP League pros: skill drills, squad coordination, real-time feedback. All skill levels welcome.",
       "featured": false,
       "reservation": false,
-      "accent": "#7ED321"
+      "accent": "#7ED321",
+      "logo": "assets/img/XPLeague/xpleague-logo.png"
     },
     {
       "id": "closed-private-event-2026-09-25",
@@ -266,23 +272,91 @@
       "image": "assets/calendar/BGAssets/sf6-saturday-slam-crowd-blurred.jpg",
       "imageHD": "assets/calendar/BGAssets/sf6-saturday-slam-crowd-blurred-hd.jpg",
       "prizes": [
-        { "place": 1, "amount": 150 },
-        { "place": 2, "amount": 100 },
-        { "place": 3, "amount": 75 },
-        { "place": 4, "amount": 50 }
+        {
+          "place": 1,
+          "amount": 150
+        },
+        {
+          "place": 2,
+          "amount": 100
+        },
+        {
+          "place": 3,
+          "amount": 75
+        },
+        {
+          "place": 4,
+          "amount": 50
+        }
       ],
-      "perks": ["Free Pizza Lunch"]
+      "perks": [
+        "Free Pizza Lunch",
+        "Raffle Prizes"
+      ]
     }
   ],
   "weeklyThemes": [
-    { "start": "2026-07-28", "end": "2026-08-01", "theme": "Eastern Harmony: Gaming for Good", "desc": "A charity Street Fighter tournament supporting mental health awareness." },
-    { "start": "2026-08-04", "end": "2026-08-08", "theme": "Marvel Week", "desc": "Marvel Rivals, Marvel Vs Capcom, and Marvel Tokon. Always Free to Play in the Gamer Zone." },
-    { "start": "2026-08-11", "end": "2026-08-15", "theme": "Riot Games Week", "desc": "Bring friends to play League of Legends, Valorant, and TFT.", "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png" },
-    { "start": "2026-08-18", "end": "2026-08-22", "theme": "Co-op Games Week", "desc": "Helldivers 2, Overcooked!, Jackbox Party, RV There Yet, Mecha Chameleon, and more!", "icon": "assets/calendar/LineupAssets/GZTest2.png" },
-    { "start": "2026-08-25", "end": "2026-08-29", "theme": "Fortnite Week", "desc": "XP League Fortnite training and tournament play all week.", "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png" },
-    { "start": "2026-09-01", "end": "2026-09-05", "theme": "Riot Games Week", "desc": "League of Legends, TFT, and Valorant running throughout the week.", "icon": "assets/calendar/LineupAssets/us-flag-metallic.png" },
-    { "start": "2026-09-08", "end": "2026-09-12", "theme": "Party Games Week", "desc": "Jackbox Party, Overcooked!, Mario Party, and other couch-co-op favorites all week.", "icon": "assets/calendar/LineupAssets/FortnitePickaxeAsset.png" },
-    { "start": "2026-09-15", "end": "2026-09-19", "theme": "Racing Games Week", "desc": "Racing sims, Mario Kart, and other racing games on rotation all week.", "icon": "assets/calendar/LineupAssets/MarioKarty.png" },
-    { "start": "2026-09-22", "end": "2026-09-26", "theme": "Fighting Games Week", "desc": "Street Fighter bracket play and fighting-game showdowns all week.", "icon": "assets/calendar/LineupAssets/FightingGamesAsset.png", "iconSymmetric": true }
+    {
+      "start": "2026-07-28",
+      "end": "2026-08-01",
+      "theme": "Eastern Harmony: Gaming for Good",
+      "desc": "A charity Street Fighter tournament supporting mental health awareness."
+    },
+    {
+      "start": "2026-08-04",
+      "end": "2026-08-08",
+      "theme": "Marvel Week",
+      "desc": "Marvel Rivals, Marvel Vs Capcom, and Marvel Tokon. Always Free to Play in the Gamer Zone."
+    },
+    {
+      "start": "2026-08-11",
+      "end": "2026-08-15",
+      "theme": "Riot Games Week",
+      "desc": "Bring friends to play League of Legends, Valorant, and TFT.",
+      "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png"
+    },
+    {
+      "start": "2026-08-18",
+      "end": "2026-08-22",
+      "theme": "Co-op Games Week",
+      "desc": "Helldivers 2, Overcooked!, Jackbox Party, RV There Yet, Mecha Chameleon, and more!",
+      "icon": "assets/calendar/LineupAssets/GZTest2.png"
+    },
+    {
+      "start": "2026-08-25",
+      "end": "2026-08-29",
+      "theme": "Fortnite Week",
+      "desc": "XP League Fortnite training and tournament play all week.",
+      "icon": "assets/calendar/LineupAssets/FortniteCrownAsset.png"
+    },
+    {
+      "start": "2026-09-01",
+      "end": "2026-09-05",
+      "theme": "Riot Games Week",
+      "desc": "League of Legends, TFT, and Valorant running throughout the week.",
+      "icon": "assets/calendar/LineupAssets/us-flag-metallic.png"
+    },
+    {
+      "start": "2026-09-08",
+      "end": "2026-09-12",
+      "theme": "Party Games Week",
+      "desc": "Jackbox Party, Overcooked!, Mario Party, and other couch-co-op favorites all week.",
+      "icon": "assets/calendar/LineupAssets/FortnitePickaxeAsset.png"
+    },
+    {
+      "start": "2026-09-15",
+      "end": "2026-09-19",
+      "theme": "Racing Games Week",
+      "desc": "Racing sims, Mario Kart, and other racing games on rotation all week.",
+      "icon": "assets/calendar/LineupAssets/MarioKarty.png"
+    },
+    {
+      "start": "2026-09-22",
+      "end": "2026-09-26",
+      "theme": "Fighting Games Week",
+      "desc": "Street Fighter bracket play and fighting-game showdowns all week.",
+      "icon": "assets/calendar/LineupAssets/FightingGamesAsset.png",
+      "iconSymmetric": true
+    }
   ]
 }

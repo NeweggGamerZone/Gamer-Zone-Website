@@ -1732,3 +1732,74 @@ not just the CSS on paper) -- all with zero console errors.
 
 Cache-bust bumped `?v=99` -> `?v=100` across all 6 shared-convention HTML files plus the new
 `event-card.html`, since `style.css` and `assets/js/calendar.js` both changed.
+
+## Round 13, same day: raffle-prizes tag, XP League partner-logo badge on recurring days, square event card's larger character graphic (2026-09-22)
+
+Per Eric, three direct, fully-specified follow-ups to Round 12's individual-event-card feature
+(implemented straight through per core rule 15):
+
+**Raffle Prizes added as a second perk tag, next to Free Pizza Lunch.** `data/events.json`'s
+SF6 Saturday Slam entry's `perks` array is now `["Free Pizza Lunch", "Raffle Prizes"]` -- a real
+detail already implied by that same event's own `blurb` ("Free play and raffle prizes all
+day"), not a new fabricated claim. No code change was needed: `prizeBlock()` in `calendar.js`
+and the inline `perkHTML` logic in `event-card.html` both already map every string in `perks`
+to its own `.perk-chip` generically (built in Round 12), so the second chip appears automatically
+in the live calendar panel and both event-card export sizes.
+
+**A real partner-brand logo badge, for recurring XP League Fortnite Training days -- distinct
+from, and much lighter-weight than, the full per-event photo/prize treatment reserved for
+one-off major tournaments.** Per Eric's own framing ("major tournaments will be a per event
+creation"): a routine recurring day (6 XP League: Fortnite Training sessions currently on the
+calendar) doesn't get the SF6-style full custom background + prize table -- it gets a small,
+real XP League logo badge instead, generic and reusable the same way `image`/`prizes`/`perks`
+already are. Implementation: a new `logo` field (`assets/img/XPLeague/xpleague-logo.png` --
+the real XP League site-icon mark already sourced and self-hosted back on 2026-09-17, still on
+disk though currently unreferenced elsewhere on the site since Academy's own XP League section
+uses a different real action photo now) added to all 6 "XP League: Fortnite Training" entries
+in `data/events.json`. `calendar.js` gained `logoBadge(e)` (returns an `<img class="cd-partner-
+logo">` when `e.logo` is set, or `''` otherwise) called from the event-day branch of `show()`,
+and `preloadBgs()` now also preloads every event's `logo` URL alongside its `image` URL, same
+preload discipline as the rest of that function. `style.css` gained `.cal-detail .cd-partner-
+logo` -- a small (52px) white-backed circular badge pinned to the panel's top-right corner via
+`position:absolute`, `z-index:1`, so it sits above the photo/scrim layers without competing
+with the day's own title/tag/meta text, which all still occupy their normal top-left position.
+This field is intentionally *not* wired into `event-card.html`'s square/horizontal exports --
+those are reserved for the fuller "special event" treatment per Eric's own major-tournament
+framing, and a routine Fortnite Training day was never asked to get its own social-share export.
+
+**The square (1200x1200) event card's content moved up, freeing room for a large real
+character graphic.** Per Eric ("make room for a larger graphic somewhere... move the
+information upwards... use the fighter games character in the lineup assets folder"): `#card`
+(square format only, via a new `body:not(.fmt-horizontal)` scope -- the horizontal 1920x1080
+format is untouched, since its own left-text/right-photo composition already has room) switched
+from `justify-content:flex-end` (bottom-anchored) to `flex-start` (top-anchored), with `.content`
+capped to `max-width:600px` (down from the shared 1020px) and given `margin-top:64px` to clear
+the brand-row logo/text sitting in the same top-left corner. The freed lower-right space now
+holds `assets/calendar/LineupAssets/FighterGames.png` -- confirmed via `PIL` before use to be a
+real 1068x1472 transparent-background character cutout (54% alpha-transparent, not a solid
+rectangle), not the smaller/differently-named `FightingGamesAsset.png` (this week's Weekly
+Lineup theme icon) that could easily have been confused for it. Rendered as a new `.card-char`
+element (square format only, `display:none` under `body.fmt-horizontal`), absolutely positioned
+bottom-right at a real 1010px render height with a soft drop-shadow, sharing `.content`'s own
+`z-index:1` and sitting earlier in the DOM so real text always wins the stacking order on the
+rare pixels where they'd overlap. The square format's own scrim was also redesigned specifically
+for this layout -- a diagonal `135deg` gradient (dark top-left, where text now sits; much
+lighter bottom-right, where the character and crowd photo show through) replacing the shared
+top-to-bottom scrim that was tuned for the old bottom-anchored text -- and the square-only prize
+table drops to 2 columns (from the shared 4) to fit the now-narrower 600px content column
+without cramming.
+
+**Verified via live Puppeteer screenshots at both card's exact real pixel dimensions**
+(1200x1200 square, 1920x1080 horizontal) confirming: the character renders with zero console
+errors, real transparency (the crowd photo is visible through the cutout areas, not a solid
+box), the "Raffle Prizes" chip appears correctly in both formats, the horizontal format's
+existing layout is completely unaffected by the square-only CSS scoping, and a live screenshot
+of the XP League Fortnite Training day's calendar panel (Sep 23, 2026) confirming the new corner
+badge renders cleanly without overlapping the day's title/meta text. The full scripted QA suite
+(`run-full-qa.sh`) came back clean: 976 text items / 5 pages, 0 container-width findings, 0
+console errors, and only the same 25 already-disclosed Featured Gear horizontal-overflow false
+positives (see "Readability" above) -- nothing new introduced by this round.
+
+Cache-bust bumped `?v=100` -> `?v=101` across all 6 shared-convention HTML files plus
+`event-card.html`, since `style.css`, `assets/js/calendar.js`, and `data/events.json` all
+changed this round.

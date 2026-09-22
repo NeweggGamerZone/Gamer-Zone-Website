@@ -94,8 +94,20 @@
   }
   function preloadBgs() {
     const urls = new Set([FREE_PLAY_BG, ...Object.values(TYPE_BG), ...MAJOR_BG_POOL]);
-    (data.events || []).forEach(e => { if (e.image) urls.add(e.image); });
+    (data.events || []).forEach(e => { if (e.image) urls.add(e.image); if (e.logo) urls.add(e.logo); });
     urls.forEach(u => { const img = new Image(); img.src = u; });
+  }
+  // Real partner-brand logo badge (e.g. XP League on its own recurring
+  // Fortnite Training days) -- generic and data-driven off `data/
+  // events.json`'s own `logo` field, so any future recurring partner day
+  // gets the same treatment just by adding the field, no per-partner code.
+  // Deliberately a small corner badge, not a full custom photo/prize
+  // treatment -- that fuller "special event card" treatment (see
+  // prizeBlock() below and event-card.html) is reserved for one-off major
+  // tournaments, built per event as they're scheduled.
+  function logoBadge(e) {
+    if (!e || !e.logo) return '';
+    return `<img class="cd-partner-logo" src="${e.logo}" alt="${GZ.esc(e.title)} partner logo" aria-hidden="true">`;
   }
   function bgLayer(url) {
     // Real DOM nodes (not pseudo-elements), rendered fresh as part of the
@@ -259,7 +271,7 @@
     // description -> CTA.
     if (e && !closedByType) {
       const typeCls = TYPE_COLOR[e.type] || 'cal-edu';
-      detail.innerHTML = `${bgLayer(bgFor(e))}<span class="tag ${typeCls}">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
+      detail.innerHTML = `${bgLayer(bgFor(e))}${logoBadge(e)}<span class="tag ${typeCls}">${GZ.esc(TYPE[e.type] || e.type || 'Event')}</span>
         <h3>${GZ.esc(e.title)}</h3>
         ${e.subtitle ? `<p class="cd-sub">${GZ.esc(e.subtitle)}</p>` : ''}
         <div class="cd-meta">

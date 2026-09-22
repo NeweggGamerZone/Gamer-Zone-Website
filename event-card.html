@@ -41,15 +41,34 @@
      yet, since which events should auto-export and on what schedule is an
      open question for Eric, not a fully-specified one. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=100">
+<link rel="stylesheet" href="assets/css/style.css?v=101">
 <style>
   html,body{margin:0;padding:0;background:#000}
-  #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:70px;box-sizing:border-box}
+  #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:70px;box-sizing:border-box}
   body.fmt-horizontal #card{width:1920px;height:1080px;padding:90px;justify-content:center}
   #card .bg-photo{position:absolute;inset:0;background-size:cover;background-position:center 32%}
-  #card .bg-scrim{position:absolute;inset:0;background:linear-gradient(190deg,rgba(6,7,8,.15) 0%,rgba(6,7,8,.55) 42%,rgba(6,7,8,.93) 78%,rgba(6,7,8,.98) 100%)}
+  /* Square format's scrim is diagonal (dark top-left, where the moved-up
+     text now sits; clear bottom-right, where the crowd photo and the new
+     card-char graphic show through) -- distinct from the horizontal
+     format's own left-to-right scrim below, since the two formats put
+     their text in different places. */
+  #card .bg-scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(6,7,8,.95) 0%,rgba(6,7,8,.86) 26%,rgba(6,7,8,.5) 50%,rgba(6,7,8,.22) 72%,rgba(6,7,8,.5) 100%)}
   body.fmt-horizontal #card .bg-scrim{background:linear-gradient(100deg,rgba(6,7,8,.97) 0%,rgba(6,7,8,.9) 40%,rgba(6,7,8,.4) 70%,rgba(6,7,8,.08) 100%)}
+  /* The real fighter-game character cutout (assets/calendar/LineupAssets/
+     FighterGames.png, a transparent-background PNG), added 2026-09-22 per
+     Eric's request for "a larger graphic" once the square format's text
+     moved up to make room for it. Square-only -- the horizontal format's
+     own composition (text on the left, full photo visible on the right)
+     already has its own real crowd photo doing that job, so this doesn't
+     need to appear there too. Rendered after the scrim but before the real
+     text content in source order, and sharing the content's own z-index,
+     so on the rare case they visually overlap, the real text (further down
+     in the DOM, same z-index) still wins the stacking order and stays
+     legible on top of the character art. */
+  #card .card-char{position:absolute;right:-30px;bottom:-20px;height:1010px;z-index:1;pointer-events:none;filter:drop-shadow(0 30px 70px rgba(0,0,0,.6))}
+  body.fmt-horizontal #card .card-char{display:none}
   #card .content{position:relative;z-index:1;max-width:1020px}
+  body:not(.fmt-horizontal) #card .content{max-width:600px;margin-top:64px}
   body.fmt-horizontal #card .content{max-width:900px}
   #card .brand-row{position:absolute;top:60px;left:70px;z-index:1;display:flex;align-items:center;gap:14px}
   body.fmt-horizontal #card .brand-row{top:80px;left:90px}
@@ -57,6 +76,7 @@
   #card .brand-row .nlogo b{color:var(--ne-orange)}
   #card .tag{font-size:22px;padding:.5rem 1.1rem}
   #card h1{font-family:var(--head);font-weight:800;font-size:64px;line-height:1.05;text-transform:uppercase;color:#fff;margin:22px 0 10px;text-shadow:0 4px 24px rgba(0,0,0,.8)}
+  body:not(.fmt-horizontal) #card h1{font-size:52px}
   body.fmt-horizontal #card h1{font-size:56px}
   #card .cd-sub{font-family:var(--head);font-weight:600;font-size:28px;color:var(--ne-blue-text);margin:0 0 18px;text-shadow:0 2px 14px rgba(0,0,0,.75)}
   body.fmt-horizontal #card .cd-sub{font-size:24px}
@@ -65,6 +85,7 @@
   #card .cd-meta-item .ic{width:26px;height:26px;color:var(--ne-orange);flex:none}
   #card .prize-heading{font-size:20px;margin:6px 0 16px}
   #card .prize-table{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 22px}
+  body:not(.fmt-horizontal) #card .prize-table{grid-template-columns:repeat(2,1fr);gap:12px}
   #card .prize-row{flex-direction:column;align-items:flex-start;padding:18px 20px;gap:8px;border-radius:16px}
   #card .prize-row .place{width:44px;height:44px;font-size:16px}
   #card .prize-row .amt{font-size:34px}
@@ -78,7 +99,7 @@
 <div id="card" aria-hidden="false">
   <div id="err"></div>
 </div>
-<script src="assets/js/main.js?v=100"></script>
+<script src="assets/js/main.js?v=101"></script>
 <script>
 (async function(){
   const qs = new URLSearchParams(location.search);
@@ -122,9 +143,19 @@
     : '';
   const perkHTML = (ev.perks && ev.perks.length) ? ev.perks.map(p => `<div class="perk-chip">${esc(p)}</div>`).join('') : '';
 
+  // The real fighter-game character cutout, square format only -- see the
+  // .card-char CSS comment above for why (the horizontal layout already
+  // shows the full crowd photo on its own right side, so it doesn't need
+  // this too). Reused as-is from the shared LineupAssets folder, not a
+  // one-off copy made just for this card.
+  const charHTML = (fmt === 'square')
+    ? `<img class="card-char" src="assets/calendar/LineupAssets/FighterGames.png" alt="" aria-hidden="true">`
+    : '';
+
   card.innerHTML = `
     <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
     <div class="bg-scrim" aria-hidden="true"></div>
+    ${charHTML}
     <div class="brand-row"><span class="nlogo">NEWEGG <b>GAMER ZONE</b></span></div>
     <div class="content">
       <span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(TYPE[ev.type] || ev.type || 'Event')}</span>
