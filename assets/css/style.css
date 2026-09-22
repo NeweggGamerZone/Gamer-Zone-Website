@@ -3377,6 +3377,21 @@ html.board-mode .reveal{opacity:1;transform:none;transition:none}
    vw value produced at either width, freeing more vertical room for the
    bigger theme icon below. */
 html.board-mode .board-logo{margin-top:.4rem}
+/* 2026-09-22, per Eric ("on the horizontal move it up, and make the logo
+   larger"): 16:9-export-only override -- the square (1:1) export's logo
+   is untouched, still the shared rules above. Bigger logo needs more
+   vertical room, which would ordinarily eat into the exact headroom
+   budget fitBoardIconForExport() (event-update.js) was just tuned
+   against for Fighting Games Week's 16:9 export -- so both margins are
+   trimmed by more than the height grows, keeping the logo's total
+   vertical footprint (margin-top + height + margin-bottom) close to the
+   shared rule's own ~156px rather than letting it balloon and push the
+   theme icon further down. Verified via real capture that Fighting Games
+   Week's icon still renders at a real, visible scale (not hidden) with
+   this in place. */
+@media (min-width:900px){
+  html.board-mode .board-logo{height:150px;margin-top:0;margin-bottom:.85rem}
+}
 /* Board-mode is an isolation mode only: it hides the surrounding chrome
    and lets .eu-board span the full viewport width, but every size/spacing
    value inside the board (logo, type scale, row gaps) — and its overall
