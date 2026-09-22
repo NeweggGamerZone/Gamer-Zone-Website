@@ -41,7 +41,7 @@
      yet, since which events should auto-export and on what schedule is an
      open question for Eric, not a fully-specified one. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=101">
+<link rel="stylesheet" href="assets/css/style.css?v=102">
 <style>
   html,body{margin:0;padding:0;background:#000}
   #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:70px;box-sizing:border-box}
@@ -57,16 +57,21 @@
   /* The real fighter-game character cutout (assets/calendar/LineupAssets/
      FighterGames.png, a transparent-background PNG), added 2026-09-22 per
      Eric's request for "a larger graphic" once the square format's text
-     moved up to make room for it. Square-only -- the horizontal format's
-     own composition (text on the left, full photo visible on the right)
-     already has its own real crowd photo doing that job, so this doesn't
-     need to appear there too. Rendered after the scrim but before the real
-     text content in source order, and sharing the content's own z-index,
-     so on the rare case they visually overlap, the real text (further down
-     in the DOM, same z-index) still wins the stacking order and stays
-     legible on top of the character art. */
-  #card .card-char{position:absolute;right:-30px;bottom:-20px;height:1010px;z-index:1;pointer-events:none;filter:drop-shadow(0 30px 70px rgba(0,0,0,.6))}
-  body.fmt-horizontal #card .card-char{display:none}
+     moved up to make room for it. Sized down 2026-09-22 (same day) per
+     Eric's follow-up -- the first pass rendered it far too large (1010px
+     tall, dominating the whole card) -- and extended to the horizontal
+     format too, which Eric expected to also show it and didn't. Rendered
+     after the scrim but before the real text content in source order, and
+     sharing the content's own z-index, so on the rare case they visually
+     overlap, the real text (further down in the DOM, same z-index) still
+     wins the stacking order and stays legible on top of the character art. */
+  /* Flipped horizontally (scaleX(-1)) so he faces left, toward the text/
+     prize details, instead of away from them -- the source art faces
+     right. Vertically centered (top:50% + translateY(-50%), not bottom-
+     anchored) per Eric's "his feet shouldn't touch the bottom, center him
+     in Y" follow-up, same day. */
+  #card .card-char{position:absolute;right:0;top:50%;height:560px;z-index:1;pointer-events:none;transform:translateY(-50%) scaleX(-1);filter:drop-shadow(0 20px 46px rgba(0,0,0,.6))}
+  body.fmt-horizontal #card .card-char{height:700px;right:50px;top:50%;transform:translateY(-50%) scaleX(-1)}
   #card .content{position:relative;z-index:1;max-width:1020px}
   body:not(.fmt-horizontal) #card .content{max-width:600px;margin-top:64px}
   body.fmt-horizontal #card .content{max-width:900px}
@@ -99,7 +104,7 @@
 <div id="card" aria-hidden="false">
   <div id="err"></div>
 </div>
-<script src="assets/js/main.js?v=101"></script>
+<script src="assets/js/main.js?v=102"></script>
 <script>
 (async function(){
   const qs = new URLSearchParams(location.search);
@@ -143,14 +148,12 @@
     : '';
   const perkHTML = (ev.perks && ev.perks.length) ? ev.perks.map(p => `<div class="perk-chip">${esc(p)}</div>`).join('') : '';
 
-  // The real fighter-game character cutout, square format only -- see the
-  // .card-char CSS comment above for why (the horizontal layout already
-  // shows the full crowd photo on its own right side, so it doesn't need
-  // this too). Reused as-is from the shared LineupAssets folder, not a
-  // one-off copy made just for this card.
-  const charHTML = (fmt === 'square')
-    ? `<img class="card-char" src="assets/calendar/LineupAssets/FighterGames.png" alt="" aria-hidden="true">`
-    : '';
+  // The real fighter-game character cutout -- rendered in both formats
+  // (see the .card-char CSS comment above for the 2026-09-22 sizing
+  // history); each format's own CSS rule controls its size/position.
+  // Reused as-is from the shared LineupAssets folder, not a one-off copy
+  // made just for this card.
+  const charHTML = `<img class="card-char" src="assets/calendar/LineupAssets/FighterGames.png" alt="" aria-hidden="true">`;
 
   card.innerHTML = `
     <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
