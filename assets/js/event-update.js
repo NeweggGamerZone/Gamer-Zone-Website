@@ -342,17 +342,94 @@
   // in style.css); the 700px 1:1 export is centered and never cropped by
   // sharp (fit:'cover' against a matching-ratio target), so its icon is
   // always shown at full size regardless of content height.
+  //
+  // 2026-09-17, per Eric ("move the gloves up so it's clear and within
+  // the image, it's getting cropped" -- caught on Fighting Games Week's
+  // real 3-row lineup, which sits the icon 115px lower than a light
+  // week): this used to just hide the icon outright once it ran past the
+  // crop line, on the theory that a partially-cropped sliver is worse
+  // than nothing. Two problems with that in practice. First, an outright
+  // hide is a bigger loss than Eric wants for a week that's only a
+  // little too tall -- he asked for the icon moved up and kept visible,
+  // not removed. Second, and the reason it was cropped at all rather
+  // than hidden: `html.board-mode .eu-board-icon{...display:block...}`
+  // (the base rule right above this comment in style.css) is a MORE
+  // specific selector than `.eu-board-icon[hidden]{display:none}` (an
+  // extra `html` type selector beats nothing), so setting `.hidden = true`
+  // was silently losing that specificity fight and never actually hiding
+  // anything under board-mode -- the exact cropped-sliver failure mode
+  // this function's original comment above says it exists to prevent.
+  // Fixed the specificity bug too (see style.css's own
+  // `html.board-mode .eu-board-icon[hidden]` override, added the same
+  // day) so the hide fallback below actually works if it's ever needed.
+  // The real fix, though, is shrinking the icon to fit instead of hiding
+  // it: `available` is how much room is left between the icon's own top
+  // (wherever this week's rows pushed it to) and the crop line, minus a
+  // real pixel buffer (SAFETY) so a shrunk icon never sits pixel-flush
+  // against the crop edge; `scale` is how much smaller than full size the
+  // icon needs to be to fit that room. Applied via a CSS custom property
+  // (--eu-icon-fit-scale, read by `html.board-mode .eu-board-icon`'s
+  // `transform:scale(...)` in style.css) rather than a fixed size, so it
+  // only ever shrinks a week that actually needs it -- Racing Games
+  // Week's kart (plenty of room) stays at its full, Eric-approved size.
+  // `transform-origin:top center` on that same rule anchors the scale to
+  // the icon's own TOP edge, so shrinking moves the visible bottom UP
+  // toward the top (which is staying put, still wherever the rows above
+  // left it) rather than shrinking symmetrically from the center -- this
+  // is what actually reads as "moved up to clear the frame" instead of
+  // "got smaller in place." Below FLOOR the icon would read as an
+  // illegibly tiny smudge rather than a deliberate small icon, so that
+  // case still falls back to hiding it outright instead of shipping
+  // something that small.
+  //
+  // SAFETY/FLOOR tuned against a real measured case, not guessed: Fighting
+  // Games Week's 16:9 export (4 event rows above the icon, the busiest
+  // real week on the calendar) originally computed scale=0.4737 with
+  // SAFETY=14/FLOOR=0.5 -- just under the floor, so the icon vanished
+  // entirely instead of merely shrinking, which is worse than the
+  // cropping bug this function exists to fix (Eric asked to see the
+  // gloves "clear and within the image," not for them to disappear).
+  // SAFETY=10/FLOOR=0.4 lets that same real week resolve to a real,
+  // visible ~0.5 scale instead of falling back to hidden, while still
+  // keeping a real hide-floor for anything busier than today's actual
+  // content. Verified via real capture against Fighting Games Week (the
+  // case this was built for) and re-confirmed Racing Games Week's scale
+  // stays exactly 1 (untouched, plenty of room above the crop line).
   function fitBoardIconForExport() {
     if (!boardIconEl || !boardIconHasTheme) return;
     if (!document.documentElement.classList.contains('board-mode')) return;
     const board = boardIconEl.closest('.eu-board');
     if (!board) return;
     const boardRect = board.getBoundingClientRect();
-    if (boardRect.width < 900) { boardIconEl.hidden = false; return; }
+    if (boardRect.width < 900) {
+      boardIconEl.hidden = false;
+      boardIconEl.style.removeProperty('--eu-icon-fit-scale');
+      return;
+    }
+    // Reset to full scale BEFORE measuring -- a stale scale left over
+    // from a previous call at a different viewport width would otherwise
+    // corrupt this measurement (the same class of stale-state bug the
+    // resize-timing comments on captureBoardFit already document for the
+    // image-load-timing case).
+    boardIconEl.style.removeProperty('--eu-icon-fit-scale');
     const cropLine = boardRect.width * (1080 / 1920);
     const iconRect = boardIconEl.getBoundingClientRect();
+    const iconTopRelative = iconRect.top - boardRect.top;
     const iconBottomRelative = iconRect.bottom - boardRect.top;
-    boardIconEl.hidden = iconBottomRelative > cropLine;
+    if (iconBottomRelative <= cropLine) {
+      boardIconEl.hidden = false;
+      return;
+    }
+    const SAFETY = 10;
+    const available = cropLine - iconTopRelative - SAFETY;
+    const scale = available / iconRect.height;
+    const FLOOR = 0.4;
+    if (scale < FLOOR) {
+      boardIconEl.hidden = true;
+    } else {
+      boardIconEl.hidden = false;
+      boardIconEl.style.setProperty('--eu-icon-fit-scale', String(Math.min(1, scale)));
+    }
   }
 
   function refit() { fitBoardTitles(); fitBoard(); fitBoardIconForExport(); }
