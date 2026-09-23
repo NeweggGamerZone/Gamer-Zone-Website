@@ -1901,3 +1901,19 @@ Per Eric, immediately after Round 18: "Remove the 1 2 3, 4, icons since it feels
 **Verified via the same live Puppeteer + pixel-sampling method used throughout this page's history:** all four tiles in both formats confirmed badge-free, `.amt` and `.place-label` centered on the same X position within each tile, every place-label rendering as exactly one line (`labelLines:1` via a real line-height-vs-rendered-height check, not eyeballed), zero clipping (`footerBottom` comfortably inside both cards' own heights, unchanged from Round 18's fix), zero console errors in either format, and the full contrast re-check clean across all sampled elements (place-label, amt, perk-chip, cd-meta-item).
 
 No cache-bust bump needed -- every change is scoped to `event-card.html`'s own inline `<style>`/`<script>` blocks, same as every round on this page since Round 15.
+
+## Round 20, same day: place labels re-checked and re-colored to a warm cream-orange (2026-09-22)
+
+Per Eric, immediately after Round 19: "Can we check wcags and make the 1st 2nd 3rd place more readable. Maybe a different color like orange?" Two parts, both addressed directly per core rule 15 (a concrete color suggestion, not an open design question): re-verify WCAG on the just-shipped white `.place-label`, and see whether an orange tint can both read as more distinct/"readable" and clear this project's own 7:1 AAA floor.
+
+**Re-verified via the same live Puppeteer + pixel-sampling method used throughout this page's history.** The current `#fff` label (Round 19) still measures a clean 8.10:1 worst-case (square) / 11.93:1 (horizontal) against a fresh render -- consistent with Round 19's own 8.22:1/11.93:1 finding, small variance being normal sampling noise. So the readability complaint isn't a contrast failure; it's that white gives the label no visual identity distinct from the `.amt` line above it (both are the same color, a real, disclosed tradeoff Round 19 already flagged).
+
+**Tried a real ramp of orange/cream tints against the actual sampled background in both formats, from the site's own `--ne-orange` down to a near-white cream.** Findings, worst-case across all 4 tiles in both formats:
+
+- `--ne-orange` (`#FA9D28`, the site's one standard orange, tried first per this file's "one shared implementation" convention): only 3.82:1 worst-case (square) -- a real fail, well under even the 4.5:1 large-text floor.
+- Every candidate saturated enough to clearly read as "orange" (`#FFC98A` through `#FFE5C4`) tops out at 5.4-6.9:1 worst-case (square) -- short of the 7:1 floor for this label's 21px non-bold size (too small/not-bold to qualify for the 4.5:1 large-text allowance).
+- `#FFF5E6` -- a pale, warm cream-orange, clearly warmer than pure white but still quite light -- is the most saturated real value found that clears 7:1 with real margin: **7.50:1 worst-case (square), 11.05:1 (horizontal)**, re-confirmed live against the shipped CSS after the change (computed `.place-label` color reads back as `rgb(255,245,230)`, zero console errors in either format).
+
+**Disclosed limitation, consistent with Round 19's own finding for this same element:** a genuinely bold/saturated orange is not achievable at this exact tile position (square-format tile 0's real sampled background is the brightest of the four, `rgb(83,79,77)`) without falling under this project's 7:1 AAA floor -- `#FFF5E6` is the practical ceiling, not an arbitrary middle-ground pick. If this tile's layout, background photo, or scrim ever changes, re-verify against the same live pixel-sampling method before assuming a bolder orange has become viable.
+
+No cache-bust bump needed -- scoped to `event-card.html`'s own inline `<style>` block, same as every round on this page since Round 15.

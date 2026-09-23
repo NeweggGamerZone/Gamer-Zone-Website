@@ -235,7 +235,25 @@
      choice; a distinct, slightly-dimmer tint from the .amt line isn't
      achievable here without falling back under the floor. Re-verify again
      if this tile's layout, background photo, or scrim ever changes. */
-  #card .prize-row .place-label{font-size:21px;color:#fff;text-align:center}
+  /* Round 20: per Eric ("make the 1st 2nd 3rd place more readable, maybe a
+     different color like orange"), re-verified live via the same Puppeteer
+     + pixel-sampling method and tried a real orange ramp against this
+     tile's actual rendered background in both formats -- the site's own
+     --ne-orange (#FA9D28) only reaches 3.82:1 worst-case (square tile 0,
+     the tile with the brightest real sampled background), and every
+     candidate saturated enough to clearly read as "orange" tops out around
+     5.4-6.9:1 there, still short of this project's own 7:1 AAA floor for
+     normal-size text (this label is 21px, not bold, so it doesn't qualify
+     for the 4.5:1 large-text allowance). #FFF5E6 -- a pale, warm
+     cream-orange tint, distinctly warmer than the .amt line's pure white
+     above it -- is the most saturated real value found that still clears
+     7:1 with real margin (7.50:1 worst-case square, 11.05:1 horizontal).
+     A bolder, more visibly "orange" color is not achievable at this exact
+     tile position without falling under the floor -- same conclusion
+     Round 19 reached for this same element, just re-confirmed against a
+     warm hue instead of a neutral one. Re-verify again if this tile's
+     layout, background photo, or scrim ever changes. */
+  #card .prize-row .place-label{font-size:21px;color:#FFF5E6;text-align:center}
   body:not(.fmt-horizontal) #card .prize-row .place-label{white-space:nowrap}
   /* Perk tags (Free Pizza Lunch / Raffle Prizes) sized up 2026-09-22
      (Round 17), per Eric's direct "make the node tags... larger" request. */
