@@ -159,19 +159,18 @@
      bg / .16 border) -- per Eric's "make the prize areas higher opacity"
      request, 2026-09-22 (Round 15). Page-scoped override, same pattern as
      every other #card-prefixed rule in this file. */
-  /* Round 18, same day: reworked from a column layout (badge on top, $
-     amount + place-label stacked below it, both left-aligned) to a row
-     layout -- per Eric's "move the 150 and 100 to be to the right of the
-     1,2,3,4" -- because the old column layout left the entire right half
-     of each tile empty (a wide 2-column grid box with narrow, left-
-     aligned content), which is the real cause of "still a lot of empty
-     space in the tiles," not just font size. align-items:flex-start pins
-     the place badge to the TOP of the row per Eric's explicit "move the
-     placement number upwards" -- previously it was already visually top
-     positioned in the column layout, but switching to a row needs this
-     set explicitly or the badge would default to vertically centering
-     against the now-taller two-line text block beside it. */
-  #card .prize-row{flex-direction:row;align-items:flex-start;gap:18px;padding:20px 22px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
+  /* Round 19, same day: the numbered place badge ("1"/"2"/"3"/"4" circle)
+     is removed entirely -- per Eric, it read as conflicting with the
+     ordinal already spelled out in the place-label text right next to it
+     ("1ST PLACE"), i.e. the same information shown twice in two different
+     shapes. Supersedes Round 18's row layout (badge left, amount+label
+     right) with a plain centered column: just the $ amount and the place
+     label, stacked and centered, filling the tile now that the badge no
+     longer needs its own dedicated space. justify-content:center centers
+     the pair vertically within the tile's own 4:3-derived height (see the
+     aspect-ratio comment below) now that there's no badge dictating a
+     top-aligned anchor. */
+  #card .prize-row{flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px 22px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
   /* Square format only: near-square tiles, per Eric's "I want square nodes
      on the square graphic version, like how the horizontal version has
      square nodes." A literal 1:1 was tried first and rejected after
@@ -188,16 +187,15 @@
      gets a real content-based automatic minimum size and won't silently
      clip if content ever needs more room than this ratio allows. */
   body:not(.fmt-horizontal) #card .prize-row{aspect-ratio:4/3}
-  /* Prize $ amount + place-label sized up again 2026-09-22 (Round 18), on
-     top of Round 17's bump, per Eric's direct "make everything within
-     those tile nodes to be larger." Place-badge circle grown to match. */
-  #card .prize-row .place{width:58px;height:58px;font-size:23px}
-  #card .prize-row .amt{font-size:58px}
-  /* The info column (the $ amount + place-label pair) sits in the bare
-     `<span>` immediately after `.place` in the markup -- it has no class
-     of its own, so it's targeted here via the adjacent-sibling combinator
-     rather than adding a new class purely for a CSS hook. */
-  #card .prize-row .place + span{display:flex;flex-direction:column;gap:4px}
+  /* Prize $ amount sized up again 2026-09-22 (Round 18), on top of Round
+     17's bump, per Eric's direct "make everything within those tile nodes
+     to be larger." Round 19 removed the `.place` badge circle entirely
+     (see the .prize-row comment above) -- its size rule is gone with it. */
+  #card .prize-row .amt{font-size:58px;text-align:center}
+  /* Round 19: the amount+label pair no longer sits in a bare wrapper
+     `<span>` next to a `.place` badge -- with the badge gone, `.amt` and
+     `.place-label` are direct children of `.prize-row` itself, which is
+     already the centered flex column set above. */
   /* A real contrast gap found and fixed while verifying Round 17's sizing
      bump, not introduced by it: at under-24px sizes, the shared style.css
      --ink-dim color only measured 5.0-6.1:1 against this card's real
@@ -216,7 +214,29 @@
      under the 7:1 floor -- confirmed live, same pixel-sampling method as
      every prior color pick for this element. Re-verify again if the tile
      shape or this color ever changes. */
-  #card .prize-row .place-label{font-size:21px;color:#DCE0E8}
+  /* Round 19: centered under the amount (the tile's new column layout),
+     and kept to one line where there's room -- per Eric's "ensure the
+     number and then place fits in the same line" ("1ST PLACE" shouldn't
+     itself wrap into "1ST"/"PLACE" on two lines). Square format's 2-column
+     294px-wide tiles have real room for this at 21px; the horizontal
+     format's 4-column tiles are narrower per-column (see the prize-table
+     comment above) and can genuinely need to wrap there -- Eric's own
+     "horizontal has multiple lines" flagged that as an acceptable
+     difference between the two formats, so nowrap is scoped to square
+     only rather than forced everywhere (which would risk real overflow
+     on the narrower horizontal columns instead). */
+  /* Round 19: pushed to pure white -- two lighter tints (#DCE0E8, #E9ECF1)
+     both still measured under the 7:1 AAA floor against this tile's real
+     rendered background at its new centered position (6.21:1, then
+     6.94:1) once the badge was removed and the label re-centered under the
+     amount. Direct pixel-sampling found the worst real background this
+     label can land on samples at ~8.19:1 even against pure white -- this is
+     already the ceiling available at this position, not an arbitrary
+     choice; a distinct, slightly-dimmer tint from the .amt line isn't
+     achievable here without falling back under the floor. Re-verify again
+     if this tile's layout, background photo, or scrim ever changes. */
+  #card .prize-row .place-label{font-size:21px;color:#fff;text-align:center}
+  body:not(.fmt-horizontal) #card .prize-row .place-label{white-space:nowrap}
   /* Perk tags (Free Pizza Lunch / Raffle Prizes) sized up 2026-09-22
      (Round 17), per Eric's direct "make the node tags... larger" request. */
   #card .perk-chip{font-size:28px;padding:.75rem 1.5rem}
@@ -271,8 +291,14 @@
   // fixed 2026-09-22 (Round 15) per Eric's "write out 1st place and place
   // for each one".
   const ord = n => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
+  // Round 19: dropped the numbered place-badge span entirely, per Eric --
+  // showing "1"/"2"/"3"/"4" in a circle right next to "1ST PLACE" spelled
+  // out the same ordinal twice in two different shapes, which read as
+  // conflicting rather than reinforcing. Each tile is now just the $
+  // amount and the place label, centered (styled via the .prize-row/
+  // .amt/.place-label rules above).
   const prizeHTML = (ev.prizes && ev.prizes.length)
-    ? `<div class="prize-heading">Bracket Prizing</div><div class="prize-table">${ev.prizes.map(p => `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></span></div>`).join('')}</div>`
+    ? `<div class="prize-heading">Bracket Prizing</div><div class="prize-table">${ev.prizes.map(p => `<div class="prize-row"><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></div>`).join('')}</div>`
     : '';
   const perkHTML = (ev.perks && ev.perks.length) ? ev.perks.map(p => `<div class="perk-chip">${esc(p)}</div>`).join('') : '';
 
