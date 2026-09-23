@@ -124,8 +124,11 @@
   #card .cd-sub{font-family:var(--head);font-weight:600;font-size:28px;color:var(--ne-blue-text);margin:0 0 18px;text-shadow:0 2px 14px rgba(0,0,0,.75)}
   body.fmt-horizontal #card .cd-sub{font-size:24px}
   #card .cd-meta{display:flex;flex-wrap:wrap;gap:.8rem 2rem;margin:.4rem 0 28px}
-  #card .cd-meta-item{display:flex;align-items:center;gap:10px;font-family:var(--eu-body);font-weight:600;font-size:24px;color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
-  #card .cd-meta-item .ic{width:26px;height:26px;color:var(--ne-orange);flex:none}
+  /* Date/time sized up 2026-09-22 (Round 17), per Eric's "make the time and
+     the date larger" -- 24px -> 30px, icon grown to match so it doesn't
+     look undersized next to the bigger text. */
+  #card .cd-meta-item{display:flex;align-items:center;gap:10px;font-family:var(--eu-body);font-weight:600;font-size:30px;color:#dfe4ec;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+  #card .cd-meta-item .ic{width:32px;height:32px;color:var(--ne-orange);flex:none}
   #card .prize-heading{font-size:20px;margin:6px 0 16px}
   #card .prize-table{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 22px}
   body:not(.fmt-horizontal) #card .prize-table{grid-template-columns:repeat(2,1fr);gap:12px}
@@ -134,10 +137,32 @@
      request, 2026-09-22 (Round 15). Page-scoped override, same pattern as
      every other #card-prefixed rule in this file. */
   #card .prize-row{flex-direction:column;align-items:flex-start;padding:18px 20px;gap:8px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
-  #card .prize-row .place{width:44px;height:44px;font-size:16px}
-  #card .prize-row .amt{font-size:34px}
-  #card .prize-row .place-label{font-size:15px}
-  #card .perk-chip{font-size:22px;padding:.6rem 1.2rem}
+  /* Prize $ amount + place-label sized up 2026-09-22 (Round 17), per Eric's
+     "too much empty space in those nodes" -- the number/label now actually
+     fill the box's existing padding instead of leaving visible dead space
+     around a small number. Place-badge circle grown a touch to stay
+     proportional to the larger text next to it. */
+  #card .prize-row .place{width:50px;height:50px;font-size:19px}
+  #card .prize-row .amt{font-size:48px}
+  /* A real contrast gap found and fixed while verifying this round's sizing
+     bump, not introduced by it: at 19px (still under the 24px "large text"
+     line either way), the shared style.css --ink-dim color only measured
+     5.0-6.1:1 against this card's real rendered background (rgba(255,255,
+     255,.16) over the dark scrim/photo), sampled live via Puppeteer +
+     pixel contrast math -- short of this project's 7:1 AAA floor. Given a
+     lighter, still-visually-secondary tint (#C7CCD8, distinct from the
+     .amt line's pure white) that clears 7.2:1 against the darkest sampled
+     background, confirmed via the same live pixel-sampling method. Scoped
+     to this page only -- the shared style.css .place-label default (used
+     by calendar.js's live panel, on a different, already-verified
+     background) is untouched. First candidate (#C7CCD8) landed at 6.99:1
+     on one live-sampled square-format box (right where the character
+     artwork passes behind it) -- under the 7:1 floor by a hair, so nudged
+     one step lighter to #D0D5E0 for real margin, re-verified below. */
+  #card .prize-row .place-label{font-size:19px;color:#D0D5E0}
+  /* Perk tags (Free Pizza Lunch / Raffle Prizes) sized up 2026-09-22
+     (Round 17), per Eric's direct "make the node tags... larger" request. */
+  #card .perk-chip{font-size:28px;padding:.75rem 1.5rem}
   #card .footer-line{margin-top:24px;font-family:var(--eu-body);font-size:20px;color:var(--ink-dim)}
   #err{color:#fff;font-family:var(--eu-body);padding:2rem}
 </style>
