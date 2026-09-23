@@ -70,8 +70,36 @@
      right. Vertically centered (top:50% + translateY(-50%), not bottom-
      anchored) per Eric's "his feet shouldn't touch the bottom, center him
      in Y" follow-up, same day. */
-  #card .card-char{position:absolute;right:0;top:50%;height:560px;z-index:1;pointer-events:none;transform:translateY(-50%) scaleX(-1);filter:drop-shadow(0 20px 46px rgba(0,0,0,.6))}
-  body.fmt-horizontal #card .card-char{height:700px;right:50px;top:50%;transform:translateY(-50%) scaleX(-1)}
+  /* Layered opacity-fade "echo" trail, added 2026-09-22 (Round 15), reusing
+     the exact technique the Weekly Lineup board's per-week theme icon
+     already uses (.eu-board-icon in style.css / event-update.js): several
+     copies of the same image anchored at the same point, each offset a
+     little further out with lower opacity/size/z-index than the last --
+     reads as a motion trail rather than a flat cutout. Main character
+     keeps z-index:1 (ties with .content, which sits later in the DOM and
+     so still wins the stacking order per the comment above); all 3 ghost
+     copies sit at z-index:0, ordered ghost-3/ghost-2/ghost-1/main in the
+     DOM so ghost-1 (closest, most visible) renders above ghost-2 and
+     ghost-3 among that shared z-index tier. */
+  #card .card-char{position:absolute;top:50%;z-index:1;pointer-events:none;transform:translateY(-50%) scaleX(-1);filter:drop-shadow(0 20px 46px rgba(0,0,0,.6))}
+  #card .card-char{right:0;height:560px}
+  #card .card-char-ghost{position:absolute;top:50%;z-index:0;pointer-events:none;transform:translateY(-50%) scaleX(-1)}
+  #card .card-char-ghost-1{right:34px;height:498px;opacity:.32}
+  #card .card-char-ghost-2{right:62px;height:440px;opacity:.16}
+  #card .card-char-ghost-3{right:86px;height:384px;opacity:.07}
+  /* Horizontal format: per Eric, the character moves off the right edge
+     and into the middle of the layout's own empty space instead -- the
+     content column (.content, max-width:900px) sits against the left
+     padding, so the genuinely empty area runs from roughly the content's
+     right edge to the card's own right padding. Anchored via left:74% +
+     translate(-50%,...) (a centered anchor, not a right-edge one) so the
+     character and its whole echo trail sit centered in that gap rather
+     than pinned to the card's outer edge. */
+  body.fmt-horizontal #card .card-char{height:700px;left:74%;right:auto;top:50%;transform:translate(-50%,-50%) scaleX(-1)}
+  body.fmt-horizontal #card .card-char-ghost{left:74%;right:auto;top:50%}
+  body.fmt-horizontal #card .card-char-ghost-1{height:623px;transform:translate(calc(-50% + 40px),-50%) scaleX(-1)}
+  body.fmt-horizontal #card .card-char-ghost-2{height:550px;transform:translate(calc(-50% + 74px),-50%) scaleX(-1)}
+  body.fmt-horizontal #card .card-char-ghost-3{height:480px;transform:translate(calc(-50% + 104px),-50%) scaleX(-1)}
   #card .content{position:relative;z-index:1;max-width:1020px}
   body:not(.fmt-horizontal) #card .content{max-width:600px;margin-top:64px}
   body.fmt-horizontal #card .content{max-width:900px}
@@ -91,7 +119,11 @@
   #card .prize-heading{font-size:20px;margin:6px 0 16px}
   #card .prize-table{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 22px}
   body:not(.fmt-horizontal) #card .prize-table{grid-template-columns:repeat(2,1fr);gap:12px}
-  #card .prize-row{flex-direction:column;align-items:flex-start;padding:18px 20px;gap:8px;border-radius:16px}
+  /* Higher-opacity fill than the shared style.css default (rgba(255,255,255,.06)
+     bg / .16 border) -- per Eric's "make the prize areas higher opacity"
+     request, 2026-09-22 (Round 15). Page-scoped override, same pattern as
+     every other #card-prefixed rule in this file. */
+  #card .prize-row{flex-direction:column;align-items:flex-start;padding:18px 20px;gap:8px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
   #card .prize-row .place{width:44px;height:44px;font-size:16px}
   #card .prize-row .amt{font-size:34px}
   #card .prize-row .place-label{font-size:15px}
@@ -142,9 +174,13 @@
   const pretty = dt => new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const esc = (window.GZ && GZ.esc) ? GZ.esc : (s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
 
+  // "${ord} Place" (e.g. "1st Place") to match calendar.js's own prizeBlock()
+  // -- this template had drifted to a bare ordinal with no "Place" word;
+  // fixed 2026-09-22 (Round 15) per Eric's "write out 1st place and place
+  // for each one".
   const ord = n => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
   const prizeHTML = (ev.prizes && ev.prizes.length)
-    ? `<div class="prize-heading">Bracket Prizing</div><div class="prize-table">${ev.prizes.map(p => `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)}</span></span></div>`).join('')}</div>`
+    ? `<div class="prize-heading">Bracket Prizing</div><div class="prize-table">${ev.prizes.map(p => `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></span></div>`).join('')}</div>`
     : '';
   const perkHTML = (ev.perks && ev.perks.length) ? ev.perks.map(p => `<div class="perk-chip">${esc(p)}</div>`).join('') : '';
 
@@ -152,8 +188,16 @@
   // (see the .card-char CSS comment above for the 2026-09-22 sizing
   // history); each format's own CSS rule controls its size/position.
   // Reused as-is from the shared LineupAssets folder, not a one-off copy
-  // made just for this card.
-  const charHTML = `<img class="card-char" src="assets/calendar/LineupAssets/FighterGames.png" alt="" aria-hidden="true">`;
+  // made just for this card. 3 lower-opacity "ghost" copies of the same
+  // image render underneath the main one (see the CSS comment above) --
+  // the same echo/fade-trail technique the Weekly Lineup board's per-week
+  // theme icon already uses, added 2026-09-22 (Round 15) per Eric's request.
+  const CHAR_SRC = 'assets/calendar/LineupAssets/FighterGames.png';
+  const charHTML = `
+    <img class="card-char-ghost card-char-ghost-3" src="${CHAR_SRC}" alt="" aria-hidden="true">
+    <img class="card-char-ghost card-char-ghost-2" src="${CHAR_SRC}" alt="" aria-hidden="true">
+    <img class="card-char-ghost card-char-ghost-1" src="${CHAR_SRC}" alt="" aria-hidden="true">
+    <img class="card-char" src="${CHAR_SRC}" alt="" aria-hidden="true">`;
 
   card.innerHTML = `
     <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
