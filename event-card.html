@@ -92,8 +92,13 @@
      right:0) per Eric's "move the square image fighter slightly more to
      the left" -- this also opens up real room to its right for the echo
      trail to sit in, rather than the ghosts pushing off the card's edge. */
-  #card .card-char{right:40px;height:560px}
-  #card .card-char-ghost{position:absolute;top:50%;right:40px;height:560px;z-index:0;pointer-events:none}
+  /* Square format graphic bumped 5% larger (560px -> 588px) per Eric's direct
+     request, 2026-09-22 (Round 18) -- ghosts grown to match so the echo
+     trail stays exactly the main character's own size throughout, per the
+     Round 16 rule above. Horizontal format's own 700px override (below) is
+     untouched -- this request was scoped to "the square image" only. */
+  #card .card-char{right:40px;height:588px}
+  #card .card-char-ghost{position:absolute;top:50%;right:40px;height:588px;z-index:0;pointer-events:none}
   #card .card-char-ghost-1{opacity:.32;transform:translate(26px,-50%) scaleX(-1)}
   #card .card-char-ghost-2{opacity:.16;transform:translate(48px,-50%) scaleX(-1)}
   #card .card-char-ghost-3{opacity:.07;transform:translate(68px,-50%) scaleX(-1)}
@@ -111,7 +116,12 @@
   body.fmt-horizontal #card .card-char-ghost-2{transform:translate(calc(-50% + 74px),-50%) scaleX(-1)}
   body.fmt-horizontal #card .card-char-ghost-3{transform:translate(calc(-50% + 104px),-50%) scaleX(-1)}
   #card .content{position:relative;z-index:1;max-width:1020px}
-  body:not(.fmt-horizontal) #card .content{max-width:600px;margin-top:64px}
+  /* margin-top trimmed 64px -> 54px in Round 18, alongside the prize-table
+     margin-bottom trim below, to close the last ~11px of real, measured
+     footer-line clipping the 4:3 near-square tiles above still left --
+     confirmed fixed via the same live getBoundingClientRect check, not
+     just recalculated on paper. */
+  body:not(.fmt-horizontal) #card .content{max-width:600px;margin-top:54px}
   body.fmt-horizontal #card .content{max-width:900px}
   #card .brand-row{position:absolute;top:60px;left:70px;z-index:1;display:flex;align-items:center;gap:14px}
   body.fmt-horizontal #card .brand-row{top:80px;left:90px}
@@ -131,35 +141,82 @@
   #card .cd-meta-item .ic{width:32px;height:32px;color:var(--ne-orange);flex:none}
   #card .prize-heading{font-size:20px;margin:6px 0 16px}
   #card .prize-table{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 22px}
-  body:not(.fmt-horizontal) #card .prize-table{grid-template-columns:repeat(2,1fr);gap:12px}
+  /* Round 18: square format kept at 2 columns (NOT switched to 4) after a
+     real bug was found and rejected -- trying 4 columns at this content's
+     enlarged font sizes triggered a classic CSS Grid "blowout": a `1fr`
+     track's automatic minimum is its content's own min-content width, not
+     0, so when 4 columns' worth of badge+$-amount content couldn't
+     realistically fit an equal 141px share of the 600px content column,
+     every track grew to fit its own content instead -- and the grid's
+     total computed width (verified live at ~1019px) silently overflowed
+     clean past `.content`'s own 600px box, exactly the "container reacts
+     to its own content length" failure this project's container/sizing
+     rules already warn against. 2 columns' own 294px-wide track (verified
+     live) comfortably fits this content's real min-content width with no
+     blowout, so it's the one actually safe to use at this column width. */
+  body:not(.fmt-horizontal) #card .prize-table{grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
   /* Higher-opacity fill than the shared style.css default (rgba(255,255,255,.06)
      bg / .16 border) -- per Eric's "make the prize areas higher opacity"
      request, 2026-09-22 (Round 15). Page-scoped override, same pattern as
      every other #card-prefixed rule in this file. */
-  #card .prize-row{flex-direction:column;align-items:flex-start;padding:18px 20px;gap:8px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
-  /* Prize $ amount + place-label sized up 2026-09-22 (Round 17), per Eric's
-     "too much empty space in those nodes" -- the number/label now actually
-     fill the box's existing padding instead of leaving visible dead space
-     around a small number. Place-badge circle grown a touch to stay
-     proportional to the larger text next to it. */
-  #card .prize-row .place{width:50px;height:50px;font-size:19px}
-  #card .prize-row .amt{font-size:48px}
-  /* A real contrast gap found and fixed while verifying this round's sizing
-     bump, not introduced by it: at 19px (still under the 24px "large text"
-     line either way), the shared style.css --ink-dim color only measured
-     5.0-6.1:1 against this card's real rendered background (rgba(255,255,
-     255,.16) over the dark scrim/photo), sampled live via Puppeteer +
-     pixel contrast math -- short of this project's 7:1 AAA floor. Given a
-     lighter, still-visually-secondary tint (#C7CCD8, distinct from the
-     .amt line's pure white) that clears 7.2:1 against the darkest sampled
-     background, confirmed via the same live pixel-sampling method. Scoped
-     to this page only -- the shared style.css .place-label default (used
-     by calendar.js's live panel, on a different, already-verified
-     background) is untouched. First candidate (#C7CCD8) landed at 6.99:1
-     on one live-sampled square-format box (right where the character
-     artwork passes behind it) -- under the 7:1 floor by a hair, so nudged
-     one step lighter to #D0D5E0 for real margin, re-verified below. */
-  #card .prize-row .place-label{font-size:19px;color:#D0D5E0}
+  /* Round 18, same day: reworked from a column layout (badge on top, $
+     amount + place-label stacked below it, both left-aligned) to a row
+     layout -- per Eric's "move the 150 and 100 to be to the right of the
+     1,2,3,4" -- because the old column layout left the entire right half
+     of each tile empty (a wide 2-column grid box with narrow, left-
+     aligned content), which is the real cause of "still a lot of empty
+     space in the tiles," not just font size. align-items:flex-start pins
+     the place badge to the TOP of the row per Eric's explicit "move the
+     placement number upwards" -- previously it was already visually top
+     positioned in the column layout, but switching to a row needs this
+     set explicitly or the badge would default to vertically centering
+     against the now-taller two-line text block beside it. */
+  #card .prize-row{flex-direction:row;align-items:flex-start;gap:18px;padding:20px 22px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
+  /* Square format only: near-square tiles, per Eric's "I want square nodes
+     on the square graphic version, like how the horizontal version has
+     square nodes." A literal 1:1 was tried first and rejected after
+     rendering it: at a 294px-wide 2-column track, a true square tile
+     forces the whole 4-tile table to ~600px tall, which pushed the perk
+     chips and the footer line completely below the card's own 1200px
+     bottom edge -- real clipped content, confirmed via a live
+     getBoundingClientRect check, not just a hunch. The horizontal format's
+     own tiles aren't a literal 1:1 either (measured ~1.12-1.27:1 live) --
+     they just read as "square" -- so 4:3 (1.33:1) matches that same
+     near-square proportion (Eric's actual reference point) while leaving
+     real, verified room for everything below the table. Applied to
+     `.prize-row` itself, a CSS Grid item (not a plain block), so it still
+     gets a real content-based automatic minimum size and won't silently
+     clip if content ever needs more room than this ratio allows. */
+  body:not(.fmt-horizontal) #card .prize-row{aspect-ratio:4/3}
+  /* Prize $ amount + place-label sized up again 2026-09-22 (Round 18), on
+     top of Round 17's bump, per Eric's direct "make everything within
+     those tile nodes to be larger." Place-badge circle grown to match. */
+  #card .prize-row .place{width:58px;height:58px;font-size:23px}
+  #card .prize-row .amt{font-size:58px}
+  /* The info column (the $ amount + place-label pair) sits in the bare
+     `<span>` immediately after `.place` in the markup -- it has no class
+     of its own, so it's targeted here via the adjacent-sibling combinator
+     rather than adding a new class purely for a CSS hook. */
+  #card .prize-row .place + span{display:flex;flex-direction:column;gap:4px}
+  /* A real contrast gap found and fixed while verifying Round 17's sizing
+     bump, not introduced by it: at under-24px sizes, the shared style.css
+     --ink-dim color only measured 5.0-6.1:1 against this card's real
+     rendered background (rgba(255,255,255,.16) over the dark scrim/photo),
+     sampled live via Puppeteer + pixel contrast math -- short of this
+     project's 7:1 AAA floor. Given a lighter, still-visually-secondary
+     tint (#D0D5E0, distinct from the .amt line's pure white) that clears
+     7.61:1 worst-case across both formats, confirmed via the same live
+     pixel-sampling method -- re-verify this if the color ever changes
+     again, per the same method. Scoped to this page only -- the shared
+     style.css .place-label default (used by calendar.js's live panel, on
+     a different, already-verified background) is untouched. */
+  /* Nudged one step lighter again in Round 18 (#D0D5E0 -> #DCE0E8): the
+     taller 4:3 tile moved this label to a new Y position that sampled a
+     real 5.98:1 against the square format's real rendered background --
+     under the 7:1 floor -- confirmed live, same pixel-sampling method as
+     every prior color pick for this element. Re-verify again if the tile
+     shape or this color ever changes. */
+  #card .prize-row .place-label{font-size:21px;color:#DCE0E8}
   /* Perk tags (Free Pizza Lunch / Raffle Prizes) sized up 2026-09-22
      (Round 17), per Eric's direct "make the node tags... larger" request. */
   #card .perk-chip{font-size:28px;padding:.75rem 1.5rem}
