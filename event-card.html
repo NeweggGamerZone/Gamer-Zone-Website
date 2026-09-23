@@ -186,7 +186,19 @@
      `.prize-row` itself, a CSS Grid item (not a plain block), so it still
      gets a real content-based automatic minimum size and won't silently
      clip if content ever needs more room than this ratio allows. */
-  body:not(.fmt-horizontal) #card .prize-row{aspect-ratio:4/3}
+  /* Round 21: shrunk further, per Eric ("make the nodes a little smaller on
+     the square version, still a bit too much white space"). Measured the
+     real content height live before touching the ratio: at the 294px tile
+     width this 2-column grid produces, the amount+label pair only needs
+     ~132px, plus the tile's own 20px top/bottom padding = ~172px -- the
+     prior 4:3 ratio forced 220.5px, leaving ~48px of real dead space per
+     tile, confirmed via getBoundingClientRect, not eyeballed. 3:2 (1.5:1)
+     brings that down to 196px -- still reads as a squarish tile (not a
+     thin bar), just tighter around its real content; a ratio closer to
+     content-hugging (~1.7:1) was available but would have left almost no
+     breathing room at all. Re-verify against real content height again if
+     the amount/label font sizes or padding ever change. */
+  body:not(.fmt-horizontal) #card .prize-row{aspect-ratio:3/2}
   /* Prize $ amount sized up again 2026-09-22 (Round 18), on top of Round
      17's bump, per Eric's direct "make everything within those tile nodes
      to be larger." Round 19 removed the `.place` badge circle entirely

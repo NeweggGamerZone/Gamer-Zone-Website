@@ -1917,3 +1917,15 @@ Per Eric, immediately after Round 19: "Can we check wcags and make the 1st 2nd 3
 **Disclosed limitation, consistent with Round 19's own finding for this same element:** a genuinely bold/saturated orange is not achievable at this exact tile position (square-format tile 0's real sampled background is the brightest of the four, `rgb(83,79,77)`) without falling under this project's 7:1 AAA floor -- `#FFF5E6` is the practical ceiling, not an arbitrary middle-ground pick. If this tile's layout, background photo, or scrim ever changes, re-verify against the same live pixel-sampling method before assuming a bolder orange has become viable.
 
 No cache-bust bump needed -- scoped to `event-card.html`'s own inline `<style>` block, same as every round on this page since Round 15.
+
+## Round 21, same day: square-format prize tiles shrunk further (2026-09-22)
+
+Per Eric, immediately after Round 20: "Make the nodes a little smaller on the square version, still a bit too much white space." Direct, fully-specified instruction, implemented straight through per core rule 15.
+
+**Measured the real dead space before touching the ratio, not eyeballed.** At the square format's 294px-wide 2-column tile track (Round 18's own layout), the amount+label content only needs ~132px of real height; with the tile's 20px top/bottom padding that's ~172px total. Round 18's `aspect-ratio:4/3` forced each tile to 220.5px tall -- confirmed live via `getBoundingClientRect()` -- meaning ~48px of real, measurable empty space per tile beyond what the content needed.
+
+**Fixed by tightening `body:not(.fmt-horizontal) #card .prize-row`'s aspect-ratio from `4/3` to `3/2`.** At the same 294px width this brings tile height down to 196px (11% shorter, re-confirmed live) -- still reads as a squarish tile per Round 18's own "square nodes" ask, just noticeably tighter around its real content, rather than pushing all the way to a content-hugging ~1.7:1 ratio that would have left almost no breathing room. The horizontal format's own tiles are untouched -- Eric's request was scoped to "the square version" specifically, matching this page's existing per-format-scoping convention.
+
+**Verified via the same live Puppeteer + pixel-sampling method used throughout this page's history.** Tile height confirmed at 196px (was 220.5px); the footer's bottom edge moved to 1141.95px (was 1190.95px) -- more margin inside the 1200px card than before, not less, so no new clipping risk. Re-ran the WCAG contrast check on `.place-label` (its on-screen position shifted along with the tile's shrink) and `.amt`: worst-case is now 8.66:1 (square) / 11.05:1 (horizontal) for the label and 9.35:1 / 11.69:1 for the amount -- both comfortably clear of the 7:1 AAA floor, actually improved slightly over Round 20's own 7.50:1 square worst-case since the label now sits closer to a darker part of the sampled background. Zero console errors in either format.
+
+No cache-bust bump needed -- scoped to `event-card.html`'s own inline `<style>` block, same as every round on this page since Round 15.
