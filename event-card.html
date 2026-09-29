@@ -129,8 +129,12 @@
      now sharing vertical space with the tag/title/subtitle stack, not
      occupying an empty corner on its own. */
   #card .brand-row{display:flex;align-items:center;gap:14px;margin:0 0 16px}
-  #card .brand-row .nlogo-img{height:42px;width:auto;display:block}
-  body.fmt-horizontal #card .brand-row .nlogo-img{height:48px}
+  /* Round 28: per Eric's direct "make the Gamer Zone logo on the other
+     screenshots 200% larger" -- 42/48px -> 126/144px (3x, i.e. +200%),
+     still an in-flow element per Round 26 so it stays aligned above the
+     tag regardless of size. */
+  #card .brand-row .nlogo-img{height:126px;width:auto;display:block}
+  body.fmt-horizontal #card .brand-row .nlogo-img{height:144px}
   #card .tag{font-size:22px;padding:.5rem 1.1rem}
   #card h1{font-family:var(--head);font-weight:800;font-size:64px;line-height:1.05;text-transform:uppercase;color:#fff;margin:22px 0 10px;text-shadow:0 4px 24px rgba(0,0,0,.8)}
   body:not(.fmt-horizontal) #card h1{font-size:52px}
