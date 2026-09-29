@@ -12,7 +12,16 @@
      (closures, tournaments, one-off parties), instead of a day-by-day
      lineup. Content here is hand-authored per month, not pulled from
      data/events.json — update it manually when the month's theme weeks
-     or special events change. Safe to delete once no longer needed. -->
+     or special events change. Safe to delete once no longer needed.
+
+     2026-09-29: updated from September to October per Eric's GTM Event
+     Timeline (SharePoint). Weekly themes for October, confirmed by Eric
+     same day: Tech Week (Oct 1-3), Co-op Games Week (Oct 6-10), Valorant
+     Week (Oct 13-17), Racing Week (Oct 20-24), Halloween Week (Oct 27-31)
+     -- real, dated entries in data/events.json's weeklyThemes array,
+     source of truth for this block. Special Events below stays the
+     curated list of dated one-off events (closures, tournaments,
+     parties). -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="stylesheet" href="assets/css/style.css?v=102">
 <!-- Page-scoped tweaks for this screenshot only — do not touch the shared
@@ -53,7 +62,7 @@
           <i data-ic="cal" data-lg></i>
           <div class="eu-eyebrow-textcol">
             <div class="eu-eyebrow-titlerow">
-              <h3 class="eu-eyebrow-title">Gamer Zone: <span class="eu-theme-highlight">September 2026</span></h3>
+              <h3 class="eu-eyebrow-title">Gamer Zone: <span class="eu-theme-highlight">October 2026</span></h3>
             </div>
           </div>
         </div>
@@ -61,67 +70,66 @@
 
       <div class="eu-list">
         <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Sep 1 - 5</span></div>
+          <div class="eu-date-wrap"><span class="eu-date">Oct 1 - 3</span></div>
           <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Riot Games Week</div>
+            <div class="eu-name eu-theme-highlight">Tech Week</div>
           </div>
         </div>
         <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Sep 8 - 12</span></div>
+          <div class="eu-date-wrap"><span class="eu-date">Oct 6 - 10</span></div>
           <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Party Games Week</div>
+            <div class="eu-name eu-theme-highlight">Co-op Games Week</div>
           </div>
         </div>
         <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Sep 15 - 19</span></div>
+          <div class="eu-date-wrap"><span class="eu-date">Oct 13 - 17</span></div>
           <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Racing Games Week</div>
+            <div class="eu-name eu-theme-highlight">Valorant Week</div>
           </div>
         </div>
         <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Sep 22 - 26</span></div>
+          <div class="eu-date-wrap"><span class="eu-date">Oct 20 - 24</span></div>
           <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Fighting Games Week</div>
+            <div class="eu-name eu-theme-highlight">Racing Week</div>
+          </div>
+        </div>
+        <div class="eu-row eu-week-row">
+          <div class="eu-date-wrap"><span class="eu-date">Oct 27 - 31</span></div>
+          <div class="eu-info">
+            <div class="eu-name eu-theme-highlight">Halloween Week</div>
           </div>
         </div>
       </div>
 
       <h4 class="eu-sublist-head">Special Events</h4>
       <div class="eu-list">
-        <!-- Single-line closure row -- "SEP 5: Closed for Labor Day" -- same
-             markup/class convention row() in event-update.js now emits for
-             closure-type events on the live Weekly Lineup (index.html /
-             events.html), so this hand-authored month view stays visually
-             consistent with the data-driven weekly one instead of using the
-             two-column date/title layout every timed event below still
-             uses. Source of truth for the date/title text is data/events.json's
-             "closed-labor-day-2026-09-05" entry. -->
+        <!-- Real, dated entries from data/events.json (source of truth):
+             fantastech-2-2026-10-03, closed-cyberpower-teambonding-2026-10-10,
+             closed-usc-collegiate-cup-setup-2026-10-16,
+             closed-usc-collegiate-cup-2026-10-17,
+             car-club-sim-racing-2026-10-24,
+             halloween-costume-party-2026-10-31. Keep in sync if those
+             entries change. -->
+        <div class="eu-row eu-line eu-major">
+          <div class="eu-name">OCT 3: FantasTech 2</div>
+          <div class="eu-meta">1:00 PM to 7:00 PM</div>
+        </div>
         <div class="eu-row eu-closure eu-closure-line">
-          <div class="eu-name">SEP 5: Closed for Labor Day</div>
+          <div class="eu-name">OCT 10: Closed for Private Event</div>
         </div>
-        <div class="eu-row eu-line">
-          <div class="eu-name">SEP 9: XP League Fortnite Training</div>
-          <div class="eu-meta">4:00 PM to 6:00 PM</div>
+        <div class="eu-row eu-closure eu-closure-line">
+          <div class="eu-name">OCT 16: Closed for Private Event Setup</div>
         </div>
-        <div class="eu-row eu-line eu-major">
-          <div class="eu-name">SEP 11: XP League Fortnite Tournament</div>
-          <div class="eu-meta">4:00 PM to 7:00 PM</div>
+        <div class="eu-row eu-closure eu-closure-line">
+          <div class="eu-name">OCT 17: Closed for Private Event</div>
         </div>
         <div class="eu-row eu-line eu-major">
-          <div class="eu-name">SEP 19: Mario Kart World Tournament</div>
-          <div class="eu-meta">11:00 AM to 7:00 PM</div>
-        </div>
-        <div class="eu-row eu-line">
-          <div class="eu-name">SEP 23: XP League Fortnite Training</div>
-          <div class="eu-meta">4:00 PM to 6:00 PM</div>
+          <div class="eu-name">OCT 24: Car Club &amp; Sim Racing Event</div>
+          <div class="eu-meta">10:00 AM to 7:00 PM</div>
         </div>
         <div class="eu-row eu-line eu-major">
-          <div class="eu-name">SEP 25: XP League Fortnite Tournament</div>
-          <div class="eu-meta">4:00 PM to 7:00 PM</div>
-        </div>
-        <div class="eu-row eu-line eu-major">
-          <div class="eu-name">SEP 26: Street Fighter 6 Saturday Slam</div>
-          <div class="eu-meta">11:00 AM to 7:00 PM</div>
+          <div class="eu-name">OCT 31: Halloween Costume Party</div>
+          <div class="eu-meta">10:00 AM to 7:00 PM</div>
         </div>
       </div>
     </div>

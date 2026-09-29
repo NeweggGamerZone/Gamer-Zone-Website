@@ -292,7 +292,79 @@
       "perks": [
         "Free Pizza Lunch",
         "Raffle Prizes"
+      ],
+      "cardChar": true
+    },
+    {
+      "id": "fantastech-2-2026-10-03",
+      "title": "FantasTech 2",
+      "subtitle": "Newegg FantasTech 2 Gamer Zone Party -- free lunch, hourly giveaways, and Newegg gift cards all afternoon.",
+      "date": "2026-10-03",
+      "time": "1:00 PM to 7:00 PM",
+      "type": "major",
+      "blurb": "Newegg FantasTech 2 Gamer Zone Party, the online promotion launch party for the Fantastech Sale. Free lunch starts at 1:00 PM, with hourly giveaways from 2:00 to 7:00 PM and Newegg gift cards all afternoon. View Fantastech Price Protection deals, win product prizes, and enjoy free play!",
+      "featured": true,
+      "reservation": false,
+      "image": "assets/calendar/BGAssets/fantastech-2-launch-blurred.jpg",
+      "perks": [
+        "Free Lunch at 1PM",
+        "Hourly Giveaways 2-7PM",
+        "Newegg Gift Cards"
       ]
+    },
+    {
+      "id": "closed-cyberpower-teambonding-2026-10-10",
+      "title": "Closed: Private Event",
+      "date": "2026-10-10",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed to the public for a private event.",
+      "featured": false,
+      "reservation": false
+    },
+    {
+      "id": "closed-usc-collegiate-cup-setup-2026-10-16",
+      "title": "Closed: Private Event Setup",
+      "date": "2026-10-16",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed to the public for private event setup.",
+      "featured": false,
+      "reservation": false
+    },
+    {
+      "id": "closed-usc-collegiate-cup-2026-10-17",
+      "title": "Closed: Private Event",
+      "date": "2026-10-17",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed to the public for a private event.",
+      "featured": false,
+      "reservation": false
+    },
+    {
+      "id": "car-club-sim-racing-2026-10-24",
+      "title": "Car Club & Sim Racing Event",
+      "subtitle": "An LA car club meet and free play day -- racing simulators, real cars, and food.",
+      "date": "2026-10-24",
+      "time": "10:00 AM to 7:00 PM",
+      "type": "major",
+      "blurb": "LA car club meet day and free play day at the Gamer Zone, featuring food, racing simulators, and cars on display.",
+      "featured": true,
+      "reservation": false,
+      "image": "assets/calendar/BGAssets/majorevent2-bg-blurred.jpg"
+    },
+    {
+      "id": "halloween-costume-party-2026-10-31",
+      "title": "Halloween Costume Party",
+      "subtitle": "Come in costume for a Halloween-themed party and costume contest at the Zone.",
+      "date": "2026-10-31",
+      "time": "10:00 AM to 7:00 PM",
+      "type": "major",
+      "blurb": "Halloween-themed costume contest and party at the Gamer Zone. Come dressed up and join the fun.",
+      "featured": true,
+      "reservation": false,
+      "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg"
     }
   ],
   "weeklyThemes": [
@@ -357,6 +429,36 @@
       "desc": "Street Fighter bracket play and fighting-game showdowns all week.",
       "icon": "assets/calendar/LineupAssets/FightingGamesAsset.png",
       "iconSymmetric": true
+    },
+    {
+      "start": "2026-10-01",
+      "end": "2026-10-03",
+      "theme": "Tech Week",
+      "desc": "Gear up for FantasTech 2 on Oct 3 -- come check out the latest tech in the Zone."
+    },
+    {
+      "start": "2026-10-06",
+      "end": "2026-10-10",
+      "theme": "Co-op Games Week",
+      "desc": "Grab a friend and team up -- co-op favorites all week in the Gamer Zone."
+    },
+    {
+      "start": "2026-10-13",
+      "end": "2026-10-17",
+      "theme": "Valorant Week",
+      "desc": "Squad up for Valorant all week in the Gamer Zone."
+    },
+    {
+      "start": "2026-10-20",
+      "end": "2026-10-24",
+      "theme": "Racing Week",
+      "desc": "Rev up the sim rigs -- Racing Week leads into the Car Club & Sim Racing Event on Oct 24."
+    },
+    {
+      "start": "2026-10-27",
+      "end": "2026-10-31",
+      "theme": "Halloween Week",
+      "desc": "Spooky season at the Zone, capped off by the Halloween Costume Party on Oct 31."
     }
   ]
 }
