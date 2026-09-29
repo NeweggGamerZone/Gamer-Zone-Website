@@ -132,12 +132,29 @@
      instead of `left`/`left:auto` so it never competes with the title's
      own max-width:600/900px column, regardless of how long a given
      event's title or subtitle runs. */
-  #card .brand-row{position:absolute;top:60px;right:70px;z-index:1;display:flex;align-items:center;gap:14px}
-  body.fmt-horizontal #card .brand-row{top:80px;right:90px}
-  /* Grown alongside the reposition -- 46/54px -> 64/76px -- since moving
-     off the text column freed real room for it without crowding anything. */
-  #card .brand-row .nlogo-img{height:64px;width:auto;display:block}
-  body.fmt-horizontal #card .brand-row .nlogo-img{height:76px}
+  /* Round 25: per Eric's direct follow-up ("make the logo on the bottom
+     right actually, make it 50% larger") -- moved again, from top-right to
+     bottom-right, and grown a further 50% (64px->96px square, 76px->114px
+     horizontal). `top:60px/80px` swapped for `bottom:60px/80px` (same
+     offset value, opposite edge) so it keeps the same visual inset from
+     the card's corner, just the other corner; `right` is unchanged since
+     that part of Round 23's reasoning (never competing with the left-
+     aligned text column) still holds regardless of which vertical edge
+     it's pinned to. Checked for collision against `.card-char` (the
+     fighter-art cutout, vertically centered via top:50%) before landing
+     here: in square format the character spans roughly y=306-894 of the
+     1200px-tall card, comfortably clear of a ~96px-tall badge sitting
+     inside the bottom 60px inset (~y=1044-1140); in horizontal format the
+     character spans roughly y=190-890 of the 1080px-tall card against a
+     ~114px badge inside the bottom 80px inset (~y=886-1000) -- close but
+     still clear, confirmed via live getBoundingClientRect measurement
+     rather than this arithmetic alone (see this round's own verification
+     note). */
+  #card .brand-row{position:absolute;bottom:60px;right:70px;z-index:1;display:flex;align-items:center;gap:14px}
+  body.fmt-horizontal #card .brand-row{bottom:80px;right:90px}
+  /* Grown a further 50% this round -- 64/76px -> 96/114px. */
+  #card .brand-row .nlogo-img{height:96px;width:auto;display:block}
+  body.fmt-horizontal #card .brand-row .nlogo-img{height:114px}
   #card .tag{font-size:22px;padding:.5rem 1.1rem}
   #card h1{font-family:var(--head);font-weight:800;font-size:64px;line-height:1.05;text-transform:uppercase;color:#fff;margin:22px 0 10px;text-shadow:0 4px 24px rgba(0,0,0,.8)}
   body:not(.fmt-horizontal) #card h1{font-size:52px}
