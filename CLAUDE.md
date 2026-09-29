@@ -1929,3 +1929,60 @@ Per Eric, immediately after Round 20: "Make the nodes a little smaller on the sq
 **Verified via the same live Puppeteer + pixel-sampling method used throughout this page's history.** Tile height confirmed at 196px (was 220.5px); the footer's bottom edge moved to 1141.95px (was 1190.95px) -- more margin inside the 1200px card than before, not less, so no new clipping risk. Re-ran the WCAG contrast check on `.place-label` (its on-screen position shifted along with the tile's shrink) and `.amt`: worst-case is now 8.66:1 (square) / 11.05:1 (horizontal) for the label and 9.35:1 / 11.69:1 for the amount -- both comfortably clear of the 7:1 AAA floor, actually improved slightly over Round 20's own 7.50:1 square worst-case since the label now sits closer to a darker part of the sampled background. Zero console errors in either format.
 
 No cache-bust bump needed -- scoped to `event-card.html`'s own inline `<style>` block, same as every round on this page since Round 15.
+
+## Round 22 (2026-09-29): site-wide logo swap -- a real ghost-text artifact in the live logo file, fixed with a clean image
+
+Per Eric: "Please look at the Gamer Zone transparent 2 logo I put in the images folder. Replace
+all newegg gamer zone logo with that one so there isn't a once you know you newegg." Read as
+literally as possible first, per core rule 15 (a direct instruction, not an open design
+question) -- but the exact ask only made sense after actually opening the *current* live logo
+file and comparing it side by side with the one Eric supplied, which is the real reason this
+was worth doing rather than a cosmetic preference.
+
+**A real, previously-undiagnosed bug, found by looking at the actual file rather than assuming
+the request was purely aesthetic.** `assets/img/newegg-gamerzone-white.png` -- the one logo
+image file referenced everywhere on the live site (nav, footer, Weekly Lineup board export,
+monthly calendar screenshot page) -- has a faint, semi-transparent ghost of Newegg's own real
+"You Know You... Newegg" tagline baked into the PNG itself, bleeding through at low opacity
+directly behind the "GAMER ZONE" text (visible as "You N..." partially obscured by the
+wordmark). This is almost certainly what Eric's own garbled phrasing ("so there isn't a once
+you know you newegg") was describing -- a real visual artifact in the shipped asset, not a
+figure of speech. It was never caught before because it's faint enough to miss at normal
+viewing size and no prior audit round inspected this file's actual pixels.
+
+**Fix: crop Eric's supplied file down to its real logo content, use it everywhere.** Eric's
+`assets/img/GamerZone logoTransparent2.png` (1200x1200, RGBA, confirmed via PIL) is the same
+Newegg/Gamer Zone mark, cleanly rendered with no ghost-text artifact -- but at full canvas size
+the actual opaque logo content only occupies the middle ~45% of the frame vertically (real
+alpha bounding box `(51,365)-(1148,908)`), which would have rendered comically tiny inside
+every existing height-based CSS sizing rule (`.logo-img{height:76px}`, `.ne-logo{width:230px}`,
+`.board-logo{height:clamp(...)}`) if used as-is. Cropped to that real content bounding box plus
+12px padding (`assets/img/newegg-gamerzone-clean.png`, 1121x567, alpha preserved) -- a new file,
+not an overwrite of the buggy original, per this project's "don't delete/overwrite real assets
+speculatively" convention; the old ghosted file stays on disk, simply unreferenced everywhere
+now. Aspect ratio shifted slightly (1.86:1 -> 1.98:1 vs. the old file), but every real usage
+site already sizes by height (or width) with the other dimension `auto`, so this is a
+~6% width difference with no distortion or clipping, confirmed via live render.
+
+**Every real logo-image instance site-wide now points at the clean file** -- a single `sed`
+swap across the 6 shared-convention pages (13 total `<img>` tags: `.logo-img` nav mark x5,
+`.ne-logo` footer/section mark x5, `.board-logo` Weekly Lineup/monthly-calendar export x3).
+`event-card.html`'s own `.brand-row` was the one outlier: it never used the image at all, just
+a hand-styled text wordmark (`<span class="nlogo">NEWEGG <b>GAMER ZONE</b></span>`) -- per
+Eric's "replace all" wording, this was switched to the same real logo image too
+(`<img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png">`), sized via a new
+height-based `.nlogo-img` rule (46px square format / 54px horizontal, matching this page's own
+per-format-scoping convention) rather than the old fixed-font-size text treatment.
+
+**Verified via live Puppeteer, not just visual comparison.** All 6 real pages plus both
+`event-card.html` export formats confirmed loading the new file with real `naturalWidth`/
+`naturalHeight` (1121x567) and zero console errors; nav and footer close-up screenshots on
+`index.html` confirmed the ghost-text artifact is gone with no new rendering issue; the square
+`event-card.html` export was screenshotted in full to confirm the smaller image-based logo in
+the top-left corner doesn't overlap or crowd the `TOURNAMENT` tag/title beneath it. The full
+scripted QA suite (`run-full-qa.sh`) came back at the known-clean baseline: 0 container-width
+findings, 0 console errors across all 5 real site pages, and only the same already-disclosed
+Featured Gear horizontal-overflow + marquee-timing review-quote false positives documented
+under "Readability" above -- nothing new introduced by this round. No cache-bust version bump
+needed -- every changed page now references a brand-new filename, which is inherently
+cache-busted on its own.

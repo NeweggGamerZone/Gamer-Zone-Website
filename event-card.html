@@ -125,8 +125,12 @@
   body.fmt-horizontal #card .content{max-width:900px}
   #card .brand-row{position:absolute;top:60px;left:70px;z-index:1;display:flex;align-items:center;gap:14px}
   body.fmt-horizontal #card .brand-row{top:80px;left:90px}
-  #card .brand-row .nlogo{font-family:var(--head);font-weight:800;color:#fff;font-size:26px;letter-spacing:.02em}
-  #card .brand-row .nlogo b{color:var(--ne-orange)}
+  /* Round 22: swapped the text-based "NEWEGG GAMER ZONE" wordmark for the
+     real logo image asset (see assets/img/newegg-gamerzone-clean.png's own
+     header note) -- height-based sizing with width:auto, same convention
+     every other logo instance on the site already uses. */
+  #card .brand-row .nlogo-img{height:46px;width:auto;display:block}
+  body.fmt-horizontal #card .brand-row .nlogo-img{height:54px}
   #card .tag{font-size:22px;padding:.5rem 1.1rem}
   #card h1{font-family:var(--head);font-weight:800;font-size:64px;line-height:1.05;text-transform:uppercase;color:#fff;margin:22px 0 10px;text-shadow:0 4px 24px rgba(0,0,0,.8)}
   body:not(.fmt-horizontal) #card h1{font-size:52px}
@@ -351,7 +355,7 @@
     <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
     <div class="bg-scrim" aria-hidden="true"></div>
     ${charHTML}
-    <div class="brand-row"><span class="nlogo">NEWEGG <b>GAMER ZONE</b></span></div>
+    <div class="brand-row"><img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png" alt="Newegg Gamer Zone"></div>
     <div class="content">
       <span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(TYPE[ev.type] || ev.type || 'Event')}</span>
       <h1>${esc(ev.title)}</h1>
