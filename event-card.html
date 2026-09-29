@@ -116,45 +116,21 @@
   body.fmt-horizontal #card .card-char-ghost-2{transform:translate(calc(-50% + 74px),-50%) scaleX(-1)}
   body.fmt-horizontal #card .card-char-ghost-3{transform:translate(calc(-50% + 104px),-50%) scaleX(-1)}
   #card .content{position:relative;z-index:1;max-width:1020px}
-  /* Round 23: the brand-row logo moved from top-left to top-right (see
-     .brand-row below), so it no longer sits stacked directly above the
-     tag/title column -- the margin-top that used to exist purely to clear
-     it (64px -> 54px across Rounds 13/18) is gone; .content now starts
-     right at the card's own 70px/90px padding, the same as it would with
-     no logo at all. */
   body:not(.fmt-horizontal) #card .content{max-width:600px}
   body.fmt-horizontal #card .content{max-width:900px}
-  /* Round 23: per Eric ("the logo should be much bigger or put in the top
-     right so it doesn't crowd the left") -- moved to the top-right corner
-     (both fixes at once: relocating away from the title/tag column solves
-     the crowding directly, and the freed space let the logo grow too)
-     rather than staying stacked above the left-aligned text. `right`
-     instead of `left`/`left:auto` so it never competes with the title's
-     own max-width:600/900px column, regardless of how long a given
-     event's title or subtitle runs. */
-  /* Round 25: per Eric's direct follow-up ("make the logo on the bottom
-     right actually, make it 50% larger") -- moved again, from top-right to
-     bottom-right, and grown a further 50% (64px->96px square, 76px->114px
-     horizontal). `top:60px/80px` swapped for `bottom:60px/80px` (same
-     offset value, opposite edge) so it keeps the same visual inset from
-     the card's corner, just the other corner; `right` is unchanged since
-     that part of Round 23's reasoning (never competing with the left-
-     aligned text column) still holds regardless of which vertical edge
-     it's pinned to. Checked for collision against `.card-char` (the
-     fighter-art cutout, vertically centered via top:50%) before landing
-     here: in square format the character spans roughly y=306-894 of the
-     1200px-tall card, comfortably clear of a ~96px-tall badge sitting
-     inside the bottom 60px inset (~y=1044-1140); in horizontal format the
-     character spans roughly y=190-890 of the 1080px-tall card against a
-     ~114px badge inside the bottom 80px inset (~y=886-1000) -- close but
-     still clear, confirmed via live getBoundingClientRect measurement
-     rather than this arithmetic alone (see this round's own verification
-     note). */
-  #card .brand-row{position:absolute;bottom:60px;right:70px;z-index:1;display:flex;align-items:center;gap:14px}
-  body.fmt-horizontal #card .brand-row{bottom:80px;right:90px}
-  /* Grown a further 50% this round -- 64/76px -> 96/114px. */
-  #card .brand-row .nlogo-img{height:96px;width:auto;display:block}
-  body.fmt-horizontal #card .brand-row .nlogo-img{height:114px}
+  /* Round 26: per Eric's direct follow-up -- both the top-right (Round 23)
+     and bottom-right/enlarged (Round 25) placements read as disconnected
+     from the card's own text block ("weird to have the logo above on the
+     right"). Moved into the normal content flow, stacked directly above
+     the type tag ("MAJOR"/"NEWEGG EVENT"/etc.), left-aligned with
+     everything below it -- back to a real in-flow element (no more
+     position:absolute) so it can never drift from the title column
+     regardless of format/viewport. Sized modestly (42/48px) since it's
+     now sharing vertical space with the tag/title/subtitle stack, not
+     occupying an empty corner on its own. */
+  #card .brand-row{display:flex;align-items:center;gap:14px;margin:0 0 16px}
+  #card .brand-row .nlogo-img{height:42px;width:auto;display:block}
+  body.fmt-horizontal #card .brand-row .nlogo-img{height:48px}
   #card .tag{font-size:22px;padding:.5rem 1.1rem}
   #card h1{font-family:var(--head);font-weight:800;font-size:64px;line-height:1.05;text-transform:uppercase;color:#fff;margin:22px 0 10px;text-shadow:0 4px 24px rgba(0,0,0,.8)}
   body:not(.fmt-horizontal) #card h1{font-size:52px}
@@ -338,8 +314,8 @@
     return;
   }
 
-  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major' };
-  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major' };
+  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major', 'newegg-event': 'Newegg Event', 'car-meet': 'Car Meet', 'lan-party': 'LAN Party' };
+  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major', 'newegg-event': 'cal-major', 'car-meet': 'cal-major', 'lan-party': 'cal-major' };
   const bgUrl = (fmt === 'horizontal' && ev.imageHD) ? ev.imageHD : (ev.image || 'assets/calendar/BGAssets/tournament-major-bg-blurred.jpg');
   const pretty = dt => new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const esc = (window.GZ && GZ.esc) ? GZ.esc : (s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
@@ -385,8 +361,8 @@
     <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
     <div class="bg-scrim" aria-hidden="true"></div>
     ${charHTML}
-    <div class="brand-row"><img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png" alt="Newegg Gamer Zone"></div>
     <div class="content">
+      <div class="brand-row"><img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png" alt="Newegg Gamer Zone"></div>
       <span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(TYPE[ev.type] || ev.type || 'Event')}</span>
       <h1>${esc(ev.title)}</h1>
       ${ev.subtitle ? `<p class="cd-sub">${esc(ev.subtitle)}</p>` : ''}

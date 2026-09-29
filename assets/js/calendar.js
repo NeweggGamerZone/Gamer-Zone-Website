@@ -18,10 +18,10 @@
   const byDate = {};
   (data.events || []).forEach(e => { byDate[e.date] = e; });
 
-  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major' };
+  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major', 'newegg-event': 'Newegg Event', 'car-meet': 'Car Meet', 'lan-party': 'LAN Party' };
   // Color-code buckets: Closed=red, Free Play=blue, Theme Day=light blue,
   // EDU/Esports=green, Ambassador (vendor/community-hosted)=pink, Major/Tournament=orange.
-  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major' };
+  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major', 'newegg-event': 'cal-major', 'car-meet': 'cal-major', 'lan-party': 'cal-major' };
   // Full-bleed card backgrounds, sourced from assets/calendar/BGAssets — chosen
   // per event type so the popup reads as "photo of that kind of event" rather
   // than a generic flyer image.
@@ -152,12 +152,26 @@
     idleTimer = setTimeout(resetToToday, IDLE_RESET_MS);
   }
   function resetToToday() {
+    pinned = false;
     if (view.getFullYear() !== t0.getFullYear() || view.getMonth() !== t0.getMonth()) {
       view = new Date(t0.getFullYear(), t0.getMonth(), 1);
       render();
     }
     show(today);
   }
+
+  // 2026-09-29, per Eric ("click a date and my cursor will keep showing
+  // that day's details until I click another date or click off the
+  // calendar entirely, when I click off... it should reset to the current
+  // date"): a real click/keyboard selection now "pins" the detail card --
+  // once pinned, an incidental hover no longer overrides what's shown (see
+  // the mouseover handler below), and only a fresh selection or an
+  // explicit click-off clears it. This is a real interaction change from
+  // the pre-2026-09-18 model, where hover always won regardless of a prior
+  // click; the 5-minute idle timer above stays as a safety-net fallback
+  // for a visitor who never clicks off at all, but the explicit click-off
+  // behavior below is the primary, immediate way this now resets.
+  let pinned = false;
 
   const iso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const pretty = dt => new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -319,6 +333,7 @@
     const c = e.target.closest('.cal-cell[data-d]');
     if (!c || c.classList.contains('cal-closed')) return;
     show(c.dataset.d);
+    pinned = true;
     grid.querySelectorAll('[data-d]').forEach(cell => { cell.tabIndex = -1; });
     c.tabIndex = 0;
     markActivity();
@@ -338,6 +353,7 @@
       e.preventDefault();
       if (c.classList.contains('cal-closed')) return; // closed days aren't activatable, see click handler above
       show(c.dataset.d);
+      pinned = true;
       markActivity();
       return;
     }
@@ -358,6 +374,7 @@
       next.tabIndex = 0;
       next.focus();
       show(next.dataset.d);
+      pinned = true;
       markActivity();
     }
   });
@@ -369,6 +386,13 @@
   // day's "Closed" detail still shows on a deliberate click (see the
   // click handler below), just not from an incidental mouse-over.
   grid.addEventListener('mouseover', e => {
+    // 2026-09-29: once a day has been pinned by a real click/keyboard
+    // selection (see the click/keydown handlers above), an incidental
+    // hover no longer overrides it -- the whole point of "pinning" is that
+    // the cursor moving around the grid doesn't change what's shown
+    // anymore. Hovering still previews normally before anything's pinned,
+    // same as always.
+    if (pinned) return;
     const c = e.target.closest('.cal-cell[data-d]');
     if (!c || c.classList.contains('cal-closed')) return;
     show(c.dataset.d);
@@ -379,6 +403,27 @@
   // file for the real 5-minute-inactivity behavior that replaces it.
   document.getElementById('cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); render(); markActivity(); });
   document.getElementById('cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); render(); markActivity(); });
+
+  // 2026-09-29, per Eric ("click off the calendar either in the grey space
+  // or elsewhere, it should reset to the current date"): a click anywhere
+  // that ISN'T a real, open day-cell selection clears the pin and snaps
+  // straight back to today -- immediately, not waiting on the 5-minute
+  // idle timer above. This covers both halves of Eric's phrasing: "grey
+  // space" (the calendar's own empty filler cells, its day-of-week header,
+  // the legend, a closed/greyed-out day) and "elsewhere" (literally
+  // anywhere else on the page, since this listens on `document`). Two
+  // things are deliberately excluded so they keep their own existing
+  // behavior instead of also resetting: the month prev/next buttons
+  // (changing the month isn't "clicking off"), and the detail card itself
+  // (`#cal-detail`, e.g. clicking its Preregister/Tournament Sign Up link
+  // shouldn't yank the visitor back to today's date out from under them).
+  document.addEventListener('click', e => {
+    if (!pinned) return;
+    if (e.target.closest('.cal-cell[data-d]:not(.cal-closed)')) return; // a real selection -- handled by grid's own click handler above
+    if (e.target.closest('#cal-prev, #cal-next')) return;
+    if (e.target.closest('#cal-detail')) return;
+    resetToToday();
+  });
 
   preloadBgs();
   render();
