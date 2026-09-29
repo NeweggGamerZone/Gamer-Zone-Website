@@ -116,21 +116,28 @@
   body.fmt-horizontal #card .card-char-ghost-2{transform:translate(calc(-50% + 74px),-50%) scaleX(-1)}
   body.fmt-horizontal #card .card-char-ghost-3{transform:translate(calc(-50% + 104px),-50%) scaleX(-1)}
   #card .content{position:relative;z-index:1;max-width:1020px}
-  /* margin-top trimmed 64px -> 54px in Round 18, alongside the prize-table
-     margin-bottom trim below, to close the last ~11px of real, measured
-     footer-line clipping the 4:3 near-square tiles above still left --
-     confirmed fixed via the same live getBoundingClientRect check, not
-     just recalculated on paper. */
-  body:not(.fmt-horizontal) #card .content{max-width:600px;margin-top:54px}
+  /* Round 23: the brand-row logo moved from top-left to top-right (see
+     .brand-row below), so it no longer sits stacked directly above the
+     tag/title column -- the margin-top that used to exist purely to clear
+     it (64px -> 54px across Rounds 13/18) is gone; .content now starts
+     right at the card's own 70px/90px padding, the same as it would with
+     no logo at all. */
+  body:not(.fmt-horizontal) #card .content{max-width:600px}
   body.fmt-horizontal #card .content{max-width:900px}
-  #card .brand-row{position:absolute;top:60px;left:70px;z-index:1;display:flex;align-items:center;gap:14px}
-  body.fmt-horizontal #card .brand-row{top:80px;left:90px}
-  /* Round 22: swapped the text-based "NEWEGG GAMER ZONE" wordmark for the
-     real logo image asset (see assets/img/newegg-gamerzone-clean.png's own
-     header note) -- height-based sizing with width:auto, same convention
-     every other logo instance on the site already uses. */
-  #card .brand-row .nlogo-img{height:46px;width:auto;display:block}
-  body.fmt-horizontal #card .brand-row .nlogo-img{height:54px}
+  /* Round 23: per Eric ("the logo should be much bigger or put in the top
+     right so it doesn't crowd the left") -- moved to the top-right corner
+     (both fixes at once: relocating away from the title/tag column solves
+     the crowding directly, and the freed space let the logo grow too)
+     rather than staying stacked above the left-aligned text. `right`
+     instead of `left`/`left:auto` so it never competes with the title's
+     own max-width:600/900px column, regardless of how long a given
+     event's title or subtitle runs. */
+  #card .brand-row{position:absolute;top:60px;right:70px;z-index:1;display:flex;align-items:center;gap:14px}
+  body.fmt-horizontal #card .brand-row{top:80px;right:90px}
+  /* Grown alongside the reposition -- 46/54px -> 64/76px -- since moving
+     off the text column freed real room for it without crowding anything. */
+  #card .brand-row .nlogo-img{height:64px;width:auto;display:block}
+  body.fmt-horizontal #card .brand-row .nlogo-img{height:76px}
   #card .tag{font-size:22px;padding:.5rem 1.1rem}
   #card h1{font-family:var(--head);font-weight:800;font-size:64px;line-height:1.05;text-transform:uppercase;color:#fff;margin:22px 0 10px;text-shadow:0 4px 24px rgba(0,0,0,.8)}
   body:not(.fmt-horizontal) #card h1{font-size:52px}
@@ -344,12 +351,18 @@
   // image render underneath the main one (see the CSS comment above) --
   // the same echo/fade-trail technique the Weekly Lineup board's per-week
   // theme icon already uses, added 2026-09-22 (Round 15) per Eric's request.
+  // Round 22.5 (2026-09-29): gated behind ev.cardChar -- this specific
+  // cutout (FighterGames.png) is fighting-game-themed art, so it only
+  // renders for an event that explicitly opts in (currently just SF6
+  // Saturday Slam). Without this gate it was rendering unconditionally on
+  // every event card, including October's FantasTech 2/Car Club/Halloween
+  // cards, which have nothing to do with a fighting game.
   const CHAR_SRC = 'assets/calendar/LineupAssets/FighterGames.png';
-  const charHTML = `
+  const charHTML = ev.cardChar ? `
     <img class="card-char-ghost card-char-ghost-3" src="${CHAR_SRC}" alt="" aria-hidden="true">
     <img class="card-char-ghost card-char-ghost-2" src="${CHAR_SRC}" alt="" aria-hidden="true">
     <img class="card-char-ghost card-char-ghost-1" src="${CHAR_SRC}" alt="" aria-hidden="true">
-    <img class="card-char" src="${CHAR_SRC}" alt="" aria-hidden="true">`;
+    <img class="card-char" src="${CHAR_SRC}" alt="" aria-hidden="true">` : '';
 
   card.innerHTML = `
     <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>

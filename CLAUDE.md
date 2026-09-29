@@ -1986,3 +1986,17 @@ Featured Gear horizontal-overflow + marquee-timing review-quote false positives 
 under "Readability" above -- nothing new introduced by this round. No cache-bust version bump
 needed -- every changed page now references a brand-new filename, which is inherently
 cache-busted on its own.
+
+## Round 23 (2026-09-29): event card logo moved to top-right + enlarged, so it stops sitting on top of the title column
+
+Per Eric, immediately after Round 22 above: "On the event cards, the logo should be much bigger or put in the top right so it doesn't crowd the left." Round 22's swap put the new image logo (`.brand-row`) at the same top-left position the old text wordmark used to occupy -- directly above the tag/title column, close enough that it read as crowding that side of the card. Eric offered two alternative fixes; both were applied together since moving it also freed the room to grow it.
+
+**`.brand-row` moved from top-left to top-right** (`event-card.html`'s inline `<style>`): `left:70px`/`left:90px` (square/horizontal) -> `right:70px`/`right:90px`. This puts it fully outside the title/tag column's own `max-width:600px`/`900px` box regardless of how long a given event's title or subtitle runs -- confirmed via live measurement (see below), not assumed from the CSS.
+
+**`.nlogo-img` grown** 46px -> 64px (square) and 54px -> 76px (horizontal) -- moving off the text column freed real vertical room next to it without crowding anything, so both of Eric's offered fixes landed together rather than picking just one.
+
+**A now-unnecessary spacer removed.** `.content`'s `margin-top:54px` (square format) existed purely to clear the old top-left logo sitting directly above the title -- with the logo relocated to the opposite corner, that margin no longer does anything but push the title down for no reason, so it's removed; `.content` now starts right at the card's own padding, same as it would with no logo at all.
+
+**Verified via live Puppeteer measurement, not just a screenshot glance.** `getBoundingClientRect()` on `.brand-row`, `.content`, and `h1` in both formats confirms the title column's right edge sits well clear of the logo's left edge with real margin (square: h1 right edge 670px vs. logo left edge 1003px, a 333px gap; horizontal: 990px vs. 1680px, a 690px gap) -- not a near-miss. Zero console errors in either format. Live screenshots of both exports confirm the logo now reads as a real corner badge rather than crowding the headline, with no clipping against the card edge at its larger size.
+
+No cache-bust bump needed -- scoped to `event-card.html`'s own inline `<style>` block, same as every round on this page since Round 15.
