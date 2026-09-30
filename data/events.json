@@ -365,6 +365,64 @@
       "featured": true,
       "reservation": false,
       "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg"
+    },
+    {
+      "id": "closed-seagate-launch-2026-11-10",
+      "title": "Closed: Private Event",
+      "date": "2026-11-10",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed to the public for a private event.",
+      "featured": false,
+      "reservation": false
+    },
+    {
+      "id": "emmalee-cs2-tournament-2026-11-14",
+      "title": "Emmalee CS2 Tournament",
+      "subtitle": "Grassroots Counter-Strike 2 tournament organized by creator Emmalee.",
+      "date": "2026-11-14",
+      "time": "10:00 AM to 7:00 PM",
+      "type": "tournament",
+      "blurb": "A grassroots Counter-Strike 2 tournament organized by content creator/influencer Emmalee. Bracket play open to the community. Walk-ins welcome.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
+    },
+    {
+      "id": "gta6-launch-event-2026-11-19",
+      "title": "GTA6 Launch Event",
+      "subtitle": "A Miami Vice City-themed free play day, running GTA6 campaigns on 10 PlayStation stations.",
+      "date": "2026-11-19",
+      "time": "10:00 AM to 7:00 PM",
+      "type": "major",
+      "blurb": "A major free play day themed around the GTA6 launch, styled after Miami Vice City -- 10 PlayStation stations running GTA6 campaigns all day.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FFC400"
+    },
+    {
+      "id": "sf6-bracket-demons-2026-12-05",
+      "title": "SF6 Tournament: Bracket Demons",
+      "subtitle": "Street Fighter 6 tournament hosted with local organizer Bracket Demons LLC.",
+      "date": "2026-12-05",
+      "time": "10:00 AM to 7:00 PM",
+      "type": "tournament",
+      "blurb": "A Street Fighter 6 tournament hosted with local organizer Bracket Demons LLC. Bracket play open to all skill levels.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FF2E97"
+    },
+    {
+      "id": "ablergamer-charity-event-2026-12-12",
+      "title": "AblerGamer Charity Event",
+      "subtitle": "A livestream charity event with AblerGamer, open to influencers and the public.",
+      "date": "2026-12-12",
+      "time": "9:00 AM to 9:00 PM",
+      "type": "major",
+      "blurb": "A charity livestream event with AblerGamer, running 9 AM to 9 PM, open to influencers and public guests.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FFC400"
     }
   ],
   "weeklyThemes": [
