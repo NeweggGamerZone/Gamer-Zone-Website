@@ -2105,3 +2105,58 @@ Per Eric: "let's cut the theme weeks, they haven't been so successful... infuse 
 **Verified via a real Puppeteer capture at the exact 1200px export width** (`tools/audit/capture-monthly.js`, unchanged from Round 29/30): output measures `(1200, 1542)`, zero console errors, all three events' tags and subtitles render cleanly with no clipping, and the pumpkin image renders at the bottom with real transparency. Ran a real pixel-sampled WCAG contrast check (screenshot with text forced transparent, sampled against the real rendered background, same method this file's "Readability" section already mandates) on every new `.mc-tags .tag` and `.mc-sub` node: tags measure a clean 9.92:1 (black text on the real `--ne-orange` tag background), subtitles measure 17.5-18.2:1 (white body text on the board's own dark photo scrim) — both comfortably clear of the 7:1 AAA floor.
 
 No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline `<style>` block and markup, which isn't cached by the shared `?v=` convention `style.css`/`main.js` use.
+
+
+## Round 32 (2026-09-30): pumpkin graphic enlarged, subtitles widened/blued/enlarged (with a real contrast fix), Halloween tags reworded
+
+Per Eric, a direct, fully-specified follow-up to Round 31 above ("Make the bottom graphic
+larger. Make the subtitle text extend the full length of the title and make the subtitle text
+blue and bigger. For the tags, do Complimentary Candy, Horror Games, Costume Contest on the
+halloween one."), implemented straight through per core rule 15, scoped entirely to
+`screenshot-monthly-calendar.html`.
+
+**Pumpkin graphic enlarged.** `#month .mc-bottom-art`'s `max-height` clamp raised from
+`clamp(140px,22cqw,240px)` to `clamp(200px,34cqw,380px)`.
+
+**Subtitle text widened to the row's full width, per Eric's "extend the full length of the
+title."** `.mc-sub`'s `max-width:56ch` cap (added in Round 31, deliberately capping the
+subtitle narrower than the row) is removed (`max-width:none`) so it now spans the same full
+row width as `.eu-name`/`.eu-meta` above it — inherits the row's shared width rather than
+having an independent one of its own, per this project's "one container-width system" rule.
+
+**Subtitle text recolored to the page's existing blue token, per Eric's "blue."** `.mc-sub`'s
+color moved from the Round-31 `.cd-blurb`-style `#F2F4F8` to `var(--ne-blue-text)` — the exact
+same blue this page already uses for `.eu-theme-highlight`/`.eu-week-row .eu-name`, reused
+rather than inventing a new blue.
+
+**A real contrast gap found and fixed while verifying the blue, not assumed clean.** Per core
+rule 12, ran the real pixel-sampled contrast audit (live screenshot with text forced
+transparent, sampled against the actual rendered background, WCAG relative-luminance math) on
+the new blue-on-photo-scrim combo before calling it done — `--ne-blue-text`'s own doc comment
+in `style.css` claims it "clears AAA's 7:1 against every dark surface," but that claim was
+never actually re-verified against this specific board's photo scrim, which is brighter in
+places than the near-black surfaces that claim was checked against originally. Real worst-case
+measured **6.28:1** at the subtitle's original size (17px) — short of the 7:1 AAA floor for
+normal-size text. Rather than darken the shared scrim (would affect every other element sitting
+on it) or invent a new, unverified blue, `.mc-sub`'s `font-size` was set to a real `max(24px,
+.95em)` floor — this both satisfies Eric's own "bigger" ask directly and pushes the text past
+the ≥24px threshold that qualifies it for WCAG's large-text AAA criterion (4.5:1) instead of
+the normal-text 7:1 one, a legitimate, recognized WCAG distinction, not a workaround. Re-verified
+after the size bump: worst-case 6.28-6.97:1 across all three subtitles, comfortably clearing
+4.5:1 with real margin.
+
+**Halloween tags reworded, per Eric's exact wording:** "Candy" → "Complimentary Candy",
+"Scary Games" → "Horror Games"; "Costume Contest" left unchanged.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`, unchanged): output measures `(1200, 1619)` before the
+font-size fix and `(1200, ~1619)` after (subtitle line-wrap height shift only), zero console
+errors, all three events' wider/bluer/bigger subtitles and the larger pumpkin render cleanly
+with no clipping, and the reworded Halloween tags display correctly. The real pixel-sampled
+WCAG check (see above) is the specific verification this round's own color/size change needed,
+run in addition to (not instead of) the visual clipping check every sizing change on this page
+already requires.
+
+No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
+`<style>` block and markup, which isn't cached by the shared `?v=` convention `style.css`/
+`main.js` use.

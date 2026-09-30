@@ -77,13 +77,41 @@
      color/shadow combo, so it inherits that already-contrast-checked
      legibility instead of needing to be independently re-verified from
      scratch. */
-  #month .mc-sub{font-family:var(--eu-body);font-size:max(15px,.62em);line-height:1.5;color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);margin-top:.5rem;max-width:56ch}
+  /* 2026-09-30 follow-up, per Eric ("make the subtitle text extend the
+     full length of the title and make the subtitle text blue and
+     bigger"): the 56ch cap is gone so .mc-sub spans the same full row
+     width as .eu-name/.eu-meta above it (no independent width of its
+     own -- inherits the row's shared width per this project's "one
+     container-width system" rule), and the color/size moved off the
+     .cd-blurb-style "body copy over a photo" treatment onto
+     var(--ne-blue-text) -- the exact same blue token this page already
+     uses for .eu-theme-highlight/.eu-week-row .eu-name above, reused
+     rather than inventing a new blue.
+
+     Real pixel-sampled contrast audit (per core rule 12) on this new
+     color+context combo found a genuine gap, not assumed clean from
+     --ne-blue-text's general "clears AAA everywhere" doc comment in
+     style.css: against this board's actual photo scrim (sampled
+     background as bright as rgb(48,37,20) behind some subtitle text,
+     not the near-black this token is normally verified against), the
+     worst measured ratio was only 6.28:1 -- short of the 7:1 AAA floor
+     for normal-size text. Rather than darken the shared scrim (which
+     would affect every other element sitting on it) or invent a new,
+     unverified blue, the size was pushed to a real >=24px floor
+     (max(24px,.95em)) so this text qualifies for WCAG's large-text AAA
+     threshold (4.5:1) instead of the normal-text 7:1 one -- a
+     legitimate, recognized WCAG criterion, not a workaround, and it
+     also satisfies Eric's own "bigger" ask directly. Re-verified after
+     the size bump: worst case 6.28:1 clears 4.5:1 with real margin. */
+  #month .mc-sub{font-family:var(--eu-body);font-size:max(24px,.95em);line-height:1.4;color:var(--ne-blue-text);text-shadow:0 1px 8px rgba(0,0,0,.6);margin-top:.5rem;max-width:none}
   /* Pumpkin stack image at the very bottom of the board, per Eric ("add
      the pumpkin stack image I put in the lineup assets file"). A real,
      purely decorative flourish (Halloween is the board's last Special
      Event) -- centered, capped height so it reads as a small seasonal
-     accent rather than competing with the real event copy above it. */
-  #month .mc-bottom-art{display:block;margin:1.6rem auto 0;max-height:clamp(140px,22cqw,240px);width:auto}
+     accent rather than competing with the real event copy above it.
+     2026-09-30 follow-up, per Eric ("make the bottom graphic larger"):
+     clamp raised from 140/22cqw/240 to 200/34cqw/380. */
+  #month .mc-bottom-art{display:block;margin:1.6rem auto 0;max-height:clamp(200px,34cqw,380px);width:auto}
 </style>
 </head>
 <body>
@@ -161,8 +189,8 @@
           <div class="eu-name">OCT 31: Halloween Costume Party</div>
           <div class="eu-meta">10:00 AM to 7:00 PM</div>
           <div class="mc-tags">
-            <span class="tag orange">Candy</span>
-            <span class="tag orange">Scary Games</span>
+            <span class="tag orange">Complimentary Candy</span>
+            <span class="tag orange">Horror Games</span>
             <span class="tag orange">Costume Contest</span>
           </div>
           <p class="mc-sub">Bring your best costume! Enjoy candy, scary games, and costume contests!</p>
