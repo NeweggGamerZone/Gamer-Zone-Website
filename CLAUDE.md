@@ -2160,3 +2160,41 @@ already requires.
 No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
 `<style>` block and markup, which isn't cached by the shared `?v=` convention `style.css`/
 `main.js` use.
+
+
+## Round 33 (2026-09-30): re-verified subtitle blue holds AAA, time text turned blue too
+
+Per Eric: "Ensure the blue is still readable with WCAGS, if not then let's go back to white
+please. Make the grey time text blue please instead." Two parts, both addressed with a real
+re-run of the pixel-sampled contrast method (per core rule 12), not assumed from Round 32's
+own prior numbers — scoped entirely to `screenshot-monthly-calendar.html`.
+
+**`.mc-sub`'s blue re-checked, confirmed to still hold.** Re-ran the same live screenshot +
+text-forced-transparent + WCAG relative-luminance sampling method Round 32 used, against the
+current pushed state. Worst-case across all three subtitles: 6.28–6.97:1 — all comfortably
+clear of the 4.5:1 large-text AAA floor this text qualifies for at its real rendered size
+(24px, confirmed via computed style). No revert to white was needed.
+
+**`.eu-meta` ("10:00 AM to 7:00 PM," the grey time line under each Special Event's title)
+recolored to the same `var(--ne-blue-text)` token**, per Eric's "make the grey time text blue
+please instead" — reusing the exact blue this page already uses for `.eu-theme-highlight`/
+`.eu-week-row .eu-name`/`.mc-sub`, not a new one. `.eu-meta`'s shared `color:var(--ink-dim)`
+rule (`style.css`) is overridden with `#month .eu-meta{color:var(--ne-blue-text)}` — scoped to
+this page only, since `.eu-meta` is also used by the live Weekly Lineup board (`#week`), which
+wasn't asked to change.
+
+**Independently pixel-verified, not assumed from `.mc-sub`'s own clearance** — a different
+element at a different font-size and board position needs its own check. `.eu-meta` renders
+at 27.5px in board-mode (confirmed via computed style: `--eu-date-size` resolves to 2.72rem at
+this viewport, `--eu-meta-size` derives to `max(14px, that*0.5)`, `.eu-meta`'s own
+`*1.265` multiplier lands at 27.5px) — comfortably past the 24px large-text threshold. Worst-
+case measured contrast across all three Special Events' time lines: 6.82–8.33:1, all clearing
+4.5:1 with real margin.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`, unchanged): zero console errors, the time text renders
+blue under all three timed events with no clipping or layout shift, and the closure rows
+(which have no `.eu-meta`) are unaffected.
+
+No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
+`<style>` block, which isn't cached by the shared `?v=` convention `style.css`/`main.js` use.

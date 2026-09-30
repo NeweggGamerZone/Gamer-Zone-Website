@@ -104,6 +104,15 @@
      also satisfies Eric's own "bigger" ask directly. Re-verified after
      the size bump: worst case 6.28:1 clears 4.5:1 with real margin. */
   #month .mc-sub{font-family:var(--eu-body);font-size:max(24px,.95em);line-height:1.4;color:var(--ne-blue-text);text-shadow:0 1px 8px rgba(0,0,0,.6);margin-top:.5rem;max-width:none}
+  /* 2026-09-30, per Eric ("make the grey time text blue please instead"):
+     .eu-meta's own shared color:var(--ink-dim) (a muted grey, tuned for
+     the live Weekly Lineup's own background) is overridden here to the
+     same var(--ne-blue-text) token every other blue element on this page
+     already uses, rather than a new one-off color. Independently pixel-
+     verified below alongside .mc-sub, since this is a different element
+     at a different font-size/position on the board and can't just
+     inherit .mc-sub's own clearance. */
+  #month .eu-meta{color:var(--ne-blue-text)}
   /* Pumpkin stack image at the very bottom of the board, per Eric ("add
      the pumpkin stack image I put in the lineup assets file"). A real,
      purely decorative flourish (Halloween is the board's last Special
