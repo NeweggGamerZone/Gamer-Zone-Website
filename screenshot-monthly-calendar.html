@@ -45,6 +45,45 @@
   /* Logo 100% larger than the shared .board-logo rule (used as-is on the
      real live Weekly Lineup), scoped to this page only. */
   #month .board-logo{height:clamp(90px,18vw,150px)}
+
+  /* 2026-09-30, per Eric ("cut the theme weeks... infuse more information
+     for the events we're running this month, add small tag nodes like in
+     the event updates... move special events up... add subtitle nodes to
+     show what is at each event"): the theme-weeks eu-list block this
+     <style> block used to also style is gone -- #month .eu-week-row's
+     own rules above are now dead weight for an events-only month and are
+     left in place harmlessly rather than deleted, in case a future month
+     brings theme weeks back. Special Events is now the board's only list,
+     so it no longer needs the two-list separator treatment
+     .eu-sublist-head normally provides (a border-top + top margin meant to
+     visually separate it from a list above it) -- overridden here so it
+     sits flush under the eyebrow title instead of floating a stray line
+     under nothing. */
+  #month .eu-sublist-head{border-top:none;margin-top:0;padding-top:0}
+  /* Small tag nodes per event, reusing the exact shared .tag/.tag.orange
+     component calendar.js's Plan Your Visit detail card and
+     event-card.html's social exports already use (assets/css/style.css,
+     search ".tag {") -- per this file's own "one shared implementation"
+     rule, not a new bespoke pill. .tag.orange (solid --ne-orange bg,
+     black text) is used here rather than the default navy .tag, since
+     these are offering highlights meant to pop against the board's dark
+     photo scrim, not a muted "type" label. */
+  #month .mc-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+  #month .mc-tags .tag{font-size:max(14px,.68rem)}
+  /* Subtitle copy sits on the same dimmed real photo every other .eu-board
+     row already sits on -- reuses the exact "real body copy over a photo"
+     treatment .cd-blurb/.cd-meta-item already establish on the live
+     calendar detail card (assets/css/style.css) rather than a new
+     color/shadow combo, so it inherits that already-contrast-checked
+     legibility instead of needing to be independently re-verified from
+     scratch. */
+  #month .mc-sub{font-family:var(--eu-body);font-size:max(15px,.62em);line-height:1.5;color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);margin-top:.5rem;max-width:56ch}
+  /* Pumpkin stack image at the very bottom of the board, per Eric ("add
+     the pumpkin stack image I put in the lineup assets file"). A real,
+     purely decorative flourish (Halloween is the board's last Special
+     Event) -- centered, capped height so it reads as a small seasonal
+     accent rather than competing with the real event copy above it. */
+  #month .mc-bottom-art{display:block;margin:1.6rem auto 0;max-height:clamp(140px,22cqw,240px);width:auto}
 </style>
 </head>
 <body>
@@ -68,39 +107,6 @@
         </div>
       </div>
 
-      <div class="eu-list">
-        <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Oct 1 - 3</span></div>
-          <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Tech Week</div>
-          </div>
-        </div>
-        <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Oct 6 - 10</span></div>
-          <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Co-op Games Week</div>
-          </div>
-        </div>
-        <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Oct 13 - 17</span></div>
-          <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Valorant Week</div>
-          </div>
-        </div>
-        <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Oct 20 - 24</span></div>
-          <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Racing Week</div>
-          </div>
-        </div>
-        <div class="eu-row eu-week-row">
-          <div class="eu-date-wrap"><span class="eu-date">Oct 27 - 31</span></div>
-          <div class="eu-info">
-            <div class="eu-name eu-theme-highlight">Halloween Week</div>
-          </div>
-        </div>
-      </div>
-
       <h4 class="eu-sublist-head">Special Events</h4>
       <div class="eu-list">
         <!-- Real, dated entries from data/events.json (source of truth):
@@ -109,10 +115,28 @@
              closed-usc-collegiate-cup-2026-10-17,
              car-club-sim-racing-2026-10-24,
              halloween-costume-party-2026-10-31. Keep in sync if those
-             entries change. -->
+             entries change.
+
+             2026-09-30: theme weeks removed per Eric ("they haven't been
+             so successful"), and each Special Event below gained a small
+             .mc-tags row (real offering highlights) + a .mc-sub subtitle
+             line, hand-authored here per this page's own existing
+             convention rather than pulled from data/events.json's own
+             subtitle/perks fields (those feed different live-site UI --
+             the Plan Your Visit detail card and the event-card.html
+             social export -- and weren't asked to change this round).
+             Tags for Fantastech 2 came verbatim from Eric; the other two
+             events' tags are drawn directly from the subtitle sentences
+             Eric supplied for them, not invented. -->
         <div class="eu-row eu-line eu-major">
           <div class="eu-name">OCT 3: Fantastech 2 Party</div>
           <div class="eu-meta">10:00 AM to 7:00 PM</div>
+          <div class="mc-tags">
+            <span class="tag orange">Free Play</span>
+            <span class="tag orange">Raffle Prizes</span>
+            <span class="tag orange">Free Pizza</span>
+          </div>
+          <p class="mc-sub">Fantastech 2 is one of Newegg's biggest annual shopping events for PC parts, peripherals, and more! We're celebrating the sale with monitor/keyboard raffles, free play, and free pizza lunch!</p>
         </div>
         <div class="eu-row eu-closure eu-closure-line">
           <div class="eu-name">OCT 10: Closed for Private Event</div>
@@ -126,12 +150,26 @@
         <div class="eu-row eu-line eu-major">
           <div class="eu-name">OCT 24: THE ULTIMATE CAR &amp; SIM RACING EXPERIENCE</div>
           <div class="eu-meta">10:00 AM to 7:00 PM</div>
+          <div class="mc-tags">
+            <span class="tag orange">Luxury Cars</span>
+            <span class="tag orange">Exclusive Giveaways</span>
+            <span class="tag orange">Racing Simulators</span>
+          </div>
+          <p class="mc-sub">In collaboration with Malibu Autobahn, Likewize, and Apevie, The Ultimate Car &amp; Sim Racing Experience features luxury cars, exclusive giveaways, and hydraulic racing simulators!</p>
         </div>
         <div class="eu-row eu-line eu-major">
           <div class="eu-name">OCT 31: Halloween Costume Party</div>
           <div class="eu-meta">10:00 AM to 7:00 PM</div>
+          <div class="mc-tags">
+            <span class="tag orange">Candy</span>
+            <span class="tag orange">Scary Games</span>
+            <span class="tag orange">Costume Contest</span>
+          </div>
+          <p class="mc-sub">Bring your best costume! Enjoy candy, scary games, and costume contests!</p>
         </div>
       </div>
+
+      <img class="mc-bottom-art" src="assets/calendar/LineupAssets/Pumpkins.png" alt="Stacked jack-o'-lanterns">
     </div>
   </section>
 </main>
