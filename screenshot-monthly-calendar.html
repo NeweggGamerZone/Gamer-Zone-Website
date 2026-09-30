@@ -55,6 +55,20 @@
      the shared --eu-name-size token (which also drives the live Weekly
      Lineup board's own date/name sizing) is untouched. */
   #month .eu-row .eu-name{font-size:56px;line-height:1.2}
+/* 2026-09-30, Round 38, per Eric ("the closed for private event can still
+   be aligned"): the 56px override above (correctly sized for the three real
+   Special Event titles) was also hitting the three shorter "Closed for
+   Private Event" closure rows, which are much shorter text but share the
+   same .eu-row .eu-name selector. At this board's real, measured row width
+   (1080px at the 1200px capture viewport, confirmed via Puppeteer), 56px and
+   54px both wrap "OCT 10: Closed for Private Event" (etc.) to 2 lines with
+   the word "EVENT" orphaned alone on the second line; 52px and every size
+   below it renders on a single line. Set to 52px here, scoped to the
+   .eu-closure class combined with .eu-row on the same element so this wins
+   over the plain .eu-row .eu-name rule by specificity regardless of source
+   order, and does not touch the shared --eu-name-size token or the real
+   Special Event titles (which stay at 56px). */
+#month .eu-row.eu-closure .eu-name{font-size:52px;line-height:1.2}
   /* Logo 100% larger than the shared .board-logo rule (used as-is on the
      real live Weekly Lineup), scoped to this page only. */
   #month .board-logo{height:clamp(90px,18vw,150px)}

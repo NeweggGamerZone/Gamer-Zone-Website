@@ -2374,3 +2374,47 @@ real margin.
 No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
 inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
 `main.js` use.
+
+
+## Round 38 (2026-09-30): closure-row wrapping fixed, 1200px width re-confirmed
+
+Per Eric: "Is this image still 1200 pixels wide? ... The closed for private event can still be
+aligned." Two parts, both answered/fixed this round.
+
+**Still 1200px wide: yes, confirmed via `PIL.Image.open(...).size`** on the current capture
+(`(1200, 2891)`) -- Round 37's text enlargement grew the image's height, not its width, and
+Round 29/30's standing export-dimensions rule (every image exactly 1200px wide, except the
+horizontal format) is intact.
+
+**A real regression from Round 37's own `.eu-name` 56px override, found and fixed.** Round 37
+added a page-scoped `#month .eu-row .eu-name{font-size:56px}` rule sized for the three real
+Special Event titles -- but that selector also matched the three, much shorter "Closed for
+Private Event" closure rows (Oct 10/16/17), which had fit on one line before Round 37 at the
+smaller, inherited size. At 56px (and 54px), empirically measured via a binary-search Puppeteer
+script (`getBoundingClientRect().height` at each candidate size against the closure row's real
+1080px-wide row at this board's 1200px capture viewport), "OCT 10: Closed for Private Event"
+wraps to 2 lines with the word "EVENT" orphaned alone on line 2; 52px and every size below it
+renders cleanly on 1 line. Fixed with a new, more-specific rule, `#month .eu-row.eu-closure
+.eu-name{font-size:52px;line-height:1.2}`, added directly after the 56px rule -- the compound
+`.eu-row.eu-closure` selector (both classes on the same element, matching the closure rows'
+real markup) wins over the plain `.eu-row .eu-name` rule by specificity regardless of source
+order, so this doesn't touch the shared `--eu-name-size` token, the real Special Event titles
+(which stay at Round 37's 56px), or anything on the live Weekly Lineup board.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`): all three closure rows now measure a single line each
+(height 62.39px, matching one line at 52px/1.2 line-height, confirmed via
+`getBoundingClientRect()` on `.eu-closure-line .eu-name`), a direct visual crop confirms clean,
+evenly-spaced single-line rows with no orphaned wrap, and zero console errors. Re-ran the
+pixel-verified WCAG contrast audit (core rule 12) on the closure text specifically at its new
+52px size, since it wasn't covered by Round 37's own sweep (that round only checked the
+Special Event titles, time text, tags, and subtitles -- not this separately-styled row type):
+real DOM-position + computed-style capture confirmed the closure text inherits the shared,
+unscoped `.eu-name{color:var(--ink-dim)}` (not the `.eu-major .eu-date{color:#fff}` override,
+which only applies to Special Event rows), sampled against the real rendered board background
+at each row's actual position -- 8.58-8.93:1 across all three rows, comfortably clearing the
+7:1 AAA floor (and the less-strict 4.5:1 large-text floor this 52px text also qualifies for).
+
+No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
+inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
+`main.js` use.
