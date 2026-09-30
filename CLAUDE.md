@@ -2234,3 +2234,36 @@ time text are all unaffected.
 
 No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
 `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/`main.js` use.
+
+
+## Round 35 (2026-09-30): more breathing room between Special Events
+
+Per Eric: "Can we add a little bit more margin between each special event, looks a bit too
+packed." A direct, fully-specified instruction (implemented straight through per core rule 15),
+scoped entirely to `screenshot-monthly-calendar.html`.
+
+**The real cause of the packed look:** each `.eu-row` (one per Special Event) shares the
+site-wide `--eu-row-pad` token (`clamp(.4rem,1.1cqw,.95rem)`) for its own top/bottom padding —
+the actual vertical gap between two consecutive events is that padding-bottom + the next row's
+padding-top + its `border-top`. That token was sized for the live Weekly Lineup board's
+original, much shorter rows (a date + a name); this board's Special Events rows now carry a
+full title/time/tags/subtitle stack (added Round 31) and read noticeably denser at the same
+gap.
+
+**Fix: a page-scoped override on `#month .eu-row`'s own padding, not the shared token.**
+`--eu-row-pad` also drives `.eu-top`'s `margin-bottom` and the real live board's own row
+spacing on `index.html`/`events.html` — touching it here would have reached both, which this
+file's own header comment already warns against ("do not touch the shared .eu-major/.eu-row
+rules in style.css, since those also drive the real live Weekly Lineup"). `#month .eu-row`'s
+padding is set directly instead: `clamp(1rem,3cqw,1.8rem)` top and bottom, roughly double the
+shared clamp — real breathing room between events without touching the live board or this
+row's own internal spacing (tags/subtitle margins untouched).
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`, unchanged): output measures `(1200, 1863)`, up from
+`(1200, 1619)` before this change — real content growth from the added spacing, not clipping
+(confirmed via a direct visual review of the capture: every event's title/tags/subtitle/divider
+line renders cleanly, no overlap, no cut-off text), zero console errors.
+
+No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
+`<style>` block, which isn't cached by the shared `?v=` convention `style.css`/`main.js` use.

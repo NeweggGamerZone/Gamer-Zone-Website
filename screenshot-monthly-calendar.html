@@ -114,6 +114,23 @@
      2026-09-30 follow-up, per Eric ("make the bottom graphic larger"):
      clamp raised from 140/22cqw/240 to 200/34cqw/380. */
   #month .mc-bottom-art{display:block;margin:1.6rem auto 0;max-height:clamp(200px,34cqw,380px);width:auto}
+  /* 2026-09-30, per Eric ("add a little bit more margin between each
+     special event, looks a bit too packed"): each Special Event row
+     (.eu-row, now carrying a title/time/tags/subtitle stack -- much
+     denser than a plain weekly-lineup row) shares the site-wide
+     --eu-row-pad token for its own top/bottom padding, which is what
+     actually creates the visual gap between two consecutive rows (this
+     row's padding-bottom + the next row's padding-top + its border-top).
+     --eu-row-pad also drives .eu-top's margin-bottom and the live
+     Weekly Lineup board's own row spacing (index.html/events.html), so
+     it's deliberately not touched here -- a page-scoped override on
+     #month .eu-row's own padding instead, consistent with this file's
+     "don't touch the shared .eu-major/.eu-row rules" rule stated at the
+     top of this <style> block. Padding roughly doubled from the shared
+     clamp(.4rem,1.1cqw,.95rem) to clamp(1rem,3cqw,1.8rem), giving each
+     event real breathing room from its neighbors without touching the
+     row's own internal spacing (tags/subtitle margins, untouched). */
+  #month .eu-row{padding-top:clamp(1rem,3cqw,1.8rem);padding-bottom:clamp(1rem,3cqw,1.8rem)}
 </style>
 </head>
 <body>
