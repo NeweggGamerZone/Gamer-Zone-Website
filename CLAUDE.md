@@ -2267,3 +2267,36 @@ line renders cleanly, no overlap, no cut-off text), zero console errors.
 
 No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
 `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/`main.js` use.
+
+
+## Round 36 (2026-09-30): Car & Sim Racing Experience's hours corrected to its real, shorter window
+
+Per Eric: "Change the time of the ultimate car and sim racing event to run from 11:00AM -
+4:00PM." A direct, fully-specified instruction (implemented straight through per core rule 15).
+
+**This is a real, disclosed exception to the Round-26 "full opening hours" default, not a
+contradiction of it.** Round 26 established that an event's `time` field should default to the
+venue's full open-to-close hours (10:00 AM to 7:00 PM) "unless Eric says otherwise" — this is
+exactly that "otherwise": Eric gave this specific event a real, shorter window (11:00 AM to
+4:00 PM), which is now what's on file. The Round-26 default still applies to every other event
+that doesn't have its own explicit hours from Eric.
+
+**`data/events.json`'s `time` field updated** (the source of truth) — `car-club-sim-racing-
+2026-10-24`'s `"time"` changed from `"10:00 AM to 7:00 PM"` to `"11:00 AM to 4:00 PM"`. Every
+data-driven surface that reads this field picks it up automatically with no code change: the
+live Plan Your Visit calendar's day tooltip on `events.html` (confirmed via live Puppeteer —
+the cell's `data-full` attribute now reads "...11:00 AM to 4:00 PM") and `event-card.html`'s
+square/horizontal social exports for this event (confirmed via live screenshot — the card's
+meta line now reads "11:00 AM to 4:00 PM").
+
+**`screenshot-monthly-calendar.html`'s own hand-authored copy updated in lockstep**, per this
+file's own repeated lesson about that page drifting from its data source when only one side is
+edited — its Oct 24 row's `.eu-meta` line changed to match.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`, unchanged): zero console errors, the Oct 24 row now reads
+"11:00 AM to 4:00 PM" with no layout shift or clipping (only the displayed text changed, not
+its length in a way that affected wrapping).
+
+No cache-bust bump needed — `data/events.json` and `screenshot-monthly-calendar.html`'s own
+inline content are both outside the shared `?v=`-tagged asset convention.
