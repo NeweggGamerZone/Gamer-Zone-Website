@@ -2198,3 +2198,39 @@ blue under all three timed events with no clipping or layout shift, and the clos
 
 No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
 `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/`main.js` use.
+
+
+## Round 34 (2026-09-30): subtitle text reverted to white
+
+Per Eric: "Make the subtitle text white please." A direct, fully-specified instruction
+(implemented straight through per core rule 15), scoped entirely to `screenshot-monthly-
+calendar.html`'s `.mc-sub` rule.
+
+**`.mc-sub`'s color moved from `var(--ne-blue-text)` back to `#F2F4F8`.** This is not a
+contrast-driven revert — Round 33 (immediately prior) re-verified the blue still cleared WCAG
+AAA with real margin (6.28–6.97:1 against the 4.5:1 large-text floor) — it's simply Eric's own
+stated preference. `#F2F4F8` is the exact same white this element used originally, before
+Round 32 introduced blue: the `.cd-blurb`/`.cd-meta-item` "real body copy over a real photo"
+treatment this page's own header comment already establishes as its reference, reused rather
+than picking a new white value. The Round-32 size bump (`max(24px,.95em)`, which also
+satisfies "bigger") and the Round-32 full-width change (`max-width:none`) are both unchanged —
+only the color moved. `.eu-meta` (the "10:00 AM to 7:00 PM" time text, turned blue in Round 33)
+is untouched — this request was scoped to "subtitle text" specifically, and Eric didn't ask to
+revert the time text.
+
+**Verified via the real pixel-sampled WCAG contrast method (per core rule 12), not assumed safe
+just because white-on-dark-photo is typically a large contrast win.** Screenshot with text
+forced transparent, sampled against the real rendered background, WCAG relative-luminance math
+— run via a live Puppeteer capture at the exact 1200px board-mode export width
+(`tools/audit/capture-monthly.js`, unchanged). All three subtitles measured 17.40–18.33:1 —
+comfortably clear of the 7:1 AAA floor (this text qualifies for large-text 4.5:1, but clears
+the stricter normal-text floor too, with wide margin). `.eu-meta`'s own blue was re-sampled in
+the same pass to confirm it's unaffected: 6.88–8.45:1, consistent with Round 33's own numbers.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`): zero console errors, all three subtitles render white with
+no clipping or layout shift (only `color` changed, not size/width), and the pumpkin art/tags/
+time text are all unaffected.
+
+No cache-bust bump needed — scoped entirely to `screenshot-monthly-calendar.html`'s own inline
+`<style>` block, which isn't cached by the shared `?v=` convention `style.css`/`main.js` use.
