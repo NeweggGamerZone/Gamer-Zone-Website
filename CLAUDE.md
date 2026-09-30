@@ -2300,3 +2300,77 @@ its length in a way that affected wrapping).
 
 No cache-bust bump needed — `data/events.json` and `screenshot-monthly-calendar.html`'s own
 inline content are both outside the shared `?v=`-tagged asset convention.
+
+
+## Round 37 (2026-09-30): mobile-email readability pass -- tags, time, title, and subtitle all enlarged against a real effective-shrink assumption
+
+Per Eric: "Can you ensure the wording on this is fully readable on mobile when I put it on
+email. Ensure text is appropriately sized, maybe make the tags larger." A direct instruction
+with one genuinely open design parameter (exactly how much larger) -- resolved with real math
+against a disclosed assumption rather than a guessed number, per core rule 15's own allowance
+for reasoning through genuinely open sizing choices rather than treating every open parameter
+as something to stop and ask about.
+
+**The real display context, stated as an explicit assumption, not a fabricated fact.** This
+board is exported as a static 1200px-wide PNG meant to be pasted directly into an email body.
+Modern mobile mail clients (Apple Mail, Gmail app, Outlook app) apply responsive image scaling
+(`max-width:100%`) to an embedded image wider than the recipient's screen -- on a
+representative ~390px-wide phone, this image effectively shrinks by roughly 390/1200 = 0.325x.
+Every on-image font size needed to be judged by its *effective on-screen size after that
+shrink*, not its raw source-pixel value -- this is a real, stated assumption about a display
+context Eric himself described ("when I put it on email"), not an invented fact, and is
+disclosed here per the no-fabrication rule's spirit around assumptions.
+
+**Real current sizes were measured via live Puppeteer before picking any target** (a temporary
+`tools/audit/measure-sizes-tmp.js` script, deleted after use per this project's scratch-script
+convention), at this board's actual 1200px capture viewport -- not reasoned about from the CSS
+clamp() values on paper, since a `cqw`-based clamp only resolves to a real number at a specific
+container width. Effective on-screen sizes at the 0.325x scale, before this round: event title
+(`.eu-name`) 43.52px real -> ~14.1px effective (borderline for a headline); time text
+(`.eu-meta`) 27.53px real -> ~8.95px effective (too small); tags (`.mc-tags .tag`) 14px real ->
+~4.55px effective (illegible -- directly confirming Eric's own intuition that tags specifically
+needed enlarging); subtitle (`.mc-sub`) 24px real -> ~7.8px effective (too small).
+
+**All four bumped, each scoped to `#month` only (per this page's own standing "don't touch the
+shared .eu-major/.eu-row rules" convention, since `--eu-name-size`/`--eu-meta-size` also drive
+the live Weekly Lineup board):**
+
+- `.mc-tags .tag`: 14px -> 38px (~12.4px effective), padding grown in lockstep (`.18rem/.6rem`
+  -> `.5rem/1.1rem`) so the pill shape stays proportionate rather than reading cramped around
+  much bigger text; `.mc-tags`'s own gap widened (`.5rem` -> `.9rem`, margin-top `.6rem` ->
+  `.9rem`) to match.
+- `.eu-row .eu-name` (event titles): no page-scoped override existed before this round -- one
+  was added, 56px (~18.2px effective), since the title previously inherited the shared,
+  unscoped `--eu-name-size` token directly.
+- `.eu-meta` (time text): 27.53px -> 40px (~13px effective); `color:var(--ne-blue-text)` from
+  Round 33 is unchanged, only `font-size` was added.
+- `.mc-sub` (subtitle body copy): `max(24px,.95em)` -> 40px (~13px effective); `color:#F2F4F8`
+  from Round 34 is unchanged, only `font-size` and `margin-top` (`.5rem` -> `.7rem`, to keep
+  proportionate spacing under the now-larger time/tags above it) changed.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`, unchanged): output grew to `(1200, 3107)` from real content
+growth (more room needed for the larger text, not clipping) -- confirmed via a direct visual
+review of the capture: every event's title/time/tags/subtitle/divider line renders cleanly, no
+overlap, no cut-off text, zero console errors.
+
+**Additionally verified by actually rendering the mobile-scaled view, not just checking the
+1200px source** -- per this round's own reasoning, the point is how the image looks *after*
+mobile email scaling, not at its native resolution. The real 1200px-wide capture was resized to
+390px wide via Lanczos resampling (simulating the same responsive-image shrink a mobile mail
+client applies) and visually reviewed: every tag, time line, title, and subtitle line reads
+clearly legible at this simulated mobile-email size.
+
+**Re-ran the mandatory pixel-verified WCAG contrast audit (core rule 12) on every resized
+element**, since a font-size change can shift an element between WCAG's normal-text (7:1 AAA)
+and large-text (4.5:1 AAA) thresholds -- real DOM-position + computed-style capture, a second
+screenshot with text forced transparent to isolate the true rendered background, and real WCAG
+relative-luminance math, not CSS-value reasoning. All comfortably pass: tags (38px bold, now
+qualifying as large text) 9.92:1 against the solid orange tag background; time text (40px)
+7.91-8.29:1; subtitle (40px) 17.06-18.48:1; title (56px) 7.92-9.33:1 -- worst case across all
+21 sampled instances is 7.91:1, still clearing even the stricter 7:1 normal-text floor with
+real margin.
+
+No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
+inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
+`main.js` use.

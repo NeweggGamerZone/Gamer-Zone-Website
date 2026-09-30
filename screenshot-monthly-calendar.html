@@ -42,6 +42,19 @@
   /* Special Events: keep the date white; only the event title itself
      highlights orange for a major/featured event. */
   #month .eu-major .eu-date{color:#fff}
+  /* 2026-09-30, Round 37, per Eric ("ensure the wording on this is fully
+     readable on mobile when I put it on email"): same ~390px/0.325x
+     mobile-email-scaling assumption documented at .mc-tags below. This
+     board's real event titles (.eu-name inside a Special Event row) had
+     no page-scoped size override at all before this round -- they simply
+     inherited the shared, unscoped --eu-name-size token (43.52px real
+     computed size at this board's 1200px capture viewport, confirmed via
+     Puppeteer), which effectively shrinks to ~14.1px on a mobile-email
+     screen -- borderline for a headline. Bumped to 56px (~18.2px
+     effective) here, scoped to #month .eu-row .eu-name specifically so
+     the shared --eu-name-size token (which also drives the live Weekly
+     Lineup board's own date/name sizing) is untouched. */
+  #month .eu-row .eu-name{font-size:56px;line-height:1.2}
   /* Logo 100% larger than the shared .board-logo rule (used as-is on the
      real live Weekly Lineup), scoped to this page only. */
   #month .board-logo{height:clamp(90px,18vw,150px)}
@@ -68,8 +81,27 @@
      black text) is used here rather than the default navy .tag, since
      these are offering highlights meant to pop against the board's dark
      photo scrim, not a muted "type" label. */
-  #month .mc-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
-  #month .mc-tags .tag{font-size:max(14px,.68rem)}
+  #month .mc-tags{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.9rem}
+  /* 2026-09-30, Round 37, per Eric ("ensure the wording on this is fully
+     readable on mobile when I put it on email... maybe make the tags
+     larger"): this board is exported as a static 1200px-wide PNG meant to
+     be pasted directly into an email body. Modern mobile mail clients
+     (Apple Mail, Gmail app, Outlook app) apply responsive image scaling
+     (max-width:100%) to an embedded image that's wider than the screen --
+     on a representative ~390px-wide phone, this 1200px image effectively
+     shrinks by ~390/1200 = 0.325x. Every on-image font size here is sized
+     against that *effective on-screen* size, not the raw source pixel
+     value -- a real, disclosed assumption about display context (a real
+     screen width used for real math), not a fabricated fact. At the old
+     14px source size, tags shrank to ~4.5px effective on screen --
+     illegible, directly confirming Eric's own intuition that tags
+     specifically needed enlarging. Bumped to 38px (real Puppeteer-
+     measured computed size at this board's 1200px capture viewport,
+     confirmed via tools/audit/measure-sizes-tmp.js) -> ~12.4px effective,
+     comfortably legible for a short highlight word. Padding grown in
+     lockstep (was .18rem/.6rem) so the pill shape still reads
+     proportionate at the larger text size, not cramped. */
+  #month .mc-tags .tag{font-size:38px;padding:.5rem 1.1rem}
   /* Subtitle copy sits on the same dimmed real photo every other .eu-board
      row already sits on -- reuses the exact "real body copy over a photo"
      treatment .cd-blurb/.cd-meta-item already establish on the live
@@ -96,7 +128,12 @@
      rather than inventing a new white. .eu-meta (the time text) is
      untouched -- still var(--ne-blue-text) per Round 33 -- since this
      request was scoped to "subtitle text" specifically. */
-  #month .mc-sub{font-family:var(--eu-body);font-size:max(24px,.95em);line-height:1.4;color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);margin-top:.5rem;max-width:none}
+  /* 2026-09-30, Round 37, per Eric's mobile-email readability request:
+     same ~390px/0.325x scaling assumption as .mc-tags/.eu-name above.
+     Round 32's max(24px,.95em) (~7.8px effective) is bumped to 40px
+     (~13px effective) -- comfortably legible body copy at that scale
+     while staying well short of crowding out the title/tags above it. */
+  #month .mc-sub{font-family:var(--eu-body);font-size:40px;line-height:1.4;color:#F2F4F8;text-shadow:0 1px 8px rgba(0,0,0,.6);margin-top:.7rem;max-width:none}
   /* 2026-09-30, per Eric ("make the grey time text blue please instead"):
      .eu-meta's own shared color:var(--ink-dim) (a muted grey, tuned for
      the live Weekly Lineup's own background) is overridden here to the
@@ -105,7 +142,12 @@
      verified below alongside .mc-sub, since this is a different element
      at a different font-size/position on the board and can't just
      inherit .mc-sub's own clearance. */
-  #month .eu-meta{color:var(--ne-blue-text)}
+  /* 2026-09-30, Round 37: font-size added (previously inherited the
+     shared, unscoped --eu-meta-size-derived calc, ~27.5px real/~8.9px
+     mobile-email-effective) -- bumped to 40px (~13px effective), same
+     scaling assumption as the other Round 37 sizing changes on this
+     page. color:var(--ne-blue-text) is unchanged from Round 33. */
+  #month .eu-meta{color:var(--ne-blue-text);font-size:40px}
   /* Pumpkin stack image at the very bottom of the board, per Eric ("add
      the pumpkin stack image I put in the lineup assets file"). A real,
      purely decorative flourish (Halloween is the board's last Special
