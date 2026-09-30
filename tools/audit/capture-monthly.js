@@ -9,7 +9,7 @@ fs.mkdirSync(OUT, { recursive: true });
 (async () => {
   const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
-  await page.setViewport({ width: 1150, height: 1900 });
+  await page.setViewport({ width: 1200, height: 1900 });
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
