@@ -2418,3 +2418,67 @@ at each row's actual position -- 8.58-8.93:1 across all three rows, comfortably 
 No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
 inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
 `main.js` use.
+
+
+## Round 39 (2026-09-30): smallest font on the sheet identified, two tag renames, and a real disclosed limit on "tags in one row" at this tag size
+
+Per Eric: "Whats the smallest font size on this sheet currently. I like the tag size, but
+would want the tags to be in one row. Change exclusive giveaways to Raffle Prizes,
+Change the complimentary candy to free candy." Four asks -- the two renames are
+direct/fully-specified (implemented straight through per core rule 15); the
+font-size question is a factual lookup; the "one row" request is partially
+satisfiable and partially a real geometric limit, disclosed rather than silently
+worked around.
+
+**Smallest font size on the sheet: 21.6px, on the "Special Events" `<h4 class="eu-sublist-
+head">` heading** -- confirmed via a live full-DOM text-node sweep
+(`document.createTreeWalker` over every real, visible text node, recording each one's
+computed `fontSize`, sorted ascending), not a grep of this page's own `<style>` block
+alone, since some rendered text here inherits shared, unscoped tokens from
+`assets/css/style.css` rather than anything declared in this file. Every other
+element (tags, time text, subtitles, titles) measures 38px or larger.
+
+**Two tag renames, exactly as given:** "Exclusive Giveaways" -> "Raffle Prizes" (Car &
+Sim Racing event), "Complimentary Candy" -> "Free Candy" (Halloween Costume Party).
+
+**"Tags in one row" at the current 38px size: the Fantastech 2 row already fit and
+still does, the other two rows don't, and can't without either shrinking the tag
+font or shortening more of their own text -- a real, measured limit, not a bug left
+unfixed.** Measured every `.mc-tags` row's real rendered width via
+`getBoundingClientRect()` before touching anything: all three rows have 1080px of
+real available width at this board's 1200px capture viewport. Before this round, the
+Car event's "Exclusive Giveaways" (573.6px) and the Halloween event's "Complimentary
+Candy" (606.3px) were each individually too wide to leave room for their third
+sibling tag -- the renames shortened both, but the *other* two tags sharing each of
+those rows ("Racing Simulators" at ~485px of real text, "Costume Contest" at ~442px)
+are also genuinely wide words, and the math doesn't close: even after the renames,
+and after tightening this page's own `.mc-tags` gap (`.9rem`->`.6rem`) and tag
+padding (`.5rem 1.1rem`->`.5rem .8rem`) as far as looks reasonable, the Car row's 3
+tags need ~1288px of real width (before tightening) and the Halloween row's need
+~1238px -- against a fixed 1080px row, a shortfall no amount of gap/padding
+tightening alone can close (tightening both all the way to their practical minimum
+only recovers ~85-95px, nowhere near the ~150-200px still needed). Getting either
+row onto one line at the current 38px tag size would require shortening at least
+one more tag's actual wording ("Racing Simulators" -> something shorter, "Costume
+Contest" -> something shorter) -- a real content change beyond what was asked this
+round, so it wasn't done without Eric's go-ahead, per core rule 15's own "an open
+design tradeoff gets proposed, not silently implemented" principle. The Fantastech 2
+row (Free Play / Raffle Prizes / Free Pizza) already fit on one line before this
+round and still does after the same tightening.
+
+**The gap/padding tightening was applied regardless, since it's a real, low-risk
+improvement with no visible downside** (confirmed via a direct visual crop of the
+rendered Car-event tags: clean pill shapes, no cramped or broken-looking text) -- it
+doesn't fully solve either remaining row by itself, but it's a genuine step in the
+right direction that should stay even though it didn't close the whole gap.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`): output measures `(1200, 2881)`, confirming the
+standing Round 29/30 export-dimensions rule still holds; zero console errors; a
+direct visual crop of all three `.mc-tags` rows confirms the Fantastech row renders
+on one line as before, and the Car/Halloween rows render cleanly wrapped to 2 lines
+each (no clipping, no cramped/overlapping pills) rather than broken.
+
+No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s
+own inline `<style>` block and markup, which isn't cached by the shared `?v=`
+convention `style.css`/`main.js` use.
