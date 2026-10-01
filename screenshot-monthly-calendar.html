@@ -72,6 +72,20 @@
   /* Logo 100% larger than the shared .board-logo rule (used as-is on the
      real live Weekly Lineup), scoped to this page only. */
   #month .board-logo{height:clamp(90px,18vw,150px)}
+  /* 2026-10-01, Round 41, per Eric ("Just have monthly calendar october 2026
+     to be large enough to fill its row fully"): the masthead title
+     (.eu-eyebrow-title) inherits the shared, unscoped --eu-date-size token
+     (which also drives the live Weekly Lineup board), rendering at 43.52px
+     real/43.52px computed at this board's 1200px capture viewport -- real
+     Puppeteer measurement showed this left a genuine ~130px unused gap on
+     the right of its row (.eu-eyebrow-textcol, real right edge x=1140,
+     title's own right edge only reaching x=1010.17). Binary-searched the
+     largest size that keeps "Monthly Calendar: October 2026" on exactly
+     one line (measured via Range.getClientRects() distinct-line-count, not
+     guessed): 49px is the largest one-line size -- 50px wraps to 2 lines.
+     Set to 49px here, scoped to #month only so the shared --eu-date-size
+     token (and the live Weekly Lineup board it also drives) is untouched. */
+  #month .eu-eyebrow-title{font-size:49px}
 
   /* 2026-09-30, per Eric ("cut the theme weeks... infuse more information
      for the events we're running this month, add small tag nodes like in
@@ -87,6 +101,15 @@
      sits flush under the eyebrow title instead of floating a stray line
      under nothing. */
   #month .eu-sublist-head{border-top:none;margin-top:0;padding-top:0}
+  /* 2026-10-01, Round 41, per Eric ("Make special events twice as large"):
+     the "Special Events" <h4> inherits the shared, unscoped
+     clamp(1rem,2cqw,1.35rem) token -- confirmed via a live full-DOM
+     text-node sweep (Round 39) to be the smallest font anywhere on this
+     sheet, 21.6px real at this board's 1200px capture viewport. Doubled to
+     43px here, scoped to #month only so the shared rule (unused elsewhere
+     on the live site -- this heading only appears on this page) is
+     overridden safely. */
+  #month .eu-sublist-head{font-size:43px}
   /* Small tag nodes per event, reusing the exact shared .tag/.tag.orange
      component calendar.js's Plan Your Visit detail card and
      event-card.html's social exports already use (assets/css/style.css,

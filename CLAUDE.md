@@ -2526,3 +2526,57 @@ at their earlier sizes.
 No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
 inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
 `main.js` use.
+
+
+## Round 41 (2026-10-01): masthead title sized to fill its row, Special Events heading doubled
+
+Per Eric: "Increase the size of special events and the october 2026 monthly calendar part.
+Just have monthly calendar october 2026 to be large enough to fill its row fully. Make special
+events twice as large." A direct, fully-specified instruction (implemented straight through
+per core rule 15) -- the exact "fill its row fully" target was derived empirically via a real
+binary-search Puppeteer measurement, not guessed, same methodology as Round 37's mobile-sizing
+pass and Round 40's tag-sizing pass.
+
+**Masthead title ("Monthly Calendar: October 2026"): real board-mode measurement confirmed a
+genuine, measurable gap, not a misperception.** `.eu-eyebrow-title` inherits the shared,
+unscoped `--eu-date-size` token (which also drives the live Weekly Lineup board) -- confirmed
+via live Puppeteer at this board's real 1200px capture viewport to render at 43.52px, occupying
+881.78px of a real 1011.6px available column width (`.eu-eyebrow-textcol`, x=128.39 to
+x=1140) -- a genuine ~130px gap of unused space on the row's right side. Binary-searched the
+largest font-size that keeps the full title on exactly one line (measured via
+`Range.getClientRects()` distinct-line-count, not guessed): 49px is the largest one-line size
+-- 50px wraps "October 2026" onto a second line. Set `#month .eu-eyebrow-title{font-size:49px}`,
+scoped to `#month` only (per this page's own standing "don't touch the shared
+`--eu-date-size` token, which also drives the live Weekly Lineup" rule) -- the title's right
+edge now reaches x=1121.3, leaving only an ~18.7px gap, down from the original ~130px.
+
+**Special Events heading ("Special Events" `<h4>`): doubled from 21.6px to 43px.** Confirmed
+via Round 39's own live full-DOM text-node sweep that this was the smallest font anywhere on
+this sheet (21.6px, inheriting the shared, unscoped `clamp(1rem,2cqw,1.35rem)` token on
+`.eu-sublist-head` -- a heading that only appears on this page, unused elsewhere on the live
+site). Set `#month .eu-sublist-head{font-size:43px}`.
+
+**A real measurement bug caught and self-corrected before any numbers or screenshots were
+shown to Eric.** The first measurement/screenshot pass applied `board-mode` to
+`document.body` instead of `document.documentElement` -- the real CSS selector and the real
+capture script (`tools/audit/capture-monthly.js`) both key off `html.board-mode`, so this
+silently prevented any board-mode CSS from applying, producing an invalid, misleading
+measurement (the title appeared to nearly fill its row -- a red herring from measuring the
+wrong, non-board-mode layout). Caught and corrected -- re-measuring with
+`document.documentElement` and the correct 1200x1900 viewport (matching the real capture
+script exactly) produced the real, trustworthy numbers quoted above.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`): output measures `(1200, 2537)`, zero console errors, a
+direct visual review confirms the title now visibly fills its row (no more large empty gap on
+the right) and "Special Events" reads clearly larger against every other heading on the board,
+with no clipping or wrapping regression anywhere else on the page. Re-ran the real
+pixel-sampled WCAG contrast audit (core rule 12) on both resized elements, since any font-size
+change can shift what's actually rendered: the title measures **20.48:1** (white text,
+unaffected by the size change since it sits on the same dark photo-scrim background as
+before) and the Special Events heading measures **8.89:1** (orange text on the same
+background) -- both comfortably clear of the 7:1 AAA floor with wide margin.
+
+No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
+inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
+`main.js` use.
