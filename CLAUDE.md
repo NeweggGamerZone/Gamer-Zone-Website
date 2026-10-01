@@ -2744,3 +2744,60 @@ this file.
 No cache-bust bump beyond the one already pending from Round 43's own unmerged work -- bumped
 `?v=105` -> `?v=106` across all 6 shared-convention HTML files here, since `calendar.js` (a
 shared, cache-busted asset) changed again in this round.
+
+## Round 45 (2026-10-01): Fantastech 2 card -- pumpkin enlarged + centered, subtitle de-dashed and reworded
+
+Per Eric: "Make the pumpkin larger and in the middle of that square format. remove M dashes.
+Free Lunch, Hourly giveaways, and free play all afternoon." Two direct, fully-specified follow-
+ups to Round 43's solo Fantastech 2 social card, implemented straight through per core rule 15.
+
+**Pumpkin grown ~2x and repositioned from a bottom-right corner accent to a vertically-centered
+focal position in the square format's own empty space.** `.decor-img` (the generic `decorImage`
+field added Round 43) grew from 300px to 620px tall; its square-format rule moved from
+`right/bottom` corner anchoring to `left:78%;top:50%;transform:translate(-50%,-50%)` --
+reusing the exact "centered in the empty space" placement Round 15 already established for the
+horizontal format's fighter-character art, just applied here to the pumpkin instead of
+reinventing a new centering approach. 78% lands its horizontal center roughly midway between
+the text/tile column's real right edge (x=670, from `.content`'s 600px max-width + 70px
+padding) and the card's own right padding -- confirmed via live measurement, not assumed from
+the percentage on paper: 91.5px of real clearance from the content column, 89.5px from the
+card's own right edge, both comfortably clear with margin to spare. The horizontal format's own
+`.decor-img` rule (bottom-right, 360px) is untouched -- Eric's request was scoped to "that
+square format" specifically.
+
+**Subtitle de-dashed and reworded, per Eric's exact replacement text.** `data/events.json`'s
+Fantastech 2 `subtitle` changed from "Newegg FantasTech 2 Gamer Zone Party -- free lunch,
+hourly giveaways, and Newegg gift cards all afternoon." to "Newegg FantasTech 2 Gamer Zone
+Party: Free Lunch, Hourly Giveaways, and Free Play All Afternoon." -- the em dash replaced with
+a colon (not another dash), "Newegg gift cards" swapped for "Free Play All Afternoon" exactly
+as Eric gave it, and capitalization brought in line with the event's own `perks` field's Title
+Case convention ("Free Lunch at 1PM", "Hourly Giveaways 2-7PM") for consistency. This field
+feeds both `event-card.html`'s `cd-sub` and the live Plan Your Visit calendar panel's own copy
+of the same text (`calendar.js`, unchanged code, same data), so both update from one source
+with no drift risk.
+
+**A real cross-session collision hit while landing this round, caught and recovered from rather
+than silently overwriting anyone's work.** A concurrent session's own commit (`6916fc3`, "Round
+44: clicking the already-selected calendar date deselects it") landed on `origin/main` mid-round
+and reverted this round's own uncommitted `event-card.html`/`data/events.json` edits in the
+working tree (not maliciously -- just two sessions' writes racing on the same checkout). Caught
+by a `git fetch`/`git log origin/main` check and an `md5sum` comparison before committing, not
+assumed clean; the two files were re-written and committed in immediate succession to close the
+race window, and this entry (plus the round number itself, since "Round 44" was already claimed
+by that other session's own commit) was renumbered to Round 45 to avoid two different, unrelated
+changes sharing one round number in this file's history.
+
+**Verified via live Puppeteer measurement and pixel-sampled contrast, not a screenshot
+glance.** `getBoundingClientRect()` confirmed the numbers above (no overlap with the text
+column or the card's own edges) and zero console errors; re-ran SF6 Saturday Slam's own square
+card to confirm it has no `decorImage` set and renders with no decor element at all --
+completely unaffected by this round's CSS. Re-sampled the subtitle's real rendered contrast
+after the reword: 8.34:1, still comfortably clear of the 7:1 AAA floor. Re-ran the full
+scripted QA suite: 0 container-width findings, 0 console errors across all 5 pages; the only
+contrast findings are the same already-disclosed Featured Gear horizontal-overflow
+(`index.html`) and nav-pill load-transition (`games.html`) false positives documented under
+"Readability" above -- nothing new.
+
+No cache-bust bump needed -- `event-card.html`'s own inline `<style>` and `data/events.json`
+are both outside the shared `?v=`-tagged asset convention; no shared asset (`style.css`,
+`main.js`, `calendar.js`) was touched this round.
