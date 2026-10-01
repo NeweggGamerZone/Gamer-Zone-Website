@@ -295,7 +295,19 @@
      (max-width:600px leaves real room to its right), so it never competes
      with the title/tag/prize-tile stack on the left. z-index:0 (below
      .content's z-index:1) so real text always wins if they ever overlap. */
-  #card .decor-img{position:absolute;right:56px;bottom:50px;height:300px;width:auto;z-index:0;pointer-events:none;filter:drop-shadow(0 16px 36px rgba(0,0,0,.55))}
+  #card .decor-img{position:absolute;width:auto;z-index:0;pointer-events:none;filter:drop-shadow(0 16px 36px rgba(0,0,0,.55))}
+  /* Square format: per Eric's "make the pumpkin larger and in the middle
+     of that square format" -- grown from 300px to 620px tall (~2x) and
+     moved from a bottom-right corner accent to a vertically-centered focal
+     position within the card's own empty space (the area right of the
+     text/tile column, which ends at x=670 -- .content's max-width:600px +
+     70px left padding). left:78% lands its horizontal center roughly
+     midway between that column's right edge and the card's own right
+     padding -- the same "centered in the empty space" placement Round 15
+     already established for the horizontal format's character art,
+     applied here to the pumpkin instead. Confirmed clear of both the text
+     column and the card's own edges via live measurement (see CLAUDE.md). */
+  body:not(.fmt-horizontal) #card .decor-img{height:620px;left:78%;top:50%;transform:translate(-50%,-50%)}
   body.fmt-horizontal #card .decor-img{height:360px;right:90px;bottom:60px}
   /* Perk tags (Free Pizza Lunch / Raffle Prizes) sized up 2026-09-22
      (Round 17), per Eric's direct "make the node tags... larger" request. */
