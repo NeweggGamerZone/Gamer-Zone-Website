@@ -2698,3 +2698,49 @@ Cache-bust bumped `?v=104` -> `?v=105` across all 6 shared-convention HTML files
 `style.css` and `assets/js/calendar.js` both changed this round; `event-card.html`'s own
 `?v=` tags (found stale at `102` from several rounds back) were brought up to `105` in the same
 pass so it stops silently lagging behind the shared-asset version everywhere else.
+
+## Round 44 (2026-10-01): clicking the already-selected date deselects it, back to today
+
+Per Eric, a direct, fully-specified follow-up to Round 27's calendar-pinning feature above:
+"If I click the date already selected, it should deselect so it goes back to what today's
+current date is." Implemented straight through per core rule 15.
+
+**The fix, in `assets/js/calendar.js`, reuses state Round 27 already built rather than adding
+anything new.** `show(dt)` already maintains a real `.sel` class on whichever cell is currently
+displayed (adds it to the new cell, strips it from the old one), and Round 27's own `pinned`
+boolean already tracks whether a real click/keyboard selection -- as opposed to an idle
+default or a hover -- is currently in effect. The grid's `click` handler now checks, before
+re-pinning, whether the clicked cell is both already `.sel` AND the calendar is currently
+`pinned`: if so, this second click is a deselect, not a re-selection, so it calls the existing
+`resetToToday()` (which already clears `pinned` and calls `show(today)`, the same function the
+5-minute idle timer and the Round-27 click-off-elsewhere listener already both use) instead of
+re-pinning the same day. The exact same check was added to the `keydown` handler's Enter/Space
+branch, for mouse/keyboard parity with the rest of Round 27's own interaction model --
+keyboard users get the identical toggle-off behavior on a focused, already-selected cell.
+
+**A real concurrent-editing collision hit mid-round, caught and recovered from.** This file's
+own Round 43 entry above confirms a separate concurrent session modified `calendar.js` in the
+same window this fix was being written -- a mid-task disk-change notice fired, and re-reading
+the file confirmed this round's own toggle-off edit had been silently dropped by that
+concurrent save (Round 43's own prize/perk-table work was intact; this round's addition
+simply wasn't there yet when they saved). Re-applied the exact same two edits against the
+file's current, post-Round-43 content rather than reverting their work, confirmed via a fresh
+grep that both the toggle-off branches and Round 43's own additions now coexist correctly.
+
+**Verification note, disclosed rather than silently skipped:** this round's functional
+correctness was verified by tracing the exact code path against `show()`/`resetToToday()`'s
+own existing, already-shipped behavior (both are small, previously-verified functions this
+round doesn't modify) rather than a fresh live Puppeteer run -- this session's sandboxed Linux
+environment could not get a local HTTP server reachable over loopback for an actual browser
+check (isolated via direct `/proc/net/tcp` inspection: a `python3 -m http.server` process
+genuinely starts and holds open real listening sockets, but connections to it are refused
+regardless of host/IP tried, a sandbox-networking issue unrelated to this change, not seen on
+any earlier round in this file's history). The logic itself is a narrow, well-contained branch
+on two already-proven mechanisms (`.sel`'s add/remove in `show()`, `pinned`'s clear in
+`resetToToday()`), so this is disclosed as a real, if minor, gap in this round's own test
+rigor rather than silently presented as fully Puppeteer-verified like every other round in
+this file.
+
+No cache-bust bump beyond the one already pending from Round 43's own unmerged work -- bumped
+`?v=105` -> `?v=106` across all 6 shared-convention HTML files here, since `calendar.js` (a
+shared, cache-busted asset) changed again in this round.
