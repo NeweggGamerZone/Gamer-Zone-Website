@@ -2580,3 +2580,50 @@ background) -- both comfortably clear of the 7:1 AAA floor with wide margin.
 No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
 inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
 `main.js` use.
+
+
+## Round 42 (2026-10-01): Special Event titles turned white, freeing orange for highlights only
+
+Per Eric: "Can the titles of the special events also be in white? what would work best to get
+better emphasis. Right now too much orange." A direct instruction (change the titles to white)
+paired with an open "what would work best" question -- per core rule 15, the direct part was
+implemented straight through and the reasoning for it is recorded here rather than treated as
+a separate stop-and-propose step, since Eric's own message already named the specific change
+he wanted.
+
+**The real problem, confirmed by reading the cascade, not just eyeballing it:** the board had
+accumulated four solid-orange elements competing for the same accent color -- the "Special
+Events" `<h4>` heading (doubled in size just last round, Round 41), the `.mc-tags` pills (Free
+Play/Raffle Prizes/etc., added Round 31, sized up twice since), and the Special Event titles
+themselves, which inherit `.eu-major .eu-name{color:var(--cal-major)}` from the shared
+`style.css` (the same rule the live Weekly Lineup board also depends on, so left untouched
+there per this page's own standing convention). With all three reading the same bright orange,
+nothing on the board distinguished "this is the headline" from "this is a scannable tag" --
+exactly Eric's own "too much orange" read.
+
+**Fix: `#month .eu-major .eu-name{color:#fff}`**, added directly after the existing
+`#month .eu-major .eu-date{color:#fff}` override (which already forces the date text white --
+this just extends the same treatment to the title). This also brings timed Special Event rows
+into the same visual language the closure rows (`OCT 10/16/17: Closed for Private Event`)
+already use -- those have read `color:var(--ink-dim)` (a dim white) since the Round-4-era
+single-line closure convention, so titles-are-light-not-orange is now consistent across every
+row type on this board, not just a one-off fix for three rows. Orange now means exactly one
+thing: a real highlight (the tag pills, the section heading) -- it's no longer also the
+title's own default color.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`): output measures `(1200, 2537)` -- identical height to the
+pre-change capture, confirming this was a pure color change with zero layout/wrapping
+side-effects; zero console errors; a direct visual review confirms the three Special Event
+titles now read white while the tags and "Special Events" heading stay orange, giving the
+board a clearer, single accent hierarchy. Ran the real pixel-sampled WCAG contrast method (per
+core rule 12) on all three titles specifically -- screenshot with text forced transparent to
+isolate the real rendered background, sampled at each title's actual on-screen position, WCAG
+relative-luminance math: 18.71-20.21:1 across all three, comfortably clear of the 7:1 AAA
+floor with very wide margin (white text against this board's dark photo scrim is an easy pass,
+but it was independently re-verified rather than assumed, per this file's own standing rule
+that no color change ships without a real pixel check).
+
+No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
+inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
+`main.js` use.

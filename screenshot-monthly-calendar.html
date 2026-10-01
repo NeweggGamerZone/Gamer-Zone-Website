@@ -42,6 +42,23 @@
   /* Special Events: keep the date white; only the event title itself
      highlights orange for a major/featured event. */
   #month .eu-major .eu-date{color:#fff}
+  /* 2026-10-01, Round 42, per Eric ("too much orange... can the titles also
+     be in white, what would work best for emphasis"): the shared
+     .eu-major .eu-name{color:var(--cal-major)} rule in style.css (which
+     also drives the live Weekly Lineup board, so it's deliberately left
+     untouched there) was putting a 4th solid-orange element on this board
+     -- the title, stacked on top of the already-orange .mc-tags pills and
+     the already-orange "Special Events" heading -- with nothing left to
+     visually distinguish "this is the headline" from "this is a tag."
+     Reassigning the titles to white (the same color closure-row titles
+     already use via the shared .eu-closure .eu-name{color:var(--ink-dim)}
+     rule, so this also makes timed and closure rows read as one consistent
+     "titles are light, not orange" language) frees orange to mean one
+     thing only: a real, tappable/scannable highlight (the tag pills, the
+     section heading) rather than also being the title's own default
+     color. Scoped to #month only, consistent with this page's standing
+     "don't edit the shared .eu-major rule" convention. */
+  #month .eu-major .eu-name{color:#fff}
   /* 2026-09-30, Round 37, per Eric ("ensure the wording on this is fully
      readable on mobile when I put it on email"): same ~390px/0.325x
      mobile-email-scaling assumption documented at .mc-tags below. This
