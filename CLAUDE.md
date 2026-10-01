@@ -2627,3 +2627,74 @@ that no color change ships without a real pixel check).
 No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
 inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
 `main.js` use.
+
+
+## Round 43 (2026-10-01): a solo Fantastech 2 social card -- named product-prize tiles generalized, pumpkin decor, and a real overflow bug found and fixed
+
+Per Eric: "give me a solo event specific one for the Fantastech 2 Party. Use the Pumpkins and
+instead of the 4 nodes of prizes, it should be 2 nodes of product prizes. MSI 24" 144HZ
+Monitors, Keyboard and Mouse Combos, 1 node for free pizza and 1 node for free play all day." A
+direct, fully-specified request (implemented straight through per core rule 15), building on
+`event-card.html`'s existing per-event square/horizontal social-card system (see Round 12
+above for its original build).
+
+**The existing `prizes` field only supported a dollar-amount bracket payout (`{place,
+amount}`) -- generalized to also support a named-prize/perk tile (`{label}`), reused by both
+renderers rather than a one-off.** `event-card.html`'s `prizeHTML` and `calendar.js`'s
+`prizeBlock()` (the live Plan Your Visit calendar detail panel, which reads the exact same
+`data/events.json` fields) both branch on whether a `prizes` entry has `.label`: if so, it
+renders as a single centered line of real text inside the same `.prize-row` tile (no $ sign,
+no "Nth Place" ordinal -- neither makes sense for a named giveaway); otherwise it falls back to
+the existing SF6-style bracket rendering, completely unchanged. A new `prizeHeading` field
+(`data/events.json`) lets an event override the "Bracket Prizing" heading default, since that
+wording only fits a real tournament bracket -- Fantastech 2 uses "Prizes & Perks" instead. A
+shared `.prize-row-label`/`.prize-label-only` CSS pair was added to `assets/css/style.css`
+(the live site's own copy of these tiles) and mirrored in `event-card.html`'s own page-scoped
+`<style>`, per this file's "one shared implementation" rule -- not a second, parallel
+component. Fantastech 2's `data/events.json` entry now carries
+`"prizes":[{"label":"MSI 24\" 144Hz Monitors"},{"label":"Keyboard & Mouse Combos"},
+{"label":"Free Pizza"},{"label":"Free Play All Day"}]` -- exactly Eric's 4 named nodes.
+
+**Pumpkin decor, generalized as a reusable `decorImage` field rather than hardcoded to this
+one event.** Per Eric's "use the pumpkins" (the same `assets/calendar/LineupAssets/
+Pumpkins.png` asset already used at the bottom of `screenshot-monthly-calendar.html`, see
+Round 31 above): added a new, generic `ev.decorImage` field and a `.decor-img` CSS rule
+(bottom-right corner, `z-index:0` so it never competes with real text) -- deliberately NOT
+built on the existing `.card-char`/`cardChar` mechanism, since that one carries a fighting-
+game-specific echo-trail treatment (Round 15-18) that wouldn't make sense for a plain
+decorative image. `decorImage` is reusable by any future event that wants one, the same way
+`image`/`prizes`/`perks`/`cardChar` already are.
+
+**A real overflow bug, found by actually rendering the result and fixed before shipping.** The
+first version (prize-tile grid + the event's existing 3-chip `perks` row below it, unchanged)
+pushed real content -- the 3rd perk chip and the entire footer line -- past the card's fixed
+1200px bottom edge, confirmed via a live screenshot, not assumed safe from the markup alone.
+Root cause: the new label-prize tiles and the old perk-chip row were both now showing
+substantially the same information (free lunch/pizza, giveaways/free play) stacked on top of
+each other, with nothing to make room. Fixed narrowly: `event-card.html`'s `perkHTML` is now
+suppressed specifically for an event whose `prizes` already use the label shape (`hasLabelPrizes`),
+since those tiles already cover the same ground on this fixed-size card -- SF6 Saturday Slam's
+own bracket-table + perk-chip combination (verified to fit back in Round 17) is completely
+unaffected, since its `prizes` entries have no `.label`. The live calendar panel
+(`calendar.js`'s own `prizeBlock()`) was deliberately left rendering both the tiles and the
+perk chips together, since that panel scrolls naturally and has no fixed-height constraint to
+violate -- confirmed via a live screenshot of the real Plan Your Visit panel for this date.
+
+**Verified via live Puppeteer measurement and pixel-sampled contrast, not just a screenshot
+glance.** `getBoundingClientRect()` on the fixed export confirmed: footer bottom at 1140.8px
+(vs. the card's 1200px height -- comfortably inside, not clipped), and the content column's
+right edge (670px) sits 305px clear of the pumpkin image's left edge (975px) -- no collision.
+Re-ran SF6 Saturday Slam's own square card to confirm zero regression -- its $-bracket table,
+fighter-character echo trail, and perk chips all render identically to before this round. Ran
+the real pixel-sampled WCAG contrast method on all 4 new label-tile texts: 12.98-13.78:1,
+comfortably clear of the 7:1 AAA floor. Re-ran the full scripted QA suite (`run-full-qa.sh`):
+979 text items / 5 pages, 0 container-width findings, 0 console errors; the only contrast
+findings (29) are the same already-disclosed Featured Gear horizontal-overflow (`index.html`)
+and nav-pill load-transition (`games.html`) false positives documented under "Readability"
+above -- nothing new, and `events.html` itself (whose live calendar panel now also renders
+label-style prizes) came back completely clean.
+
+Cache-bust bumped `?v=104` -> `?v=105` across all 6 shared-convention HTML files, since
+`style.css` and `assets/js/calendar.js` both changed this round; `event-card.html`'s own
+`?v=` tags (found stale at `102` from several rounds back) were brought up to `105` in the same
+pass so it stops silently lagging behind the shared-asset version everywhere else.

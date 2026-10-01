@@ -119,12 +119,25 @@
   // `perks` fields, e.g. the SF6 Saturday Slam bracket payouts + its free
   // pizza lunch) -- generic and reusable by any future event that defines
   // the same fields, not a one-off hand-coded block just for this event.
+  // 2026-10-01: a second `prizes` item shape added -- `{label}` instead of
+  // `{place,amount}` -- for an event whose prizing is a set of named
+  // giveaways/perks (e.g. Fantastech 2's "MSI 24in 144Hz Monitors",
+  // "Free Pizza") rather than a dollar-amount bracket payout. Reuses the
+  // same .prize-row tile instead of inventing a second component --
+  // per Eric's own request, these simply render as a plain centered label
+  // with no place badge/ordinal, which only make sense for the bracket
+  // case. `prizeHeading` (data/events.json) lets each event override the
+  // "Bracket Prizing" heading default, since that specific wording only
+  // fits a real bracket tournament.
   function prizeBlock(e) {
     if (!e || !e.prizes || !e.prizes.length) return '';
     const ord = n => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
-    const rows = e.prizes.map(p => `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></span></div>`).join('');
+    const rows = e.prizes.map(p => p.label
+      ? `<div class="prize-row prize-row-label"><span class="amt prize-label-only">${GZ.esc(p.label)}</span></div>`
+      : `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></span></div>`
+    ).join('');
     const perks = (e.perks && e.perks.length) ? e.perks.map(p => `<div class="perk-chip">${GZ.esc(p)}</div>`).join('') : '';
-    return `<div class="prize-heading">Bracket Prizing</div><div class="prize-table">${rows}</div>${perks}`;
+    return `<div class="prize-heading">${GZ.esc(e.prizeHeading || 'Bracket Prizing')}</div><div class="prize-table">${rows}</div>${perks}`;
   }
   const t0 = new Date(today + 'T12:00:00');
   let view = new Date(t0.getFullYear(), t0.getMonth(), 1);
@@ -332,6 +345,17 @@
   grid.addEventListener('click', e => {
     const c = e.target.closest('.cal-cell[data-d]');
     if (!c || c.classList.contains('cal-closed')) return;
+    // 2026-10-01, per Eric ("if I click the date already selected, it
+    // should deselect so it goes back to today's current date"): a second
+    // click on the cell that's already the pinned/displayed selection is a
+    // toggle-off, not a re-pin of the same day -- checked via the real
+    // `.sel` class `show()` already maintains, so this needs no separate
+    // tracked "last clicked date" state of its own.
+    if (pinned && c.classList.contains('sel')) {
+      resetToToday();
+      markActivity();
+      return;
+    }
     show(c.dataset.d);
     pinned = true;
     grid.querySelectorAll('[data-d]').forEach(cell => { cell.tabIndex = -1; });
@@ -352,6 +376,13 @@
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
       e.preventDefault();
       if (c.classList.contains('cal-closed')) return; // closed days aren't activatable, see click handler above
+      // Same toggle-off-on-reselect behavior as the click handler above,
+      // for keyboard parity.
+      if (pinned && c.classList.contains('sel')) {
+        resetToToday();
+        markActivity();
+        return;
+      }
       show(c.dataset.d);
       pinned = true;
       markActivity();

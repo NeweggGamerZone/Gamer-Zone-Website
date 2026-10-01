@@ -1763,6 +1763,13 @@ body.home-page { background: transparent; }
 .prize-row .place-label{font-size:.66rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.04em;display:block}
 .perk-chip{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);color:#fff;font-weight:700;font-size:.8rem;padding:.35rem .8rem;border-radius:999px;margin:0 .4rem .4rem 0}
 @media (max-width:420px){.prize-table{grid-template-columns:1fr 1fr}}
+/* 2026-10-01: a named-giveaway variant of .prize-row (see prizeBlock()'s own
+   comment in calendar.js), for an event whose "prizes" are a list of real
+   named items/perks (e.g. Fantastech 2's "MSI 24in 144Hz Monitors", "Free
+   Pizza") rather than a dollar-amount bracket payout -- no place badge or
+   ordinal makes sense for these, so the row is just centered label text. */
+.prize-row-label{justify-content:center}
+.prize-label-only{font-size:.95rem;text-align:center;white-space:normal}
 /* Shared type-color coding for tags — used by both the calendar detail card
    and the Event details cards, so a type reads the same color everywhere. */
 /* Black text on both — white measured under 4.5:1 WCAG AA against these two

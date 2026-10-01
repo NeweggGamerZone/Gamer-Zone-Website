@@ -41,7 +41,7 @@
      yet, since which events should auto-export and on what schedule is an
      open question for Eric, not a fully-specified one. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=102">
+<link rel="stylesheet" href="assets/css/style.css?v=105">
 <style>
   html,body{margin:0;padding:0;background:#000}
   #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:70px;box-sizing:border-box}
@@ -275,6 +275,28 @@
      layout, background photo, or scrim ever changes. */
   #card .prize-row .place-label{font-size:21px;color:#FFF5E6;text-align:center}
   body:not(.fmt-horizontal) #card .prize-row .place-label{white-space:nowrap}
+  /* 2026-10-01: a named-giveaway variant of the prize tile (see prizeHTML's
+     own comment below), for an event whose "prizes" are a list of real
+     named items/perks (Fantastech 2's "MSI 24in 144Hz Monitors", "Free
+     Pizza") rather than a dollar-amount bracket payout. Reuses the exact
+     same .prize-row tile/grid -- just a single centered label line instead
+     of the $amount + "Nth Place" pair, since neither of those make sense
+     for a named giveaway. Sized well under the bracket .amt's 58px (product
+     names run much longer than a dollar amount) and allowed to wrap --
+     the tile's own aspect-ratio floor (see the .prize-row comment above)
+     still lets it grow taller for real if a longer name needs 2 lines. */
+  #card .prize-row .prize-label-only{font-size:30px;line-height:1.15;text-align:center;color:#fff;white-space:normal}
+  /* The pumpkin/decorative-image slot (data/events.json's own `decorImage`
+     field) -- generic and reusable by any future event, not hardcoded to
+     this one image. Unlike .card-char (gated behind `cardChar`, built
+     specifically for the SF6 fighter-game cutout with its own echo trail),
+     this is a plain single decorative image: sized modestly and tucked in
+     the square format's bottom-right, the content column's own empty space
+     (max-width:600px leaves real room to its right), so it never competes
+     with the title/tag/prize-tile stack on the left. z-index:0 (below
+     .content's z-index:1) so real text always wins if they ever overlap. */
+  #card .decor-img{position:absolute;right:56px;bottom:50px;height:300px;width:auto;z-index:0;pointer-events:none;filter:drop-shadow(0 16px 36px rgba(0,0,0,.55))}
+  body.fmt-horizontal #card .decor-img{height:360px;right:90px;bottom:60px}
   /* Perk tags (Free Pizza Lunch / Raffle Prizes) sized up 2026-09-22
      (Round 17), per Eric's direct "make the node tags... larger" request. */
   #card .perk-chip{font-size:28px;padding:.75rem 1.5rem}
@@ -286,7 +308,7 @@
 <div id="card" aria-hidden="false">
   <div id="err"></div>
 </div>
-<script src="assets/js/main.js?v=102"></script>
+<script src="assets/js/main.js?v=105"></script>
 <script>
 (async function(){
   const qs = new URLSearchParams(location.search);
@@ -335,10 +357,40 @@
   // conflicting rather than reinforcing. Each tile is now just the $
   // amount and the place label, centered (styled via the .prize-row/
   // .amt/.place-label rules above).
+  // 2026-10-01: a second `prizes` item shape, `{label}`, added alongside the
+  // existing `{place,amount}` bracket-payout shape -- for an event whose
+  // prizing is a set of named giveaways/perks (Fantastech 2's "MSI 24in
+  // 144Hz Monitors", "Free Pizza") rather than a dollar bracket. Reuses the
+  // same .prize-row tile (just centered label text, see the CSS comment
+  // above) instead of a second component, and `ev.prizeHeading` lets each
+  // event override the "Bracket Prizing" default heading, which only
+  // actually fits a real bracket tournament.
   const prizeHTML = (ev.prizes && ev.prizes.length)
-    ? `<div class="prize-heading">Bracket Prizing</div><div class="prize-table">${ev.prizes.map(p => `<div class="prize-row"><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></div>`).join('')}</div>`
+    ? `<div class="prize-heading">${esc(ev.prizeHeading || 'Bracket Prizing')}</div><div class="prize-table">${ev.prizes.map(p => p.label
+        ? `<div class="prize-row prize-row-label"><span class="amt prize-label-only">${esc(p.label)}</span></div>`
+        : `<div class="prize-row"><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></div>`
+      ).join('')}</div>`
     : '';
-  const perkHTML = (ev.perks && ev.perks.length) ? ev.perks.map(p => `<div class="perk-chip">${esc(p)}</div>`).join('') : '';
+  // A real overflow bug found while building Fantastech 2's card, fixed
+  // before shipping rather than after: an event using the new label-based
+  // prize tiles above already surfaces its giveaways/perks as part of that
+  // 4-tile grid, so also rendering the separate perk-chip row (data/
+  // events.json's own `perks` field, built for a different purpose --
+  // supplementing a $-amount bracket table, see SF6 Saturday Slam) is both
+  // redundant and, confirmed via a live screenshot, pushes real content
+  // (the 3rd perk chip and the whole footer line) past this card's fixed
+  // 1200px bottom edge. Scoped narrowly to label-prize events only -- SF6's
+  // own bracket-table + perk-chip combination (verified to fit back in
+  // Round 17) is completely unchanged.
+  const hasLabelPrizes = ev.prizes && ev.prizes.some(p => p.label);
+  const perkHTML = (!hasLabelPrizes && ev.perks && ev.perks.length) ? ev.perks.map(p => `<div class="perk-chip">${esc(p)}</div>`).join('') : '';
+  // A generic, event-opt-in decorative image (data/events.json's own
+  // `decorImage` field) -- e.g. the pumpkin stack for Fantastech 2, per
+  // Eric's direct request. Deliberately not hardcoded to one image/event
+  // the way .card-char/CHAR_SRC above is (that one carries its own
+  // fighting-game-specific echo-trail treatment) -- this is a plain single
+  // image, reusable by any future event that wants one.
+  const decorHTML = ev.decorImage ? `<img class="decor-img" src="${esc(ev.decorImage)}" alt="" aria-hidden="true">` : '';
 
   // The real fighter-game character cutout -- rendered in both formats
   // (see the .card-char CSS comment above for the 2026-09-22 sizing
@@ -365,6 +417,7 @@
     <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
     <div class="bg-scrim" aria-hidden="true"></div>
     ${charHTML}
+    ${decorHTML}
     <div class="content">
       <div class="brand-row"><img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png" alt="Newegg Gamer Zone"></div>
       <span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(TYPE[ev.type] || ev.type || 'Event')}</span>

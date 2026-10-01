@@ -310,7 +310,15 @@
         "Free Lunch at 1PM",
         "Hourly Giveaways 2-7PM",
         "Newegg Gift Cards"
-      ]
+      ],
+      "prizeHeading": "Prizes & Perks",
+      "prizes": [
+        {"label": "MSI 24\" 144Hz Monitors"},
+        {"label": "Keyboard & Mouse Combos"},
+        {"label": "Free Pizza"},
+        {"label": "Free Play All Day"}
+      ],
+      "decorImage": "assets/calendar/LineupAssets/Pumpkins.png"
     },
     {
       "id": "closed-cyberpower-teambonding-2026-10-10",
