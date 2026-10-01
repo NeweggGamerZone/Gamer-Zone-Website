@@ -2801,3 +2801,46 @@ contrast findings are the same already-disclosed Featured Gear horizontal-overfl
 No cache-bust bump needed -- `event-card.html`'s own inline `<style>` and `data/events.json`
 are both outside the shared `?v=`-tagged asset convention; no shared asset (`style.css`,
 `main.js`, `calendar.js`) was touched this round.
+
+
+## Round 46 (2026-10-01): October 23rd Car & Simulator Setup closure added to the monthly calendar
+
+Per Eric: "Hey we will also be closed on October 23rd for Car & Simulator Setup. Please add
+that onto the monthly image." A direct, fully-specified instruction (implemented straight
+through per core rule 15) -- a fourth real closure day, exactly like the three existing
+October closures (Oct 10, 16, 17), landing the day before the Oct 24 Car & Sim Racing event
+it's setting up for.
+
+**`data/events.json`: a new closure entry, same shape as the other three.** Added
+`closed-car-sim-setup-2026-10-23` (`title:"Closed: Car & Simulator Setup"`, `date:"2026-10-23"`,
+`time:""`, `type:"closed"`, `blurb`, `featured:false`, `reservation:false`) in date order
+between the Oct 17 closure and the Oct 24 car-event entry. **Inserted via a surgical `Edit` (an
+exact-string-match insertion), not a Python `json.load`/`json.dump` round-trip** -- a first
+attempt using Python silently reformatted the unrelated Fantastech 2 event's compact single-
+line `prizes` array into multi-line form (Python's JSON serializer doesn't preserve a file's
+own existing per-array formatting choices), caught via `git diff --stat` showing far more
+churn than one new ~10-line entry should produce, and reverted (`git checkout HEAD --
+data/events.json`) before it could ship. The targeted text-edit approach that replaced it
+leaves every other line in the file byte-for-byte unchanged.
+
+**`screenshot-monthly-calendar.html`'s own hand-authored Special Events list updated in
+lockstep**, per this file's own repeated lesson about that page drifting from its data source
+when only one side is edited: a new `OCT 23: Closed for Car &amp; Simulator Setup` row, using
+the exact same `eu-row eu-closure eu-closure-line` markup/class convention the other three
+closure rows already use (including Round 38's `#month .eu-row.eu-closure .eu-name{font-
+size:52px;line-height:1.2}` override, which already correctly scopes to this row shape) --
+no new CSS needed. The row wraps to 2 lines ("CLOSED FOR CAR &/SIMULATOR SETUP") at this
+board's 1200px export width, which is expected and harmless -- Round 38's own fix only
+guarded against an orphaned single word on its own line, not against wrapping at all, and a
+clean 2-line wrap with no orphan reads fine (confirmed via the regenerated capture).
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`): output measures `(1200, 2720)` -- real height growth from
+the added row, not clipping -- with zero console errors, and a direct visual review confirms
+the new OCT 23 row renders cleanly in the same style as the other three closures, correctly
+positioned between OCT 17 and OCT 24. No new text styling was introduced (this row reuses an
+existing, already-contrast-verified convention from Round 38 exactly), so no fresh pixel-
+sampled WCAG pass was needed beyond that prior verification.
+
+No cache-bust bump needed -- `data/events.json` and `screenshot-monthly-calendar.html`'s own
+inline content are both outside the shared `?v=`-tagged asset convention.
