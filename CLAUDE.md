@@ -2482,3 +2482,47 @@ each (no clipping, no cramped/overlapping pills) rather than broken.
 No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s
 own inline `<style>` block and markup, which isn't cached by the shared `?v=`
 convention `style.css`/`main.js` use.
+
+
+## Round 40 (2026-10-01): tags shrunk to fit one line, subtitles shrunk a bit too
+
+Per Eric, a direct follow-up to Round 39's disclosed limit: "Shrink the tags a little bit so
+they all fit within one line, I don't like two lines of tags. Make the event subtitles a bit
+smaller as well." A fully-specified instruction (implemented straight through per core rule
+15) -- Round 39 had already measured and disclosed exactly how much shortfall existed, so this
+round's job was finding the smallest real reduction that actually closes it, not guessing.
+
+**Tags: binary-searched the real minimum font-size that fits all three rows on one line, not
+guessed.** A temporary Puppeteer script swept candidate `.mc-tags .tag` font-sizes from 38px
+down to 20px against the board's real 1200px capture viewport, checking
+`getBoundingClientRect()`-derived line counts for every row at each size. 33px still left the
+Car row wrapped to 2 lines; **32px is the smallest size (at Round 39's already-tightened `.6rem`
+gap/`.5rem .8rem` padding) where all three rows -- Fantastech 2, Car & Sim Racing, Halloween --
+render on exactly one line.** Set `.mc-tags .tag` to `font-size:32px` (down from Round 39's
+38px) with padding nudged to `.45rem .75rem` (from `.5rem .8rem`) to keep the pill shape
+proportionate at the smaller text rather than reading oversized/baggy around it. This is a
+genuine, if modest, size reduction (32px is still comfortably above this board's smallest font,
+the 21.6px "Special Events" heading) -- not the font-shrink Eric had explicitly ruled out back
+when this tag size was first set, since he's now asking for exactly this tradeoff directly.
+
+**Subtitles: shrunk from 40px to 34px**, per Eric's separate "make the event subtitles a bit
+smaller as well" -- a modest, not drastic, reduction (15%), keeping the text well clear of
+WCAG's 24px large-text threshold (34px still qualifies) and nowhere near illegible.
+
+**Verified via a real Puppeteer capture at the exact 1200px export width**
+(`tools/audit/capture-monthly.js`): output measures `(1200, 2496)` -- down from Round 39's
+`(1200, 2881)`, real height reduction from the rows now needing only 1 line each instead of 2,
+confirming the fix is real and not just visually plausible. Direct visual crops of all three
+`.mc-tags` rows confirm clean, single-line rendering with no clipping or cramped-looking pills
+at the smaller size. Re-ran the pixel-verified WCAG contrast audit (core rule 12) on every
+resized element, since any font-size or padding change can shift what's actually rendered, not
+assumed safe from the prior round's numbers: tags measure a clean 9.92:1 (black text on the
+solid `--ne-orange` tag background -- unaffected by the size change, since this is a solid-fill
+background, not a position-dependent photo sample) across all 9 tag instances; subtitles
+measure 16.29-18.85:1 across all three events -- both comfortably clear of the 7:1 AAA floor
+with real margin, consistent with Round 31/32/34's own prior findings for these same elements
+at their earlier sizes.
+
+No cache-bust bump needed -- scoped entirely to `screenshot-monthly-calendar.html`'s own
+inline `<style>` block, which isn't cached by the shared `?v=` convention `style.css`/
+`main.js` use.
