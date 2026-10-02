@@ -54,7 +54,31 @@ const GZ_ICONS = {
   // existing `gamepad` glyph rather than adding a near-duplicate.
   monitor: '<path d="M3 4h18a1 1 0 011 1v11a1 1 0 01-1 1h-6v2h3v2H8v-2h3v-2H3a1 1 0 01-1-1V5a1 1 0 011-1zm1 2v9h16V6z"/>',
   keyboard: '<path d="M3 6h18a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7a1 1 0 011-1zm1 2v8h16V8zm1.5 1.2h2v2h-2zm3.8 0h2v2h-2zm3.8 0h2v2h-2zm3.8 0h2v2h-2zM5.5 13h13v2h-13z"/>',
-  pizza: '<path d="M12 2.4L21.3 19.6A2 2 0 0119.5 22h-15a2 2 0 01-1.8-2.4z"/><circle cx="12" cy="11.5" r="1.3" opacity=".5"/><circle cx="8.3" cy="16" r="1.1" opacity=".5"/><circle cx="15.3" cy="16.4" r="1.1" opacity=".5"/>'
+  // 2026-10-02 (same-day follow-up), per Eric ("the pizza emoji should be
+  // still all orange, so all orange pizza emoji with circles cut out of
+  // it"): the original version only laid 3 semi-transparent <circle>
+  // elements ON TOP of the solid wedge (dimmed via opacity, never
+  // actually cut into the shape) -- which is why it still read as a
+  // plain triangle. This version is a single <path> with
+  // fill-rule="evenodd": the outer wedge and the 3 "pepperoni" circles
+  // are each their own closed subpath in the same `d`, so evenodd's
+  // alternating winding genuinely punches the circles out as real holes
+  // (the tile's own dark background shows through) instead of dimming
+  // the fill in place. Every arc's flags/coordinates are fully
+  // space-separated ("A1.8 1.8 0 1 0 12 9.9999", not a packed
+  // "a1.6 1.6 0 100-3.2") -- a first attempt packed them tightly, which
+  // a real browser parses as a different, degenerate (zero-area) arc,
+  // silently collapsing the holes back to nothing; caught by actually
+  // rendering and zooming into the result, not assumed from the path
+  // string alone. Re-verified the same way after this fix: a clean solid
+  // orange wedge with 3 real circular holes.
+  pizza: '<path fill="currentColor" fill-rule="evenodd" d="M12 2 L22 20 L2 20 Z M12 6.4 A1.8 1.8 0 1 0 12 9.9999 A1.8 1.8 0 1 0 12 6.4 Z M8.3 12.2 A1.8 1.8 0 1 0 8.3 15.7999 A1.8 1.8 0 1 0 8.3 12.2 Z M15.7 12.2 A1.8 1.8 0 1 0 15.7 15.7999 A1.8 1.8 0 1 0 15.7 12.2 Z"/>',
+  // A plain fork-and-knife ("restaurant"/dinner-plate) glyph, added the
+  // same round as a disclosed fallback option alongside the pizza-with-
+  // holes redesign above, per Eric's own "otherwise, just have a fork and
+  // knife emoji" framing -- kept in the shared set either way, reusable
+  // by any future food-related tile regardless of which one ships here.
+  utensils: '<path d="M6 2v8a2 2 0 001.5 1.9V22h1V11.9A2 2 0 0010 10V2H9v7H8.5V2h-1v7H7V2zm11 0a4 4 0 00-3 3.9V12a1 1 0 001 1h1v9h1V2z"/>'
 };
 // 2026-09-08, per Eric ("have their motion synced, so the positions are
 // relatively the same, even when pages are closed they are aligned"): a

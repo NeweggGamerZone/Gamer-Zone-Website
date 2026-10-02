@@ -41,7 +41,7 @@
      yet, since which events should auto-export and on what schedule is an
      open question for Eric, not a fully-specified one. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=108">
+<link rel="stylesheet" href="assets/css/style.css?v=109">
 <style>
   html,body{margin:0;padding:0;background:#000}
   #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:70px;box-sizing:border-box}
@@ -344,6 +344,23 @@
   body:not(.fmt-horizontal) #card .ll-content{max-width:none}
   #card .ll-top{display:flex;align-items:center;gap:40px}
   #card .ll-text{flex:1;min-width:0}
+  /* 2026-10-02 (same-day follow-up), per Eric's "make the subtitle
+     smaller" -- scoped to this layout's text column only (the original
+     bottom-anchored layout's .cd-sub, used by every other event, is
+     untouched). Paired with a shortened subtitle string in
+     data/events.json itself (Eric's separate "shorter version" ask), so
+     both the text length and its font-size came down together. */
+  body:not(.fmt-horizontal) #card .ll-text .cd-sub{font-size:20px}
+  /* Per Eric's "see if fantastech 2 party is fit in one line" -- binary-
+     searched the real largest font-size that keeps "FANTASTECH 2 PARTY"
+     on one line within .ll-text's real 476px width (measured live via
+     Range.getClientRects(), not guessed): 39px is the largest one-line
+     size, 40px wraps. 38px ships with a small safety margin, the same
+     convention this project's other binary-searched text sizes use
+     (e.g. Round 38's closure-row font-size). Scoped to this layout's
+     text column only -- the original layout's shared h1 size (52px) is
+     untouched for every other event. */
+  body:not(.fmt-horizontal) #card .ll-text h1{font-size:38px}
   /* Overrides the base .decor-img's position:absolute/left/top/transform
      (tuned for the old bottom-right-corner placement) so the image
      becomes a normal, larger, static flex item sitting next to the text
@@ -405,7 +422,7 @@
 <div id="card" aria-hidden="false">
   <div id="err"></div>
 </div>
-<script src="assets/js/main.js?v=108"></script>
+<script src="assets/js/main.js?v=109"></script>
 <script>
 (async function(){
   const qs = new URLSearchParams(location.search);
@@ -440,7 +457,10 @@
   const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major', 'newegg-event': 'Newegg Event', 'car-meet': 'Car Meet', 'lan-party': 'LAN Party' };
   const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major', 'newegg-event': 'cal-major', 'car-meet': 'cal-major', 'lan-party': 'cal-major' };
   const bgUrl = (fmt === 'horizontal' && ev.imageHD) ? ev.imageHD : (ev.image || 'assets/calendar/BGAssets/tournament-major-bg-blurred.jpg');
-  const pretty = dt => new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  // 2026-10-02 (same-day follow-up), per Eric's "write out Saturday" --
+  // the weekday now spells out in full ("Saturday, Oct 3") rather than
+  // abbreviating ("Sat, Oct 3").
+  const pretty = dt => new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   const esc = (window.GZ && GZ.esc) ? GZ.esc : (s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
 
   // "${ord} Place" (e.g. "1st Place") to match calendar.js's own prizeBlock()
