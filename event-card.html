@@ -373,7 +373,16 @@
      silently kept at the old constraint: Eric only asked for bigger text
      this round, not a renewed one-line guarantee, and a 2-line title reads
      fine at this size with the row's own height already flexing to fit it. */
-  body:not(.fmt-horizontal) #card .ll-text h1{font-size:42px}
+  /* 2026-10-02 (same day, follow-up round), per Eric's direct "make the
+     Fantastech 2 party title larger" -- 42px -> 56px. Swept live from 42 up
+     to 70px first: the title stays wrapped to the same 2 lines
+     ("FANTASTECH 2"/"PARTY") at every size in that range (it's wrapping on
+     a real word boundary, not a soft near-miss), and the card has real
+     room to spare even at 70px (footer bottom still ~20px clear of the
+     card's own edge). 56px is a clear, visible jump over 42px while still
+     leaving a comfortable ~49px of margin below the footer, rather than
+     pushing all the way to the edge of what technically still fits. */
+  body:not(.fmt-horizontal) #card .ll-text h1{font-size:56px}
   /* Overrides the base .decor-img's position:absolute/left/top/transform
      (tuned for the old bottom-right-corner placement) so the image
      becomes a normal, larger, static flex item sitting next to the text
