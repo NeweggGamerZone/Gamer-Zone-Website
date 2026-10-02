@@ -2844,3 +2844,94 @@ sampled WCAG pass was needed beyond that prior verification.
 
 No cache-bust bump needed -- `data/events.json` and `screenshot-monthly-calendar.html`'s own
 inline content are both outside the shared `?v=`-tagged asset convention.
+
+## Round 47 (2026-10-02): Fantastech 2 card -- new lineup art, reworded subtitle, prize icons
+
+Per Eric, three direct, fully-specified requests in one message, implemented straight through
+per core rule 15:
+
+**Decorative image swapped from Pumpkins.png to the real "smiling computer" asset Eric added.**
+Located on Eric's connected device (not yet in the git repo or cloud clone -- added there very
+recently, after the device's working tree was last synced) at
+`assets/calendar/LineupAssets/Fantastech2.png`: staged and visually confirmed via the Read tool
+before use, per this project's own "actually open and look at candidates" rule -- a real
+1427x1102 RGBA image (genuine alpha transparency, confirmed via `PIL`'s `getbbox()`) depicting a
+retro chrome CRT monitor/keyboard/mouse set with a pixel-art orange-screen smiley face, matching
+"the smiling computer" exactly. `data/events.json`'s Fantastech 2 `decorImage` field updated
+accordingly. The old square-format sizing (`height:620px;left:78%`, tuned in Round 45 for
+Pumpkins.png's narrow ~0.56:1 portrait aspect ratio) would have rendered the new ~1.3:1 landscape
+image ~800px wide at that same height -- confirmed via the math before shipping, not assumed
+safe -- colliding with the text column (only ~460px of real clearance exists between the content
+column's right edge and the card's own right edge). Re-sized to `height:310px;left:75%` instead,
+which keeps the image at a real, verified ~400px wide with ~30px of clearance on both sides. The
+horizontal format's own bottom-right corner placement (`height:360px;right:90px;bottom:60px`)
+needed no change -- the new image's wider aspect ratio still fits comfortably in that format's
+much larger (~840px) gap.
+
+**Subtitle reworded to Eric's exact text.** `data/events.json`'s Fantastech 2 `subtitle` field
+changed to "Fantastech 2 is one of Newegg's biggest sales yet! We're celebrating with Free Lunch,
+Hourly Giveaways, and Free Play All Day!" -- this field feeds both `event-card.html`'s social
+export and the live Plan Your Visit calendar panel (`calendar.js`, same data, no code change
+needed), so both update from one source with no drift risk.
+
+**Prize tiles gained a flat orange icon each, plus Eric's exact reworded labels.** Three new
+icons added to the shared `GZ_ICONS` set (`assets/js/main.js`) -- `monitor`, `keyboard`, `pizza`
+-- matching this set's existing flat, geometric, single-path style (the `pizza` glyph uses a
+solid triangular wedge with three lower-opacity "pepperoni" dots, since a true two-tone cutout
+isn't achievable with a single `currentColor` fill); "Free Play All Day" reuses the existing
+`gamepad` icon rather than adding a near-duplicate. This follows the project's own "one shared
+implementation" rule -- the icon is rendered via `GZ.icon(name, 'ic prize-icon')`, the same
+helper every other icon badge on the site already uses (`.amb-class-icon`, the tier pillars,
+etc.), not a new icon system or literal multi-color emoji (which "flat orange emoticons" was
+read as describing, given this site's existing all-orange flat-icon visual language).
+`data/events.json`'s Fantastech 2 `prizes` array updated to
+`{"label":"MSI 24\" Monitor Raffles","icon":"monitor"}` /
+`{"label":"Keyboard Raffles","icon":"keyboard"}` /
+`{"label":"Free Pizza Lunch","icon":"pizza"}` / `{"label":"Free Play All Day","icon":"gamepad"}`.
+
+**Icon rendering added in both places that render a label-style prize tile, not just one.**
+`event-card.html`'s `prizeHTML` template and `calendar.js`'s `prizeBlock()` (the live Plan Your
+Visit calendar panel, which reads the exact same JSON fields) both now render
+`p.icon ? GZ.icon(p.icon, 'ic prize-icon') : ''` above the label text when a prize entry has an
+`icon` field -- mirrored intentionally, per this project's own "one shared implementation, don't
+let the live panel drift from the social-export card" discipline (the same lesson documented
+repeatedly elsewhere in this file for `screenshot-monthly-calendar.html`). The shared
+`.prize-row-label` rule in `style.css` (used by the live calendar panel) was changed from a
+plain centered row to a centered column (`flex-direction:column`) so the icon stacks above the
+label text there too, and a new `.prize-row-label .ic.prize-icon{width:1.6rem;height:1.6rem;
+color:var(--ne-orange)}` rule was added. `event-card.html` gets its own larger, page-scoped
+icon-sizing override (`40px`, consistent with that page's much larger text), same pattern as
+every other `#card`-prefixed override in that file.
+
+**Verified via live Puppeteer screenshots of both export formats and the live calendar panel,
+plus real pixel-sampled contrast, not just a glance.** Both `event-card.html` exports (1200x1200
+square, 1920x1080 horizontal) render cleanly with zero console errors: the new image sits
+correctly centered in its own space with no clipping or overlap against the text column or the
+card's edges, all four prize tiles show their icon above a correctly-worded label, and the
+subtitle reads the new text. The live Plan Your Visit calendar panel for Oct 3 (`events.html`)
+was clicked open directly and confirmed to render the identical icon-above-label treatment.
+Sampled the real rendered icon color (the shared `--ne-orange`, `rgb(250,157,40)`) against each
+tile's real background within the icon's own bounding box: worst-case 5.96-6.39:1 across all
+four tiles -- comfortably clear of the 3:1 AA floor this project holds non-text/icon elements to
+(icons have no WCAG AAA tier, per the "Non-text UI/graphical elements" note under "Readability"
+above). A full cross-page console-error sweep (`index.html`, `events.html`, `games.html`,
+`edu.html`, `ambassador.html`) came back clean -- the full scripted `run-full-qa.sh` suite itself
+hit a real Puppeteer navigation-timeout flake in this session's sandbox unrelated to this
+round's changes (intermittent, not reproduced on a second direct per-page check), so the
+per-page console sweep plus the targeted live checks above are this round's disclosed
+verification method instead of a clean full-suite run.
+
+Site-wide cache-bust bumped `?v=106` -> `?v=107` across all 6 shared-convention HTML files plus
+`event-card.html`, since `main.js`, `calendar.js`, and `style.css` all changed this round.
+
+**A real, unrelated set of in-progress local changes found on Eric's device while syncing this
+round, left untouched rather than clobbered or swept into this commit.** Before writing this
+round's files to the device, `git status` there showed `ambassador.html` and
+`assets/js/reviews.js` already modified (uncommitted), several `PhotoReel` photos deleted/
+duplicated, and a handful of untracked files (a `Claude outputs/` folder, a stale
+`data/calendar-manifest.json.stale-bak-14957`, etc.) -- none of which this round touched or
+asked about. Per this project's own small-scoped-commit discipline, only this round's own 11
+files were `git add`ed and committed by name (never `-A`), so that other in-progress work stays
+exactly as it was for whoever is mid-way through it. A stale, empty `.git/index.lock` (left
+behind by a different process) also had to be removed via `device_request_delete_permission`
+before `git add`/`commit` would run at all.
