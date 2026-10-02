@@ -2933,3 +2933,26 @@ needed (same colors/sizes as Round 50, just a real geometry fix).
 
 No cache-bust bump needed -- scoped entirely to `event-card.html`'s own inline `<style>`
 block, same as every round on this page since Round 15.
+
+
+## Round 52 (2026-10-02): Fantastech 2 square card -- larger title
+
+Per Eric's direct "make the Fantastech 2 party title larger": `.ll-text h1` grew 42px -> 56px.
+
+**Swept live before picking a value, per this project's own binary-search/sweep convention**,
+rather than guessing a bump: from 42px up to 70px, the title stays wrapped to the same real 2
+lines ("FANTASTECH 2"/"PARTY") at every size in that range -- it's wrapping at a real word
+boundary, not a soft near-miss that could flip to 1 or 3 lines as the size changes -- and the
+card has genuine room to spare even at 70px (footer bottom still ~20px clear of the card's own
+edge, confirmed via `getBoundingClientRect()`). 56px ships: a clear, visible jump over 42px,
+while leaving a comfortable ~49px of margin below the footer rather than pushing all the way to
+the edge of what technically still fits.
+
+**Verified via live Puppeteer screenshot and a zero-regression check, not a glance.** Confirmed
+no clipping or overlap at the new size and zero console errors; re-screenshotted SF6 Saturday
+Slam's own square card and the Fantastech 2 horizontal format to confirm both are unaffected,
+since the new size is scoped to `body:not(.fmt-horizontal) #card .ll-text h1` -- this layout's
+own text column only.
+
+No cache-bust bump needed -- scoped entirely to `event-card.html`'s own inline `<style>`
+block, same as every round on this page since Round 15.
