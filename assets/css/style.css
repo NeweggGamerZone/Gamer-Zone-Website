@@ -1776,6 +1776,12 @@ body.home-page { background: transparent; }
    pattern every other icon badge on the site already uses (.amb-class-icon,
    the tier pillars, etc.) rather than a new icon system or literal emoji. */
 .prize-row-label .ic.prize-icon{width:1.6rem;height:1.6rem;color:var(--ne-orange)}
+/* 2026-10-02, per Eric ("use a pizza emoji, not a triangle"): when a
+   prize's `icon` field isn't a name in the shared GZ_ICONS set, it's
+   rendered as literal emoji text instead (see prizeBlock()'s own
+   `iconHTML` helper in calendar.js, mirrored in event-card.html) -- sized
+   to read at the same visual weight as the SVG icons next to it. */
+.prize-row-label .prize-icon-emoji{font-size:1.6rem;line-height:1}
 /* Shared type-color coding for tags — used by both the calendar detail card
    and the Event details cards, so a type reads the same color everywhere. */
 /* Black text on both — white measured under 4.5:1 WCAG AA against these two

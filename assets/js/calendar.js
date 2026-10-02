@@ -137,8 +137,14 @@
     // shared GZ_ICONS set, same as every other orange icon badge on the
     // site), mirrored here from event-card.html's own identical change so
     // the live calendar panel stays in sync with the social-export card.
+    // Same-day follow-up, per Eric's "use a pizza emoji, not a triangle":
+    // `icon` can also be a literal emoji character instead of a GZ_ICONS
+    // name -- checked here (and in event-card.html's identical helper) so
+    // a value not found in the shared icon set renders as plain emoji text
+    // rather than silently rendering nothing.
+    const iconHTML = name => !name ? '' : (GZ_ICONS[name] ? GZ.icon(name, 'ic prize-icon') : `<span class="prize-icon-emoji" aria-hidden="true">${GZ.esc(name)}</span>`);
     const rows = e.prizes.map(p => p.label
-      ? `<div class="prize-row prize-row-label">${p.icon ? GZ.icon(p.icon, 'ic prize-icon') : ''}<span class="amt prize-label-only">${GZ.esc(p.label)}</span></div>`
+      ? `<div class="prize-row prize-row-label">${iconHTML(p.icon)}<span class="amt prize-label-only">${GZ.esc(p.label)}</span></div>`
       : `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></span></div>`
     ).join('');
     const perks = (e.perks && e.perks.length) ? e.perks.map(p => `<div class="perk-chip">${GZ.esc(p)}</div>`).join('') : '';

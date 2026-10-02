@@ -41,7 +41,7 @@
      yet, since which events should auto-export and on what schedule is an
      open question for Eric, not a fully-specified one. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=107">
+<link rel="stylesheet" href="assets/css/style.css?v=108">
 <style>
   html,body{margin:0;padding:0;background:#000}
   #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:70px;box-sizing:border-box}
@@ -328,6 +328,75 @@
   /* Perk tags (Free Pizza Lunch / Raffle Prizes) sized up 2026-09-22
      (Round 17), per Eric's direct "make the node tags... larger" request. */
   #card .perk-chip{font-size:28px;padding:.75rem 1.5rem}
+  /* 2026-10-02 (same day, follow-up round): the square-format-only
+     "label prizes + decorImage" layout (see useLabelSquareLayout in the
+     script below) -- per Eric's "make the nodes stretch in a row of 4x1
+     on the bottom of the square one, with the computer graphic larger and
+     next to the event description." Scoped narrowly to this one new
+     layout branch; the original layout's own CSS above (used by every
+     other event, including SF6 Saturday Slam's bracket-table square card)
+     is completely untouched. */
+  /* .ll-content overrides the shared .content max-width (600px on square)
+     back to the card's full available width -- this content block needs
+     to host a real flex row (.ll-top) wide enough to fit both the text
+     column and the enlarged decor image side by side, not the narrow
+     single-column width the original bottom-anchored layout used. */
+  body:not(.fmt-horizontal) #card .ll-content{max-width:none}
+  #card .ll-top{display:flex;align-items:center;gap:40px}
+  #card .ll-text{flex:1;min-width:0}
+  /* Overrides the base .decor-img's position:absolute/left/top/transform
+     (tuned for the old bottom-right-corner placement) so the image
+     becomes a normal, larger, static flex item sitting next to the text
+     column instead of floating in its own empty corner -- directly
+     addressing "the computer graphic larger and next to the event
+     description." Needs the same body:not(.fmt-horizontal) specificity
+     as the base square-format .decor-img rule above to reliably win. */
+  body:not(.fmt-horizontal) #card .decor-img-inline{position:static;left:auto;top:auto;transform:none;height:420px;width:auto;flex:none;margin-left:auto}
+  /* Pushed to the bottom of #card's own flex column via margin-top:auto
+     (a flex item's margin-top:auto consumes all remaining free space
+     above it) -- this is what makes the prize row sit at "the bottom of
+     the square one" regardless of how tall the text column above it
+     happens to be. A full-width block (no max-width cap, unlike
+     .content) so the 4 tiles can genuinely stretch across the card's
+     full ~1060px inner width, per Eric's "stretch in a row of 4x1". */
+  /* position:relative;z-index:1, matching .content's own treatment --
+     without it, these two plain static siblings (outside .content, for
+     the useLabelSquareLayout branch) paint in the lower "static in-flow
+     block" stacking tier, which sits BELOW the positioned .bg-photo/
+     .bg-scrim layers (position:absolute, z-index:auto) regardless of DOM
+     order -- confirmed live via direct pixel sampling (every sampled
+     point in this region came back near-black, i.e. nothing was actually
+     painting there despite getComputedStyle reporting opacity:1/
+     visibility:visible). Promoting both to the same z-index:1 tier
+     .content already uses puts them back in normal DOM-order stacking,
+     above the background layers. */
+  #card .ll-prize-section{margin-top:auto;width:100%;position:relative;z-index:1}
+  /* Back to 4 columns specifically for this layout's prize row -- the
+     shared square-format override above (body:not(.fmt-horizontal) #card
+     .prize-table{grid-template-columns:repeat(2,1fr)...}) exists because
+     the *original* layout's prize table sits inside the narrow 600px
+     .content column, where 4 columns would blow out past its own width
+     (see Round 18's own documented rejection of exactly that). This
+     table instead sits inside the full-width .ll-prize-section, so 4
+     columns fits safely -- same specificity as that 2-column override,
+     defined later in the stylesheet so it wins for this table only. */
+  /* minmax(0,1fr), not a bare 1fr -- a bare 1fr track's automatic minimum
+     is its content's own min-content width (not 0), which silently blew
+     this 4-column row out to ~1245px of real content width against only
+     a 1060px box (confirmed live via getBoundingClientRect() before this
+     fix, tiles spilling ~115px past the card's own right edge) -- the
+     exact CSS Grid blowout bug Round 18 already documented and fixed the
+     same way for this page's other prize-table usage. minmax(0,1fr)
+     lets each track actually shrink to its equal 1/4 share; the tile's
+     own text wrapping (already white-space:normal) absorbs the rest. */
+  body:not(.fmt-horizontal) #card .ll-prize-table{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 8px}
+  #card .ll-footer{margin-top:16px;position:relative;z-index:1}
+  /* A page-scoped size for the emoji-fallback prize icon (see iconHTML's
+     own comment below) to match the existing SVG icon case's own
+     page-scoped 40px size (#card .prize-row-label .ic.prize-icon above)
+     -- the shared style.css .prize-icon-emoji default (1.6rem) is sized
+     for the live calendar panel's much smaller text, not this card. */
+  #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
   #card .footer-line{margin-top:24px;font-family:var(--eu-body);font-size:20px;color:var(--ink-dim)}
   #err{color:#fff;font-family:var(--eu-body);padding:2rem}
 </style>
@@ -336,7 +405,7 @@
 <div id="card" aria-hidden="false">
   <div id="err"></div>
 </div>
-<script src="assets/js/main.js?v=107"></script>
+<script src="assets/js/main.js?v=108"></script>
 <script>
 (async function(){
   const qs = new URLSearchParams(location.search);
@@ -393,11 +462,18 @@
   // above) instead of a second component, and `ev.prizeHeading` lets each
   // event override the "Bracket Prizing" default heading, which only
   // actually fits a real bracket tournament.
+  // 2026-10-02 (same day, follow-up): per Eric's "use a pizza emoji, not a
+  // triangle" -- `icon` can be either a GZ_ICONS name (rendered as the
+  // existing flat-orange SVG, e.g. monitor/keyboard/gamepad) or a literal
+  // emoji character (rendered as plain text instead) when the value isn't
+  // a known icon name. Mirrored in calendar.js's own identical helper so
+  // the live calendar panel and this export stay in sync.
+  const iconHTML = name => !name ? '' : (GZ_ICONS[name] ? GZ.icon(name, 'ic prize-icon') : `<span class="prize-icon-emoji" aria-hidden="true">${esc(name)}</span>`);
+  const prizeTile = p => p.label
+    ? `<div class="prize-row prize-row-label">${iconHTML(p.icon)}<span class="amt prize-label-only">${esc(p.label)}</span></div>`
+    : `<div class="prize-row"><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></div>`;
   const prizeHTML = (ev.prizes && ev.prizes.length)
-    ? `<div class="prize-heading">${esc(ev.prizeHeading || 'Bracket Prizing')}</div><div class="prize-table">${ev.prizes.map(p => p.label
-        ? `<div class="prize-row prize-row-label">${p.icon ? GZ.icon(p.icon, 'ic prize-icon') : ''}<span class="amt prize-label-only">${esc(p.label)}</span></div>`
-        : `<div class="prize-row"><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></div>`
-      ).join('')}</div>`
+    ? `<div class="prize-heading">${esc(ev.prizeHeading || 'Bracket Prizing')}</div><div class="prize-table">${ev.prizes.map(prizeTile).join('')}</div>`
     : '';
   // A real overflow bug found while building Fantastech 2's card, fixed
   // before shipping rather than after: an event using the new label-based
@@ -441,24 +517,65 @@
     <img class="card-char-ghost card-char-ghost-1" src="${CHAR_SRC}" alt="" aria-hidden="true">
     <img class="card-char" src="${CHAR_SRC}" alt="" aria-hidden="true">` : '';
 
-  card.innerHTML = `
-    <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
-    <div class="bg-scrim" aria-hidden="true"></div>
-    ${charHTML}
-    ${decorHTML}
-    <div class="content">
-      <div class="brand-row"><img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png" alt="Newegg Gamer Zone"></div>
-      <span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(TYPE[ev.type] || ev.type || 'Event')}</span>
-      <h1>${esc(ev.title)}</h1>
-      ${ev.subtitle ? `<p class="cd-sub">${esc(ev.subtitle)}</p>` : ''}
-      <div class="cd-meta">
+  const brandRowHTML = `<div class="brand-row"><img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png" alt="Newegg Gamer Zone"></div>`;
+  const tagHTML = `<span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(TYPE[ev.type] || ev.type || 'Event')}</span>`;
+  const metaHTML = `<div class="cd-meta">
         <span class="cd-meta-item"><i data-ic="cal"></i>${pretty(ev.date)}</span>
         ${ev.time ? `<span class="cd-meta-item"><i data-ic="clock"></i>${esc(ev.time)}</span>` : ''}
+      </div>`;
+
+  // 2026-10-02 (same day, follow-up round), per Eric: "make the nodes
+  // stretch in a row of 4x1 on the bottom of the square one, with the
+  // computer graphic larger and next to the event description." A second,
+  // square-format-only layout -- only for an event that has BOTH a
+  // decorImage (currently just Fantastech 2's "smiling computer") AND
+  // label-style prizes, i.e. exactly the card this request is about, not
+  // a generic trigger that could silently change SF6 Saturday Slam's own
+  // bracket-table/fighter-cutout square card, which keeps the original
+  // layout below completely unchanged. Horizontal format is untouched too
+  // -- Eric's request was scoped to "the square one" specifically, and
+  // horizontal's existing 4-column prize-table + bottom-right decor image
+  // already reads the way this request asks for.
+  const useLabelSquareLayout = !!(ev.decorImage && hasLabelPrizes && fmt === 'square');
+
+  if (useLabelSquareLayout) {
+    card.innerHTML = `
+      <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
+      <div class="bg-scrim" aria-hidden="true"></div>
+      <div class="content ll-content">
+        <div class="ll-top">
+          <div class="ll-text">
+            ${brandRowHTML}
+            ${tagHTML}
+            <h1>${esc(ev.title)}</h1>
+            ${ev.subtitle ? `<p class="cd-sub">${esc(ev.subtitle)}</p>` : ''}
+            ${metaHTML}
+          </div>
+          <img class="decor-img decor-img-inline" src="${esc(ev.decorImage)}" alt="" aria-hidden="true">
+        </div>
       </div>
-      ${prizeHTML}
-      ${perkHTML}
-      <div class="footer-line">Free to enter the Zone · Walk-ins welcome</div>
-    </div>`;
+      <div class="ll-prize-section">
+        <div class="prize-heading">${esc(ev.prizeHeading || 'Prizes & Perks')}</div>
+        <div class="prize-table ll-prize-table">${ev.prizes.map(prizeTile).join('')}</div>
+      </div>
+      <div class="footer-line ll-footer">Free to enter the Zone · Walk-ins welcome</div>`;
+  } else {
+    card.innerHTML = `
+      <div class="bg-photo" style="background-image:url('${bgUrl}')" aria-hidden="true"></div>
+      <div class="bg-scrim" aria-hidden="true"></div>
+      ${charHTML}
+      ${decorHTML}
+      <div class="content">
+        ${brandRowHTML}
+        ${tagHTML}
+        <h1>${esc(ev.title)}</h1>
+        ${ev.subtitle ? `<p class="cd-sub">${esc(ev.subtitle)}</p>` : ''}
+        ${metaHTML}
+        ${prizeHTML}
+        ${perkHTML}
+        <div class="footer-line">Free to enter the Zone · Walk-ins welcome</div>
+      </div>`;
+  }
   if (window.injectIcons) injectIcons(card);
   else if (window.GZ && GZ.injectIcons) GZ.injectIcons(card);
 })();
