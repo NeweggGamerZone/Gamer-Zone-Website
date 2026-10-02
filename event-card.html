@@ -390,7 +390,13 @@
      it. 460px is a real, verified compromise: still a visible increase, but
      leaves the text column close to its old ~476px width. */
   body:not(.fmt-horizontal) #card .ll-top{gap:32px}
-  body:not(.fmt-horizontal) #card .decor-img-inline{position:static;left:auto;top:auto;transform:none;height:460px;width:auto;flex:none;margin-left:auto}
+  /* 2026-10-02 (same day, follow-up), per Eric's "lower the computer a bit"
+     -- `.ll-top` centers this image against the text column via
+     align-items:center; a small relative top offset nudges it down from
+     that centered position without changing the flex row's own height or
+     the text column's position (position:relative doesn't affect sibling
+     layout, unlike a margin-top would). */
+  body:not(.fmt-horizontal) #card .decor-img-inline{position:relative;left:auto;top:28px;transform:none;height:460px;width:auto;flex:none;margin-left:auto}
   /* Pushed to the bottom of #card's own flex column via margin-top:auto
      (a flex item's margin-top:auto consumes all remaining free space
      above it) -- this is what makes the prize row sit at "the bottom of
@@ -445,8 +451,20 @@
      and already fine content-wise; this only needs more room, not a ratio.
      Scoped to .ll-prize-table specifically so SF6 Saturday Slam's own
      square card (a different layout, different prize-table class) is
-     unaffected. */
-  body:not(.fmt-horizontal) #card .ll-prize-table .prize-row{min-height:210px;padding:26px 22px}
+     unaffected.
+     A real bug found and fixed the same day: the shared, broader
+     `body:not(.fmt-horizontal) #card .prize-row{aspect-ratio:3/2}` rule
+     above (tuned for SF6's own 2-column tiles) still matched these tiles
+     too, since they share the same .prize-row class. Combined with this
+     rule's own min-height:210px, the browser computed a *width* from the
+     3:2 ratio against that taller height (210*1.5=315px) instead of
+     stretching to the grid track's real 253px column -- each tile rendered
+     315px wide against a 253px track, visibly overlapping its neighbor.
+     `aspect-ratio:auto` here overrides the shared rule (this selector is
+     more specific) so these tiles go back to their real track width (253px,
+     their original/intended size) with no ratio fighting the min-height
+     floor. */
+  body:not(.fmt-horizontal) #card .ll-prize-table .prize-row{aspect-ratio:auto;min-height:210px;padding:26px 22px}
   #card .ll-footer{margin-top:16px;position:relative;z-index:1}
   /* A page-scoped size for the emoji-fallback prize icon (see iconHTML's
      own comment below) to match the existing SVG icon case's own
