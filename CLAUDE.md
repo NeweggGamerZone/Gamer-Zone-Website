@@ -2745,3 +2745,84 @@ contrast findings are the same already-disclosed Featured Gear horizontal-overfl
 No cache-bust bump needed -- `event-card.html`'s own inline `<style>` and `data/events.json`
 are both outside the shared `?v=`-tagged asset convention; no shared asset (`style.css`,
 `main.js`, `calendar.js`) was touched this round.
+
+
+## Round 49 (2026-10-02): Fantastech 2 square card -- equal prize tiles, shorter/smaller
+subtitle, orange pizza-with-holes icon (reverted from emoji), spelled-out Saturday, and a
+real cross-session git collision found and fixed
+
+Per Eric, a same-day follow-up to Round 48's Fantastech 2 square card: "The nodes all need to
+be the same size, maybe just say Monitor Raffles. Make the subtitle a shorter version of what
+it is right now. The pizza emoji should be still all orange, so all orange pizza emoji with
+circles cut out of it. otherwise, just have a fork and knife emoji kind of like a dinner plate
+or food emoji. Write out Saturday. Make the subtitle smaller and see if fantastech 2 party is
+fit in one line." Five concrete, fully-specified asks, implemented straight through per core
+rule 15, all still scoped to the Fantastech 2 event's square format.
+
+**Prize tiles now equal height.** `data/events.json`'s monitor prize label shortened from
+`MSI 24" Monitor Raffles` to `Monitor Raffles` -- the one label whose extra line was forcing
+its own tile taller than its three siblings. Confirmed via live render: all 4 tiles now measure
+exactly 169px.
+
+**Subtitle shortened and its font-size reduced.** New subtitle: "One of Newegg's biggest sales
+yet: Free Lunch, Hourly Giveaways, and Free Play All Day!" -- noticeably shorter than Round
+48's own version. `event-card.html` gained a page-scoped `.ll-text .cd-sub{font-size:20px}`
+rule (the original bottom-anchored layout's own `.cd-sub`, used by every other event, is
+untouched).
+
+**Pizza icon switched back from the 🍕 emoji (Round 47's own fallback) to a flat, all-orange
+SVG, per Eric's explicit "all orange pizza emoji with circles cut out of it."** `main.js`'s
+`GZ_ICONS.pizza` is now a single `<path fill-rule="evenodd">` combining the outer wedge and 3
+"pepperoni" circles as separate closed subpaths in one `d` -- evenodd's alternating winding
+genuinely cuts the circles out as real holes (the tile's own dark background shows through)
+rather than the icon's prior history of dimming opacity-reduced circles layered on top (which
+never actually cut anything, and was why it kept reading as a plain triangle). **A real SVG
+parsing bug was found and fixed while building this, not assumed safe from the path string
+alone:** a first attempt packed the arc command's flags tightly against the following negative
+coordinate (`a1.6 1.6 0 100-3.2`) -- a real browser's path parser mis-reads this as a different,
+degenerate (zero-area) arc, silently collapsing the holes back to nothing. Caught by building an
+isolated standalone test file with the same shape but fully space-separated arc parameters
+(`A1.8 1.8 0 1 0 12 9.9999`), rendering it, and confirming 3 real holes appear -- then applying
+the same fix to the live icon and re-confirming via a zoomed crop of the actual rendered card.
+Viewed at the icon's real small render size next to its own "Free Pizza Lunch" label, it reads
+clearly as a pizza slice -- the fork-and-knife fallback Eric also offered wasn't needed.
+
+**Date now spells out the weekday in full.** `event-card.html`'s `pretty` date formatter
+changed from `{weekday:'short',...}` to `{weekday:'long',...}` -- "Saturday, Oct 3" instead of
+"Sat, Oct 3".
+
+**H1 font-size reduced, with the "does it fit on one line" question answered by real
+measurement, not a guess.** Binary-searched the real largest font-size that keeps "FANTASTECH 2
+PARTY" on one line within `.ll-text`'s real 476px column width (measured live via
+`Range.getClientRects()`): 39px is the largest one-line size, 40px wraps. Shipped 38px, the same
+small-safety-margin convention this project's other binary-searched text sizes already use.
+
+**A real cross-session git collision, found and fixed, not silently absorbed.** Before starting
+this round's own changes, `git show 6f993cc -- data/events.json` (the prior, Round-48 commit)
+revealed the committed diff had actually gone the wrong direction: it reverted the Fantastech 2
+entry back to stale Round-45-era content (an old verbose subtitle, prizes with no icon fields,
+`decorImage` reverted to `Pumpkins.png`) despite the correct Round 47/48 content having been
+written to the device beforehand -- consistent with this project's own repeatedly-documented
+risk of more than one live session editing this exact working tree at once (see Round 24's own
+entry above for a near-identical near-miss). Fixed by resetting the cloud clone to
+`origin/main`, confirming the regression was real and already pushed, then reconstructing the
+correct Round 47/48 content with this round's own new changes folded into the same edit, rather
+than compounding the problem with a second independent partial fix.
+
+**Verified via live Puppeteer screenshots and real pixel-sampled WCAG contrast, not a visual
+glance.** Confirmed via direct render: all 4 prize tiles equal height (169px), the h1 renders on
+exactly one line, the pizza icon shows 3 real circular holes and reads clearly at its actual
+render size, and the date reads "Saturday, Oct 3". Re-ran WCAG contrast on every changed text
+element (real DOM-position + computed-style capture, a second screenshot with text forced
+transparent to isolate the real rendered background, WCAG relative-luminance math): every
+element measured 8.3-19.8:1, comfortably clear of its 4.5:1 (large text)/7:1 (normal text)
+floor. Re-screenshotted Street Fighter 6 Saturday Slam's own square card and both events'
+horizontal format to confirm zero regression -- all render pixel-for-pixel as expected, since
+every new rule this round is scoped to `.ll-text`/page-level selectors specific to this card's
+layout. Zero console errors across every capture.
+
+Site-wide cache-bust bumped `?v=108` -> `?v=109` across `index.html`, `events.html`,
+`games.html`, `edu.html`, `screenshot-monthly-calendar.html`, and `event-card.html`, since
+`main.js` and `event-card.html` both changed this round. `ambassador.html` intentionally
+excluded again -- still diverged with unrelated concurrent local changes, now at its own
+`?v=106`.
