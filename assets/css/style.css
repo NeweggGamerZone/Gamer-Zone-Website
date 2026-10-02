@@ -1768,8 +1768,14 @@ body.home-page { background: transparent; }
    named items/perks (e.g. Fantastech 2's "MSI 24in 144Hz Monitors", "Free
    Pizza") rather than a dollar-amount bracket payout -- no place badge or
    ordinal makes sense for these, so the row is just centered label text. */
-.prize-row-label{justify-content:center}
+.prize-row-label{flex-direction:column;align-items:center;justify-content:center;gap:.3rem}
 .prize-label-only{font-size:.95rem;text-align:center;white-space:normal}
+/* 2026-10-02, per Eric ("make the prizes have icons, so use the flat orange
+   emoticons"): one flat orange icon per named-prize tile, reusing the
+   shared GZ_ICONS set (assets/js/main.js) and the same ".ic" + orange-tint
+   pattern every other icon badge on the site already uses (.amb-class-icon,
+   the tier pillars, etc.) rather than a new icon system or literal emoji. */
+.prize-row-label .ic.prize-icon{width:1.6rem;height:1.6rem;color:var(--ne-orange)}
 /* Shared type-color coding for tags — used by both the calendar detail card
    and the Event details cards, so a type reads the same color everywhere. */
 /* Black text on both — white measured under 4.5:1 WCAG AA against these two

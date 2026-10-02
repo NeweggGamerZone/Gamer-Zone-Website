@@ -298,7 +298,7 @@
     {
       "id": "fantastech-2-2026-10-03",
       "title": "Fantastech 2 Party",
-      "subtitle": "Newegg FantasTech 2 Gamer Zone Party: Free Lunch, Hourly Giveaways, and Free Play All Afternoon.",
+      "subtitle": "Fantastech 2 is one of Newegg's biggest sales yet! We're celebrating with Free Lunch, Hourly Giveaways, and Free Play All Day!",
       "date": "2026-10-03",
       "time": "10:00 AM to 7:00 PM",
       "type": "newegg-event",
@@ -313,12 +313,12 @@
       ],
       "prizeHeading": "Prizes & Perks",
       "prizes": [
-        {"label": "MSI 24\" 144Hz Monitors"},
-        {"label": "Keyboard & Mouse Combos"},
-        {"label": "Free Pizza"},
-        {"label": "Free Play All Day"}
+        {"label": "MSI 24\" Monitor Raffles", "icon": "monitor"},
+        {"label": "Keyboard Raffles", "icon": "keyboard"},
+        {"label": "Free Pizza Lunch", "icon": "pizza"},
+        {"label": "Free Play All Day", "icon": "gamepad"}
       ],
-      "decorImage": "assets/calendar/LineupAssets/Pumpkins.png"
+      "decorImage": "assets/calendar/LineupAssets/Fantastech2.png"
     },
     {
       "id": "closed-cyberpower-teambonding-2026-10-10",

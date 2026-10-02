@@ -132,8 +132,13 @@
   function prizeBlock(e) {
     if (!e || !e.prizes || !e.prizes.length) return '';
     const ord = n => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
+    // 2026-10-02, per Eric ("make the prizes have icons, so use the flat
+    // orange emoticons"): a flat orange icon per named-prize tile (the
+    // shared GZ_ICONS set, same as every other orange icon badge on the
+    // site), mirrored here from event-card.html's own identical change so
+    // the live calendar panel stays in sync with the social-export card.
     const rows = e.prizes.map(p => p.label
-      ? `<div class="prize-row prize-row-label"><span class="amt prize-label-only">${GZ.esc(p.label)}</span></div>`
+      ? `<div class="prize-row prize-row-label">${p.icon ? GZ.icon(p.icon, 'ic prize-icon') : ''}<span class="amt prize-label-only">${GZ.esc(p.label)}</span></div>`
       : `<div class="prize-row"><span class="place">${p.place}</span><span><span class="amt">$${p.amount}</span><span class="place-label">${ord(p.place)} Place</span></span></div>`
     ).join('');
     const perks = (e.perks && e.perks.length) ? e.perks.map(p => `<div class="perk-chip">${GZ.esc(p)}</div>`).join('') : '';

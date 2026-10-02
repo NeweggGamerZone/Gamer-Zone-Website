@@ -46,7 +46,15 @@ const GZ_ICONS = {
   // 2026-09-08: added for the shared marquee hover-controls (GZ.marquee's
   // pause/skip overlay, see below) -- no play/pause glyph existed before.
   play: '<path d="M8 5v14l11-7z"/>',
-  pause: '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
+  pause: '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>',
+  // 2026-10-02: added for Fantastech 2's named prize/perk tiles (a flat
+  // orange icon per tile, per Eric's "use the flat orange emoticons"
+  // request) -- monitor (MSI 24" Monitor Raffles), keyboard (Keyboard
+  // Raffles), pizza (Free Pizza Lunch); "Free Play All Day" reuses the
+  // existing `gamepad` glyph rather than adding a near-duplicate.
+  monitor: '<path d="M3 4h18a1 1 0 011 1v11a1 1 0 01-1 1h-6v2h3v2H8v-2h3v-2H3a1 1 0 01-1-1V5a1 1 0 011-1zm1 2v9h16V6z"/>',
+  keyboard: '<path d="M3 6h18a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7a1 1 0 011-1zm1 2v8h16V8zm1.5 1.2h2v2h-2zm3.8 0h2v2h-2zm3.8 0h2v2h-2zm3.8 0h2v2h-2zM5.5 13h13v2h-13z"/>',
+  pizza: '<path d="M12 2.4L21.3 19.6A2 2 0 0119.5 22h-15a2 2 0 01-1.8-2.4z"/><circle cx="12" cy="11.5" r="1.3" opacity=".5"/><circle cx="8.3" cy="16" r="1.1" opacity=".5"/><circle cx="15.3" cy="16.4" r="1.1" opacity=".5"/>'
 };
 // 2026-09-08, per Eric ("have their motion synced, so the positions are
 // relatively the same, even when pages are closed they are aligned"): a
