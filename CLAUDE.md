@@ -2890,3 +2890,46 @@ need the square screenshot," only the Fantastech 2 square export was delivered b
 
 No cache-bust bump needed -- every change is scoped to `event-card.html`'s own inline
 `<style>` block, same as every round on this page since Round 15.
+
+
+## Round 51 (2026-10-02): fix a real Round-50 prize-tile overlap bug, computer graphic lowered
+
+Per Eric's bug report immediately after Round 50 shipped: "Do not have the nodes overlap
+please, return them to their original width. Make Monitor Raffels sit on two lines like the
+other nodes. Lower the computer a bit."
+
+**A real bug, found by reading the computed layout, not guessed.** Round 50 added
+`min-height:210px` to `.ll-prize-table .prize-row` to make the perk tiles taller, but didn't
+account for the shared, broader `body:not(.fmt-horizontal) #card .prize-row{aspect-ratio:3/2}`
+rule (tuned for SF6 Saturday Slam's own 2-column tiles) still matching these tiles too, since
+they share the same `.prize-row` class. With both rules active, the browser computed a *width*
+from the 3:2 ratio against the taller min-height (210 * 1.5 = 315px) instead of stretching to
+the real 253px grid-column width -- confirmed live via `getComputedStyle`, not assumed: each
+tile rendered 315px wide against a 253px track, visibly overlapping its neighbor by 62px at
+the 4th tile. Fixed with `aspect-ratio:auto` scoped specifically to `.ll-prize-table
+.prize-row` (more specific than the shared rule, so it wins) -- tiles went back to their real,
+correct 253px track width with zero overlap, confirmed live.
+
+**"Monitor Raffles" now wraps to 2 lines like its siblings -- a side effect of the same bug,
+not a separate fix.** The overlap had given that tile's text ~271px of usable width instead of
+its real ~209px, letting "Monitor Raffles" fit on one line while "Keyboard Raffles"/"Free Pizza
+Lunch"/"Free Play All Day" wrapped to two at the correct width. Once the width bug was fixed,
+all four tiles' labels wrap to 2 lines with no text/copy change needed.
+
+**Computer graphic nudged down 28px**, per Eric's "lower the computer a bit" -- a relative
+`top:28px` offset on `.decor-img-inline` (which `.ll-top`'s `align-items:center` had been
+centering against the text column), chosen specifically because `position:relative` doesn't
+reflow the flex row's own height or the text column's position the way a margin change would.
+
+**Verified via live Puppeteer measurement and a zero-regression screenshot check, not a visual
+glance.** `getBoundingClientRect()` confirmed all 4 tiles are back to a uniform 253px wide with
+zero overlap (previously 315px/overlapping), all 4 labels now wrap to 2 lines, and the computer
+graphic's new position has no clipping against the row's own height. Re-screenshotted SF6
+Saturday Slam's own square card (unaffected -- it has no `min-height` override to conflict with
+its own `aspect-ratio:3/2`, since that tile's height was already correctly content-driven) and
+the Fantastech 2 horizontal format (untouched, square-only layout branch) to confirm zero
+regression. Zero console errors. No text/color changes this round, so no WCAG re-check was
+needed (same colors/sizes as Round 50, just a real geometry fix).
+
+No cache-bust bump needed -- scoped entirely to `event-card.html`'s own inline `<style>`
+block, same as every round on this page since Round 15.
