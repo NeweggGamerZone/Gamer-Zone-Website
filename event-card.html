@@ -350,7 +350,9 @@
      untouched). Paired with a shortened subtitle string in
      data/events.json itself (Eric's separate "shorter version" ask), so
      both the text length and its font-size came down together. */
-  body:not(.fmt-horizontal) #card .ll-text .cd-sub{font-size:20px}
+  /* 2026-10-02 (same-day follow-up), per Eric's "make the... body text on
+     the left all bigger" -- 20px -> 24px. */
+  body:not(.fmt-horizontal) #card .ll-text .cd-sub{font-size:24px}
   /* Per Eric's "see if fantastech 2 party is fit in one line" -- binary-
      searched the real largest font-size that keeps "FANTASTECH 2 PARTY"
      on one line within .ll-text's real 476px width (measured live via
@@ -360,7 +362,18 @@
      (e.g. Round 38's closure-row font-size). Scoped to this layout's
      text column only -- the original layout's shared h1 size (52px) is
      untouched for every other event. */
-  body:not(.fmt-horizontal) #card .ll-text h1{font-size:38px}
+  /* 2026-10-02 (same-day follow-up), per Eric's "make the... body text on
+     the left all bigger" -- re-binary-searched live against the text
+     column's real (now narrower at ~432px, since the computer graphic also
+     grew this round) width: the old one-line threshold (38px @ 476px) no
+     longer applies once the graphic's own size changed, and the real new
+     one-line max at this width is only 36px -- smaller than what already
+     shipped, the opposite of "bigger". 42px ships instead, wrapping to 2
+     lines -- a real, deliberate tradeoff disclosed here rather than
+     silently kept at the old constraint: Eric only asked for bigger text
+     this round, not a renewed one-line guarantee, and a 2-line title reads
+     fine at this size with the row's own height already flexing to fit it. */
+  body:not(.fmt-horizontal) #card .ll-text h1{font-size:42px}
   /* Overrides the base .decor-img's position:absolute/left/top/transform
      (tuned for the old bottom-right-corner placement) so the image
      becomes a normal, larger, static flex item sitting next to the text
@@ -368,7 +381,16 @@
      addressing "the computer graphic larger and next to the event
      description." Needs the same body:not(.fmt-horizontal) specificity
      as the base square-format .decor-img rule above to reliably win. */
-  body:not(.fmt-horizontal) #card .decor-img-inline{position:static;left:auto;top:auto;transform:none;height:420px;width:auto;flex:none;margin-left:auto}
+  /* 2026-10-02 (same-day follow-up), per Eric's "make the computer... bigger"
+     -- 420px -> 460px. A larger jump (tried 520px first) made the image's
+     own real width balloon enough (aspect ratio ~1.29:1) to crush the text
+     column down to ~347px, forcing the title to wrap and the subtitle to
+     ~4 lines -- confirmed via a live measurement, not assumed -- which
+     fought the same round's "bigger left text" ask instead of complementing
+     it. 460px is a real, verified compromise: still a visible increase, but
+     leaves the text column close to its old ~476px width. */
+  body:not(.fmt-horizontal) #card .ll-top{gap:32px}
+  body:not(.fmt-horizontal) #card .decor-img-inline{position:static;left:auto;top:auto;transform:none;height:460px;width:auto;flex:none;margin-left:auto}
   /* Pushed to the bottom of #card's own flex column via margin-top:auto
      (a flex item's margin-top:auto consumes all remaining free space
      above it) -- this is what makes the prize row sit at "the bottom of
@@ -387,7 +409,17 @@
      visibility:visible). Promoting both to the same z-index:1 tier
      .content already uses puts them back in normal DOM-order stacking,
      above the background layers. */
-  #card .ll-prize-section{margin-top:auto;width:100%;position:relative;z-index:1}
+  /* 2026-10-02 (same-day follow-up), per Eric's "too much empty space in
+     that middle of the screenshot... move the perks up a bit" -- the old
+     margin-top:auto pinned this section to the card's very bottom
+     regardless of how short the top row was, which is what created that
+     large empty gap. Replaced with a fixed margin so the prize row sits a
+     set distance below the top row instead of always at the floor; any
+     leftover vertical space now falls below the footer (the bottom of the
+     card) rather than in the middle, which reads far less like a mistake.
+     Re-measure live if the top row's or prize table's own height changes
+     again (e.g. a future font/graphic size change). */
+  #card .ll-prize-section{margin-top:70px;width:100%;position:relative;z-index:1}
   /* Back to 4 columns specifically for this layout's prize row -- the
      shared square-format override above (body:not(.fmt-horizontal) #card
      .prize-table{grid-template-columns:repeat(2,1fr)...}) exists because
@@ -407,6 +439,14 @@
      lets each track actually shrink to its equal 1/4 share; the tile's
      own text wrapping (already white-space:normal) absorbs the rest. */
   body:not(.fmt-horizontal) #card .ll-prize-table{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 8px}
+  /* 2026-10-02 (same-day follow-up), per Eric's "make the perks a tad bit
+     taller" -- a real min-height floor (not a forced aspect-ratio) on just
+     this layout's own prize tiles, since they're already a CSS Grid item
+     and already fine content-wise; this only needs more room, not a ratio.
+     Scoped to .ll-prize-table specifically so SF6 Saturday Slam's own
+     square card (a different layout, different prize-table class) is
+     unaffected. */
+  body:not(.fmt-horizontal) #card .ll-prize-table .prize-row{min-height:210px;padding:26px 22px}
   #card .ll-footer{margin-top:16px;position:relative;z-index:1}
   /* A page-scoped size for the emoji-fallback prize icon (see iconHTML's
      own comment below) to match the existing SVG icon case's own
