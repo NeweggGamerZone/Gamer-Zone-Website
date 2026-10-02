@@ -2826,3 +2826,67 @@ Site-wide cache-bust bumped `?v=108` -> `?v=109` across `index.html`, `events.ht
 `main.js` and `event-card.html` both changed this round. `ambassador.html` intentionally
 excluded again -- still diverged with unrelated concurrent local changes, now at its own
 `?v=106`.
+
+
+## Round 50 (2026-10-02): Fantastech 2 square card -- closed the empty middle gap, taller perks, bigger computer graphic and left text
+
+Per Eric, a same-day follow-up to Round 49: "TOO much empty space in that middle of the
+screenshot, I just need the square screenshot. Move the perks up a bit and make the perks a
+tad bit taller. Make the computer and the body text on the left all bigger." Five concrete
+asks, implemented straight through per core rule 15, all scoped to the Fantastech 2 event's
+`useLabelSquareLayout` square-format branch of `event-card.html` only (per Eric's own "I just
+need the square screenshot") -- the horizontal format and SF6 Saturday Slam's own square card
+(a different layout branch) were re-screenshotted afterward to confirm zero regression, not
+just assumed safe from the CSS scoping.
+
+**The real cause of the empty middle gap, found by reading the layout, not guessed.**
+`.ll-prize-section{margin-top:auto}` is a flex item inside `#card`'s own flex column -- `auto`
+on a flex item's margin consumes all remaining free space above it, which is exactly what
+pinned the prize row to the card's very bottom regardless of how short the top row (text +
+computer graphic) was, leaving the freed space stranded in the middle rather than wherever the
+actual *design* wanted it. Replaced with a fixed `margin-top:70px` -- the prize row now sits a
+set distance below the top row, and any genuinely leftover vertical space falls below the
+footer instead, which reads as normal card padding rather than a layout mistake.
+
+**Perks (prize tiles) made taller via a real `min-height` floor, not a forced ratio.**
+`.ll-prize-table .prize-row` (this layout's own 4-column tile grid, distinct from SF6's
+2-column `.prize-table`) gained `min-height:210px` plus a small padding bump -- a floor, not an
+`aspect-ratio`, since these tiles are already real CSS Grid items (per this file's own
+"aspect-ratio on a plain block is a forced size, a floor is what a grid item already gets for
+free" distinction) and just needed more room, not a different ratio.
+
+**Computer graphic and left text grown together, with a real tried-and-rejected size in
+between.** `.decor-img-inline` (420px tall) was first tried at 520px (a ~24% jump) -- but at
+this image's real ~1.29:1 aspect ratio, that height balloons its own width enough to crush
+`.ll-text`'s real column width down to ~347px (confirmed live via `getBoundingClientRect`),
+forcing the title to 2 lines and the subtitle to ~4 -- fighting the same round's "bigger left
+text" ask instead of complementing it. Settled on 460px instead (a smaller but still real
+increase), which keeps the text column at ~432px, close to its old ~476px width; `.ll-top`'s
+gap was trimmed from 40px to 32px to help claw back a little more of that width. `.ll-text
+h1` grew 38px -> 42px and `.cd-sub` grew 20px -> 24px.
+
+**A disclosed tradeoff on the title, found by live measurement rather than assumed from the old
+binary-search result.** Round 49's own 38px h1 size was binary-searched against the *old*
+476px-wide text column specifically to keep "FANTASTECH 2 PARTY" on one line. Re-binary-
+searching against this round's narrower ~432px column found the real one-line max there is
+only 36px -- smaller than what already shipped, the opposite of "bigger." Since Eric's ask this
+round was for bigger text, not a renewed one-line guarantee, 42px ships and the title now wraps
+to 2 lines -- a real, deliberate tradeoff, not an overlooked regression, and the row's own flex
+height already accommodates it with no clipping or overlap.
+
+**Verified via live Puppeteer measurement, pixel-sampled WCAG contrast, and a zero-regression
+screenshot check, not a visual glance.** `getBoundingClientRect()` confirmed: the prize section
+now sits a fixed 70px below the top row instead of pinned to the floor, all 4 tiles measure a
+uniform 210px, and the footer's bottom edge sits comfortably inside the card with the leftover
+space below it, not above the prize row. Ran the real pixel-sampled WCAG contrast method (live
+screenshot, a second screenshot with text forced transparent to isolate the real rendered
+background, WCAG relative-luminance math) on every resized text element: `.cd-sub` (now
+24px, crossing into WCAG's large-text 4.5:1 tier) measured 8.32-8.43:1; `h1` measured
+19.48-20.04:1; the unaffected `.prize-label-only` text measured 13.32:1 -- all comfortably
+clear of their respective floors. Re-screenshotted SF6 Saturday Slam's own square card and both
+events' horizontal exports: all three render pixel-for-pixel identical to before this round,
+confirming the scoping held. Zero console errors across every capture. Per Eric's own "I just
+need the square screenshot," only the Fantastech 2 square export was delivered back this round.
+
+No cache-bust bump needed -- every change is scoped to `event-card.html`'s own inline
+`<style>` block, same as every round on this page since Round 15.
