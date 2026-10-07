@@ -38,6 +38,8 @@
     rx9070xt: { name: 'GIGABYTE Gaming Radeon RX 9070 XT 16GB OC', spec: '16GB GDDR6 · PCIe 5.0 · triple-fan WINDFORCE cooling · RGB lighting', img: IMG + '14-932-751-07.jpg', url: 'https://www.newegg.com/gigabyte-gv-r9070xtgaming-oc-16gd-radeon-rx-9070-xt-16gb-graphics-card-triple-fans/p/N82E16814932751' },
     // Added 2026-10-07; name/spec/photo read from the live Newegg page.
     rtx5080: { name: 'MSI Ventus GeForce RTX 5080 16GB GDDR7 (RTX 5080 16G VENTUS 3X OC)', spec: '16GB GDDR7 · 256-bit · PCIe 5.0 · 2640 MHz boost · 3 x DisplayPort 2.1b + HDMI 2.1b', img: IMG + '14-137-930-03.jpg', url: 'https://www.newegg.com/msi-rtx-5080-16g-ventus-3x-oc-geforce-rtx-5080-16gb-graphics-card/p/N82E16814137930' },
+    // Added 2026-10-07; name/spec/photo read from the live Newegg page (N82E16824992231).
+    monitorArm: { name: 'Rosewill RMS-P61U Single Monitor Arm (Black)', spec: 'Fits 13"-35" screens up to 26.5lbs · gas spring · built-in USB port · C-clamp & grommet mount · VESA 75/100', img: IMG + '24-992-231-06.jpg', url: 'https://www.newegg.com/rosewill-rms-p61u-monitor-arms-black/p/N82E16824992231' },
     vengeance: { name: 'CORSAIR Vengeance RGB 32GB (2 x 16GB) DDR5-6000', spec: 'CL36 · Intel XMP 3.0 · ten-zone RGB lighting', img: IMG + '20-236-879-03.jpg', url: 'https://www.newegg.com/corsair-vengeance-rgb-32gb-ddr5-6000-cas-latency-cl36-desktop-memory-black/p/N82E16820236991' }
   };
 
@@ -65,7 +67,7 @@
     { title: 'Keyboards', icon: 'keyboard', items: by(/Keyboard/i) },
     { title: 'Mice', icon: 'run', items: by(/Mouse/i).filter(g => !/Keyboard/i.test(g.name)) },
     { title: 'Headsets', icon: 'chat', items: [EXTRA.fractalDark, EXTRA.fractalLight, EXTRA.maestro] },
-    { title: 'Chairs & Desks', icon: 'users', items: by(/Chair|Desk/i) }
+    { title: 'Chairs & Desks', icon: 'users', items: by(/Chair|Desk/i).concat([EXTRA.monitorArm]) }
   ];
 
   // The whole card is one link (no nested buttons), so a click anywhere shops it.

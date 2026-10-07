@@ -3034,3 +3034,7 @@ Per Eric: drag in a direction should behave like the left/right arrows so behavi
 **Real root cause of the long-chased "phantom pointercancel" (Round 9):** the lanes' `<img>`s are natively draggable, so Chromium starts an HTML5 image drag a few ms after pointerdown and cancels the pointer stream. Fixed with a `dragstart` preventDefault on the lane plus `-webkit-user-drag:none` on `.gz-marquee img`; the self-heal path stays as a safety net. Also added `touch-action:pan-y` to `.gz-marquee` so horizontal touch gestures reach JS instead of being claimed as page scroll (the mobile half of "doesn't work properly"). Removed a leftover `DBG` console.log in the pointerleave handler.
 
 Verified with real Puppeteer mouse drags on the homepage hero strip: left 90px = +1 step (19.6s vs 18.8s step incl. autoplay), right 90px = -1 step, 20px = no step, 90px then 300px more = still exactly one step, repeated drags no longer cancel; Zone Stack advances/retreats one card per drag. Cache-bust `?v=113` -> `?v=114`.
+
+## Round 58 (2026-10-07): Gear page -- Rosewill RMS-P61U monitor arm
+
+Per Eric ("add this under Desk Component?"): the Rosewill RMS-P61U single monitor arm (N82E16824992231; name/spec/photo read from the live Newegg page, no price) was added to the existing **Chairs & Desks** category, the closest fit; no new category was created. It is listed explicitly in `gear.js` (not via the `/Monitor/i` regex) so it can't land in Monitors. Cache-bust `?v=114` -> `?v=115`.
