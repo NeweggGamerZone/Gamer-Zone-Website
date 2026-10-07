@@ -55,7 +55,7 @@
   // product photo URL ever 404s, that one card hides itself instead of
   // sitting in the lane as a broken-image icon.
   function cardHTML(g) {
-    const label = GZ.esc(`View ${g.name} on Newegg (opens in new tab)`);
+    const label = GZ.esc(`Shop ${g.name} on Newegg (opens in new tab)`);
     return `<div class="card gear-item">
       <!-- No loading="lazy" -- same reasoning as photo-waterfall.js's own
            comment: every card (both the real set and GZ.marquee's
@@ -67,12 +67,12 @@
       <div class="gear-item-img"><img src="${GZ.esc(g.img)}" alt="${GZ.esc(g.name)}" onerror="this.closest('.gear-item').style.display='none'"></div>
       <h3>${GZ.esc(g.name)}</h3>
       <p class="dim gear-item-spec">${GZ.esc(g.spec)}</p>
-      <a class="btn" href="${GZ.esc(g.url)}" target="_blank" rel="noopener" aria-label="${label}">View on Newegg</a>
+      <a class="btn" href="${GZ.esc(g.url)}" target="_blank" rel="noopener" aria-label="${label}">Shop on Newegg</a>
     </div>`;
   }
 
   // 2026-09-15: the shared hover-reveal pause/skip overlay used to block
-  // this section's real "View on Newegg" links, so it was pulled off
+  // this section's real "Shop on Newegg" links, so it was pulled off
   // GZ.marquee entirely (2026-09-16, a manual single-row scroll strip with
   // its own arrow buttons/drag). 2026-09-17, per Eric ("make Gear We
   // Feature an autoscrolling shopping reel with the controls center

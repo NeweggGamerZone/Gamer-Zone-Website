@@ -36,6 +36,8 @@
     aio: { name: 'ASUS ROG STRIX LC III 360 ARGB LCD Liquid Cooler', spec: '360mm AIO · 2.1" IPS LCD · Intel LGA 1700/1200/115x · AMD AM5/AM4', img: IMG + '35-101-114-13.png', url: 'https://www.newegg.com/asus-aio-360-series/p/N82E16835101114' },
     rtx5070: { name: 'GIGABYTE WindForce GeForce RTX 5070 12GB', spec: '12GB GDDR7 · PCIe 5.0 · 3 x DisplayPort 2.1b + HDMI 2.1b', img: IMG + '14-932-782-02.jpg', url: 'https://www.newegg.com/gigabyte-windforce-gv-n5070wf3-12gd-geforce-rtx-5070-12gb-graphics-card-triple-fans/p/N82E16814932782' },
     rx9070xt: { name: 'GIGABYTE Gaming Radeon RX 9070 XT 16GB OC', spec: '16GB GDDR6 · PCIe 5.0 · triple-fan WINDFORCE cooling · RGB lighting', img: IMG + '14-932-751-07.jpg', url: 'https://www.newegg.com/gigabyte-gv-r9070xtgaming-oc-16gd-radeon-rx-9070-xt-16gb-graphics-card-triple-fans/p/N82E16814932751' },
+    // Added 2026-10-07; name/spec/photo read from the live Newegg page.
+    rtx5080: { name: 'MSI Ventus GeForce RTX 5080 16GB GDDR7 (RTX 5080 16G VENTUS 3X OC)', spec: '16GB GDDR7 · 256-bit · PCIe 5.0 · 2640 MHz boost · 3 x DisplayPort 2.1b + HDMI 2.1b', img: IMG + '14-137-930-03.jpg', url: 'https://www.newegg.com/msi-rtx-5080-16g-ventus-3x-oc-geforce-rtx-5080-16gb-graphics-card/p/N82E16814137930' },
     vengeance: { name: 'CORSAIR Vengeance RGB 32GB (2 x 16GB) DDR5-6000', spec: 'CL36 · Intel XMP 3.0 · ten-zone RGB lighting', img: IMG + '20-236-879-03.jpg', url: 'https://www.newegg.com/corsair-vengeance-rgb-32gb-ddr5-6000-cas-latency-cl36-desktop-memory-black/p/N82E16820236991' }
   };
 
@@ -58,10 +60,7 @@
   const CATS = [
     { title: 'Consoles', icon: 'gamepad', items: [EXTRA.ps5, EXTRA.switch2] },
     { title: 'Gaming PCs', icon: 'pc', items: by(/Gaming PC/i).concat([EXTRA.stratos]) },
-    { title: 'PC Cases', icon: 'pc', items: [EXTRA.case4000] },
-    { title: 'Graphics Cards', icon: 'chip', items: [EXTRA.rtx5070, EXTRA.rx9070xt] },
-    { title: 'CPU Cooling', icon: 'shield', items: [EXTRA.aio] },
-    { title: 'Memory', icon: 'chip', items: [EXTRA.vengeance] },
+    { title: 'PC Components', icon: 'chip', items: [EXTRA.case4000, EXTRA.rtx5080, EXTRA.rtx5070, EXTRA.rx9070xt, EXTRA.aio, EXTRA.vengeance] },
     { title: 'Monitors', icon: 'monitor', items: by(/Monitor/i) },
     { title: 'Keyboards', icon: 'keyboard', items: by(/Keyboard/i) },
     { title: 'Mice', icon: 'run', items: by(/Mouse/i).filter(g => !/Keyboard/i.test(g.name)) },
@@ -69,15 +68,16 @@
     { title: 'Chairs & Desks', icon: 'users', items: by(/Chair|Desk/i) }
   ];
 
-  const card = (g, tag) => `<article class="card gear-card">
-      <div class="gear-card-img"><img src="${GZ.esc(g.img)}" alt="${GZ.esc(g.name)}" onerror="this.closest('.gear-card').style.display='none'"></div>
-      <div class="gear-card-body">
+  // The whole card is one link (no nested buttons), so a click anywhere shops it.
+  const card = (g, tag) => `<a class="card gear-card" href="${GZ.esc(g.url)}" target="_blank" rel="noopener" aria-label="${GZ.esc('Shop ' + g.name + ' on Newegg (opens in new tab)')}">
+      <span class="gear-card-img"><img src="${GZ.esc(g.img)}" alt="" onerror="this.closest('.gear-card').style.display='none'"></span>
+      <span class="gear-card-body">
         ${tag ? `<span class="tag orange">${GZ.esc(tag)}</span>` : ''}
         <h4>${GZ.esc(g.name)}</h4>
-        <p class="dim">${GZ.esc(g.spec)}</p>
-        <a class="btn" href="${GZ.esc(g.url)}" target="_blank" rel="noopener" aria-label="${GZ.esc('View ' + g.name + ' on Newegg (opens in new tab)')}">View on Newegg</a>
-      </div>
-    </article>`;
+        <span class="dim gear-card-spec">${GZ.esc(g.spec)}</span>
+        <span class="gear-card-cta">Shop on Newegg &rarr;</span>
+      </span>
+    </a>`;
 
   setupRoot.innerHTML = SETUP.map(s => card(s[1], s[0])).join('');
 
@@ -85,30 +85,22 @@
     const id = 'gc-' + c.title.replace(/\W+/g, '-');
     return `<section class="gear-cat" aria-labelledby="${GZ.esc(id)}">
       <h3 id="${GZ.esc(id)}"><i data-ic="${c.icon}"></i> ${GZ.esc(c.title)} <span class="dim gear-cat-count">${c.items.length}</span></h3>
-      <div class="gear-masonry" data-min="250">${c.items.map(g => card(g, '')).join('')}</div>
+      <div class="gear-grid">${c.items.map(g => card(g, '')).join('')}</div>
     </section>`;
   }).join('');
 
-  // Waterfall: deal each card into the currently-shortest column, keeping
-  // reading order. Card heights are known before photos load (square
-  // aspect-ratio wells), so no re-layout is needed when images arrive.
-  const masons = [...catRoot.querySelectorAll('.gear-masonry')].map(m => ({ el: m, cards: [...m.children], n: 0 }));
-  function layout() {
-    masons.forEach(m => {
-      const min = +m.el.dataset.min, gap = 16;
-      const n = Math.max(1, Math.floor((m.el.clientWidth + gap) / (min + gap)));
-      if (n === m.n) return;
-      m.n = n;
-      const cols = Array.from({ length: n }, () => { const c = document.createElement('div'); c.className = 'gear-mcol'; return c; });
-      m.el.replaceChildren(...cols);
-      m.cards.forEach(card => {
-        const col = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
-        col.appendChild(card);
-      });
-    });
+  // Equal heights: plain CSS grids fill left to right in reading order; this
+  // pass makes every card on the page as tall as the tallest one (a floor, so
+  // text still wraps and grows if it ever needs more room).
+  function equalize() {
+    const cards = [...document.querySelectorAll('#gear-page .gear-card')];
+    cards.forEach(c => { c.style.minHeight = ''; });
+    const h = Math.max(0, ...cards.map(c => c.offsetHeight));
+    if (h) cards.forEach(c => { c.style.minHeight = h + 'px'; });
   }
-  layout();
-  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 120); });
+  equalize();
+  window.addEventListener('load', equalize);
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(equalize, 120); });
 
   // main.js's injectIcons() already ran at DOMContentLoaded, so convert the
   // placeholders this render just added (same call calendar.js makes).
