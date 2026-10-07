@@ -25,9 +25,11 @@
    on the floor -- see this section's own copy in index.html ("We feature
    similar products..."). */
 (function () {
-  const wrap = document.getElementById('gear-waterfall');
-  if (!wrap) return;
-
+  // 2026-10-07: GEAR is now defined BEFORE the early return and exposed as
+  // window.GZ_GEAR so gear.html's station-column page (assets/js/gear.js)
+  // reuses this one verified product list instead of keeping a second copy
+  // that could drift (same "one shared implementation" rule as elsewhere).
+  // Only the homepage's #gear-waterfall marquee render stays gated below.
   const GEAR = [
     { name: 'ABS Kaze II Aqua Gaming PC', spec: 'RTX 5070 Ti · Core Ultra 7 270K Plus · 32GB DDR5 · 2TB NVMe', img: 'https://c1.neweggimages.com/productimage/nb640/83-360-970-34.jpg', url: 'https://www.newegg.com/abs-kazeii-aqua-pc-intel-core-ultra-7-270k-plus-geforce-rtx-5070-ti-32gb-ddr5-2tb-ssd-kiia270k5070ti/p/N82E16883360970' },
     { name: 'COUGAR NxSys Aero Gaming Chair', spec: '200mm RGB fan · 150° recline · lumbar pillow', img: 'https://c1.neweggimages.com/productimage/nb640/26-567-079-01.png', url: 'https://www.newegg.com/cougar-nxsys-aero-black-computer-gaming/p/N82E16826567079' },
@@ -44,6 +46,10 @@
     { name: 'MSI Clutch GM08 Mouse', spec: '4,200 DPI optical · adjustable weight', img: 'https://c1.neweggimages.com/productimage/nb640/26-554-042-02.jpg', url: 'https://www.newegg.com/msi-s12-0401800-cla-clutch-gm08-usb-2-0-wired/p/N82E16826554042' },
     { name: 'ASUS ROG Harpe Ace Mouse', spec: '54g ultralight · 36,000 DPI · tri-mode wireless', img: 'https://c1.neweggimages.com/productimage/nb640/C02WS2605300KE7QD60.jpg', url: 'https://www.newegg.com/p/32K-001D-001B7' },
   ];
+  window.GZ_GEAR = GEAR;
+
+  const wrap = document.getElementById('gear-waterfall');
+  if (!wrap) return;
 
   // onerror fallback mirrors photo-waterfall.js's own pattern -- if a given
   // product photo URL ever 404s, that one card hides itself instead of

@@ -2956,3 +2956,53 @@ own text column only.
 
 No cache-bust bump needed -- scoped entirely to `event-card.html`'s own inline `<style>`
 block, same as every round on this page since Round 15.
+
+## Round 53 (2026-10-07): new GEAR page (gear.html) -- station columns, best sellers, shared product list
+
+Per Eric: a new page called GEAR with product columns per station and Newegg shop links,
+adding the PlayStation and Switch 2 links he supplied, "put things together based on their
+product category," add the "msi maestro 30," and "research what products are best sellers
+then decide." Proposed first per core rule 15 (new page = open design), then built after his
+answers.
+
+**Structure.** `gear.html` + `assets/js/gear.js` + a "Gear page" block at the end of
+`style.css`. Six category columns (`.gear-col`, built on the shared `.card`/`.tag.orange`/`.btn`,
+no new button or tag style): Consoles, Gaming PCs, Monitors, Keyboards & Mice, Audio, Seating &
+Desks. A zone tag (Console Gaming Zone / PC Gaming Zone) appears only on the columns whose
+category maps to a zone by Eric's own category rule; Audio and Seating carry no zone tag because
+nothing on file says which station they sit at (rule 4). `.gear-col-head` reserves a minimum
+height so product lists start on the same Y across a row (core rule 10). Rides the shared
+`.container`/`--safe-x` width (rule 5); no `max-width` of its own.
+
+**One shared product list.** `featured-gear.js` now builds `GEAR` before its homepage-only early
+return and exposes it as `window.GZ_GEAR`; `gear.js` categorizes by product name and adds the
+new items itself, so the homepage marquee and this page cannot drift. `gear.html` loads
+`featured-gear.js` first for that reason.
+
+**Newly added products (name/spec/photo read from each live Newegg page 2026-10-07):**
+PlayStation 5 Digital Slim 825GB (N82E16868110357 -- the page showed Out of Stock that day; the
+card still links to it, no stock claim made), Nintendo Switch 2 (N82E16878966017), and the MSI
+MAESTRO 300, which is a wired gaming HEADSET (Eric's "msi maestro 30"; confirmed via
+N82E16826554074), filed under Audio. No prices, same as the homepage.
+
+**Best sellers: Newegg's own rankings, dated, never claimed as permanent.** Read from
+newegg.com's best-seller pages 2026-10-07: Switch 2 is #1 in Nintendo Switch Systems; MSI MAG
+272QP QD-OLED X24 is #11 in Gaming Monitors (4.9 stars, 274 reviews); ASUS ROG Strix
+XG27AQDMES is #13 in the Gaming & VR best sellers (4.8 stars, 55 reviews). The section is
+labeled "checked Oct 7, 2026; rankings change daily" and links to Newegg's live list. **"Most
+used equipment" is intentionally NOT shown:** no usage or sales data for the Zone's own floor
+exists in this repo (SENET tracks games, not hardware), and inventing one would violate rule 4.
+If hardware usage data ever becomes available, add it as its own row. Re-read the rankings
+before relying on them -- they drift.
+
+**Nav/footer.** "Gear" added to the main nav (after Games) and the footer Discover column on all
+pages. Cache-bust `?v=` bumped to 110 on every page including `event-card.html` and
+`screenshot-monthly-calendar.html`; `ambassador.html`'s tags (stale at 106) were brought up to
+110 in the same pass.
+
+**Verified:** live Puppeteer at 1400/820/390px -- all 20 product photos load (naturalWidth 640),
+no horizontal overflow, every button 44.8px tall, zero console errors; full scripted QA with
+`gear.html` included (`PAGES="index.html,events.html,..."` is comma-separated): 0 contrast
+findings on `gear.html`, 0 container-width findings, 0 console errors; the only contrast
+failures (25) are the already-disclosed Featured Gear off-screen-card false positives on
+`index.html`.
