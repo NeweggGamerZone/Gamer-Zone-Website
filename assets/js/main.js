@@ -418,6 +418,7 @@ const GZ = {
       }
     }
 
+    track._gzSkip = skip; // lets enableMarqueeDrag fire the exact same step as the arrows
     prevBtn.addEventListener('click', () => skip(-1));
     nextBtn.addEventListener('click', () => skip(1));
     ppBtn.addEventListener('click', togglePlayPause);
@@ -432,6 +433,9 @@ const GZ = {
   // so the drag-release snap in enableMarqueeDrag below can reuse the exact
   // same math as the skip buttons, rather than a second, independently
   // maintained copy of the same measurement drifting out of sync with it.
+  // Drag distance (px) that counts as one arrow press, shared by every
+  // marquee lane and the Zone Stack so drag behaves identically site-wide.
+  DRAG_STEP_PX: 50,
   marqueeStepMs(track) {
     const dur = parseFloat(track.dataset.gzDur);
     if (!dur) return 0;
@@ -552,7 +556,7 @@ const GZ = {
         // keep overwriting currentTime on top of this new drag's own
         // pointermove updates, the two visibly fighting each other.
         track._gzSnapGen = (track._gzSnapGen || 0) + 1;
-        drag = { startX: e.clientX, startTime: anim.currentTime || 0, wasHardPaused: !!track.dataset.gzHardPaused, moved: false };
+        drag = { startX: e.clientX, startTime: anim.currentTime || 0, wasHardPaused: !!track.dataset.gzHardPaused, moved: false, committed: false, pointerId: e.pointerId };
         anim.pause();
       } else {
         drag = { startX: e.clientX, startScroll: container.scrollLeft, moved: false };
@@ -561,6 +565,11 @@ const GZ = {
       try { container.setPointerCapture(e.pointerId); } catch { /* not every pointer type supports capture */ }
       return true;
     }
+    // Real root cause of the "phantom pointercancel" (found 2026-10-07): a
+    // plain <img>/<a> inside the lane is natively draggable, so Chromium starts
+    // an HTML5 image drag a few ms into the gesture and cancels the pointer
+    // stream. Blocking dragstart keeps the pointer events flowing.
+    container.addEventListener('dragstart', e => e.preventDefault());
     container.addEventListener('pointerdown', e => {
       if (e.button !== undefined && e.button !== 0) return;
       if (e.target.closest('.gz-mq-btn,a,[data-full],button')) return;
@@ -573,26 +582,30 @@ const GZ = {
         // drag is active, this pointermove is the tail of a gesture whose
         // cancel we shouldn't have trusted. Re-anchor from right here
         // rather than dropping the rest of the gesture on the floor.
-        if (e.buttons === undefined || (e.buttons & 1) === 0) return;
+        if (e.buttons === undefined || (e.buttons & 1) === 0) { track._gzCommittedPtr = null; return; }
+        if (e.pointerId === track._gzCommittedPtr) return; // this hold already fired its step
         if (!beginDrag(e)) return;
       }
       const dx = e.clientX - drag.startX;
       if (Math.abs(dx) > 4) drag.moved = true;
       if (useAnimation) {
-        const dur = parseFloat(track.dataset.gzDur);
-        const totalDist = track.scrollWidth / 2;
-        if (!dur || !totalDist) return;
-        // Forward track: increasing currentTime moves content left on
-        // screen, so a drag-left (negative dx) should INCREASE
-        // currentTime to make the content follow the pointer ("grab and
-        // drag" convention) -- hence the negated dx. A `.rev` track's
-        // on-screen motion for the same currentTime change runs the other
-        // way (animation-direction:reverse samples the keyframe from the
-        // opposite end), so its sign is flipped back to un-negated dx.
-        const sign = track.classList.contains('rev') ? 1 : -1;
-        const deltaMs = (sign * dx / totalDist) * dur * 1000;
-        const anim = track.getAnimations()[0];
-        if (anim) anim.currentTime = Math.max(0, drag.startTime + deltaMs);
+        // 2026-10-07, per Eric: a drag now behaves exactly like the
+        // left/right arrow buttons (standardized across the site, same as
+        // Zone Stack): no live scrubbing, no mid-card snap. Dragging past
+        // GZ.DRAG_STEP_PX fires ONE step -- drag left = the "next" arrow,
+        // drag right = "previous" -- then the gesture is spent until
+        // release. The step reuses skip() from buildMarqueeControls (same
+        // 140ms tween, same hard-pause handling), exposed as track._gzSkip.
+        if (!drag.committed && Math.abs(dx) >= GZ.DRAG_STEP_PX && track._gzSkip) {
+          drag.committed = true;
+          track._gzCommittedPtr = drag.pointerId;
+          // Forward lane: next arrow (+1) moves content left, matching a
+          // leftward drag. A .rev lane's content moves the opposite way for
+          // the same step, so its sign flips to keep content following the
+          // finger.
+          const dir = (dx < 0 ? 1 : -1) * (track.classList.contains('rev') ? -1 : 1);
+          track._gzSkip(dir);
+        }
       } else {
         container.scrollLeft = drag.startScroll - dx;
       }
@@ -609,32 +622,13 @@ const GZ = {
       // just reasoned about.
       const wasHardPaused = drag.wasHardPaused;
       const moved = drag.moved;
-      if (useAnimation) {
+      const committed = drag.committed;
+      if (useAnimation && committed) {
+        // skip() is already tweening and will resume autoplay itself.
+      } else if (useAnimation) {
+        // Under-threshold drag or plain click: nothing moved, just resume.
         const anim = track.getAnimations()[0];
-        const resume = () => { if (wasHardPaused) anim.pause(); else { anim.playbackRate = 1; anim.play(); } };
-        if (anim) {
-          // 2026-09-19, per Eric ("when I drag photo reels it should
-          // seamlessly and smoothly move onto the next image, so the card
-          // stack as I drag should show me the next one after a
-          // threshold"): a real drag no longer just leaves the lane parked
-          // at whatever arbitrary mid-card position the pointer let go of
-          // -- it settles onto the nearest full card. Math.round against
-          // the fixed per-card time step is itself the threshold (past
-          // roughly half a card's width commits forward/back to the next
-          // one, short of that settles back to the current one), and
-          // GZ.animateMarqueeTo eases there smoothly rather than snapping
-          // instantly, so the release reads as a continuation of the same
-          // gesture instead of a cut. A plain click with no real movement
-          // (moved === false) skips the snap and just resumes immediately,
-          // same as before.
-          const step = moved ? GZ.marqueeStepMs(track) : 0;
-          if (step) {
-            const target = Math.round((anim.currentTime || 0) / step) * step;
-            GZ.animateMarqueeTo(track, anim, target, resume);
-          } else {
-            resume();
-          }
-        }
+        if (anim) { if (wasHardPaused) anim.pause(); else { anim.playbackRate = 1; anim.play(); } }
       }
       if (moved) {
         track.dataset.gzSuppressClick = '1';
@@ -643,7 +637,9 @@ const GZ = {
       drag = null;
       container.classList.remove('dragging');
     }
-    container.addEventListener('pointerup', endDrag);
+    // Only a real pointerup proves the physical hold is over; a (possibly
+    // phantom) pointercancel must not re-arm the committed-hold guard.
+    container.addEventListener('pointerup', e => { if (e.pointerId === track._gzCommittedPtr) track._gzCommittedPtr = null; endDrag(); });
     container.addEventListener('pointercancel', endDrag);
     // 2026-09-19, per Eric reporting the drag still "wasn't smooth" and
     // "conflicted with autoscroll" even after the snap-tween race fix above
@@ -667,7 +663,6 @@ const GZ = {
     // don't support it) -- once real capture IS active, pointerup/
     // pointercancel are the only signals that should end the gesture.
     container.addEventListener('pointerleave', e => {
-      console.log('DBG pointerleave at t=' + performance.now().toFixed(1) + ' hasCap=' + (container.hasPointerCapture && container.hasPointerCapture(e.pointerId)) + ' drag=' + !!drag);
       if (!drag) return;
       if (container.hasPointerCapture && e.pointerId !== undefined && container.hasPointerCapture(e.pointerId)) return;
       endDrag();

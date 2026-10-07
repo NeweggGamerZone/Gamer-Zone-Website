@@ -2274,8 +2274,9 @@ details.archive-month,.quota,.eu-board { clip-path: none !important; border-radi
    its own drag handler. Fixed once here so it reaches every .gz-marquee
    instance site-wide, per this file's "one shared implementation" rule --
    not a per-consumer patch. */
-.gz-marquee{position:relative;overflow:hidden;width:100%;min-width:0;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+.gz-marquee{touch-action:pan-y;position:relative;overflow:hidden;width:100%;min-width:0;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
 .gz-marquee.dragging{cursor:grabbing}
+.gz-marquee img{-webkit-user-drag:none;user-drag:none}
 .gz-marquee-track{display:flex;gap:.9rem;width:max-content;animation:gz-marquee-scroll var(--gz-marquee-dur,46s) linear infinite}
 .gz-marquee-track.rev{animation-direction:reverse}
 @keyframes gz-marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}

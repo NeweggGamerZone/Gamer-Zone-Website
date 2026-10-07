@@ -87,7 +87,7 @@
   // modest fraction of the section before it commits to advancing,
   // matching how the peek cards already sit fairly close to the center
   // card.
-  const DRAG_COMMIT_PX = 70;      // distance threshold to commit to a swipe
+  const DRAG_COMMIT_PX = (typeof GZ !== 'undefined' && GZ.DRAG_STEP_PX) || 50; // same threshold as every marquee lane: one drag past it = one arrow press
   const DRAG_COMMIT_VELOCITY = .5; // px/ms -- a fast flick commits even short
   const CLICK_SUPPRESS_PX = 6;     // below this, treat it as a click/tap, not a drag
   let dragging = false;
