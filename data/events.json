@@ -385,6 +385,17 @@
       "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg"
     },
     {
+      "id": "gigabyte-event-2026-11-07",
+      "title": "Gigabyte Event",
+      "subtitle": "A Gigabyte-hosted event at Gamer Zone -- details still being finalized.",
+      "date": "2026-11-07",
+      "type": "major",
+      "blurb": "Gigabyte is planning an indoor and outdoor event at Gamer Zone. The full plan is still being finalized with their team -- check back for details.",
+      "featured": true,
+      "reservation": false,
+      "accent": "#FFC400"
+    },
+    {
       "id": "closed-seagate-launch-2026-11-10",
       "title": "Closed: Private Event",
       "date": "2026-11-10",
