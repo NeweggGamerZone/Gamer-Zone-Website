@@ -3006,3 +3006,15 @@ no horizontal overflow, every button 44.8px tall, zero console errors; full scri
 findings on `gear.html`, 0 container-width findings, 0 console errors; the only contrast
 failures (25) are the already-disclosed Featured Gear off-screen-card false positives on
 `index.html`.
+
+## Round 54 (2026-10-07): Gear page rework -- Gamer Zone Setup, waterfall categories, Fractal headsets, larger photos
+
+Per Eric, replacing Round 53's layout. **Supersedes Round 53's "columns per station," zone tags, and Newegg best-sellers section** (all removed; the dated best-seller ranks are gone, no ranking claims remain on the page).
+
+- **"Gamer Zone Setup"** opens the page: Fractal Scape Dark headset, PS5 Digital Slim, MSI MPG 271QRX monitor, COUGAR MARS PRO desk, COUGAR NxSys Aero chair, MSI Vigor GK30 keyboard, MSI Clutch GM08 mouse, each with a role tag. "The MSI monitor" was ambiguous; the MPG 271QRX (already on the verified list) was chosen and disclosed in `gear.js`'s header. Swap the `SETUP` entry if another model is meant.
+- **Categories are not tied to stations** (Consoles, Gaming PCs, Monitors, Keyboards, Mice, Headsets, Chairs & Desks). Keyboards and mice are split; the FRIEREN keyboard+mouse combo lives under Keyboards only.
+- **Pinterest-style waterfall:** `gear.js` deals each card into the currently-shortest column (`.gear-masonry`/`.gear-mcol`, 250px minimum column, recomputed on resize). Column count comes from container width, not card count, so a 1-item category stays card-sized instead of ballooning. Card heights are known before photos load (square wells), so no re-layout on image load. An earlier CSS-multi-column attempt was dropped because it balanced columns by height and placed the 5th keyboard out of reading order.
+- **Larger photos:** square 1:1 white wells spanning the full card width (was 92px thumbnails); absolutely-positioned `object-fit:contain` image so a tall chair photo can't stretch its card.
+- **New products (read from live Newegg pages 2026-10-07):** Fractal Design Scape Dark (N82E16826743003) and Scape Light (N82E16826743004) wireless headsets, filed under Headsets. No prices.
+- Closing button now reads "Shop on Newegg.com". Cache-bust `?v=` 110 -> 111 on all pages.
+- Verified: Puppeteer at 1400/820/390px (26 photos load, no horizontal overflow, buttons 44.8px, zero console errors); `run-full-qa.sh` on `gear.html`: 0 contrast findings, 0 console errors.
