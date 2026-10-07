@@ -3018,3 +3018,7 @@ Per Eric, replacing Round 53's layout. **Supersedes Round 53's "columns per stat
 - **New products (read from live Newegg pages 2026-10-07):** Fractal Design Scape Dark (N82E16826743003) and Scape Light (N82E16826743004) wireless headsets, filed under Headsets. No prices.
 - Closing button now reads "Shop on Newegg.com". Cache-bust `?v=` 110 -> 111 on all pages.
 - Verified: Puppeteer at 1400/820/390px (26 photos load, no horizontal overflow, buttons 44.8px, zero console errors); `run-full-qa.sh` on `gear.html`: 0 contrast findings, 0 console errors.
+
+## Round 55 (2026-10-07): Gear page -- refurbished ABS Stratos II PC + PC-parts categories
+
+Per Eric: add N82E16883360994C to the PCs and add five parts. Name/spec/photo read from each live Newegg page; no prices. The PC is the **refurbished** ABS Stratos II Aqua (i9-14900KF, RTX 5070 Ti 16GB, 32GB DDR5, 2TB), so its name says "(Refurbished)"; it was added only to gear.js (Gaming PCs), not the shared homepage `GZ_GEAR` list. New categories, after Gaming PCs: PC Cases (CORSAIR FRAME 4000D RS ARGB), Graphics Cards (GIGABYTE RTX 5070 12GB, RX 9070 XT 16GB OC), CPU Cooling (ASUS ROG STRIX LC III 360 ARGB LCD; the linked listing is the 360 series, White edition on the page title), Memory (CORSAIR Vengeance RGB 32GB DDR5-6000 CL36). This amends Round 54's category list. Meta/lead copy now mention "PC parts". Cache-bust `?v=111` -> 112. Verified at 1400/820/390: 32 photos load, no overflow, buttons 44.8px, zero console errors; QA suite 0 findings on gear.html.

@@ -29,7 +29,14 @@
     switch2: { name: 'Nintendo Switch 2', spec: '7.9" 1080p screen · 256GB · TV, tabletop & handheld modes', img: IMG + '78-966-017-08.jpg', url: 'https://www.newegg.com/black-nintendo-beeskb6aa-switch-2-console/p/N82E16878966017' },
     maestro: { name: 'MSI MAESTRO 300 Gaming Headset', spec: 'Wired USB-C · 40mm drivers · detachable mic · 247g', img: IMG + '26-554-074-04.jpg', url: 'https://www.newegg.com/p/N82E16826554074' },
     fractalDark: { name: 'Fractal Design Scape Dark Wireless Headset', spec: 'USB dongle & Bluetooth 5.3 · 40mm drivers · RGB · up to 40hr battery · charging stand', img: IMG + '26-743-003-28.jpg', url: 'https://www.newegg.com/p/N82E16826743003' },
-    fractalLight: { name: 'Fractal Design Scape Light Wireless Headset', spec: 'USB dongle & Bluetooth 5.3 · 40mm drivers · RGB · up to 40hr battery · charging stand', img: IMG + '26-743-004-27.jpg', url: 'https://www.newegg.com/p/N82E16826743004' }
+    fractalLight: { name: 'Fractal Design Scape Light Wireless Headset', spec: 'USB dongle & Bluetooth 5.3 · 40mm drivers · RGB · up to 40hr battery · charging stand', img: IMG + '26-743-004-27.jpg', url: 'https://www.newegg.com/p/N82E16826743004' },
+    // Added 2026-10-07 (PC + parts); name/spec/photo read from each live Newegg page.
+    stratos: { name: 'ABS Stratos II Aqua Gaming PC (Refurbished)', spec: 'Core i9-14900KF · GeForce RTX 5070 Ti 16GB · 32GB DDR5 · 2TB NVMe SSD · Windows 11', img: IMG + '83-360-994-13.jpg', url: 'https://www.newegg.com/p/N82E16883360994C' },
+    case4000: { name: 'CORSAIR FRAME 4000D RS ARGB Mid-Tower Case', spec: 'Black · steel & tempered glass · 3 RS120 ARGB fans · fits 360mm radiators', img: IMG + '11-139-228-02.png', url: 'https://www.newegg.com/corsair-atx-mid-tower-frame-4000d-rs-argb-steel-tempered-glass-computer-case-black/p/N82E16811139228' },
+    aio: { name: 'ASUS ROG STRIX LC III 360 ARGB LCD Liquid Cooler', spec: '360mm AIO · 2.1" IPS LCD · Intel LGA 1700/1200/115x · AMD AM5/AM4', img: IMG + '35-101-114-13.png', url: 'https://www.newegg.com/asus-aio-360-series/p/N82E16835101114' },
+    rtx5070: { name: 'GIGABYTE WindForce GeForce RTX 5070 12GB', spec: '12GB GDDR7 · PCIe 5.0 · 3 x DisplayPort 2.1b + HDMI 2.1b', img: IMG + '14-932-782-02.jpg', url: 'https://www.newegg.com/gigabyte-windforce-gv-n5070wf3-12gd-geforce-rtx-5070-12gb-graphics-card-triple-fans/p/N82E16814932782' },
+    rx9070xt: { name: 'GIGABYTE Gaming Radeon RX 9070 XT 16GB OC', spec: '16GB GDDR6 · PCIe 5.0 · triple-fan WINDFORCE cooling · RGB lighting', img: IMG + '14-932-751-07.jpg', url: 'https://www.newegg.com/gigabyte-gv-r9070xtgaming-oc-16gd-radeon-rx-9070-xt-16gb-graphics-card-triple-fans/p/N82E16814932751' },
+    vengeance: { name: 'CORSAIR Vengeance RGB 32GB (2 x 16GB) DDR5-6000', spec: 'CL36 · Intel XMP 3.0 · ten-zone RGB lighting', img: IMG + '20-236-879-03.jpg', url: 'https://www.newegg.com/corsair-vengeance-rgb-32gb-ddr5-6000-cas-latency-cl36-desktop-memory-black/p/N82E16820236991' }
   };
 
   const find = re => window.GZ_GEAR.find(g => re.test(g.name));
@@ -50,7 +57,11 @@
   // lands in the right place without touching this file.
   const CATS = [
     { title: 'Consoles', icon: 'gamepad', items: [EXTRA.ps5, EXTRA.switch2] },
-    { title: 'Gaming PCs', icon: 'pc', items: by(/Gaming PC/i) },
+    { title: 'Gaming PCs', icon: 'pc', items: by(/Gaming PC/i).concat([EXTRA.stratos]) },
+    { title: 'PC Cases', icon: 'pc', items: [EXTRA.case4000] },
+    { title: 'Graphics Cards', icon: 'chip', items: [EXTRA.rtx5070, EXTRA.rx9070xt] },
+    { title: 'CPU Cooling', icon: 'shield', items: [EXTRA.aio] },
+    { title: 'Memory', icon: 'chip', items: [EXTRA.vengeance] },
     { title: 'Monitors', icon: 'monitor', items: by(/Monitor/i) },
     { title: 'Keyboards', icon: 'keyboard', items: by(/Keyboard/i) },
     { title: 'Mice', icon: 'run', items: by(/Mouse/i).filter(g => !/Keyboard/i.test(g.name)) },
