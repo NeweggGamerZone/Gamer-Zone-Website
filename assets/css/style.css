@@ -999,8 +999,10 @@ form.gz-form textarea { min-height: 90px; resize: vertical; }
 @media (max-width: 760px) {
   .nav-burger { display: flex; align-items: center; justify-content: center; margin-left: auto; width: 44px; height: 44px; cursor: pointer; color: var(--ne-orange); }
   .nav-burger .ic { width: 26px; height: 26px; }
-  nav.main-nav { display: none; width: 100%; flex-direction: column; gap: .15rem; padding: .5rem 0 .8rem; }
-  #nav-toggle:checked ~ nav.main-nav { display: flex; }
+  /* 2026-10-10: the phone menu is now the expanding-panel strip (.nav-mega,
+     see "Expanding-panel navigation" at the end of this file); the plain
+     stacked link list is retired on phones. */
+  nav.main-nav { display: none; }
   .nav-wrap { flex-wrap: wrap; }
   .logo img.logo-img { height: 56px; }
   .hero { padding-top: 2rem; }
@@ -3482,3 +3484,51 @@ html.board-mode .board-logo{margin-top:.4rem}
 .gear-card-body h4 { margin: 0; font-size: 1.05rem; line-height: 1.3; overflow-wrap: anywhere; }
 .gear-card-body .dim { margin: 0; font-size: .85rem; }
 .gear-card-body .tag { margin-bottom: .1rem; }
+
+
+/* ==== Expanding-panel navigation (2026-10-10, per Eric) ====
+   Reference: a row of tall photo slots where the hovered one widens. Desktop:
+   a strip that drops under the header while the nav is hovered/focused.
+   Phone: stacked rows inside the hamburger menu, tap to expand. Photos are
+   people-free Zone baseline shots (assets/img/NavPanels). Titles sit on a
+   dark scrim and are contrast-checked in the open state. */
+.nav-mega { position: absolute; left: 0; right: 0; top: 100%; z-index: 49; background: #050607; border-bottom: 1px solid var(--line); box-shadow: 0 18px 40px rgba(0,0,0,.55); visibility: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity .22s ease, transform .22s ease, visibility 0s linear .22s; }
+.site-header.mega-open .nav-mega { visibility: visible; opacity: 1; transform: none; pointer-events: auto; transition: opacity .22s ease, transform .22s ease; }
+.nm-track { display: flex; height: clamp(250px, 36vh, 330px); }
+.nm-link { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 1.3rem 1.1rem 1.2rem; color: #fff; text-decoration: none; border-left: 1px solid rgba(255,255,255,.08); transition: flex-grow .5s cubic-bezier(.22,.9,.3,1); -webkit-user-drag: none; }
+.nm-link:first-child { border-left: 0; }
+.nm-link:hover, .nm-link:focus-visible, .nm-link.is-hot { flex-grow: 3.4; text-decoration: none; }
+.nm-link:focus-visible { outline: 3px solid var(--ne-orange); outline-offset: -3px; }
+.nm-link img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; filter: grayscale(.6) brightness(.6); transform: scale(1.06); transition: filter .5s ease, transform .6s ease; user-select: none; -webkit-user-drag: none; }
+.nm-link:hover img, .nm-link:focus-visible img, .nm-link.is-hot img, .nm-link.is-open img { filter: grayscale(0) brightness(.82); transform: scale(1); }
+/* dark scrim: top for the title, bottom for the teaser */
+.nm-link::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(4,5,7,.88) 0%, rgba(4,5,7,.55) 34%, rgba(4,5,7,.2) 58%, rgba(4,5,7,.9) 100%); }
+/* film grain, like the reference */
+.nm-link::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: .16; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.nm-title, .nm-tease { position: relative; z-index: 3; }
+.nm-title { font-family: var(--head); font-weight: 800; font-size: clamp(1.05rem, 1.5vw, 1.45rem); line-height: 1.1; letter-spacing: .01em; text-shadow: 0 2px 10px rgba(0,0,0,.8); }
+.nm-tease { display: block; width: min(250px, 100%); font-size: .9rem; line-height: 1.45; color: #fff; text-shadow: 0 1px 8px rgba(0,0,0,.9); opacity: 0; transform: translateY(8px); transition: opacity .3s ease, transform .3s ease; }
+.nm-link:hover .nm-tease, .nm-link:focus-visible .nm-tease, .nm-link.is-hot .nm-tease, .nm-link.is-open .nm-tease { opacity: 1; transform: none; transition-delay: .12s; }
+.nm-go { display: block; margin-top: .45rem; color: #fff; font-weight: 800; font-size: .88rem; text-decoration: underline; text-decoration-color: var(--ne-orange); text-decoration-thickness: 2px; text-underline-offset: 4px; } /* white, not orange: orange on the photo measured 4.9-6.7:1, under the 7:1 AAA floor */
+/* "you are here": orange bar along the bottom of the current page's slot */
+.nm-link.is-current { box-shadow: inset 0 -5px 0 var(--ne-orange); }
+@media (max-width: 760px) {
+  .nav-mega { position: static; visibility: visible; opacity: 1; transform: none; pointer-events: auto; display: none; box-shadow: none; border-bottom: 0; max-height: calc(100vh - 92px); overflow-y: auto; width: 100%; transition: none; }
+  .site-header.menu-open .nav-mega { display: block; }
+  .nm-track { flex-direction: column; height: auto; }
+  .nm-link { flex: none; height: 68px; border-left: 0; border-top: 1px solid rgba(255,255,255,.1); transition: height .4s cubic-bezier(.22,.9,.3,1); padding: 1.05rem 1.1rem; justify-content: flex-start; gap: .5rem; }
+  .nm-link:first-child { border-top: 0; }
+  .nm-link:hover, .nm-link:focus-visible, .nm-link.is-hot { flex-grow: 0; }
+  .nm-link.is-open { height: 196px; }
+  .nm-link.is-open img { filter: grayscale(0) brightness(.82); }
+  .nm-link.is-current { box-shadow: inset 5px 0 0 var(--ne-orange); }
+  .nm-link:not(.is-open):hover img { filter: grayscale(.6) brightness(.6); transform: scale(1.06); }
+  .nm-link:not(.is-open):hover .nm-tease { opacity: 0; }
+  .nm-tease { width: 100%; }
+  .nm-link.is-open .nm-title { font-size: 1.35rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-mega, .nm-link, .nm-link img, .nm-tease { transition: none !important; }
+  .nm-link img { transform: none !important; }
+}
+html.board-mode .nav-mega { display: none; }

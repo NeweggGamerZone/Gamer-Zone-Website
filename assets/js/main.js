@@ -1024,6 +1024,84 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (navToggle) navToggle.addEventListener('change', () => requestAnimationFrame(() => { toActive(); placeCurrentMarker(); }));
   })();
 
+  // 2026-10-10, per Eric: "expanding panels" navigation (reference image of
+  // four tall photo slots that widen on hover). Built from nav.main-nav's own
+  // links so the panel strip can never drift from the real nav. Desktop:
+  // hovering/focusing the top nav drops the strip down and the hovered slot
+  // widens. Phone (<=760px): the hamburger opens the strip as stacked rows;
+  // first tap expands a row, second tap goes to the page. Photos are the
+  // people-free baseline Zone photos only (self-hosted in assets/img/NavPanels).
+  (function initMegaNav() {
+    const header = document.querySelector('.site-header');
+    const wrap = header && header.querySelector('.nav-wrap');
+    const nav = wrap && wrap.querySelector('nav.main-nav');
+    if (!nav) return;
+    const META = {
+      'index.html': ['home', 'Start here: hours, zones, and what is on at the Zone.'],
+      'events.html': ['events', 'The weekly lineup, tournaments, and the visit calendar.'],
+      'games.html': ['games', 'Browse the game library by zone.'],
+      'gear.html': ['gear', 'Shop the setups we feature, straight from Newegg.'],
+      'edu.html': ['academy', 'Workshops and esports training.'],
+      'ambassador.html': ['ambassador', 'Host an event at the Zone.']
+    };
+    const mega = document.createElement('div');
+    mega.className = 'nav-mega';
+    mega.id = 'nav-mega';
+    mega.innerHTML = '<div class="nm-track">' + [...nav.querySelectorAll('a')].map(a => {
+      const href = a.getAttribute('href');
+      const m = META[href] || ['home', ''];
+      const label = a.textContent.trim();
+      return `<a class="nm-link${href === page ? ' is-current' : ''}" href="${GZ.esc(href)}" data-nm="${GZ.esc(href)}"${href === page ? ' aria-current="page"' : ''}>` +
+        `<img src="assets/img/NavPanels/${m[0]}.jpg" alt="" draggable="false">` +
+        `<span class="nm-title">${GZ.esc(label)}</span>` +
+        `<span class="nm-tease">${GZ.esc(m[1])}<b class="nm-go">Go to ${GZ.esc(label)} &rarr;</b></span></a>`;
+    }).join('') + '</div>';
+    header.appendChild(mega);
+
+    const links = [...mega.querySelectorAll('.nm-link')];
+    const mq = window.matchMedia('(max-width: 760px)');
+    const navToggle = document.getElementById('nav-toggle');
+    let closeT;
+
+    function applyMode() {
+      // Desktop: decorative duplicate of the nav (hidden from AT and Tab).
+      // Phone: it IS the menu, so fully exposed.
+      mega.setAttribute('aria-label', 'Explore the Gamer Zone');
+      if (mq.matches) mega.removeAttribute('aria-hidden'); else mega.setAttribute('aria-hidden', 'true');
+      links.forEach(l => { if (mq.matches) l.removeAttribute('tabindex'); else l.setAttribute('tabindex', '-1'); });
+      header.classList.remove('mega-open');
+      links.forEach(l => l.classList.remove('is-hot', 'is-open'));
+    }
+    applyMode();
+    (mq.addEventListener ? mq.addEventListener('change', applyMode) : mq.addListener(applyMode));
+
+    // ---- desktop: open from the nav, close when leaving the header ----
+    const hot = href => links.forEach(l => l.classList.toggle('is-hot', l.dataset.nm === href));
+    const open = () => { if (mq.matches) return; clearTimeout(closeT); header.classList.add('mega-open'); };
+    const close = () => { clearTimeout(closeT); closeT = setTimeout(() => { header.classList.remove('mega-open'); hot(null); }, 170); };
+    nav.addEventListener('mouseenter', open);
+    nav.querySelectorAll('a').forEach(a => {
+      const h = a.getAttribute('href');
+      a.addEventListener('mouseenter', () => { open(); hot(h); });
+      a.addEventListener('focus', () => { open(); hot(h); });
+    });
+    header.addEventListener('mouseleave', close);
+    header.addEventListener('mouseenter', () => clearTimeout(closeT));
+    mega.addEventListener('mouseover', () => hot(null));
+    header.addEventListener('focusout', e => { if (!header.contains(e.relatedTarget)) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { header.classList.remove('mega-open'); links.forEach(l => l.classList.remove('is-open')); } });
+
+    // ---- phone: hamburger toggles the strip, tap-to-expand rows ----
+    if (navToggle) navToggle.addEventListener('change', () => header.classList.toggle('menu-open', navToggle.checked && mq.matches));
+    links.forEach(l => l.addEventListener('click', e => {
+      if (!mq.matches) return;
+      if (!l.classList.contains('is-open')) {
+        e.preventDefault();
+        links.forEach(o => o.classList.toggle('is-open', o === l));
+      }
+    }));
+  })();
+
   // 2026-09-19, design/QA audit fix: the mobile nav's checkbox+label
   // "hamburger" hack had no aria-expanded anywhere, so assistive tech had
   // no reliable way to know whether the menu is currently open. The
