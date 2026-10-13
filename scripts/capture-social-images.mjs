@@ -245,13 +245,18 @@ async function main() {
     // --- optional: one 16:9 + 1:1 pair per upcoming weekly theme (--weeks N) ---
     const weekCaptures = [];
     if (args.weeks > 0) {
-      let themes = [];
-      try {
-        const eventsData = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'events.json'), 'utf8'));
-        themes = (eventsData.weeklyThemes || []).slice().sort((a, b) => a.start.localeCompare(b.start));
-      } catch {}
+      // 2026-10-13: weekly themes are retired (per Eric); upcoming weeks are
+      // now the Zone's open Tue-Sat windows, matching event-update.js.
       const todayIso = args.date || new Date().toISOString().slice(0, 10);
-      const upcoming = themes.filter(t => t.end >= todayIso).slice(0, args.weeks);
+      const d0 = new Date(todayIso + 'T12:00:00Z');
+      const dow = d0.getUTCDay();
+      const toTue = dow === 0 ? 2 : dow === 1 ? 1 : 2 - dow;
+      const upcoming = [];
+      for (let i = 0; i < args.weeks; i++) {
+        const s = new Date(d0); s.setUTCDate(s.getUTCDate() + toTue + 7 * i);
+        const e = new Date(s); e.setUTCDate(e.getUTCDate() + 4);
+        upcoming.push({ start: s.toISOString().slice(0, 10), end: e.toISOString().slice(0, 10), theme: 'Special Events' });
+      }
       for (let i = 0; i < upcoming.length; i++) {
         const theme = upcoming[i];
         // Fake the page clock to a moment inside this theme's window (noon

@@ -1009,6 +1009,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       a.addEventListener('mouseenter', () => moveTo(a));
       a.addEventListener('focus', () => moveTo(a));
     });
+    // 2026-10-13, per Eric: hovering a panel in the expanding-panel strip
+    // (initMegaNav below) slides this same pill to that panel's nav link, so
+    // the orange highlight always follows whatever is hovered.
+    nav._gzPillTo = href => { const a = nav.querySelector('a[href="' + href + '"]'); if (a) moveTo(a); };
+    nav._gzPillReset = toActive;
     nav.addEventListener('mouseleave', toActive);
     nav.addEventListener('focusout', e => {
       if (!nav.contains(e.relatedTarget)) toActive();
@@ -1078,7 +1083,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ---- desktop: open from the nav, close when leaving the header ----
     const hot = href => links.forEach(l => l.classList.toggle('is-hot', l.dataset.nm === href));
     const open = () => { if (mq.matches) return; clearTimeout(closeT); header.classList.add('mega-open'); };
-    const close = () => { clearTimeout(closeT); closeT = setTimeout(() => { header.classList.remove('mega-open'); hot(null); }, 170); };
+    const close = () => { clearTimeout(closeT); closeT = setTimeout(() => { header.classList.remove('mega-open'); hot(null); if (nav._gzPillReset) nav._gzPillReset(); }, 170); };
+    // hovering a panel slides the nav's orange pill to that panel's link
+    links.forEach(l => {
+      const to = () => { if (!mq.matches && nav._gzPillTo) nav._gzPillTo(l.dataset.nm); };
+      l.addEventListener('mouseenter', to);
+      l.addEventListener('focus', to);
+    });
     nav.addEventListener('mouseenter', open);
     nav.querySelectorAll('a').forEach(a => {
       const h = a.getAttribute('href');

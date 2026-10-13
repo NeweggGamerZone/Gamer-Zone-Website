@@ -43,21 +43,20 @@
   // Week" Aug 4–8) rather than derived from a one-off theme-night event —
   // themes now stand on their own, with any specific special events for that
   // week called out separately below.
-  const themeWeeks = (data.weeklyThemes || []).slice().sort((a, b) => a.start.localeCompare(b.start));
-  const currentTheme = themeWeeks.find(w => today >= w.start && today <= w.end);
-
-  let weekStart, weekEnd, themeName, themeDesc;
-  if (currentTheme) {
-    weekStart = currentTheme.start; weekEnd = currentTheme.end; themeName = currentTheme.theme;
-    themeDesc = currentTheme.desc || '';
-  } else {
-    // No theme defined for this stretch yet — show a plain 5-day window
-    // starting today rather than guessing at a name.
-    const endD = new Date(today + 'T12:00:00'); endD.setDate(endD.getDate() + 4);
-    weekStart = today; weekEnd = endD.toISOString().slice(0, 10);
-    themeName = 'Free Play Week';
-    themeDesc = 'Free-to-play PCs, consoles, and VR, all week.';
-  }
+  // 2026-10-13, per Eric: weekly themes are retired. The board now just lists
+  // that week's Special Events (same shape as the monthly calendar card).
+  // data.weeklyThemes may still exist in events.json but is ignored here.
+  // The week is the Zone's open Tue-Sat run (config hoursSchedule days 2-6):
+  // Sun/Mon roll forward to the coming Tuesday.
+  const todayD = new Date(today + 'T12:00:00');
+  const dow = todayD.getDay();
+  const toTue = dow === 0 ? 2 : dow === 1 ? 1 : 2 - dow; // days from today to this/next Tuesday
+  const startD = new Date(todayD); startD.setDate(startD.getDate() + toTue);
+  const endD = new Date(startD); endD.setDate(endD.getDate() + 4);
+  const iso = d => d.toISOString().slice(0, 10);
+  const weekStart = iso(startD), weekEnd = iso(endD);
+  const themeName = 'Special Events';
+  const currentTheme = null;
 
   // This theme week's full slate — used to list closures and any special
   // events (tournaments, majors, community, EDU, vendor) still on the books.
@@ -236,9 +235,7 @@
   // box with no explanation at all.
   list.innerHTML = rows.length
     ? rows.join('')
-    : (boardIconHasTheme
-      ? ''
-      : '<div class="calendar-empty">Just the weekly theme this week, no closures or special events on the books.</div>');
+    : '<div class="eu-row eu-line"><div class="eu-name" data-noshrink="1">Free play every day, walk-ins welcome</div></div>';
 
   // The title column matches the date's oversized font, so a long title
   // (e.g. "Gamer Zone Anniversary") would otherwise wrap to a second line.
