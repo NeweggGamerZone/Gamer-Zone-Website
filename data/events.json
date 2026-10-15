@@ -375,14 +375,22 @@
     {
       "id": "halloween-costume-party-2026-10-31",
       "title": "Halloween Costume Party",
-      "subtitle": "Come in costume for a Halloween-themed party and costume contest at the Zone.",
+      "subtitle": "Come in costume: Prize Raffles, Free Snacks & Candy, and Free Play All Day!",
       "date": "2026-10-31",
       "time": "10:00 AM to 7:00 PM",
       "type": "lan-party",
       "blurb": "Halloween-themed costume contest and party at the Gamer Zone. Come dressed up and join the fun.",
       "featured": true,
       "reservation": false,
-      "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg"
+      "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg",
+      "prizeHeading": "Prizes & Perks",
+      "prizes": [
+        { "label": "Prize Raffles", "icon": "ticket" },
+        { "label": "Free Snacks & Candy", "icon": "snack" },
+        { "label": "Free Play All Day", "icon": "gamepad" },
+        { "label": "Costume Contest", "icon": "trophy" }
+      ],
+      "decorImage": "assets/calendar/LineupAssets/Ghosty.png"
     },
     {
       "id": "gigabyte-event-2026-11-07",
