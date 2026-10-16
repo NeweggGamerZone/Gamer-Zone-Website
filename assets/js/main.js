@@ -72,6 +72,7 @@ const GZ_ICONS = {
   // rendering and zooming into the result, not assumed from the path
   // string alone. Re-verified the same way after this fix: a clean solid
   // orange wedge with 3 real circular holes.
+  candy: '<path fill="currentColor" fill-rule="evenodd" d="M1.5 7.5 L6.8 12 L1.5 16.5 Z M22.5 7.5 L17.2 12 L22.5 16.5 Z M12 5.5 A6.5 6.5 0 1 0 12 18.5 A6.5 6.5 0 1 0 12 5.5 Z M12 9.5 A2.5 2.5 0 1 1 12 14.5 A2.5 2.5 0 1 1 12 9.5 Z"/>',
   pizza: '<path fill="currentColor" fill-rule="evenodd" d="M12 2 L22 20 L2 20 Z M12 6.4 A1.8 1.8 0 1 0 12 9.9999 A1.8 1.8 0 1 0 12 6.4 Z M8.3 12.2 A1.8 1.8 0 1 0 8.3 15.7999 A1.8 1.8 0 1 0 8.3 12.2 Z M15.7 12.2 A1.8 1.8 0 1 0 15.7 15.7999 A1.8 1.8 0 1 0 15.7 12.2 Z"/>',
   // A plain fork-and-knife ("restaurant"/dinner-plate) glyph, added the
   // same round as a disclosed fallback option alongside the pizza-with-

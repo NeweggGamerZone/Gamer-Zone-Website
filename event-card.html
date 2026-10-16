@@ -41,7 +41,7 @@
      yet, since which events should auto-export and on what schedule is an
      open question for Eric, not a fully-specified one. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=119">
+<link rel="stylesheet" href="assets/css/style.css?v=120">
 <style>
   html,body{margin:0;padding:0;background:#000}
   #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:70px;box-sizing:border-box}
@@ -484,8 +484,8 @@
      for the live calendar panel's much smaller text, not this card. */
   /* A label may contain \n to force a line break (e.g. 'Prize\nRaffles'). */
   #card .prize-label-only{white-space:pre-line}
-  /* Halloween: clearer (more see-through) tiles so the photo shows through. */
-  body[data-event^="halloween"] #card .ll-prize-table .prize-row{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.26)}
+  /* Halloween: high-opacity dark tiles so the photo never muddles the label text. */
+  body[data-event^="halloween"] #card .ll-prize-table .prize-row{background:rgba(8,10,16,.80);border-color:rgba(255,255,255,.30)}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
   #card .footer-line{margin-top:24px;font-family:var(--eu-body);font-size:20px;color:var(--ink-dim)}
   #err{color:#fff;font-family:var(--eu-body);padding:2rem}
@@ -495,7 +495,7 @@
 <div id="card" aria-hidden="false">
   <div id="err"></div>
 </div>
-<script src="assets/js/main.js?v=119"></script>
+<script src="assets/js/main.js?v=120"></script>
 <script>
 (async function(){
   const qs = new URLSearchParams(location.search);

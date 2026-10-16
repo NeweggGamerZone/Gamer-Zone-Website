@@ -386,7 +386,7 @@
       "prizeHeading": "Prizes & Perks",
       "prizes": [
         { "label": "Prize\nRaffles", "icon": "ticket" },
-        { "label": "Free Snacks & Candy", "icon": "🍿" },
+        { "label": "Free Snacks & Candy", "icon": "candy" },
         { "label": "Free Play All Day", "icon": "gamepad" },
         { "label": "Costume Contest", "icon": "trophy" }
       ],

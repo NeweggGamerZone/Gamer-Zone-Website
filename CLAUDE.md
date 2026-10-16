@@ -3073,3 +3073,7 @@ Per Eric: clearer tile backgrounds, "Prize Raffles" on two lines, a better snack
 - **Clearer tiles, Halloween only:** `document.body.dataset.event = ev.id` gives a hook, and `body[data-event^="halloween"] #card .ll-prize-table .prize-row` lowers the fill (.16 to .07) and border (.34 to .26) so the photo shows through. The Fantastech 2 card is untouched.
 - **Snack icon:** the Free Snacks & Candy tile uses the popcorn emoji (an emoji string `icon` renders via `.prize-icon-emoji`).
 - **Contrast:** pixel-verified after the change; worst case 7.17:1 on the 24px subtitle (large text, needs 4.5:1), footer 7.35:1, tile labels well above 7:1.
+
+## Round 63 (2026-10-16): Halloween card, candy icon and opaque tiles
+
+Per Eric: the Free Snacks & Candy tile uses a flat orange wrapped-candy icon (new `candy` glyph in `GZ_ICONS`, `main.js`, same single-path evenodd style as `pizza`) instead of the popcorn emoji, and the Halloween tiles are now high-opacity dark (`rgba(8,10,16,.80)`, scoped via `body[data-event^="halloween"]`) so the photo no longer muddles label text. This reverses Round 62's "clearer tiles" choice at Eric's request. Cache-bust `?v=119` -> `?v=120` (main.js changed). Labels are white on near-black; contrast was judged from the render, not re-sampled by pixel.
