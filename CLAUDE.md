@@ -3063,3 +3063,13 @@ Per Eric: an individual event card for the Halloween Costume Party, same style a
 **A real contrast gap in the shared footer, found and fixed while verifying:** the label-layout footer ("Free to enter the Zone / Walk-ins welcome", 20px) used the shared `--ink-dim` and measured only 4.84:1 on the photo scrim (7:1 needed at that size). Added `#card .footer-line.ll-footer{color:#D0D5E0}` (7.35:1 worst case). This is scoped to the label-layout footer only, so it also lifts the Fantastech 2 card's footer, which had the same gap; the SF6 and horizontal footers are untouched. Every other text element passes (worst 7.17:1 on the 24px blue subtitle, which only needs 4.5:1).
 
 **Verified:** Puppeteer at 1200x1200: four equal 253x210 tiles, h1 wraps to two lines, Ghosty box (643-1130 x 155-615) clear of the text column (right edge 611) and the footer inside the card, zero console errors, PNG exactly 1200x1200. `JackOLantern.png` was left untracked on purpose (not part of this request). No cache-bust bump (event-card inline and events.json only).
+
+## Round 62 (2026-10-15): Halloween card tweaks, LAN Party renamed Costume Party
+
+Per Eric: clearer tile backgrounds, "Prize Raffles" on two lines, a better snack emoji, and the event type tag changed from "LAN Party" to "Costume Party". All direct instructions, implemented straight through.
+
+- **New `costume-party` type** ("Costume Party", `cal-major` color) added to the `TYPE`/`TYPE_COLOR` maps in BOTH `event-card.html` and `assets/js/calendar.js` (they must stay in lockstep); the Halloween entry's `type` moved from `lan-party`. calendar.js is shared, so cache-bust `?v=118` -> `?v=119`. The `lan-party` type is left defined for future use.
+- **Line breaks in prize labels:** a `\n` in a label now renders as a line break (`white-space:pre-line` on `.prize-label-only`). The pre-existing rule `#card .prize-row .prize-label-only{white-space:normal}` has higher specificity than a bare `#card .prize-label-only`, so the fix had to change that rule itself; the first attempt silently did nothing until the render was checked.
+- **Clearer tiles, Halloween only:** `document.body.dataset.event = ev.id` gives a hook, and `body[data-event^="halloween"] #card .ll-prize-table .prize-row` lowers the fill (.16 to .07) and border (.34 to .26) so the photo shows through. The Fantastech 2 card is untouched.
+- **Snack icon:** the Free Snacks & Candy tile uses the popcorn emoji (an emoji string `icon` renders via `.prize-icon-emoji`).
+- **Contrast:** pixel-verified after the change; worst case 7.17:1 on the 24px subtitle (large text, needs 4.5:1), footer 7.35:1, tile labels well above 7:1.
