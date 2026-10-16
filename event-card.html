@@ -41,7 +41,7 @@
      yet, since which events should auto-export and on what schedule is an
      open question for Eric, not a fully-specified one. -->
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css?v=118">
+<link rel="stylesheet" href="assets/css/style.css?v=119">
 <style>
   html,body{margin:0;padding:0;background:#000}
   #card{width:1200px;height:1200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:70px;box-sizing:border-box}
@@ -285,7 +285,7 @@
      names run much longer than a dollar amount) and allowed to wrap --
      the tile's own aspect-ratio floor (see the .prize-row comment above)
      still lets it grow taller for real if a longer name needs 2 lines. */
-  #card .prize-row .prize-label-only{font-size:30px;line-height:1.15;text-align:center;color:#fff;white-space:normal}
+  #card .prize-row .prize-label-only{font-size:30px;line-height:1.15;text-align:center;color:#fff;white-space:pre-line}
   /* 2026-10-02, per Eric ("make the prizes have icons, so use the flat
      orange emoticons"): a flat orange icon per named-prize tile, reusing
      the shared GZ_ICONS set (see main.js) the same way every other orange
@@ -482,6 +482,10 @@
      page-scoped 40px size (#card .prize-row-label .ic.prize-icon above)
      -- the shared style.css .prize-icon-emoji default (1.6rem) is sized
      for the live calendar panel's much smaller text, not this card. */
+  /* A label may contain \n to force a line break (e.g. 'Prize\nRaffles'). */
+  #card .prize-label-only{white-space:pre-line}
+  /* Halloween: clearer (more see-through) tiles so the photo shows through. */
+  body[data-event^="halloween"] #card .ll-prize-table .prize-row{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.26)}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
   #card .footer-line{margin-top:24px;font-family:var(--eu-body);font-size:20px;color:var(--ink-dim)}
   #err{color:#fff;font-family:var(--eu-body);padding:2rem}
@@ -491,7 +495,7 @@
 <div id="card" aria-hidden="false">
   <div id="err"></div>
 </div>
-<script src="assets/js/main.js?v=118"></script>
+<script src="assets/js/main.js?v=119"></script>
 <script>
 (async function(){
   const qs = new URLSearchParams(location.search);
@@ -523,8 +527,8 @@
     return;
   }
 
-  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major', 'newegg-event': 'Newegg Event', 'car-meet': 'Car Meet', 'lan-party': 'LAN Party' };
-  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major', 'newegg-event': 'cal-major', 'car-meet': 'cal-major', 'lan-party': 'cal-major' };
+  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major', 'newegg-event': 'Newegg Event', 'car-meet': 'Car Meet', 'lan-party': 'LAN Party', 'costume-party': 'Costume Party' };
+  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major', 'newegg-event': 'cal-major', 'car-meet': 'cal-major', 'lan-party': 'cal-major', 'costume-party': 'cal-major' };
   const bgUrl = (fmt === 'horizontal' && ev.imageHD) ? ev.imageHD : (ev.image || 'assets/calendar/BGAssets/tournament-major-bg-blurred.jpg');
   // 2026-10-02 (same-day follow-up), per Eric's "write out Saturday" --
   // the weekday now spells out in full ("Saturday, Oct 3") rather than
@@ -575,6 +579,7 @@
   // 1200px bottom edge. Scoped narrowly to label-prize events only -- SF6's
   // own bracket-table + perk-chip combination (verified to fit back in
   // Round 17) is completely unchanged.
+  document.body.dataset.event = ev.id;
   const hasLabelPrizes = ev.prizes && ev.prizes.some(p => p.label);
   const perkHTML = (!hasLabelPrizes && ev.perks && ev.perks.length) ? ev.perks.map(p => `<div class="perk-chip">${esc(p)}</div>`).join('') : '';
   // A generic, event-opt-in decorative image (data/events.json's own

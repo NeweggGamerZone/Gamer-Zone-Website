@@ -18,10 +18,10 @@
   const byDate = {};
   (data.events || []).forEach(e => { byDate[e.date] = e; });
 
-  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major', 'newegg-event': 'Newegg Event', 'car-meet': 'Car Meet', 'lan-party': 'LAN Party' };
+  const TYPE = { 'theme-night': 'Theme Day', tournament: 'Tournament', vendor: 'Vendor', edu: 'Training', community: 'Community', major: 'Major', 'newegg-event': 'Newegg Event', 'car-meet': 'Car Meet', 'lan-party': 'LAN Party', 'costume-party': 'Costume Party' };
   // Color-code buckets: Closed=red, Free Play=blue, Theme Day=light blue,
   // EDU/Esports=green, Ambassador (vendor/community-hosted)=pink, Major/Tournament=orange.
-  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major', 'newegg-event': 'cal-major', 'car-meet': 'cal-major', 'lan-party': 'cal-major' };
+  const TYPE_COLOR = { 'theme-night': 'cal-theme', tournament: 'cal-major', vendor: 'cal-amb', edu: 'cal-edu', community: 'cal-amb', major: 'cal-major', 'newegg-event': 'cal-major', 'car-meet': 'cal-major', 'lan-party': 'cal-major', 'costume-party': 'cal-major' };
   // Full-bleed card backgrounds, sourced from assets/calendar/BGAssets — chosen
   // per event type so the popup reads as "photo of that kind of event" rather
   // than a generic flyer image.

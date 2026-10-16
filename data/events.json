@@ -378,15 +378,15 @@
       "subtitle": "Come in costume: Prize Raffles, Free Snacks & Candy, and Free Play All Day!",
       "date": "2026-10-31",
       "time": "10:00 AM to 7:00 PM",
-      "type": "lan-party",
+      "type": "costume-party",
       "blurb": "Halloween-themed costume contest and party at the Gamer Zone. Come dressed up and join the fun.",
       "featured": true,
       "reservation": false,
       "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg",
       "prizeHeading": "Prizes & Perks",
       "prizes": [
-        { "label": "Prize Raffles", "icon": "ticket" },
-        { "label": "Free Snacks & Candy", "icon": "snack" },
+        { "label": "Prize\nRaffles", "icon": "ticket" },
+        { "label": "Free Snacks & Candy", "icon": "🍿" },
         { "label": "Free Play All Day", "icon": "gamepad" },
         { "label": "Costume Contest", "icon": "trophy" }
       ],
