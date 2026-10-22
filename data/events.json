@@ -1,6 +1,16 @@
 {
   "events": [
     {
+      "id": "closed-amd-launch-2026-07-17",
+      "title": "Closed: Private Event",
+      "date": "2026-07-17",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed to the public for a private event.",
+      "featured": false,
+      "reservation": false
+    },
+    {
       "id": "xp-fortnite-training-2026-07-22",
       "title": "XP League: Fortnite Training",
       "boardTitle": "XP League Fortnite Training",
@@ -313,10 +323,22 @@
       ],
       "prizeHeading": "Prizes & Perks",
       "prizes": [
-        {"label": "Monitor Raffles", "icon": "monitor"},
-        {"label": "Keyboard Raffles", "icon": "keyboard"},
-        {"label": "Free Pizza Lunch", "icon": "pizza"},
-        {"label": "Free Play All Day", "icon": "gamepad"}
+        {
+          "label": "Monitor Raffles",
+          "icon": "monitor"
+        },
+        {
+          "label": "Keyboard Raffles",
+          "icon": "keyboard"
+        },
+        {
+          "label": "Free Pizza Lunch",
+          "icon": "pizza"
+        },
+        {
+          "label": "Free Play All Day",
+          "icon": "gamepad"
+        }
       ],
       "decorImage": "assets/calendar/LineupAssets/Fantastech2.png"
     },
@@ -351,20 +373,20 @@
       "reservation": false
     },
     {
-      "id": "closed-car-sim-setup-2026-10-23",
+      "id": "closed-car-sim-setup-2026-10-24",
       "title": "Closed: Car & Simulator Setup",
-      "date": "2026-10-23",
+      "date": "2026-10-24",
       "time": "",
       "type": "closed",
-      "blurb": "Venue closed to the public for Car & Simulator setup ahead of Oct 24's event.",
+      "blurb": "Venue closed to the public for Car & Simulator setup ahead of Oct 25's event.",
       "featured": false,
       "reservation": false
     },
     {
-      "id": "car-club-sim-racing-2026-10-24",
+      "id": "car-club-sim-racing-2026-10-25",
       "title": "THE ULTIMATE CAR & SIM RACING EXPERIENCE",
       "subtitle": "An LA car club meet and free play day -- racing simulators, real cars, and food.",
-      "date": "2026-10-24",
+      "date": "2026-10-25",
       "time": "11:00 AM to 4:00 PM",
       "type": "car-meet",
       "blurb": "LA car club meet day and free play day at the Gamer Zone, featuring food, racing simulators, and cars on display.",
@@ -385,10 +407,22 @@
       "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg",
       "prizeHeading": "Prizes & Perks",
       "prizes": [
-        { "label": "Prize\nRaffles", "icon": "ticket" },
-        { "label": "Free Snacks & Candy", "icon": "candy" },
-        { "label": "Free Play All Day", "icon": "gamepad" },
-        { "label": "Costume Contest", "icon": "trophy" }
+        {
+          "label": "Prize\nRaffles",
+          "icon": "ticket"
+        },
+        {
+          "label": "Free Snacks & Candy",
+          "icon": "candy"
+        },
+        {
+          "label": "Free Play All Day",
+          "icon": "gamepad"
+        },
+        {
+          "label": "Costume Contest",
+          "icon": "trophy"
+        }
       ],
       "decorImage": "assets/calendar/LineupAssets/Ghosty.png"
     },
@@ -396,7 +430,7 @@
       "id": "gigabyte-event-2026-11-07",
       "title": "Gigabyte Event",
       "subtitle": "A Gigabyte-hosted event at Gamer Zone -- details still being finalized.",
-      "date": "2026-11-07",
+      "date": "2026-11-21",
       "type": "major",
       "blurb": "Gigabyte is planning an indoor and outdoor event at Gamer Zone. The full plan is still being finalized with their team -- check back for details.",
       "featured": true,
@@ -545,9 +579,9 @@
     },
     {
       "start": "2026-10-20",
-      "end": "2026-10-24",
+      "end": "2026-10-25",
       "theme": "Racing Week",
-      "desc": "Rev up the sim rigs -- Racing Week leads into THE ULTIMATE CAR & SIM RACING EXPERIENCE on Oct 24."
+      "desc": "Rev up the sim rigs -- Racing Week leads into THE ULTIMATE CAR & SIM RACING EXPERIENCE on Oct 25."
     },
     {
       "start": "2026-10-27",
