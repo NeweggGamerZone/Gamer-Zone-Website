@@ -36,12 +36,12 @@
 
   // 62 written Google reviews (5 stars each), captured in an earlier sync
   // with Google's listing. The aggregate stat line in index.html
-  // ("4.9 rating · 139 Google reviews") is refreshed daily against the
-  // live Google Business Profile count (now 4.9, 139 total reviews
-  // as of 2026-10-25, up from 138) -- this written pool is NOT re-scraped
+  // ("4.9 rating · 159 Google reviews") is refreshed daily against the
+  // live Google Business Profile count (now 4.9, 159 total reviews
+  // as of 2026-10-26, up from 139) -- this written pool is NOT re-scraped
   // by that daily refresh (per request, it only updates the quantity, it
   // never adds/edits written reviews), so the gap between 62 written here
-  // and the real total will keep growing over time (77 unwritten/other
+  // and the real total will keep growing over time (97 unwritten/other
   // 5-star ratings as of this count). Re-sync this pool itself in its own
   // pass if the written reviews ever need refreshing.
   // 2026-09-04 (per Eric): one review whose only attribution Google had on
