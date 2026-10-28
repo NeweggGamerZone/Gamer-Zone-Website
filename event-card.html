@@ -487,10 +487,11 @@
   /* Halloween: high-opacity dark tiles so the photo never muddles the label text. */
   body[data-event^="halloween"] #card .ll-prize-table .prize-row{background:rgba(8,10,16,.80);border-color:rgba(255,255,255,.30)}
   /* Optional second row of mini tiles (ev.bonusPrizes, e.g. Halloween top-costume cash prizes). */
-  #card .ll-bonus-heading{margin-top:22px}
+  #card .ll-bonus-heading{margin-top:16px}
   body:not(.fmt-horizontal) #card .ll-bonus-table .prize-row{min-height:0;padding:14px 10px}
-  #card .ll-bonus-table .prize-row .amt{font-size:44px;line-height:1.1}
-  body[data-event^="halloween"] #card .ll-prize-section{margin-top:44px}
+  #card .ll-bonus-table .prize-row .amt{font-size:40px;line-height:1.1}
+  #card .ll-bonus-table .prize-row .place-label{font-size:18px;white-space:nowrap}
+  body[data-event^="halloween"] #card .ll-prize-section{margin-top:34px}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
   #card .footer-line{margin-top:24px;font-family:var(--eu-body);font-size:20px;color:var(--ink-dim)}
   #err{color:#fff;font-family:var(--eu-body);padding:2rem}
@@ -656,7 +657,7 @@
       <div class="ll-prize-section">
         <div class="prize-heading">${esc(ev.prizeHeading || 'Prizes & Perks')}</div>
         <div class="prize-table ll-prize-table">${ev.prizes.map(prizeTile).join('')}</div>
-        ${ev.bonusPrizes ? `<div class="prize-heading ll-bonus-heading">${esc(ev.bonusPrizes.heading)}</div><div class="prize-table ll-prize-table ll-bonus-table">${ev.bonusPrizes.amounts.map(a => `<div class="prize-row ll-mini"><span class="amt">$${a}</span></div>`).join('')}</div>` : ''}
+        ${ev.bonusPrizes ? `<div class="prize-heading ll-bonus-heading">${esc(ev.bonusPrizes.heading)}</div><div class="prize-table ll-prize-table ll-bonus-table">${ev.bonusPrizes.amounts.map((a, i) => `<div class="prize-row ll-mini"><span class="amt">$${a}</span><span class="place-label">${ord(i + 1)} Place</span></div>`).join('')}</div>` : ''}
       </div>
       <div class="footer-line ll-footer">Free to enter the Zone · Walk-ins welcome</div>`;
   } else {
