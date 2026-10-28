@@ -3077,3 +3077,7 @@ Per Eric: clearer tile backgrounds, "Prize Raffles" on two lines, a better snack
 ## Round 63 (2026-10-16): Halloween card, candy icon and opaque tiles
 
 Per Eric: the Free Snacks & Candy tile uses a flat orange wrapped-candy icon (new `candy` glyph in `GZ_ICONS`, `main.js`, same single-path evenodd style as `pizza`) instead of the popcorn emoji, and the Halloween tiles are now high-opacity dark (`rgba(8,10,16,.80)`, scoped via `body[data-event^="halloween"]`) so the photo no longer muddles label text. This reverses Round 62's "clearer tiles" choice at Eric's request. Cache-bust `?v=119` -> `?v=120` (main.js changed). Labels are white on near-black; contrast was judged from the render, not re-sampled by pixel.
+
+## Round 64 (2026-10-28): Halloween card, second row of top-costume cash prizes
+
+Per Eric: Halloween card shows "2 Logitech X2 Pro Mice Raffle Prizes", "Free Pizza & Candy" (the existing flat orange `pizza` icon), and a second row of four mini tiles under the main four: $200/$150/$100/$50 with "1st-4th Place" labels (Eric named 1st-3rd; 4th added for consistency). New generic `bonusPrizes: {heading, amounts[]}` field in `data/events.json`, rendered by `event-card.html`'s label layout (`.ll-bonus-table`/`.ll-mini`, same opaque tile style). Halloween section top margin tightened (70px to 34px) to fit; footer ends at y=1181 of 1200. Matching subtitle updated to "Free Pizza & Candy". No shared asset changed, so no cache bump. Contrast judged from the render (white/cream text on near-black tiles), not re-sampled.

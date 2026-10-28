@@ -397,7 +397,7 @@
     {
       "id": "halloween-costume-party-2026-10-31",
       "title": "Halloween Costume Party",
-      "subtitle": "Come in costume: Prize Raffles, Free Snacks & Candy, and Free Play All Day!",
+      "subtitle": "Come in costume: Prize Raffles, Free Pizza & Candy, and Free Play All Day!",
       "date": "2026-10-31",
       "time": "10:00 AM to 7:00 PM",
       "type": "costume-party",
@@ -408,12 +408,12 @@
       "prizeHeading": "Prizes & Perks",
       "prizes": [
         {
-          "label": "Prize\nRaffles",
+          "label": "2 Logitech\nX2 Pro Mice\nRaffle Prizes",
           "icon": "ticket"
         },
         {
-          "label": "Free Snacks & Candy",
-          "icon": "candy"
+          "label": "Free Pizza\n& Candy",
+          "icon": "pizza"
         },
         {
           "label": "Free Play All Day",
@@ -424,7 +424,16 @@
           "icon": "trophy"
         }
       ],
-      "decorImage": "assets/calendar/LineupAssets/Ghosty.png"
+      "decorImage": "assets/calendar/LineupAssets/Ghosty.png",
+      "bonusPrizes": {
+        "heading": "Top Costume Prizes",
+        "amounts": [
+          200,
+          150,
+          100,
+          50
+        ]
+      }
     },
     {
       "id": "gigabyte-event-2026-11-07",
