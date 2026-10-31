@@ -470,7 +470,7 @@
     },
     {
       "id": "gta6-launch-event-2026-11-19",
-      "title": "GTA6 Launch Event",
+      "title": "GTA6 Launch Party",
       "subtitle": "A Miami Vice City-themed free play day, running GTA6 campaigns on 10 PlayStation stations.",
       "date": "2026-11-19",
       "time": "10:00 AM to 7:00 PM",
@@ -478,7 +478,29 @@
       "blurb": "A major free play day themed around the GTA6 launch, styled after Miami Vice City -- 10 PlayStation stations running GTA6 campaigns all day.",
       "featured": true,
       "reservation": false,
-      "accent": "#FFC400"
+      "accent": "#FFC400",
+      "tagLabel": "Launch Party",
+      "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg",
+      "prizeHeading": "Prizes & Perks",
+      "prizes": [
+        {
+          "label": "Vice City\nThemed Day",
+          "icon": "wheel"
+        },
+        {
+          "label": "2 Grand Prizes:\nMSI Monitor &\nPS5 + GTA6\nBundle",
+          "icon": "trophy"
+        },
+        {
+          "label": "$500 in Gift\nCard Prizing",
+          "icon": "coin"
+        },
+        {
+          "label": "Complimentary\nDinner & Snacks",
+          "icon": "utensils"
+        }
+      ],
+      "decorImage": "assets/calendar/LineupAssets/GTA6.png"
     },
     {
       "id": "sf6-bracket-demons-2026-12-05",

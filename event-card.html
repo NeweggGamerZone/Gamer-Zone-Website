@@ -485,13 +485,15 @@
   /* A label may contain \n to force a line break (e.g. 'Prize\nRaffles'). */
   #card .prize-label-only{white-space:pre-line}
   /* Halloween: high-opacity dark tiles so the photo never muddles the label text. */
-  body[data-event^="halloween"] #card .ll-prize-table .prize-row{background:rgba(8,10,16,.80);border-color:rgba(255,255,255,.30)}
+  body[data-event^="halloween"] #card .ll-prize-table .prize-row,body[data-event^="gta6"] #card .ll-prize-table .prize-row{background:rgba(8,10,16,.80);border-color:rgba(255,255,255,.30)}
   /* Optional second row of mini tiles (ev.bonusPrizes, e.g. Halloween top-costume cash prizes). */
   #card .ll-bonus-heading{margin-top:16px}
   body:not(.fmt-horizontal) #card .ll-bonus-table .prize-row{min-height:0;padding:14px 10px}
   #card .ll-bonus-table .prize-row .amt{font-size:40px;line-height:1.1}
   #card .ll-bonus-table .prize-row .place-label{font-size:18px;white-space:nowrap}
-  body[data-event^="halloween"] #card .ll-prize-section{margin-top:34px}
+  body[data-event^="halloween"] #card .ll-prize-section,body[data-event^="gta6"] #card .ll-prize-section{margin-top:34px}
+  /* GTA6 tiles carry longer labels (grand-prize line); 26px keeps "Complimentary" and "PS5 + GTA6" inside the 4-up tile width. */
+  body[data-event^="gta6"] #card .ll-prize-table .prize-row .prize-label-only{font-size:26px}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
   #card .footer-line{margin-top:24px;font-family:var(--eu-body);font-size:20px;color:var(--ink-dim)}
   #err{color:#fff;font-family:var(--eu-body);padding:2rem}
@@ -618,7 +620,7 @@
     <img class="card-char" src="${CHAR_SRC}" alt="" aria-hidden="true">` : '';
 
   const brandRowHTML = `<div class="brand-row"><img class="nlogo-img" src="assets/img/newegg-gamerzone-clean.png" alt="Newegg Gamer Zone"></div>`;
-  const tagHTML = `<span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(TYPE[ev.type] || ev.type || 'Event')}</span>`;
+  const tagHTML = `<span class="tag ${TYPE_COLOR[ev.type] || 'cal-major'}">${esc(ev.tagLabel || TYPE[ev.type] || ev.type || 'Event')}</span>`;
   const metaHTML = `<div class="cd-meta">
         <span class="cd-meta-item"><i data-ic="cal"></i>${pretty(ev.date)}</span>
         ${ev.time ? `<span class="cd-meta-item"><i data-ic="clock"></i>${esc(ev.time)}</span>` : ''}
