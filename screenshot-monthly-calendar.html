@@ -102,7 +102,7 @@
      guessed): 49px is the largest one-line size -- 50px wraps to 2 lines.
      Set to 49px here, scoped to #month only so the shared --eu-date-size
      token (and the live Weekly Lineup board it also drives) is untouched. */
-  #month .eu-eyebrow-title{font-size:49px}
+  #month .eu-eyebrow-title{font-size:47px}
 
   /* 2026-09-30, per Eric ("cut the theme weeks... infuse more information
      for the events we're running this month, add small tag nodes like in
@@ -244,7 +244,7 @@
           <i data-ic="cal" data-lg></i>
           <div class="eu-eyebrow-textcol">
             <div class="eu-eyebrow-titlerow">
-              <h3 class="eu-eyebrow-title">Monthly Calendar: <span class="eu-theme-highlight">October 2026</span></h3>
+              <h3 class="eu-eyebrow-title">Monthly Calendar: <span class="eu-theme-highlight">November 2026</span></h3>
             </div>
           </div>
         </div>
@@ -252,70 +252,29 @@
 
       <h4 class="eu-sublist-head">Special Events</h4>
       <div class="eu-list">
-        <!-- Real, dated entries from data/events.json (source of truth):
-             fantastech-2-2026-10-03, closed-cyberpower-teambonding-2026-10-10,
-             closed-usc-collegiate-cup-setup-2026-10-16,
-             closed-usc-collegiate-cup-2026-10-17,
-             car-club-sim-racing-2026-10-24,
-             halloween-costume-party-2026-10-31. Keep in sync if those
-             entries change.
-
-             2026-09-30: theme weeks removed per Eric ("they haven't been
-             so successful"), and each Special Event below gained a small
-             .mc-tags row (real offering highlights) + a .mc-sub subtitle
-             line, hand-authored here per this page's own existing
-             convention rather than pulled from data/events.json's own
-             subtitle/perks fields (those feed different live-site UI --
-             the Plan Your Visit detail card and the event-card.html
-             social export -- and weren't asked to change this round).
-             Tags for Fantastech 2 came verbatim from Eric; the other two
-             events' tags are drawn directly from the subtitle sentences
-             Eric supplied for them, not invented. -->
-        <div class="eu-row eu-line eu-major">
-          <div class="eu-name">OCT 3: Fantastech 2 Party</div>
-          <div class="eu-meta">10:00 AM to 7:00 PM</div>
-          <div class="mc-tags">
-            <span class="tag orange">Free Play</span>
-            <span class="tag orange">Raffle Prizes</span>
-            <span class="tag orange">Free Pizza</span>
-          </div>
-          <p class="mc-sub">Fantastech 2 is one of Newegg's biggest annual shopping events for PC parts, peripherals, and more! We're celebrating the sale with monitor/keyboard raffles, free play, and free pizza lunch!</p>
-        </div>
+        <!-- 2026-10-15, Round 65, per Eric: November 2026 board with ONLY the
+             five dates he confirmed "set in stone" (Nov 10 / 21 private-event
+             closures, Nov 19 GTA6 Launch Party, Nov 25 closing early, Nov 26
+             Thanksgiving closure). No times, tags or subtitles were given, so
+             none are shown (no invented closing time for Nov 25, no launch
+             party hours). Other November entries in data/events.json are not
+             confirmed for this board and are intentionally left off. -->
         <div class="eu-row eu-closure eu-closure-line">
-          <div class="eu-name">OCT 10: Closed for Private Event</div>
-        </div>
-        <div class="eu-row eu-closure eu-closure-line">
-          <div class="eu-name">OCT 16: Closed for Private Event</div>
-        </div>
-        <div class="eu-row eu-closure eu-closure-line">
-          <div class="eu-name">OCT 17: Closed for Private Event</div>
-        </div>
-        <div class="eu-row eu-closure eu-closure-line">
-          <div class="eu-name">OCT 23: Closed for Car &amp; Simulator Setup</div>
+          <div class="eu-name">NOV 10: Closed for Private Event</div>
         </div>
         <div class="eu-row eu-line eu-major">
-          <div class="eu-name">OCT 24: THE ULTIMATE CAR &amp; SIM RACING EXPERIENCE</div>
-          <div class="eu-meta">11:00 AM to 4:00 PM</div>
-          <div class="mc-tags">
-            <span class="tag orange">Luxury Cars</span>
-            <span class="tag orange">Raffle Prizes</span>
-            <span class="tag orange">Racing Simulators</span>
-          </div>
-          <p class="mc-sub">In collaboration with Malibu Autobahn, Likewize, and Apevie, The Ultimate Car &amp; Sim Racing Experience features luxury cars, exclusive giveaways, and hydraulic racing simulators!</p>
+          <div class="eu-name">NOV 19: GTA6 Launch Party</div>
         </div>
-        <div class="eu-row eu-line eu-major">
-          <div class="eu-name">OCT 31: Halloween Costume Party</div>
-          <div class="eu-meta">10:00 AM to 7:00 PM</div>
-          <div class="mc-tags">
-            <span class="tag orange">Free Candy</span>
-            <span class="tag orange">Horror Games</span>
-            <span class="tag orange">Costume Contest</span>
-          </div>
-          <p class="mc-sub">Bring your best costume! Enjoy candy, scary games, and costume contests!</p>
+        <div class="eu-row eu-closure eu-closure-line">
+          <div class="eu-name">NOV 21: Closed for Private Event</div>
+        </div>
+        <div class="eu-row eu-closure eu-closure-line">
+          <div class="eu-name">NOV 25: Closing Early</div>
+        </div>
+        <div class="eu-row eu-closure eu-closure-line">
+          <div class="eu-name">NOV 26: Closed for Thanksgiving</div>
         </div>
       </div>
-
-      <img class="mc-bottom-art" src="assets/calendar/LineupAssets/Pumpkins.png" alt="Stacked jack-o'-lanterns">
     </div>
   </section>
 </main>
