@@ -96,7 +96,8 @@
       "blurb": "A charity Street Fighter tournament presented with Eastern Harmony, raising awareness and support for mental health. Bracket play open to all skill levels. Walk-ins welcome.",
       "featured": true,
       "reservation": false,
-      "accent": "#FF2E97"
+      "accent": "#FF2E97",
+      "startgg": "https://www.start.gg/tournament/gaming-for-good-street-fighter-6-tournament-and-fundraiser"
     },
     {
       "id": "xp-fortnite-training-2026-08-05",
