@@ -106,7 +106,7 @@
   /* 2026-10-15, Round 66, per Eric ("Highlight GTA6 launch party in
      Orange"): the one real event on the November board gets the same
      --ne-orange as the "Special Events" heading, scoped to #month. */
-  #month .eu-row.eu-major .eu-name{color:var(--ne-orange)}
+  #month .eu-row.eu-major .eu-name{color:var(--ne-orange);font-size:50px}
 
   /* 2026-09-30, per Eric ("cut the theme weeks... infuse more information
      for the events we're running this month, add small tag nodes like in
@@ -256,27 +256,24 @@
 
       <h4 class="eu-sublist-head">Special Events</h4>
       <div class="eu-list">
-        <!-- 2026-10-15, Round 65, per Eric: November 2026 board with ONLY the
-             five dates he confirmed "set in stone" (Nov 10 / 21 private-event
-             closures, Nov 19 GTA6 Launch Party, Nov 25 closing early, Nov 26
-             Thanksgiving closure). No times, tags or subtitles were given, so
-             none are shown (no invented closing time for Nov 25, no launch
-             party hours). Other November entries in data/events.json are not
-             confirmed for this board and are intentionally left off. -->
+        <!-- 2026-11-07, Round 67, per Eric: revised November list (Nov 10 / 28 private-event closures, Nov 19 GTA6 Event, Nov 21 Gigabyte AORUS VS40 Event, Nov 26 Thanksgiving closure, Nov 27 Black Friday Event). No times/tags/subtitles supplied, so none shown. Nov 25 closing-early row removed (not in Eric's revised list). -->
         <div class="eu-row eu-closure eu-closure-line">
           <div class="eu-name">NOV 10: Closed for Private Event</div>
         </div>
         <div class="eu-row eu-line eu-major">
-          <div class="eu-name">NOV 19: GTA6 Launch Party</div>
+          <div class="eu-name">NOV 19: GTA6 Event</div>
         </div>
-        <div class="eu-row eu-closure eu-closure-line">
-          <div class="eu-name">NOV 21: Closed for Private Event</div>
-        </div>
-        <div class="eu-row eu-closure eu-closure-line">
-          <div class="eu-name">NOV 25: Closing Early</div>
+        <div class="eu-row eu-line eu-major">
+          <div class="eu-name">NOV 21: Gigabyte AORUS VS40 Event</div>
         </div>
         <div class="eu-row eu-closure eu-closure-line">
           <div class="eu-name">NOV 26: Closed for Thanksgiving</div>
+        </div>
+        <div class="eu-row eu-line eu-major">
+          <div class="eu-name">NOV 27: Black Friday Event</div>
+        </div>
+        <div class="eu-row eu-closure eu-closure-line">
+          <div class="eu-name">NOV 28: Closed for Private Event</div>
         </div>
       </div>
     </div>
