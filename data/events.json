@@ -481,7 +481,7 @@
       "reservation": false,
       "accent": "#FFC400",
       "tagLabel": "Launch Party",
-      "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg",
+      "image": "assets/calendar/BGAssets/console-lounge-bg.jpg",
       "prizeHeading": "Prizes & Perks",
       "prizes": [
         {
@@ -501,7 +501,7 @@
           "icon": "utensils"
         }
       ],
-      "decorImage": "assets/calendar/LineupAssets/Neon Duo Beside a Muscle Car.png"
+      "decorImage": "assets/calendar/LineupAssets/GTA6.png"
     },
     {
       "id": "sf6-bracket-demons-2026-12-05",
