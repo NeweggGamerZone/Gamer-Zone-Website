@@ -496,6 +496,8 @@
   body[data-event^="halloween"] #card .ll-prize-section,body[data-event^="gta6"] #card .ll-prize-section{margin-top:34px}
   /* GTA6 tiles carry longer labels (grand-prize line); 26px keeps "Complimentary" and "PS5 + GTA6" inside the 4-up tile width. */
   body[data-event^="gta6"] #card .ll-prize-table .prize-row .prize-label-only{font-size:26px}
+  /* GTA6 tiles have 2- and 3-line labels; top-anchor the content (icon first) instead of vertically centering so every icon, and the first label line under it, sits at the same height across the row. */
+  body:not(.fmt-horizontal)[data-event^="gta6"] #card .ll-prize-table .prize-row{justify-content:flex-start;padding-top:36px}
   /* GTA6 art is a tall portrait cutout (~0.63:1); the shared 460px height left it tiny and the card top-heavy, so it is sized up to fill the card. */
   body:not(.fmt-horizontal)[data-event^="gta6"] #card .decor-img-inline{height:600px;top:0;border-radius:22px;border:2px solid rgba(255,255,255,.28);box-shadow:0 18px 44px rgba(0,0,0,.6)}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
