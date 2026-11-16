@@ -504,6 +504,27 @@
       "decorImage": "assets/calendar/LineupAssets/GTA6.png"
     },
     {
+      "id": "black-friday-2026-11-27",
+      "title": "Black Friday",
+      "subtitle": "A Black Friday celebration at the Newegg Gamer Zone.",
+      "date": "2026-11-27",
+      "time": "10:00 AM to 7:00 PM",
+      "type": "newegg-event",
+      "blurb": "The Gamer Zone celebrates Black Friday -- stop by during regular hours for free play on the latest gaming PCs, consoles, and simulators.",
+      "featured": true,
+      "reservation": false
+    },
+    {
+      "id": "closed-cal-poly-pomona-2026-11-28",
+      "title": "Closed: Private Event",
+      "date": "2026-11-28",
+      "time": "",
+      "type": "closed",
+      "blurb": "Venue closed to the public for a private event.",
+      "featured": false,
+      "reservation": false
+    },
+    {
       "id": "sf6-bracket-demons-2026-12-05",
       "title": "SF6 Tournament: Bracket Demons",
       "subtitle": "Street Fighter 6 tournament hosted with local organizer Bracket Demons LLC.",
