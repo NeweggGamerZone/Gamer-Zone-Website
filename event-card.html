@@ -511,8 +511,10 @@
   /* Black Friday layout v2: logo panel stretches to the text column's height (logo centered, its own gold-silk art enlarged behind it so there is no empty pocket), grand prize is a wide featured tile, the other three share one row. */
   body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-top{align-items:center;gap:32px}
   /* Black Friday v3: logo + tag left, Lockup right; title/subtitle centered beneath. */
-  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-text{flex:0 0 auto}
-  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-top .decor-img-inline{flex:1;min-width:0;width:auto;max-height:230px;align-self:center}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-top{gap:0}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-text{flex:0 0 50%;width:50%;min-width:0;display:flex;flex-direction:column;align-items:center}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-text .brand-row{justify-content:center}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-top .decor-img-inline{flex:0 0 50%;min-width:0;width:50%;max-width:50%;max-height:230px;align-self:center;padding:0 24px;box-sizing:border-box}
   body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-title-block{text-align:center;margin-top:30px}
   body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-title-block h1{font-size:76px;line-height:1.05;margin:0;white-space:nowrap}
   body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-title-block .cd-sub{font-size:28px;margin:12px 0 0;text-align:center}
