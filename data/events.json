@@ -536,7 +536,8 @@
       ],
       "decorImage": "assets/calendar/LineupAssets/Lockup.png",
       "metaBelow": true,
-      "featuredPrize": true
+      "featuredPrize": true,
+      "titleBelow": true
     },
     {
       "id": "closed-cal-poly-pomona-2026-11-28",
