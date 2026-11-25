@@ -512,7 +512,28 @@
       "type": "newegg-event",
       "blurb": "The Gamer Zone celebrates Black Friday -- stop by during regular hours for free play on the latest gaming PCs, consoles, and simulators.",
       "featured": true,
-      "reservation": false
+      "reservation": false,
+      "labelLayout": true,
+      "image": "assets/calendar/BGAssets/tournament-major-bg-blurred.jpg",
+      "prizeHeading": "Prizes & Perks",
+      "prizes": [
+        {
+          "label": "Black Friday\nFeatured Products\nfor Giveaways",
+          "icon": "ticket"
+        },
+        {
+          "label": "Complimentary\nMusubi's &\nSnacks!",
+          "icon": "utensils"
+        },
+        {
+          "label": "Free Play\nAll Day",
+          "icon": "gamepad"
+        },
+        {
+          "label": "Grand Prize:\nABS PC!\ni7, 5060 GPU\n+ 32GB DDR5",
+          "icon": "trophy"
+        }
+      ]
     },
     {
       "id": "closed-cal-poly-pomona-2026-11-28",

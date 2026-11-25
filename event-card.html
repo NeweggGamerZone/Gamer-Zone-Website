@@ -55,6 +55,7 @@
   #card .bg-scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(6,7,8,.95) 0%,rgba(6,7,8,.86) 26%,rgba(6,7,8,.5) 50%,rgba(6,7,8,.22) 72%,rgba(6,7,8,.5) 100%)}
   /* GTA6 uses the bright Gamer Zone lounge photo (neon floor glow + the wall logo), so its scrim is held heavier everywhere text sits to keep subtitle/footer text at AA+ against the photo's brightest areas. */
   body[data-event^="gta6"] #card .bg-scrim{background:linear-gradient(135deg,rgba(6,7,8,.94) 0%,rgba(6,7,8,.9) 40%,rgba(6,7,8,.84) 70%,rgba(6,7,8,.9) 100%)}
+  body[data-event^="black-friday"] #card .bg-scrim{background:linear-gradient(135deg,rgba(6,7,8,.9) 0%,rgba(6,7,8,.8) 40%,rgba(6,7,8,.7) 70%,rgba(6,7,8,.78) 100%)}
   body.fmt-horizontal #card .bg-scrim{background:linear-gradient(100deg,rgba(6,7,8,.97) 0%,rgba(6,7,8,.9) 40%,rgba(6,7,8,.4) 70%,rgba(6,7,8,.08) 100%)}
   /* The real fighter-game character cutout (assets/calendar/LineupAssets/
      FighterGames.png, a transparent-background PNG), added 2026-09-22 per
@@ -498,6 +499,14 @@
   body[data-event^="gta6"] #card .ll-prize-table .prize-row .prize-label-only{font-size:26px}
   /* GTA6 tiles have 2- and 3-line labels; top-anchor the content (icon first) instead of vertically centering so every icon, and the first label line under it, sits at the same height across the row. */
   body:not(.fmt-horizontal)[data-event^="gta6"] #card .ll-prize-table .prize-row{justify-content:flex-start;padding-top:36px}
+  /* Black Friday card (labelLayout, no decor image): same opaque, top-anchored tiles as GTA6; larger date/time and the tile row pushed down per Eric. */
+  body[data-event^="black-friday"] #card .ll-prize-table .prize-row{background:rgba(8,10,16,.80);border-color:rgba(255,255,255,.30)}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-prize-table .prize-row{justify-content:flex-start;padding-top:36px}
+  body[data-event^="black-friday"] #card .ll-prize-table .prize-row .prize-label-only{font-size:26px}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-text h1{font-size:92px;line-height:1.05}
+  body[data-event^="black-friday"] #card .cd-meta-item{font-size:46px}
+  body[data-event^="black-friday"] #card .cd-meta-item .ic{width:46px;height:46px}
+  body[data-event^="black-friday"] #card .ll-prize-section{margin-top:150px}
   /* GTA6 art is a tall portrait cutout (~0.63:1); the shared 460px height left it tiny and the card top-heavy, so it is sized up to fill the card. */
   body:not(.fmt-horizontal)[data-event^="gta6"] #card .decor-img-inline{height:600px;top:0;border-radius:22px;border:2px solid rgba(255,255,255,.28);box-shadow:0 18px 44px rgba(0,0,0,.6)}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
@@ -644,7 +653,7 @@
   // -- Eric's request was scoped to "the square one" specifically, and
   // horizontal's existing 4-column prize-table + bottom-right decor image
   // already reads the way this request asks for.
-  const useLabelSquareLayout = !!(ev.decorImage && hasLabelPrizes && fmt === 'square');
+  const useLabelSquareLayout = !!((ev.decorImage || ev.labelLayout) && hasLabelPrizes && fmt === 'square');
 
   if (useLabelSquareLayout) {
     card.innerHTML = `
@@ -659,7 +668,7 @@
             ${ev.subtitle ? `<p class="cd-sub">${esc(ev.subtitle)}</p>` : ''}
             ${metaHTML}
           </div>
-          <img class="decor-img decor-img-inline" src="${esc(ev.decorImage)}" alt="" aria-hidden="true">
+          ${ev.decorImage ? `<img class="decor-img decor-img-inline" src="${esc(ev.decorImage)}" alt="" aria-hidden="true">` : ''}
         </div>
       </div>
       <div class="ll-prize-section">
