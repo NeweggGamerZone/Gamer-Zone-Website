@@ -505,13 +505,22 @@
   body[data-event^="black-friday"] #card .ll-prize-table .prize-row .prize-label-only{font-size:26px}
   body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-text h1{font-size:64px;line-height:1.05}
   /* Black Friday logo art (opaque 815x346 banner): sits right of the text column as a framed panel. */
-  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .decor-img-inline{height:auto;width:500px;top:95px;border-radius:20px;border:2px solid rgba(255,255,255,.28);box-shadow:0 18px 44px rgba(0,0,0,.6)}
   body[data-event^="black-friday"] #card .cd-meta-item{font-size:46px}
   /* Date + time share one line under the logo/subtitle row (metaBelow). */
-  body[data-event^="black-friday"] #card .ll-meta-below{margin-top:34px}
-  body[data-event^="black-friday"] #card .ll-meta-below .cd-meta{display:flex;flex-wrap:nowrap;gap:36px;align-items:center}
+  body[data-event^="black-friday"] #card .ll-meta-below{margin-top:28px}
+  /* Black Friday layout v2: logo panel stretches to the text column's height (logo centered, its own gold-silk art enlarged behind it so there is no empty pocket), grand prize is a wide featured tile, the other three share one row. */
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-top{align-items:stretch;gap:32px}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .decor-img-inline{height:auto;align-self:stretch;width:500px;top:0;object-fit:contain;background:#050403 url("assets/calendar/LineupAssets/BlackFriday.png") center/cover;border-radius:20px;border:2px solid rgba(255,255,255,.28);box-shadow:0 18px 44px rgba(0,0,0,.6)}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-feature-table{grid-template-columns:minmax(0,1fr);margin-bottom:14px}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-rest-table{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-feature-table .prize-row{flex-direction:row;justify-content:center;align-items:center;gap:30px;min-height:104px;padding:18px 30px;border:2px solid var(--ne-orange)}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-feature-table .prize-row .ic.prize-icon{width:76px;height:76px;margin:0}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-feature-table .prize-label-only{font-size:40px;line-height:1.15;text-align:left}
+  body:not(.fmt-horizontal)[data-event^="black-friday"] #card .ll-rest-table .prize-row{min-height:150px;padding:24px 16px 20px}
+  body[data-event^="black-friday"] #card .ll-rest-table .prize-label-only{font-size:28px}
+  body[data-event^="black-friday"] #card .ll-meta-below .cd-meta{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:center;padding:10px 30px;border-radius:16px;background:rgba(8,10,16,.72);border:1px solid rgba(255,255,255,.2);border-bottom:3px solid var(--ne-orange)}
   body[data-event^="black-friday"] #card .cd-meta-item .ic{width:46px;height:46px}
-  body[data-event^="black-friday"] #card .ll-prize-section{margin-top:60px}
+  body[data-event^="black-friday"] #card .ll-prize-section{margin-top:28px}
   /* GTA6 art is a tall portrait cutout (~0.63:1); the shared 460px height left it tiny and the card top-heavy, so it is sized up to fill the card. */
   body:not(.fmt-horizontal)[data-event^="gta6"] #card .decor-img-inline{height:600px;top:0;border-radius:22px;border:2px solid rgba(255,255,255,.28);box-shadow:0 18px 44px rgba(0,0,0,.6)}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
@@ -679,7 +688,7 @@
       </div>
       <div class="ll-prize-section">
         <div class="prize-heading">${esc(ev.prizeHeading || 'Prizes & Perks')}</div>
-        <div class="prize-table ll-prize-table">${ev.prizes.map(prizeTile).join('')}</div>
+        ${ev.featuredPrize ? `<div class="prize-table ll-prize-table ll-feature-table">${prizeTile(ev.prizes[0])}</div><div class="prize-table ll-prize-table ll-rest-table">${ev.prizes.slice(1).map(prizeTile).join('')}</div>` : `<div class="prize-table ll-prize-table">${ev.prizes.map(prizeTile).join('')}</div>`}
         ${ev.bonusPrizes ? `<div class="prize-heading ll-bonus-heading">${esc(ev.bonusPrizes.heading)}</div><div class="prize-table ll-prize-table ll-bonus-table">${ev.bonusPrizes.amounts.map((a, i) => `<div class="prize-row ll-mini"><span class="amt">$${a}</span><span class="place-label">${ord(i + 1)} Place</span></div>`).join('')}</div>` : ''}
       </div>
       <div class="footer-line ll-footer">Free to enter the Zone · Walk-ins welcome</div>`;

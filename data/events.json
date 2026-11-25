@@ -518,7 +518,7 @@
       "prizeHeading": "Prizes & Perks",
       "prizes": [
         {
-          "label": "Grand Prize:\n5060 ABS PC\nwith 32GB DDR5",
+          "label": "Grand Prize:\n5060 ABS PC with 32GB DDR5",
           "icon": "trophy"
         },
         {
@@ -535,7 +535,8 @@
         }
       ],
       "decorImage": "assets/calendar/LineupAssets/BlackFriday.png",
-      "metaBelow": true
+      "metaBelow": true,
+      "featuredPrize": true
     },
     {
       "id": "closed-cal-poly-pomona-2026-11-28",
