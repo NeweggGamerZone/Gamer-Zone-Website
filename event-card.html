@@ -507,8 +507,11 @@
   /* Black Friday logo art (opaque 815x346 banner): sits right of the text column as a framed panel. */
   body:not(.fmt-horizontal)[data-event^="black-friday"] #card .decor-img-inline{height:auto;width:500px;top:0;border-radius:20px;border:2px solid rgba(255,255,255,.28);box-shadow:0 18px 44px rgba(0,0,0,.6)}
   body[data-event^="black-friday"] #card .cd-meta-item{font-size:46px}
+  /* Date + time share one line under the logo/subtitle row (metaBelow). */
+  body[data-event^="black-friday"] #card .ll-meta-below{margin-top:34px}
+  body[data-event^="black-friday"] #card .ll-meta-below .cd-meta{display:flex;flex-wrap:nowrap;gap:36px;align-items:center}
   body[data-event^="black-friday"] #card .cd-meta-item .ic{width:46px;height:46px}
-  body[data-event^="black-friday"] #card .ll-prize-section{margin-top:110px}
+  body[data-event^="black-friday"] #card .ll-prize-section{margin-top:60px}
   /* GTA6 art is a tall portrait cutout (~0.63:1); the shared 460px height left it tiny and the card top-heavy, so it is sized up to fill the card. */
   body:not(.fmt-horizontal)[data-event^="gta6"] #card .decor-img-inline{height:600px;top:0;border-radius:22px;border:2px solid rgba(255,255,255,.28);box-shadow:0 18px 44px rgba(0,0,0,.6)}
   #card .prize-row-label .prize-icon-emoji{font-size:34px;line-height:40px;margin-bottom:8px}
@@ -668,10 +671,11 @@
             ${tagHTML}
             <h1>${esc(ev.title)}</h1>
             ${ev.subtitle ? `<p class="cd-sub">${esc(ev.subtitle)}</p>` : ''}
-            ${metaHTML}
+            ${ev.metaBelow ? '' : metaHTML}
           </div>
           ${ev.decorImage ? `<img class="decor-img decor-img-inline" src="${esc(ev.decorImage)}" alt="" aria-hidden="true">` : ''}
         </div>
+        ${ev.metaBelow ? `<div class="ll-meta-below">${metaHTML}</div>` : ''}
       </div>
       <div class="ll-prize-section">
         <div class="prize-heading">${esc(ev.prizeHeading || 'Prizes & Perks')}</div>

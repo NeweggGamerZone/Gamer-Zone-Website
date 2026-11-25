@@ -534,7 +534,8 @@
           "icon": "trophy"
         }
       ],
-      "decorImage": "assets/calendar/LineupAssets/BlackFriday.png"
+      "decorImage": "assets/calendar/LineupAssets/BlackFriday.png",
+      "metaBelow": true
     },
     {
       "id": "closed-cal-poly-pomona-2026-11-28",
