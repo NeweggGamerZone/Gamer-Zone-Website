@@ -518,7 +518,7 @@
       "prizeHeading": "Prizes & Perks",
       "prizes": [
         {
-          "label": "Black Friday\nFeatured Product\nGiveaways",
+          "label": "Black Friday\nProduct\nGiveaways",
           "icon": "ticket"
         },
         {
@@ -530,7 +530,7 @@
           "icon": "gamepad"
         },
         {
-          "label": "Grand Prize:\nABS PC with\n5060 + 32GB DDR5",
+          "label": "Grand Prize:\n5060 ABS PC\nwith 32GB DDR5",
           "icon": "trophy"
         }
       ]
