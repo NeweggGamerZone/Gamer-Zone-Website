@@ -518,6 +518,10 @@
       "prizeHeading": "Prizes & Perks",
       "prizes": [
         {
+          "label": "Grand Prize:\n5060 ABS PC\nwith 32GB DDR5",
+          "icon": "trophy"
+        },
+        {
           "label": "Black Friday\nProduct\nGiveaways",
           "icon": "ticket"
         },
@@ -528,10 +532,6 @@
         {
           "label": "Free Play\nAll Day",
           "icon": "gamepad"
-        },
-        {
-          "label": "Grand Prize:\n5060 ABS PC\nwith 32GB DDR5",
-          "icon": "trophy"
         }
       ],
       "decorImage": "assets/calendar/LineupAssets/BlackFriday.png",
