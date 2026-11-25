@@ -506,7 +506,7 @@
     {
       "id": "black-friday-2026-11-27",
       "title": "Black Friday Party",
-      "subtitle": "A Black Friday celebration at the Newegg Gamer Zone.",
+      "subtitle": "Black Friday Sale Celebration at the Newegg Gamer Zone.",
       "date": "2026-11-27",
       "time": "10:00 AM to 7:00 PM",
       "type": "newegg-event",
@@ -534,7 +534,7 @@
           "icon": "gamepad"
         }
       ],
-      "decorImage": "assets/calendar/LineupAssets/BlackFriday.png",
+      "decorImage": "assets/calendar/LineupAssets/Lockup.png",
       "metaBelow": true,
       "featuredPrize": true
     },
