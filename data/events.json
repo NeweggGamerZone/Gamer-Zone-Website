@@ -518,11 +518,11 @@
       "prizeHeading": "Prizes & Perks",
       "prizes": [
         {
-          "label": "Black Friday\nFeatured Products\nfor Giveaways",
+          "label": "Black Friday\nFeatured Product\nGiveaways",
           "icon": "ticket"
         },
         {
-          "label": "Complimentary\nMusubi's &\nSnacks!",
+          "label": "Complimentary\nMusubis &\nSnacks!",
           "icon": "utensils"
         },
         {
@@ -530,7 +530,7 @@
           "icon": "gamepad"
         },
         {
-          "label": "Grand Prize:\nABS PC!\ni7, 5060 GPU\n+ 32GB DDR5",
+          "label": "Grand Prize:\nABS PC with\n5060 + 32GB DDR5",
           "icon": "trophy"
         }
       ]
